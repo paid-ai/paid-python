@@ -41,9 +41,9 @@ class AgentsClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.agents.list()
@@ -81,9 +81,9 @@ class AgentsClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.agents.create(
@@ -116,9 +116,9 @@ class AgentsClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.agents.get(
@@ -167,9 +167,9 @@ class AgentsClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.agents.update(
@@ -203,9 +203,9 @@ class AgentsClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.agents.delete(
@@ -231,9 +231,9 @@ class AgentsClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.agents.get_by_external_id(
@@ -282,9 +282,9 @@ class AgentsClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.agents.update_by_external_id(
@@ -320,9 +320,9 @@ class AgentsClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.agents.delete_by_external_id(
@@ -364,9 +364,9 @@ class AsyncAgentsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -412,9 +412,9 @@ class AsyncAgentsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -455,9 +455,9 @@ class AsyncAgentsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -514,9 +514,9 @@ class AsyncAgentsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -558,9 +558,9 @@ class AsyncAgentsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -596,9 +596,9 @@ class AsyncAgentsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -655,9 +655,9 @@ class AsyncAgentsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -701,9 +701,9 @@ class AsyncAgentsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 

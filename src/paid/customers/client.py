@@ -43,9 +43,9 @@ class CustomersClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.customers.list()
@@ -98,9 +98,9 @@ class CustomersClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.customers.create(
@@ -137,9 +137,9 @@ class CustomersClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.customers.get(
@@ -197,9 +197,9 @@ class CustomersClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.customers.update(
@@ -236,9 +236,9 @@ class CustomersClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.customers.delete(
@@ -266,9 +266,9 @@ class CustomersClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.customers.get_by_external_id(
@@ -326,9 +326,9 @@ class CustomersClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.customers.update_by_external_id(
@@ -367,9 +367,9 @@ class CustomersClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.customers.delete_by_external_id(
@@ -411,9 +411,9 @@ class AsyncCustomersClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -474,9 +474,9 @@ class AsyncCustomersClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -521,9 +521,9 @@ class AsyncCustomersClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -589,9 +589,9 @@ class AsyncCustomersClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -636,9 +636,9 @@ class AsyncCustomersClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -674,9 +674,9 @@ class AsyncCustomersClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -742,9 +742,9 @@ class AsyncCustomersClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -791,9 +791,9 @@ class AsyncCustomersClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 

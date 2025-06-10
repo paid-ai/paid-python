@@ -47,9 +47,9 @@ class UsageClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.usage.record_bulk()
@@ -96,9 +96,9 @@ class AsyncUsageClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 

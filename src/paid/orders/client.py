@@ -43,9 +43,9 @@ class OrdersClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.orders.list()
@@ -98,9 +98,9 @@ class OrdersClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.orders.create(
@@ -141,9 +141,9 @@ class OrdersClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.orders.get(
@@ -168,9 +168,9 @@ class OrdersClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.orders.delete(
@@ -196,9 +196,9 @@ class OrdersClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.orders.activate(
@@ -241,9 +241,9 @@ class AsyncOrdersClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -304,9 +304,9 @@ class AsyncOrdersClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -355,9 +355,9 @@ class AsyncOrdersClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -390,9 +390,9 @@ class AsyncOrdersClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -426,9 +426,9 @@ class AsyncOrdersClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 

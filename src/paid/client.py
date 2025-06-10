@@ -7,12 +7,12 @@ from .agents.client import AgentsClient, AsyncAgentsClient
 from .contacts.client import AsyncContactsClient, ContactsClient
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .customers.client import AsyncCustomersClient, CustomersClient
-from .environment import PaidApiEnvironment
+from .environment import PaidEnvironment
 from .orders.client import AsyncOrdersClient, OrdersClient
 from .usage.client import AsyncUsageClient, UsageClient
 
 
-class PaidApi:
+class Paid:
     """
     Use this class to access the different functions within the SDK. You can instantiate any number of clients with different configuration that will propagate to these functions.
 
@@ -21,12 +21,12 @@ class PaidApi:
     base_url : typing.Optional[str]
         The base url to use for requests from the client.
 
-    environment : PaidApiEnvironment
-        The environment to use for requests from the client. from .environment import PaidApiEnvironment
+    environment : PaidEnvironment
+        The environment to use for requests from the client. from .environment import PaidEnvironment
 
 
 
-        Defaults to PaidApiEnvironment.PRODUCTION
+        Defaults to PaidEnvironment.PRODUCTION
 
 
 
@@ -42,9 +42,9 @@ class PaidApi:
 
     Examples
     --------
-    from paid import PaidApi
+    from paid import Paid
 
-    client = PaidApi(
+    client = Paid(
         token="YOUR_TOKEN",
     )
     """
@@ -53,7 +53,7 @@ class PaidApi:
         self,
         *,
         base_url: typing.Optional[str] = None,
-        environment: PaidApiEnvironment = PaidApiEnvironment.PRODUCTION,
+        environment: PaidEnvironment = PaidEnvironment.PRODUCTION,
         token: typing.Union[str, typing.Callable[[], str]],
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
@@ -79,7 +79,7 @@ class PaidApi:
         self.usage = UsageClient(client_wrapper=self._client_wrapper)
 
 
-class AsyncPaidApi:
+class AsyncPaid:
     """
     Use this class to access the different functions within the SDK. You can instantiate any number of clients with different configuration that will propagate to these functions.
 
@@ -88,12 +88,12 @@ class AsyncPaidApi:
     base_url : typing.Optional[str]
         The base url to use for requests from the client.
 
-    environment : PaidApiEnvironment
-        The environment to use for requests from the client. from .environment import PaidApiEnvironment
+    environment : PaidEnvironment
+        The environment to use for requests from the client. from .environment import PaidEnvironment
 
 
 
-        Defaults to PaidApiEnvironment.PRODUCTION
+        Defaults to PaidEnvironment.PRODUCTION
 
 
 
@@ -109,9 +109,9 @@ class AsyncPaidApi:
 
     Examples
     --------
-    from paid import AsyncPaidApi
+    from paid import AsyncPaid
 
-    client = AsyncPaidApi(
+    client = AsyncPaid(
         token="YOUR_TOKEN",
     )
     """
@@ -120,7 +120,7 @@ class AsyncPaidApi:
         self,
         *,
         base_url: typing.Optional[str] = None,
-        environment: PaidApiEnvironment = PaidApiEnvironment.PRODUCTION,
+        environment: PaidEnvironment = PaidEnvironment.PRODUCTION,
         token: typing.Union[str, typing.Callable[[], str]],
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
@@ -146,7 +146,7 @@ class AsyncPaidApi:
         self.usage = AsyncUsageClient(client_wrapper=self._client_wrapper)
 
 
-def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidApiEnvironment) -> str:
+def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidEnvironment) -> str:
     if base_url is not None:
         return base_url
     elif environment is not None:

@@ -3,5 +3,5 @@
 import enum
 
 
-class PaidApiEnvironment(enum.Enum):
+class PaidEnvironment(enum.Enum):
     PRODUCTION = "https://api.agentpaid.io/api/v1"

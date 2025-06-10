@@ -41,9 +41,9 @@ class ContactsClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.contacts.list()
@@ -108,9 +108,9 @@ class ContactsClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.contacts.create(
@@ -158,9 +158,9 @@ class ContactsClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.contacts.get(
@@ -185,9 +185,9 @@ class ContactsClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.contacts.delete(
@@ -215,9 +215,9 @@ class ContactsClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.contacts.get_by_external_id(
@@ -244,9 +244,9 @@ class ContactsClient:
 
         Examples
         --------
-        from paid import PaidApi
+        from paid import Paid
 
-        client = PaidApi(
+        client = Paid(
             token="YOUR_TOKEN",
         )
         client.contacts.delete_by_external_id(
@@ -288,9 +288,9 @@ class AsyncContactsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -363,9 +363,9 @@ class AsyncContactsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -421,9 +421,9 @@ class AsyncContactsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -456,9 +456,9 @@ class AsyncContactsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -494,9 +494,9 @@ class AsyncContactsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 
@@ -531,9 +531,9 @@ class AsyncContactsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaidApi
+        from paid import AsyncPaid
 
-        client = AsyncPaidApi(
+        client = AsyncPaid(
             token="YOUR_TOKEN",
         )
 

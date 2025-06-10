@@ -32,8 +32,8 @@ from .types import (
     Tier,
 )
 from . import agents, contacts, customers, orders, usage
-from .client import AsyncPaidApi, PaidApi
-from .environment import PaidApiEnvironment
+from .client import AsyncPaid, Paid
+from .environment import PaidEnvironment
 from .version import __version__
 
 __all__ = [
@@ -44,7 +44,7 @@ __all__ = [
     "AgentPricePointTiers",
     "AgentUpdate",
     "ApiError",
-    "AsyncPaidApi",
+    "AsyncPaid",
     "BillingFrequency",
     "ChargeType",
     "Contact",
@@ -58,8 +58,8 @@ __all__ = [
     "OrderLineAttribute",
     "OrderLineAttributePricing",
     "OrderLineCreate",
-    "PaidApi",
-    "PaidApiEnvironment",
+    "Paid",
+    "PaidEnvironment",
     "PricePoint",
     "Pricing",
     "PricingModelType",
