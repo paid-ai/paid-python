@@ -37,7 +37,7 @@ pip install paid-python
 The client needs to be configured with your account's API key, which is available in the [Paid dashboard](https://app.paid.ai/agent-integration/api-keys). 
 
 ```python
-from paid import Client
+from paid import Paid
 
 client = Paid(token="API_KEY")
 
