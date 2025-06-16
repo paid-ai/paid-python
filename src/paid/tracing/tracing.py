@@ -2,6 +2,7 @@
 import asyncio
 import contextvars
 import logging
+import os
 from typing import Optional, TypeVar, Callable, Union, Awaitable, Tuple, Dict
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
@@ -10,7 +11,10 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 # from opentelemetry.instrumentation.openai import OpenAIInstrumentor
 
-logging.basicConfig(level=logging.INFO)
+# Configure logging
+log_level_name = os.environ.get("PAID_LOG_LEVEL", "INFO").upper()
+log_level = getattr(logging, log_level_name, logging.INFO)
+logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
 
 _token: Optional[str] = None
