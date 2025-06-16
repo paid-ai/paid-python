@@ -6,11 +6,13 @@ import httpx
 from .agents.client import AgentsClient, AsyncAgentsClient
 from .contacts.client import AsyncContactsClient, ContactsClient
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
+from .tracing import _initialize_tracing, _capture
 from .customers.client import AsyncCustomersClient, CustomersClient
 from .environment import PaidEnvironment
 from .orders.client import AsyncOrdersClient, OrdersClient
 from .usage.client import AsyncUsageClient, UsageClient
 
+T = typing.TypeVar('T')
 
 class Paid:
     """
@@ -78,6 +80,17 @@ class Paid:
         self.orders = OrdersClient(client_wrapper=self._client_wrapper)
         self.usage = UsageClient(client_wrapper=self._client_wrapper)
 
+    def initialize_tracing(self) -> None:
+        token = self._client_wrapper._get_token()
+        _initialize_tracing(token)
+
+    def capture(self,
+                external_customer_id: str,
+                fn: typing.Callable[[], typing.Union[T, typing.Awaitable[T]]],
+                args: typing.Optional[typing.Tuple] = None,
+                kwargs: typing.Optional[typing.Dict] = None,
+    ) -> typing.Union[T, typing.Awaitable[T]]:
+        return _capture(external_customer_id, fn, args, kwargs)
 
 class AsyncPaid:
     """
@@ -144,6 +157,18 @@ class AsyncPaid:
         self.contacts = AsyncContactsClient(client_wrapper=self._client_wrapper)
         self.orders = AsyncOrdersClient(client_wrapper=self._client_wrapper)
         self.usage = AsyncUsageClient(client_wrapper=self._client_wrapper)
+
+    def initialize_tracing(self) -> None:
+        token = self._client_wrapper._get_token()
+        _initialize_tracing(token)
+
+    def capture(self,
+                external_customer_id: str,
+                fn: typing.Callable[[], typing.Union[T, typing.Awaitable[T]]],
+                args: typing.Optional[typing.Tuple] = None,
+                kwargs: typing.Optional[typing.Dict] = None,
+    ) -> typing.Union[T, typing.Awaitable[T]]:
+        return _capture(external_customer_id, fn, args, kwargs)
 
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidEnvironment) -> str:

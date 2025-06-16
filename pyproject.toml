@@ -39,6 +39,10 @@ httpx = ">=0.21.2"
 pydantic = ">= 1.9.2"
 pydantic-core = "^2.18.2"
 typing_extensions = ">= 4.0.0"
+openai = "^1.12.0"
+opentelemetry-api = "^1.23.0"
+opentelemetry-sdk = "^1.23.0"
+opentelemetry-exporter-otlp-proto-http = "^1.23.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "==1.13.0"
