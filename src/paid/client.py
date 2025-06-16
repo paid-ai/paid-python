@@ -159,7 +159,7 @@ class AsyncPaid:
         self.usage = AsyncUsageClient(client_wrapper=self._client_wrapper)
 
     def initialize_tracing(self) -> None:
-        token = self._client_wrapper.token() if callable(self._client_wrapper.token) else self._client_wrapper.token
+        token = self._client_wrapper._get_token()
         _initialize_tracing(token)
 
     def capture(self,

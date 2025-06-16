@@ -22,6 +22,10 @@ class PaidOpenAI:
     @property
     def embeddings(self):
         return EmbeddingsWrapper(self.openai, self.tracer)
+    
+    @property
+    def images(self):
+        return ImagesWrapper(self.openai, self.tracer)
 
 
 class ChatWrapper:
@@ -151,6 +155,66 @@ class EmbeddingsWrapper:
                         "gen_ai.usage.input_tokens": response.usage.prompt_tokens,
                         "gen_ai.response.model": response.model,
                     })
+                
+                # Mark span as successful
+                span.set_status(Status(StatusCode.OK))
+                
+                return response
+                
+            except Exception as error:
+                # Mark span as failed and record error
+                span.set_status(Status(StatusCode.ERROR, str(error)))
+                span.record_exception(error)
+                raise error
+
+
+class ImagesWrapper:
+    def __init__(self, openai_client: OpenAI, tracer: trace.Tracer):
+        self.openai = openai_client
+        self.tracer = tracer
+    
+    def generate(
+        self, 
+        **kwargs  # Accept all parameters as-is to match the actual API
+    ) -> Any:
+        # Check if there's an active span (from paid.capture())
+        current_span = trace.get_current_span()
+        if current_span == trace.INVALID_SPAN:
+            logger.warning("No active span found")
+            # Call OpenAI directly without tracing
+            return self.openai.images.generate(**kwargs)
+        
+        # Extract model for span naming with proper defaults
+        model = kwargs.get('model', 'dall-e-3')  # Default to dall-e-3
+        
+        # Create child span following OTel GenAI conventions
+        span_name = f"trace.images {model}"
+        
+        with self.tracer.start_as_current_span(span_name) as span:
+            span.set_attributes({
+                "gen_ai.request.model": model, # there's no model in response, so extract from request
+                "gen_ai.system": "openai",
+                "gen_ai.operation.name": "image_generation",
+            })
+            
+            try:
+                # Make the actual OpenAI API call
+                response = self.openai.images.generate(**kwargs)
+
+                # Add image generation cost factors with proper defaults
+                span.set_attributes({
+                    "gen_ai.image.count": kwargs.get('n', 1),  # Default to 1 image
+                    "gen_ai.image.size": kwargs.get('size', '1024x1024'),  # Default size
+                })
+                
+                # Add quality with proper defaults based on model
+                if model == 'dall-e-3':
+                    quality = kwargs.get('quality', 'standard')  # Default to standard quality
+                    span.set_attribute("gen_ai.image.quality", quality)
+                elif model == 'gpt-image-1':
+                    quality = kwargs.get('quality', 'medium')  # Default to medium quality for GPT Image 1
+                    span.set_attribute("gen_ai.image.quality", quality)
+                # DALL-E 2 doesn't have quality parameter
                 
                 # Mark span as successful
                 span.set_status(Status(StatusCode.OK))
