@@ -147,7 +147,6 @@ class EmbeddingsWrapper:
             try:
                 # Make the actual OpenAI API call
                 response = self.openai.embeddings.create(**kwargs)
-                logger.warning(f"ATA-DBG : embeddings Response: {response}")
 
                 # Add usage information if available
                 if hasattr(response, 'usage') and response.usage:
