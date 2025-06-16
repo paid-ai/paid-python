@@ -75,6 +75,16 @@ except paid.Error as e:
     print(e.raw_response)
 ```
 
+## Logging
+
+Supported log levels are `DEBUG`, `INFO`, `WARNING`, `ERROR`, and `CRITICAL`.
+
+For example, to set the log level to debug, you can set the environment variable:
+```bash
+export PAID_LOG_LEVEL=DEBUG
+```
+Falls back to `INFO`
+
 ## Cost Tracking
 
 As of now, the following OpenAI python APIs are supported:
