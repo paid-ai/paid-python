@@ -75,6 +75,88 @@ except paid.Error as e:
     print(e.raw_response)
 ```
 
+## Cost Tracking
+
+As of now, the following OpenAI python APIs are supported:
+
+```
+chat.completions.create()
+responses.create()
+images.generate()
+embeddings.create()
+```
+
+Example usage:
+
+```python
+import os
+from openai import OpenAI
+import dotenv
+from paid import Paid
+from paid.tracing.wrappers import PaidOpenAI
+
+# Initialize Paid SDK
+client = Paid(token="PAID_API_KEY")
+
+# Initialize OpenAI client
+_ = dotenv.load_dotenv()
+
+openAIClient = PaidOpenAI(OpenAI(
+    # This is the default and can be omitted
+    api_key=os.getenv("OPENAI_KEY"),
+))
+
+# Initialize tracing, must be after initializeing Paid SKD
+client.initialize_tracing()
+
+# Capture chat request in telemetry
+def chat_complete1():
+    response = openAIClient.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a coding assistant that talks like a pirate."},
+            {"role": "user", "content": "How do I check if a Python object is an instance of a class?"}
+        ]
+    )
+    return response
+
+def chat_complete2():
+    response = openAIClient.responses.create(
+        model="gpt-4o",
+        instructions="You are a historian.",
+        input="When did Boston tea party happen?",
+    )
+    return response
+
+def embeddings():
+    response = openAIClient.embeddings.create(
+        model="text-embedding-3-small",
+        input=["Hello world", "How are you?"]
+    )
+    return response
+
+def image_generate():
+    response = openAIClient.images.generate(
+        model="dall-e-3",
+        prompt="A sunset over mountains",
+        size="1024x1024",
+        quality="hd",
+        style="vivid",
+        n=1
+    )
+    return response
+
+def do_agent_work():
+    chat_complete1()
+    chat_complete2()
+    image_generate()
+    embeddings()
+
+# Finally, Capture the traces!
+_ = client.capture("your_external_customer_id", do_agent_work)
+```
+
+
 ## Contributing
 
 While we value open-source contributions to this SDK, this library is generated programmatically.

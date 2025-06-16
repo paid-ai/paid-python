@@ -9,6 +9,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 # from opentelemetry.instrumentation.openai import OpenAIInstrumentor
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Global variables
@@ -34,8 +35,8 @@ def _initialize_tracing(api_key: str):
     Args:
         api_key: The API key for authentication
     """
-    # endpoint = "https://collector.agentpaid.io:4318/v1/traces"
-    endpoint = "http://localhost:4318/v1/traces"
+    endpoint = "https://collector.agentpaid.io:4318/v1/traces"
+    # endpoint = "http://localhost:4318/v1/traces"
     try:
         set_token(api_key)
         
