@@ -1,5 +1,4 @@
 # Initializing tracing for OTLP
-
 import asyncio
 import logging
 from typing import Optional, TypeVar, Callable, Union, Awaitable, Tuple, Dict
@@ -36,7 +35,6 @@ def _initialize_tracing(api_key: str):
     
     Args:
         api_key: The API key for authentication
-        endpoint: The OTLP endpoint URL (defaults to localhost for development)
     """
     # endpoint = "https://collector.agentpaid.io:4318/v1/traces"
     endpoint = "http://localhost:4318/v1/traces"
@@ -57,6 +55,8 @@ def _initialize_tracing(api_key: str):
         span_processor = BatchSpanProcessor(otlp_exporter)
         tracer_provider.add_span_processor(span_processor)
 
+        # Don't need auto-instrumentation,
+        # will add it when implementing automatic tracing (w/o explicit capture)
         # instrumentor = OpenAIInstrumentor(
         #     # exception_logger=lambda e: Telemetry().log_exception(e),
         #     # enrich_assistant=True,
@@ -74,40 +74,56 @@ def _initialize_tracing(api_key: str):
 
 
 
-# Capturing the traces with Auto-intstrumented OTLP
-
 def _capture(
-    external_customer_id: str, 
-    fn: Callable[[], Union[T, Awaitable[T]]],
+    external_customer_id: str,
+    fn: Callable[..., Union[T, Awaitable[T]]],
     args: Optional[Tuple] = None,
-    kwargs: Optional[Dict] = None
+    kwargs: Optional[Dict] = None,
 ) -> Union[T, Awaitable[T]]:
-    """Capture the execution of a function with OpenTelemetry tracing."""
-    # Check if function is async
-    if asyncio.iscoroutinefunction(fn):
-        return _capture_async(external_customer_id, fn, args, kwargs)
-    else:
-        return _capture_sync(external_customer_id, fn, args, kwargs)
+    """
+    Executes a function within an OpenTelemetry span for tracing purposes.
 
-def _capture_sync(external_customer_id: str,
-                  fn: Callable[..., T],
-                  args: Optional[Tuple] = None,
-                  kwargs: Optional[Dict] = None) -> T:
-    """Handle synchronous function capture."""
+    Args:
+        external_customer_id (str): Backend won't record the trace if the id isn't recognized.
+        fn (Callable[..., Union[T, Awaitable[T]]]): The function to be executed, supposedly calls a Paid wrapper around an LLM API.
+        args (Optional[Tuple], optional): Positional arguments to pass to the function.
+        kwargs (Optional[Dict], optional): Keyword arguments to pass to the function.
+
+    Returns:
+        Union[T, Awaitable[T]]: The result of the executed function, either synchronously or asynchronously.
+
+    Notes:
+        - If no token is available, tracing will not be initialized, and the function will execute without tracing.
+        - Automatically determines whether the function is synchronous or asynchronous and handles it accordingly.
+    """
     args = args or ()
     kwargs = kwargs or {}
-
     token = get_token()
     if not token:
-        logger.warning('No token found - tracing is not initialized and will not be captured')
+        logger.warning(
+            "No token found - tracing is not initialized and will not be captured"
+        )
         return fn(*args, **kwargs)
 
+    if asyncio.iscoroutinefunction(fn):
+        return _capture_async(external_customer_id, fn, token, args, kwargs)
+    else:
+        return _capture_sync(external_customer_id, fn, token, args, kwargs)
+
+
+def _capture_sync(
+    external_customer_id: str,
+    fn: Callable[..., T],
+    token: str,
+    args: Tuple = (),
+    kwargs: Dict = {},
+) -> T:
+    """Handle synchronous function capture."""
     tracer = trace.get_tracer("paid.python")
-    
     logger.info(f"Creating span for external_customer_id: {external_customer_id}")
     with tracer.start_as_current_span(f"paid.python:{external_customer_id}") as span:
-        span.set_attribute('external_customer_id', external_customer_id)
-        span.set_attribute('token', token)
+        span.set_attribute("external_customer_id", external_customer_id)
+        span.set_attribute("token", token)
         try:
             result = fn(*args, **kwargs)
             span.set_status(Status(StatusCode.OK))
@@ -117,23 +133,20 @@ def _capture_sync(external_customer_id: str,
             span.set_status(Status(StatusCode.ERROR, str(error)))
             raise
 
-async def _capture_async(external_customer_id: str,
-                         fn: Callable[..., Awaitable[T]],
-                         args: Optional[Tuple] = None,
-                         kwargs: Optional[Dict] = None) -> T:
+
+async def _capture_async(
+    external_customer_id: str,
+    fn: Callable[..., Awaitable[T]],
+    token: str,
+    args: Tuple = (),
+    kwargs: Dict = {},
+) -> T:
     """Handle asynchronous function capture."""
-    args = args or ()
-    kwargs = kwargs or {}
-
-    token = get_token()
-    if not token:
-        logger.warning('No token found - tracing is not initialized and async function will not be captured')
-        return await fn(*args, **kwargs)
-
     tracer = trace.get_tracer("paid.python")
+    logger.info(f"Creating span for external_customer_id: {external_customer_id}")
     with tracer.start_as_current_span(f"paid.python:{external_customer_id}") as span:
-        span.set_attribute('external_customer_id', external_customer_id)
-        span.set_attribute('token', token)
+        span.set_attribute("external_customer_id", external_customer_id)
+        span.set_attribute("token", token)
         try:
             result = await fn(*args, **kwargs)
             span.set_status(Status(StatusCode.OK))

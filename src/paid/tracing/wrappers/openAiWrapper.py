@@ -1,8 +1,10 @@
+import logging
 from openai import OpenAI
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 from typing import Any
 
+logger = logging.getLogger(__name__)
 
 class PaidOpenAI:
     def __init__(self, openai_client: OpenAI):
@@ -40,10 +42,10 @@ class ChatCompletionsWrapper:
         messages: list,
         **kwargs
     ) -> Any:
-        # Check if there's an active span (from paid.capture())
+        # Check if there's an active span (from capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
-            print("No active span found")
+            logger.warning("No active span found")
             # Call OpenAI directly without tracing
             return self.openai.chat.completions.create(
                 model=model,
@@ -55,11 +57,9 @@ class ChatCompletionsWrapper:
         span_name = f"trace.chat {model}"
         
         with self.tracer.start_as_current_span(span_name) as span:
-            # Set required GenAI semantic convention attributes
             span.set_attributes({
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
-                "gen_ai.request.model": model,
             })
             
             try:
@@ -72,10 +72,10 @@ class ChatCompletionsWrapper:
                 
                 # Add usage information if available
                 if hasattr(response, 'usage') and response.usage:
-                    # Use correct OpenAI SDK field names: prompt_tokens, completion_tokens
                     span.set_attributes({
                         "gen_ai.usage.input_tokens": response.usage.prompt_tokens,
                         "gen_ai.usage.output_tokens": response.usage.completion_tokens,
+                        "gen_ai.response.model": response.model,
                     })
                     
                     # Add cached tokens if available (for newer models)
@@ -95,10 +95,6 @@ class ChatCompletionsWrapper:
                             "gen_ai.usage.reasoning_output_tokens", 
                             response.usage.completion_tokens_details.reasoning_tokens
                         )
-                
-                # Add response ID if available
-                if hasattr(response, 'id') and response.id:
-                    span.set_attribute("gen_ai.response.id", response.id)
                 
                 # Mark span as successful
                 span.set_status(Status(StatusCode.OK))
@@ -124,7 +120,7 @@ class ResponsesWrapper:
         # Check if there's an active span (from paid.capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
-            print("No active span found")
+            logger.warning("No active span found")
             # Call OpenAI directly without tracing
             return self.openai.responses.create(**kwargs)
         
@@ -135,46 +131,40 @@ class ResponsesWrapper:
         span_name = f"trace.responses {model}"
         
         with self.tracer.start_as_current_span(span_name) as span:
-            # Set required GenAI semantic convention attributes
             span.set_attributes({
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
-                "gen_ai.request.model": model,
             })
             
             try:
                 # Make the actual OpenAI API call
                 response = self.openai.responses.create(**kwargs)
-                
+
                 # Add usage information if available
                 if hasattr(response, 'usage') and response.usage:
-                    # Use correct OpenAI SDK field names: prompt_tokens, completion_tokens
                     span.set_attributes({
-                        "gen_ai.usage.input_tokens": response.usage.prompt_tokens,
-                        "gen_ai.usage.output_tokens": response.usage.completion_tokens,
+                        "gen_ai.usage.input_tokens": response.usage.input_tokens,
+                        "gen_ai.usage.output_tokens": response.usage.output_tokens,
+                        "gen_ai.response.model": response.model,
                     })
                     
                     # Add cached tokens if available (for newer models)
-                    if (hasattr(response.usage, 'prompt_tokens_details') and 
-                        response.usage.prompt_tokens_details and
-                        hasattr(response.usage.prompt_tokens_details, 'cached_tokens')):
+                    if (hasattr(response.usage, 'input_tokens_details') and 
+                        response.usage.input_tokens_details and
+                        hasattr(response.usage.input_tokens_details, 'cached_tokens')):
                         span.set_attribute(
                             "gen_ai.usage.cached_input_tokens", 
-                            response.usage.prompt_tokens_details.cached_tokens
+                            response.usage.input_tokens_details.cached_tokens
                         )
                     
                     # Add reasoning tokens if available (for o1 models)
-                    if (hasattr(response.usage, 'completion_tokens_details') and 
-                        response.usage.completion_tokens_details and
-                        hasattr(response.usage.completion_tokens_details, 'reasoning_tokens')):
+                    if (hasattr(response.usage, 'output_tokens_details') and 
+                        response.usage.output_tokens_details and
+                        hasattr(response.usage.output_tokens_details, 'reasoning_tokens')):
                         span.set_attribute(
                             "gen_ai.usage.reasoning_output_tokens", 
-                            response.usage.completion_tokens_details.reasoning_tokens
+                            response.usage.output_tokens_details.reasoning_tokens
                         )
-                
-                # Add response ID if available
-                if hasattr(response, 'id') and response.id:
-                    span.set_attribute("gen_ai.response.id", response.id)
                 
                 # Mark span as successful
                 span.set_status(Status(StatusCode.OK))
