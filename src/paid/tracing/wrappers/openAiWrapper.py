@@ -3,6 +3,7 @@ from openai import OpenAI
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 from typing import Any
+from ..tracing import paid_external_customer_id_var, paid_token_var
 
 logger = logging.getLogger(__name__)
 
@@ -61,14 +62,22 @@ class ChatCompletionsWrapper:
                 **kwargs
             )
         
+        external_customer_id = paid_external_customer_id_var.get()
+        token = paid_token_var.get()
+
         # Create child span following OTel GenAI conventions
         span_name = f"trace.chat {model}"
         
         with self.tracer.start_as_current_span(span_name) as span:
-            span.set_attributes({
+            attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
-            })
+            }
+            if external_customer_id:
+                attributes["external_customer_id"] = external_customer_id
+            if token:
+                attributes["token"] = token
+            span.set_attributes(attributes)
             
             try:
                 # Make the actual OpenAI API call
@@ -132,6 +141,9 @@ class EmbeddingsWrapper:
             # Call OpenAI directly without tracing
             return self.openai.embeddings.create(**kwargs)
         
+        external_customer_id = paid_external_customer_id_var.get()
+        token = paid_token_var.get()
+
         # Extract model for span naming
         model = kwargs.get('model', 'unknown')
         
@@ -139,10 +151,15 @@ class EmbeddingsWrapper:
         span_name = f"trace.embeddings {model}"
         
         with self.tracer.start_as_current_span(span_name) as span:
-            span.set_attributes({
+            attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "embeddings",
-            })
+            }
+            if external_customer_id:
+                attributes["external_customer_id"] = external_customer_id
+            if token:
+                attributes["token"] = token
+            span.set_attributes(attributes)
             
             try:
                 # Make the actual OpenAI API call
@@ -182,7 +199,10 @@ class ImagesWrapper:
             logger.warning("No active span found")
             # Call OpenAI directly without tracing
             return self.openai.images.generate(**kwargs)
-        
+
+        external_customer_id = paid_external_customer_id_var.get()
+        token = paid_token_var.get()
+
         # Extract model for span naming with proper defaults
         model = kwargs.get('model', 'dall-e-3')  # Default to dall-e-3
         
@@ -190,11 +210,16 @@ class ImagesWrapper:
         span_name = f"trace.images {model}"
         
         with self.tracer.start_as_current_span(span_name) as span:
-            span.set_attributes({
+            attributes = {
                 "gen_ai.request.model": model, # there's no model in response, so extract from request
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "image_generation",
-            })
+            }
+            if external_customer_id:
+                attributes["external_customer_id"] = external_customer_id
+            if token:
+                attributes["token"] = token
+            span.set_attributes(attributes)
             
             try:
                 # Make the actual OpenAI API call
@@ -242,6 +267,9 @@ class ResponsesWrapper:
             logger.warning("No active span found")
             # Call OpenAI directly without tracing
             return self.openai.responses.create(**kwargs)
+
+        external_customer_id = paid_external_customer_id_var.get()
+        token = paid_token_var.get()
         
         # Extract model for span naming
         model = kwargs.get('model', 'unknown')
@@ -250,10 +278,15 @@ class ResponsesWrapper:
         span_name = f"trace.responses {model}"
         
         with self.tracer.start_as_current_span(span_name) as span:
-            span.set_attributes({
+            attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
-            })
+            }
+            if external_customer_id:
+                attributes["external_customer_id"] = external_customer_id
+            if token:
+                attributes["token"] = token
+            span.set_attributes(attributes)
             
             try:
                 # Make the actual OpenAI API call

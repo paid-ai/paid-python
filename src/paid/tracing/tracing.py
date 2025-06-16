@@ -1,5 +1,6 @@
 # Initializing tracing for OTLP
 import asyncio
+import contextvars
 import logging
 from typing import Optional, TypeVar, Callable, Union, Awaitable, Tuple, Dict
 from opentelemetry import trace
@@ -12,8 +13,10 @@ from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExport
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Global variables
 _token: Optional[str] = None
+# Context variables for passing data to nested spans (e.g., in openAiWrapper)
+paid_external_customer_id_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar("paid_external_customer_id", default=None)
+paid_token_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar("paid_token", default=None)
 
 T = TypeVar('T')
 
@@ -118,19 +121,28 @@ def _capture_sync(
     kwargs: Dict = {},
 ) -> T:
     """Handle synchronous function capture."""
+    # Set context variables for access by nested spans
+    reset_id_ctx_token = paid_external_customer_id_var.set(external_customer_id)
+    reset_token_ctx_token = paid_token_var.set(token)
+
     tracer = trace.get_tracer("paid.python")
     logger.info(f"Creating span for external_customer_id: {external_customer_id}")
-    with tracer.start_as_current_span(f"paid.python:{external_customer_id}") as span:
-        span.set_attribute("external_customer_id", external_customer_id)
-        span.set_attribute("token", token)
-        try:
-            result = fn(*args, **kwargs)
-            span.set_status(Status(StatusCode.OK))
-            logger.info(f"Function {fn.__name__} executed successfully")
-            return result
-        except Exception as error:
-            span.set_status(Status(StatusCode.ERROR, str(error)))
-            raise
+    try:
+        with tracer.start_as_current_span(f"paid.python:{external_customer_id}") as span:
+            span.set_attribute("external_customer_id", external_customer_id)
+            span.set_attribute("token", token)
+            try:
+                result = fn(*args, **kwargs)
+                span.set_status(Status(StatusCode.OK))
+                logger.info(f"Function {fn.__name__} executed successfully")
+                return result
+            except Exception as error:
+                span.set_status(Status(StatusCode.ERROR, str(error)))
+                raise
+    finally:
+        # Reset context variables to their previous state
+        paid_external_customer_id_var.reset(reset_id_ctx_token)
+        paid_token_var.reset(reset_token_ctx_token)
 
 
 async def _capture_async(
@@ -141,16 +153,25 @@ async def _capture_async(
     kwargs: Dict = {},
 ) -> T:
     """Handle asynchronous function capture."""
+    # Set context variables for access by nested spans
+    reset_id_ctx_token = paid_external_customer_id_var.set(external_customer_id)
+    reset_token_ctx_token = paid_token_var.set(token)
+
     tracer = trace.get_tracer("paid.python")
     logger.info(f"Creating span for external_customer_id: {external_customer_id}")
-    with tracer.start_as_current_span(f"paid.python:{external_customer_id}") as span:
-        span.set_attribute("external_customer_id", external_customer_id)
-        span.set_attribute("token", token)
-        try:
-            result = await fn(*args, **kwargs)
-            span.set_status(Status(StatusCode.OK))
-            logger.info(f"Async function {fn.__name__} executed successfully")
-            return result
-        except Exception as error:
-            span.set_status(Status(StatusCode.ERROR, str(error)))
-            raise
+    try:
+        with tracer.start_as_current_span(f"paid.python:{external_customer_id}") as span:
+            span.set_attribute("external_customer_id", external_customer_id)
+            span.set_attribute("token", token)
+            try:
+                result = await fn(*args, **kwargs)
+                span.set_status(Status(StatusCode.OK))
+                logger.info(f"Async function {fn.__name__} executed successfully")
+                return result
+            except Exception as error:
+                span.set_status(Status(StatusCode.ERROR, str(error)))
+                raise
+    finally:
+        # Reset context variables to their previous state
+        paid_external_customer_id_var.reset(reset_id_ctx_token)
+        paid_token_var.reset(reset_token_ctx_token)
