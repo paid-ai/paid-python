@@ -50,7 +50,7 @@ class PaidLangChainCallback(BaseCallbackHandler):
             return f"{operation} {name}"
         return f"{operation}"
     
-    def _start_span(self, run_id: UUID, span_name: str, **attributes) -> Optional[Any]:
+    def _start_span(self, run_id: UUID, span_name: str, **attributes: Any) -> Optional[Any]:
         """Start a new span and store it."""
         # Check if there's an active span (from capture())
         current_span = trace.get_current_span()
@@ -128,9 +128,12 @@ class PaidLangChainCallback(BaseCallbackHandler):
         **kwargs: Any,
     ) -> Any:
         """Called when LLM starts running."""
+        if not metadata:
+            logger.warning("No metadata provided for LLM start")
+            return None
 
-        model_type = metadata['ls_model_type']
-        model_name = metadata['ls_model_name']
+        model_type = metadata.get('ls_model_type', 'unknown')
+        model_name = metadata.get('ls_model_name', 'unknown')
         logger.info(f"LLM start: {metadata}")
         logger.info(f"model_name: {model_name}")
         span_name = self._get_span_name(f"trace.{model_type}", model_name)
@@ -245,7 +248,7 @@ class PaidLangChainCallback(BaseCallbackHandler):
         **kwargs: Any,
     ) -> Any:
         """Called when chain ends running."""
-        attributes = {
+        attributes: Dict[str, Any] = {
             "langchain.outputs.count": len(outputs),
         }
         
@@ -306,7 +309,7 @@ class PaidLangChainCallback(BaseCallbackHandler):
         **kwargs: Any,
     ) -> Any:
         """Called when tool ends running."""
-        attributes = {}
+        attributes: Dict[str, Any] = {}
         
         # Add output (truncated for size)
         if output:
@@ -364,7 +367,7 @@ class PaidLangChainCallback(BaseCallbackHandler):
         **kwargs: Any,
     ) -> Any:
         """Called when retriever ends running."""
-        attributes = {
+        attributes: Dict[str, Any] = {
             "langchain.retriever.documents_count": len(documents),
         }
         
