@@ -1,82 +1,121 @@
 import logging
-from typing import Any, Dict, List, Optional, Union, cast
+import time
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
-from langchain_core.callbacks import BaseCallbackHandler  # type: ignore
-from langchain_core.outputs import LLMResult, ChatResult  # type: ignore
-from langchain_core.messages import BaseMessage  # type: ignore
+
+from langchain_core.callbacks import BaseCallbackHandler # type: ignore
+from langchain_core.outputs import LLMResult # type: ignore
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
+
+from ..tracing import paid_external_customer_id_var, paid_token_var
 
 logger = logging.getLogger(__name__)
 
 
 class PaidLangChainCallback(BaseCallbackHandler):
     """
-    LangChain callback handler that integrates with Paid tracing system.
+    LangChain callback handler that integrates with Paid tracing infrastructure.
     
-    This callback creates child spans for LangChain operations when there's an active
-    Paid tracing span (created by _capture() function).
+    This handler creates OpenTelemetry spans for LangChain operations including:
+    - LLM calls (chat completions, completions)
+    - Chain executions
+    - Tool usage
+    - Retrieval operations
+    - Agent actions
+    
+    Usage:
+        # Initialize with your existing Paid setup
+        callback_handler = PaidCallbackHandler()
+        
+        # Use with LangChain
+        llm = ChatOpenAI(callbacks=[callback_handler])
+        response = llm.invoke("Hello world")
+        
+        # Or with chains
+        chain = LLMChain(llm=llm, prompt=prompt, callbacks=[callback_handler])
+        result = chain.run("input text")
     """
     
-    def __init__(self, name: str = "langchain"):
-        """
-        Initialize the callback handler.
-        
-        Args:
-            name: Name to use for the tracer
-        """
+    def __init__(self):
+        """Initialize the callback handler."""
         super().__init__()
-        self.tracer = trace.get_tracer(f"paid.python.{name}")
-        self._spans: Dict[Union[UUID, str], Any] = {}
+        self.tracer = trace.get_tracer("paid.python")
+        self._spans: Dict[str, Any] = {}  # Track active spans by run_id
+        self._start_times: Dict[str, float] = {}  # Track start times
+        
+    def _get_span_name(self, operation: str, name: Optional[str] = None) -> str:
+        """Generate a consistent span name."""
+        if name:
+            return f"{operation} {name}"
+        return f"{operation}"
     
-    def _get_span_name(self, serialized: Dict[str, Any], operation: str) -> str:
-        """Generate a descriptive span name."""
-        class_name = serialized.get("name", serialized.get("id", ["unknown"])[-1])
-        return f"langchain.{operation} {class_name}"
+    def _start_span(self, run_id: UUID, span_name: str, **attributes) -> Optional[Any]:
+        """Start a new span and store it."""
+        # Check if there's an active span (from capture())
+        current_span = trace.get_current_span()
+        if current_span == trace.INVALID_SPAN:
+            logger.warning("No active span found - LangChain operations will not be traced")
+            return None
+            
+        # Get context variables
+        external_customer_id = paid_external_customer_id_var.get()
+        token = paid_token_var.get()
+        
+        # Create child span
+        span = self.tracer.start_span(span_name)
+        
+        # Set common attributes
+        base_attributes = {
+            "langchain.operation": span_name.split()[0].split('.')[-1],
+            "langchain.run_id": str(run_id),
+        }
+        
+        if external_customer_id:
+            base_attributes["external_customer_id"] = external_customer_id
+        if token:
+            base_attributes["token"] = token
+            
+        # Add custom attributes
+        base_attributes.update(attributes)
+        span.set_attributes(base_attributes)
+        
+        # Store span and start time
+        self._spans[str(run_id)] = span
+        self._start_times[str(run_id)] = time.time()
+        
+        return span
     
-    def _extract_model_info(self, serialized: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract model information from serialized data."""
-        attributes = {}
+    def _end_span(self, run_id: UUID, error: Optional[Exception] = None, **attributes):
+        """End a span and clean up."""
+        span_key = str(run_id)
+        span = self._spans.get(span_key)
         
-        # Try to get model name from various possible locations
-        if "model_name" in serialized:
-            attributes["gen_ai.request.model"] = serialized["model_name"]
-        elif "model" in serialized:
-            attributes["gen_ai.request.model"] = serialized["model"]
-        elif "kwargs" in serialized and "model" in serialized["kwargs"]:
-            attributes["gen_ai.request.model"] = serialized["kwargs"]["model"]
-        
-        # Add system information
-        if "openai" in str(serialized).lower():
-            attributes["gen_ai.system"] = "openai"
-        elif "anthropic" in str(serialized).lower():
-            attributes["gen_ai.system"] = "anthropic"
-        elif "google" in str(serialized).lower():
-            attributes["gen_ai.system"] = "google"
-        
-        return attributes
-    
-    def _extract_usage_from_result(self, result: Union[LLMResult, ChatResult]) -> Dict[str, Any]:
-        """Extract token usage information from LLM result."""
-        attributes = {}
-        
-        if hasattr(result, 'llm_output') and result.llm_output:
-            usage = result.llm_output.get('token_usage', {})
-            if usage:
-                if 'prompt_tokens' in usage:
-                    attributes["gen_ai.usage.input_tokens"] = usage['prompt_tokens']
-                if 'completion_tokens' in usage:
-                    attributes["gen_ai.usage.output_tokens"] = usage['completion_tokens']
-                if 'total_tokens' in usage:
-                    attributes["gen_ai.usage.total_tokens"] = usage['total_tokens']
-        
-        # Try to extract model from result
-        if hasattr(result, 'llm_output') and result.llm_output:
-            if 'model_name' in result.llm_output:
-                attributes["gen_ai.response.model"] = result.llm_output['model_name']
-        
-        return attributes
-    
+        if not span:
+            return
+            
+        try:
+            # Add duration
+            if span_key in self._start_times:
+                duration = time.time() - self._start_times[span_key]
+                span.set_attribute("langchain.duration_ms", int(duration * 1000))
+                del self._start_times[span_key]
+            
+            # Add final attributes
+            span.set_attributes(attributes)
+            
+            # Set status
+            if error:
+                span.set_status(Status(StatusCode.ERROR, str(error)))
+                span.record_exception(error)
+            else:
+                span.set_status(Status(StatusCode.OK))
+                
+        finally:
+            span.end()
+            del self._spans[span_key]
+
+    # LLM Callbacks
     def on_llm_start(
         self,
         serialized: Dict[str, Any],
@@ -89,93 +128,39 @@ class PaidLangChainCallback(BaseCallbackHandler):
         **kwargs: Any,
     ) -> Any:
         """Called when LLM starts running."""
-        current_span = trace.get_current_span()
-        if current_span == trace.INVALID_SPAN:
-            logger.debug("No active span found for LLM start")
-            return
+
+        model_type = metadata['ls_model_type']
+        model_name = metadata['ls_model_name']
+        logger.info(f"LLM start: {metadata}")
+        logger.info(f"model_name: {model_name}")
+        span_name = self._get_span_name(f"trace.{model_type}", model_name)
         
-        span_name = self._get_span_name(serialized, "llm")
-        span = self.tracer.start_span(span_name)
-        
-        # Set basic attributes
         attributes = {
-            "gen_ai.operation.name": "chat",
-            "langchain.run_id": str(run_id),
-            "langchain.run_type": "llm",
+            "gen_ai.system": self._extract_provider(serialized),
+            "gen_ai.operation.name": metadata['ls_model_type'],
+            "gen_ai.request.model": model_name,
+            "langchain.prompts.count": len(prompts),
         }
         
-        # Add model information
-        attributes.update(self._extract_model_info(serialized))
-        
-        # Add parent run ID if available
-        if parent_run_id:
-            attributes["langchain.parent_run_id"] = str(parent_run_id)
-        
-        # Add tags if available
-        if tags:
-            attributes["langchain.tags"] = ",".join(tags)
-        
-        # Add prompt information
-        attributes["gen_ai.prompt.count"] = str(len(prompts))
+        # Add prompt content (be careful with size)
         if prompts:
-            # Store first prompt for debugging (truncated to avoid huge spans)
-            first_prompt = prompts[0][:500] + "..." if len(prompts[0]) > 500 else prompts[0]
-            attributes["gen_ai.prompt.first"] = first_prompt
-        
-        span.set_attributes(attributes)
-        self._spans[run_id] = span
-    
-    def on_chat_model_start(
-        self,
-        serialized: Dict[str, Any],
-        messages: List[List[BaseMessage]],
-        *,
-        run_id: UUID,
-        parent_run_id: Optional[UUID] = None,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        **kwargs: Any,
-    ) -> Any:
-        """Called when chat model starts running."""
-        current_span = trace.get_current_span()
-        if current_span == trace.INVALID_SPAN:
-            logger.debug("No active span found for chat model start")
-            return
-        
-        span_name = self._get_span_name(serialized, "chat")
-        span = self.tracer.start_span(span_name)
-        
-        # Set basic attributes
-        attributes = {
-            "gen_ai.operation.name": "chat",
-            "langchain.run_id": str(run_id),
-            "langchain.run_type": "chat_model",
-        }
-        
-        # Add model information
-        attributes.update(self._extract_model_info(serialized))
-        
-        # Add parent run ID if available
-        if parent_run_id:
-            attributes["langchain.parent_run_id"] = str(parent_run_id)
-        
-        # Add tags if available
+            # Only add first prompt and truncate if too long
+            first_prompt = prompts[0]
+            if len(first_prompt) > 1000:
+                first_prompt = first_prompt[:1000] + "..."
+            attributes["langchain.prompt"] = first_prompt
+            
         if tags:
             attributes["langchain.tags"] = ",".join(tags)
+            
+        if metadata:
+            # Add safe metadata (avoid large objects)
+            for key, value in metadata.items():
+                if isinstance(value, (str, int, float, bool)):
+                    attributes[f"langchain.metadata.{key}"] = value
         
-        # Add message information
-        total_messages = sum(len(msg_list) for msg_list in messages)
-        attributes["gen_ai.message.count"] = str(total_messages)
-        
-        # Store first message for debugging (truncated)
-        if messages and messages[0]:
-            first_message = str(messages[0][0])
-            first_message = first_message[:500] + "..." if len(first_message) > 500 else first_message
-            attributes["gen_ai.message.first"] = first_message
-        
-        span.set_attributes(attributes)
-        self._spans[run_id] = span
-    
+        self._start_span(run_id, span_name, **attributes)
+
     def on_llm_end(
         self,
         response: LLMResult,
@@ -185,47 +170,43 @@ class PaidLangChainCallback(BaseCallbackHandler):
         **kwargs: Any,
     ) -> Any:
         """Called when LLM ends running."""
-        span = self._spans.pop(run_id, None)
-        if not span:
-            return
+        attributes = {}
         
-        try:
-            # Add usage information from response
-            usage_attributes = self._extract_usage_from_result(response)
-            span.set_attributes(usage_attributes)
+        # Add token usage if available
+        if response.llm_output and "token_usage" in response.llm_output:
+            usage = response.llm_output["token_usage"]
+            if "prompt_tokens" in usage:
+                attributes["gen_ai.usage.input_tokens"] = usage["prompt_tokens"]
+            if "completion_tokens" in usage:
+                attributes["gen_ai.usage.output_tokens"] = usage["completion_tokens"]
+            if "cached_input_tokens" in usage:
+                attributes["gen_ai.usage.cached_input_tokens"] = usage["cached_input_tokens"]
+            if "reasoning_output_tokens" in usage:
+                attributes["gen_ai.usage.reasoning_output_tokens"] = usage["reasoning_output_tokens"]
+            if "total_tokens" in usage:
+                attributes["gen_ai.usage.total_tokens"] = usage["total_tokens"]
+        
+        # Add response count
+        attributes["langchain.generations.count"] = len(response.generations)
+        
+        # Add model from response if available
+        if response.llm_output and "model_name" in response.llm_output:
+            attributes["gen_ai.response.model"] = response.llm_output["model_name"]
             
-            # Add generation count
-            if hasattr(response, 'generations'):
-                span.set_attribute("gen_ai.response.generation_count", len(response.generations))
-            
-            # Mark span as successful
-            span.set_status(Status(StatusCode.OK))
-            
-        except Exception as e:
-            logger.exception("Error processing LLM end event")
-            span.set_status(Status(StatusCode.ERROR, str(e)))
-        finally:
-            span.end()
-    
+        self._end_span(run_id, **attributes)
+
     def on_llm_error(
         self,
-        error: BaseException,
+        error: Exception,
         *,
         run_id: UUID,
         parent_run_id: Optional[UUID] = None,
         **kwargs: Any,
     ) -> Any:
         """Called when LLM errors."""
-        span = self._spans.pop(run_id, None)
-        if not span:
-            return
-        
-        try:
-            span.set_status(Status(StatusCode.ERROR, str(error)))
-            span.record_exception(error)
-        finally:
-            span.end()
-    
+        self._end_span(run_id, error=error)
+
+    # Chain Callbacks
     def on_chain_start(
         self,
         serialized: Dict[str, Any],
@@ -238,41 +219,23 @@ class PaidLangChainCallback(BaseCallbackHandler):
         **kwargs: Any,
     ) -> Any:
         """Called when chain starts running."""
-        current_span = trace.get_current_span()
-        if current_span == trace.INVALID_SPAN:
-            logger.debug("No active span found for chain start")
-            return
+        chain_name = serialized.get("id", ["unknown"])[-1] if serialized.get("id") else "unknown"
+        span_name = self._get_span_name("chain", chain_name)
         
-        span_name = self._get_span_name(serialized, "chain")
-        span = self.tracer.start_span(span_name)
-        
-        # Set basic attributes
         attributes = {
-            "langchain.operation.name": "chain",
-            "langchain.run_id": str(run_id),
-            "langchain.run_type": "chain",
+            "langchain.chain.name": chain_name,
+            "langchain.inputs.count": len(inputs),
         }
         
-        # Add parent run ID if available
-        if parent_run_id:
-            attributes["langchain.parent_run_id"] = str(parent_run_id)
-        
-        # Add tags if available
+        # Add input keys (but not values for privacy)
+        if inputs:
+            attributes["langchain.input_keys"] = ",".join(inputs.keys())
+            
         if tags:
             attributes["langchain.tags"] = ",".join(tags)
-        
-        # Add input information (truncated)
-        if inputs:
-            attributes["langchain.chain.input_keys"] = ",".join(inputs.keys())
-            # Store first input value for debugging (truncated)
-            first_key = next(iter(inputs.keys()))
-            first_value = str(inputs[first_key])
-            first_value = first_value[:300] + "..." if len(first_value) > 300 else first_value
-            attributes["langchain.chain.first_input"] = first_value
-        
-        span.set_attributes(attributes)
-        self._spans[run_id] = span
-    
+            
+        self._start_span(run_id, span_name, **attributes)
+
     def on_chain_end(
         self,
         outputs: Dict[str, Any],
@@ -282,43 +245,28 @@ class PaidLangChainCallback(BaseCallbackHandler):
         **kwargs: Any,
     ) -> Any:
         """Called when chain ends running."""
-        span = self._spans.pop(run_id, None)
-        if not span:
-            return
+        attributes = {
+            "langchain.outputs.count": len(outputs),
+        }
         
-        try:
-            # Add output information
-            if outputs:
-                span.set_attribute("langchain.chain.output_keys", ",".join(outputs.keys()))
+        # Add output keys (but not values for privacy)
+        if outputs:
+            attributes["langchain.output_keys"] = ",".join(outputs.keys())
             
-            # Mark span as successful
-            span.set_status(Status(StatusCode.OK))
-            
-        except Exception as e:
-            logger.exception("Error processing chain end event")
-            span.set_status(Status(StatusCode.ERROR, str(e)))
-        finally:
-            span.end()
-    
+        self._end_span(run_id, **attributes)
+
     def on_chain_error(
         self,
-        error: BaseException,
+        error: Exception,
         *,
         run_id: UUID,
         parent_run_id: Optional[UUID] = None,
         **kwargs: Any,
     ) -> Any:
         """Called when chain errors."""
-        span = self._spans.pop(run_id, None)
-        if not span:
-            return
-        
-        try:
-            span.set_status(Status(StatusCode.ERROR, str(error)))
-            span.record_exception(error)
-        finally:
-            span.end()
-    
+        self._end_span(run_id, error=error)
+
+    # Tool Callbacks
     def on_tool_start(
         self,
         serialized: Dict[str, Any],
@@ -328,41 +276,27 @@ class PaidLangChainCallback(BaseCallbackHandler):
         parent_run_id: Optional[UUID] = None,
         tags: Optional[List[str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        inputs: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Any:
         """Called when tool starts running."""
-        current_span = trace.get_current_span()
-        if current_span == trace.INVALID_SPAN:
-            logger.debug("No active span found for tool start")
-            return
+        tool_name = serialized.get("name", "unknown")
+        span_name = self._get_span_name("tool", tool_name)
         
-        span_name = self._get_span_name(serialized, "tool")
-        span = self.tracer.start_span(span_name)
-        
-        # Set basic attributes
         attributes = {
-            "langchain.operation.name": "tool",
-            "langchain.run_id": str(run_id),
-            "langchain.run_type": "tool",
+            "langchain.tool.name": tool_name,
         }
         
-        # Add parent run ID if available
-        if parent_run_id:
-            attributes["langchain.parent_run_id"] = str(parent_run_id)
-        
-        # Add tags if available
+        # Add input (truncated for size)
+        if input_str:
+            if len(input_str) > 500:
+                input_str = input_str[:500] + "..."
+            attributes["langchain.tool.input"] = input_str
+            
         if tags:
             attributes["langchain.tags"] = ",".join(tags)
-        
-        # Add tool input (truncated)
-        if input_str:
-            truncated_input = input_str[:300] + "..." if len(input_str) > 300 else input_str
-            attributes["langchain.tool.input"] = truncated_input
-        
-        span.set_attributes(attributes)
-        self._spans[run_id] = span
-    
+            
+        self._start_span(run_id, span_name, **attributes)
+
     def on_tool_end(
         self,
         output: str,
@@ -372,62 +306,114 @@ class PaidLangChainCallback(BaseCallbackHandler):
         **kwargs: Any,
     ) -> Any:
         """Called when tool ends running."""
-        span = self._spans.pop(run_id, None)
-        if not span:
-            return
+        attributes = {}
         
-        try:
-            # Add tool output (truncated)
-            if output:
-                truncated_output = output[:300] + "..." if len(output) > 300 else output
-                span.set_attribute("langchain.tool.output", truncated_output)
+        # Add output (truncated for size)
+        if output:
+            if len(output) > 500:
+                output = output[:500] + "..."
+            attributes["langchain.tool.output"] = output
             
-            # Mark span as successful
-            span.set_status(Status(StatusCode.OK))
-            
-        except Exception as e:
-            logger.exception("Error processing tool end event")
-            span.set_status(Status(StatusCode.ERROR, str(e)))
-        finally:
-            span.end()
-    
+        self._end_span(run_id, **attributes)
+
     def on_tool_error(
         self,
-        error: BaseException,
+        error: Exception,
         *,
         run_id: UUID,
         parent_run_id: Optional[UUID] = None,
         **kwargs: Any,
     ) -> Any:
         """Called when tool errors."""
-        span = self._spans.pop(run_id, None)
-        if not span:
-            return
+        self._end_span(run_id, error=error)
+
+    # Retriever Callbacks
+    def on_retriever_start(
+        self,
+        serialized: Dict[str, Any],
+        query: str,
+        *,
+        run_id: UUID,
+        parent_run_id: Optional[UUID] = None,
+        tags: Optional[List[str]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        **kwargs: Any,
+    ) -> Any:
+        """Called when retriever starts running."""
+        retriever_name = serialized.get("id", ["unknown"])[-1] if serialized.get("id") else "unknown"
+        span_name = self._get_span_name("retriever", retriever_name)
         
-        try:
-            span.set_status(Status(StatusCode.ERROR, str(error)))
-            span.record_exception(error)
-        finally:
-            span.end()
+        attributes = {
+            "langchain.retriever.name": retriever_name,
+        }
+        
+        # Add query (truncated for size)
+        if query:
+            if len(query) > 500:
+                query = query[:500] + "..."
+            attributes["langchain.retriever.query"] = query
+            
+        self._start_span(run_id, span_name, **attributes)
+
+    def on_retriever_end(
+        self,
+        documents: List[Any],
+        *,
+        run_id: UUID,
+        parent_run_id: Optional[UUID] = None,
+        **kwargs: Any,
+    ) -> Any:
+        """Called when retriever ends running."""
+        attributes = {
+            "langchain.retriever.documents_count": len(documents),
+        }
+        
+        self._end_span(run_id, **attributes)
+
+    def on_retriever_error(
+        self,
+        error: Exception,
+        *,
+        run_id: UUID,
+        parent_run_id: Optional[UUID] = None,
+        **kwargs: Any,
+    ) -> Any:
+        """Called when retriever errors."""
+        self._end_span(run_id, error=error)
+
+    def _extract_provider(self, serialized: Dict[str, Any]) -> str:
+        """Extract the LLM provider from serialized data."""
+        if not serialized or "id" not in serialized:
+            return "unknown"
+            
+        id_parts = serialized["id"]
+        if not id_parts:
+            return "unknown"
+            
+        # Common patterns
+        for part in id_parts:
+            if "openai" in part.lower():
+                return "openai"
+            elif "anthropic" in part.lower():
+                return "anthropic"
+            elif "cohere" in part.lower():
+                return "cohere"
+            elif "huggingface" in part.lower():
+                return "huggingface"
+                
+        return "unknown"
 
 
-# Usage example:
-"""
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage
-
-# Initialize your Paid tracing
-paid.initialize_tracing("your-api-key")
-
-# Create the callback
-callback = PaidLangChainCallback()
-
-# Use with LangChain
-def my_langchain_function():
-    llm = ChatOpenAI(model="gpt-4", callbacks=[callback])
-    response = llm.invoke([HumanMessage(content="Hello!")])
-    return response
-
-# Capture the entire operation
-result = paid.capture("customer-123", my_langchain_function)
-"""
+# Convenience function to create callback
+def create_paid_callback() -> PaidLangChainCallback:
+    """
+    Create a PaidCallbackHandler instance.
+        
+    Returns:
+        PaidCallbackHandler instance
+        
+    Example:
+        callback = create_paid_callback()
+        llm = ChatOpenAI(callbacks=[callback])
+    """
+    return PaidLangChainCallback()
