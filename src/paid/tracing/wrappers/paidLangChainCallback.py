@@ -1,9 +1,9 @@
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 from uuid import UUID
-from langchain_core.callbacks import BaseCallbackHandler
-from langchain_core.outputs import LLMResult, ChatResult
-from langchain_core.messages import BaseMessage
+from langchain_core.callbacks import BaseCallbackHandler  # type: ignore
+from langchain_core.outputs import LLMResult, ChatResult  # type: ignore
+from langchain_core.messages import BaseMessage  # type: ignore
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
@@ -116,7 +116,7 @@ class PaidLangChainCallback(BaseCallbackHandler):
             attributes["langchain.tags"] = ",".join(tags)
         
         # Add prompt information
-        attributes["gen_ai.prompt.count"] = len(prompts)
+        attributes["gen_ai.prompt.count"] = str(len(prompts))
         if prompts:
             # Store first prompt for debugging (truncated to avoid huge spans)
             first_prompt = prompts[0][:500] + "..." if len(prompts[0]) > 500 else prompts[0]
@@ -165,7 +165,7 @@ class PaidLangChainCallback(BaseCallbackHandler):
         
         # Add message information
         total_messages = sum(len(msg_list) for msg_list in messages)
-        attributes["gen_ai.message.count"] = total_messages
+        attributes["gen_ai.message.count"] = str(total_messages)
         
         # Store first message for debugging (truncated)
         if messages and messages[0]:
