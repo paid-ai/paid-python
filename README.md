@@ -6,7 +6,7 @@
     </picture>
 </div>
 
-# 
+#
 
 <div align="center">
     <a href="https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2FAgentPaid%2Fpaid-python">
@@ -17,7 +17,7 @@
     </a>
 </div>
 
-Paid is the all-in-one, drop-in Business Engine for AI Agents that handles your pricing, subscriptions, margins, billing, and renewals with just 5 lines of code. 
+Paid is the all-in-one, drop-in Business Engine for AI Agents that handles your pricing, subscriptions, margins, billing, and renewals with just 5 lines of code.
 The Paid Python library provides convenient access to the Paid API from Python applications.
 
 ## Documentation
@@ -34,7 +34,7 @@ pip install paid-python
 
 ## Usage
 
-The client needs to be configured with your account's API key, which is available in the [Paid dashboard](https://app.paid.ai/agent-integration/api-keys). 
+The client needs to be configured with your account's API key, which is available in the [Paid dashboard](https://app.paid.ai/agent-integration/api-keys).
 
 ```python
 from paid import Paid
@@ -80,10 +80,12 @@ except paid.Error as e:
 Supported log levels are `DEBUG`, `INFO`, `WARNING`, `ERROR`, and `CRITICAL`.
 
 For example, to set the log level to debug, you can set the environment variable:
+
 ```bash
 export PAID_LOG_LEVEL=DEBUG
 ```
-Falls back to `INFO`
+
+Falls back to no logging.
 
 ## Cost Tracking
 
@@ -157,7 +159,6 @@ signal = Signal(
 
 _ = client.usage.record_bulk(signals=[signal])
 ```
-
 
 ## Contributing
 

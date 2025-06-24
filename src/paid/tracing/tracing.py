@@ -12,8 +12,11 @@ from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExport
 # from opentelemetry.instrumentation.openai import OpenAIInstrumentor
 
 # Configure logging
-log_level_name = os.environ.get("PAID_LOG_LEVEL", "INFO").upper()
-log_level = getattr(logging, log_level_name, logging.INFO)
+log_level_name = os.environ.get("PAID_LOG_LEVEL")
+if log_level_name is not None:
+    log_level = getattr(logging, log_level_name.upper(), logging.INFO)
+else:
+    log_level = 100  # No logs by default
 logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
 
@@ -38,7 +41,7 @@ def set_token(token: str) -> None:
 def _initialize_tracing(api_key: str):
     """
     Initialize OpenTelemetry with OTLP exporter for Paid backend.
-    
+
     Args:
         api_key: The API key for authentication
     """
@@ -46,17 +49,17 @@ def _initialize_tracing(api_key: str):
     # endpoint = "http://localhost:4318/v1/traces"
     try:
         set_token(api_key)
-        
+
         # Set up tracer provider
         tracer_provider = TracerProvider()
         trace.set_tracer_provider(tracer_provider)
-        
+
         # Set up OTLP exporter
         otlp_exporter = OTLPSpanExporter(
             endpoint=endpoint,
             headers={},  # No additional headers needed for OTLP
         )
-        
+
         # Set up span processor
         span_processor = BatchSpanProcessor(otlp_exporter)
         tracer_provider.add_span_processor(span_processor)
