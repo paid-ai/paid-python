@@ -6,7 +6,7 @@ import httpx
 from .agents.client import AgentsClient, AsyncAgentsClient
 from .contacts.client import AsyncContactsClient, ContactsClient
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
-from .tracing import _initialize_tracing, _capture
+from .tracing import _initialize_tracing, _trace
 from .customers.client import AsyncCustomersClient, CustomersClient
 from .environment import PaidEnvironment
 from .orders.client import AsyncOrdersClient, OrdersClient
@@ -90,7 +90,20 @@ class Paid:
                 args: typing.Optional[typing.Tuple] = None,
                 kwargs: typing.Optional[typing.Dict] = None,
     ) -> typing.Union[T, typing.Awaitable[T]]:
-        return _capture(external_customer_id, fn, args, kwargs)
+        print("capture() is deprecated. Please rename it to trace() to remove this message.")
+        return _trace( external_customer_id = external_customer_id, fn = fn,
+            external_agent_id = None, args = args, kwargs = kwargs)
+
+    def trace(self,
+        external_customer_id: str,
+        fn: typing.Callable[[], typing.Union[T, typing.Awaitable[T]]],
+        external_agent_id: typing.Optional[str] = None,
+        args: typing.Optional[typing.Tuple] = None,
+        kwargs: typing.Optional[typing.Dict] = None,
+    ) -> typing.Union[T, typing.Awaitable[T]]:
+        return _trace( external_customer_id = external_customer_id, fn = fn,
+            external_agent_id = external_agent_id, args = args, kwargs = kwargs)
+
 
 class AsyncPaid:
     """
@@ -168,8 +181,19 @@ class AsyncPaid:
                 args: typing.Optional[typing.Tuple] = None,
                 kwargs: typing.Optional[typing.Dict] = None,
     ) -> typing.Union[T, typing.Awaitable[T]]:
-        return _capture(external_customer_id, fn, args, kwargs)
+        print("capture() is deprecated. Please rename it to trace() to remove this message.")
+        return _trace( external_customer_id = external_customer_id, fn = fn,
+            external_agent_id = None, args = args, kwargs = kwargs)
 
+    def trace(self,
+        external_customer_id: str,
+        fn: typing.Callable[[], typing.Union[T, typing.Awaitable[T]]],
+        external_agent_id: typing.Optional[str] = None,
+        args: typing.Optional[typing.Tuple] = None,
+        kwargs: typing.Optional[typing.Dict] = None,
+    ) -> typing.Union[T, typing.Awaitable[T]]:
+        return _trace( external_customer_id = external_customer_id, fn = fn,
+            external_agent_id = external_agent_id, args = args, kwargs = kwargs)
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidEnvironment) -> str:
     if base_url is not None:

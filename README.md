@@ -129,7 +129,9 @@ def image_generate():
     return response
 
 # Finally, capture the traces!
-_ = client.capture("<your_external_customer_id>", lambda: image_generate())
+_ = client.trace(external_customer_id = "<your_external_customer_id>",
+                external_agent_id = "<your_external_agent_id>",  # can optionally include external_agent_id to enable agent-level cost tracking
+                fn = lambda: image_generate())
 ```
 
 ## Manual Cost Tracking
