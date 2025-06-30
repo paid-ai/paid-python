@@ -66,10 +66,7 @@ class ChatCompletionsWrapper:
         external_agent_id = paid_external_agent_id_var.get()
         token = paid_token_var.get()
 
-        # Create child span following OTel GenAI conventions
-        span_name = f"trace.chat {model}"
-
-        with self.tracer.start_as_current_span(span_name) as span:
+        with self.tracer.start_as_current_span("trace.openai.chat") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
@@ -148,13 +145,7 @@ class EmbeddingsWrapper:
         external_agent_id = paid_external_agent_id_var.get()
         token = paid_token_var.get()
 
-        # Extract model for span naming
-        model = kwargs.get('model', 'unknown')
-
-        # Create child span following OTel GenAI conventions
-        span_name = f"trace.embeddings {model}"
-
-        with self.tracer.start_as_current_span(span_name) as span:
+        with self.tracer.start_as_current_span("trace.openai.embeddings") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "embeddings",
@@ -213,10 +204,7 @@ class ImagesWrapper:
         # Extract model for span naming with proper defaults
         model = kwargs.get('model', 'dall-e-3')  # Default to dall-e-3
 
-        # Create child span following OTel GenAI conventions
-        span_name = f"trace.images {model}"
-
-        with self.tracer.start_as_current_span(span_name) as span:
+        with self.tracer.start_as_current_span("trace.openai.images") as span:
             attributes = {
                 "gen_ai.request.model": model, # there's no model in response, so extract from request
                 "gen_ai.system": "openai",
@@ -281,13 +269,7 @@ class ResponsesWrapper:
         external_agent_id = paid_external_agent_id_var.get()
         token = paid_token_var.get()
 
-        # Extract model for span naming
-        model = kwargs.get('model', 'unknown')
-
-        # Create child span following OTel GenAI conventions
-        span_name = f"trace.responses {model}"
-
-        with self.tracer.start_as_current_span(span_name) as span:
+        with self.tracer.start_as_current_span("trace.openai.responses") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
