@@ -6,7 +6,7 @@ import httpx
 from .agents.client import AgentsClient, AsyncAgentsClient
 from .contacts.client import AsyncContactsClient, ContactsClient
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
-from .tracing import _initialize_tracing, _trace
+from .tracing import _initialize_tracing, _trace, _signal
 from .customers.client import AsyncCustomersClient, CustomersClient
 from .environment import PaidEnvironment
 from .orders.client import AsyncOrdersClient, OrdersClient
@@ -104,6 +104,8 @@ class Paid:
         return _trace( external_customer_id = external_customer_id, fn = fn,
             external_agent_id = external_agent_id, args = args, kwargs = kwargs)
 
+    def signal(self, event_name: str, data: typing.Optional[typing.Dict] = None):
+        _signal(event_name = event_name, data = data)
 
 class AsyncPaid:
     """
@@ -194,6 +196,9 @@ class AsyncPaid:
     ) -> typing.Union[T, typing.Awaitable[T]]:
         return _trace( external_customer_id = external_customer_id, fn = fn,
             external_agent_id = external_agent_id, args = args, kwargs = kwargs)
+
+    def signal(self, event_name: str, data: typing.Optional[typing.Dict] = None):
+        _signal(event_name = event_name, data = data)
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidEnvironment) -> str:
     if base_url is not None:

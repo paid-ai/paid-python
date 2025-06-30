@@ -147,7 +147,7 @@ client = Paid(token="<PAID_API_KEY>")
 signal = Signal(
     event_name="<your_signal_name>",
     agent_id="<your_agent_id>",
-    customer_id="<your_customer_id>",
+    customer_id="<your_external_customer_id>",
     data = {
         "costData": {
             "vendor": "<any_vendor_name>", # can be anything
