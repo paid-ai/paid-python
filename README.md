@@ -154,7 +154,8 @@ signal = Signal(
             "cost": {
                 "amount": 0.002,
                 "currency": "USD"
-            }
+            },
+            "gen_ai.response.model": "<ai_model_name>",
         }
     }
 )
