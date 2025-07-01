@@ -134,6 +134,37 @@ _ = client.trace(external_customer_id = "<your_external_customer_id>",
                 fn = lambda: image_generate())
 ```
 
+## Signaling within the traces.
+
+A more reliable and user-friendly way to send signals is to send them from within the traces.
+This allows you to send signals with the same customer and agent IDs as the trace, with less arguments and boilerplate.
+The interface is `Paid.signal()`, which takes in signal name and optional data.
+`Paid.signal()` has to be called within a trace - meaning inside of a callback to `Paid.trace()`.
+In contrast to `Paid.usage.record_bulk()`, `Paid.signal()` is using OpenTelemetry to provide reliable delivery.
+
+Here's an example of how to use it:
+```python
+from paid import Paid
+
+# Initialize Paid SDK
+client = Paid(token="PAID_API_KEY")
+
+# Initialize tracing, must be after initializing Paid SDK
+client.initialize_tracing()
+
+def do_work():
+    # ...do some work...
+    client.signal(
+        event_name="<your_signal_name>",
+        data={ } # optional data (ex. manual cost tracking data)
+    )
+
+# Finally, capture the traces!
+_ = client.trace(external_customer_id = "<your_external_customer_id>",
+                external_agent_id = "<your_external_agent_id>",  # external_agent_id is required for signals
+                fn = lambda: do_work())
+```
+
 ## Manual Cost Tracking
 
 Manual cost tracking allow to insert your own costs to the usage data and
