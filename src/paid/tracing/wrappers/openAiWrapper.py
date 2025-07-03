@@ -54,8 +54,7 @@ class ChatCompletionsWrapper:
         # Check if there's an active span (from capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
-            logger.warning("No active span found")
-            # Call OpenAI directly without tracing
+            logger.warning("No active span found, no tracing will be applied")
             return self.openai.chat.completions.create(
                 model=model,
                 messages=messages,
@@ -66,17 +65,25 @@ class ChatCompletionsWrapper:
         external_agent_id = paid_external_agent_id_var.get()
         token = paid_token_var.get()
 
+        if not (external_customer_id and token):
+            logger.warning("Missing required tracing information: "
+                           "external_customer_id or token. "
+                           "Tracing will not be applied.")
+            return self.openai.chat.completions.create(
+                model=model,
+                messages=messages,
+                **kwargs
+            )
+
         with self.tracer.start_as_current_span("trace.openai.chat") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
             }
-            if external_customer_id:
-                attributes["external_customer_id"] = external_customer_id
+            attributes["external_customer_id"] = external_customer_id
+            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
-            if token:
-                attributes["token"] = token
             span.set_attributes(attributes)
 
             try:
@@ -137,25 +144,28 @@ class EmbeddingsWrapper:
         # Check if there's an active span (from paid.capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
-            logger.warning("No active span found")
-            # Call OpenAI directly without tracing
+            logger.warning("No active span found, no tracing will be applied")
             return self.openai.embeddings.create(**kwargs)
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
         token = paid_token_var.get()
 
+        if not (external_customer_id and token):
+            logger.warning("Missing required tracing information: "
+                           "external_customer_id or token. "
+                           "Tracing will not be applied.")
+            return self.openai.embeddings.create(**kwargs)
+
         with self.tracer.start_as_current_span("trace.openai.embeddings") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "embeddings",
             }
-            if external_customer_id:
-                attributes["external_customer_id"] = external_customer_id
+            attributes["external_customer_id"] = external_customer_id
+            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
-            if token:
-                attributes["token"] = token
             span.set_attributes(attributes)
 
             try:
@@ -201,6 +211,12 @@ class ImagesWrapper:
         external_agent_id = paid_external_agent_id_var.get()
         token = paid_token_var.get()
 
+        if not (external_customer_id and token):
+            logger.warning("Missing required tracing information: "
+                           "external_customer_id or token. "
+                           "Tracing will not be applied.")
+            return self.openai.images.generate(**kwargs)
+
         # Extract model for span naming with proper defaults
         model = kwargs.get('model', 'dall-e-3')  # Default to dall-e-3
 
@@ -210,12 +226,10 @@ class ImagesWrapper:
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "image_generation",
             }
-            if external_customer_id:
-                attributes["external_customer_id"] = external_customer_id
+            attributes["external_customer_id"] = external_customer_id
+            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
-            if token:
-                attributes["token"] = token
             span.set_attributes(attributes)
 
             try:
@@ -269,17 +283,21 @@ class ResponsesWrapper:
         external_agent_id = paid_external_agent_id_var.get()
         token = paid_token_var.get()
 
+        if not (external_customer_id and token):
+            logger.warning("Missing required tracing information: "
+                           "external_customer_id or token. "
+                           "Tracing will not be applied.")
+            return self.openai.responses.create(**kwargs)
+
         with self.tracer.start_as_current_span("trace.openai.responses") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
             }
-            if external_customer_id:
-                attributes["external_customer_id"] = external_customer_id
+            attributes["external_customer_id"] = external_customer_id
+            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
-            if token:
-                attributes["token"] = token
             span.set_attributes(attributes)
 
             try:
