@@ -1,12 +1,10 @@
-import logging
 from mistralai import Mistral, models
 from mistralai.types import OptionalNullable, UNSET
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 from typing import Any, Dict, Union, List, Optional
 from ..tracing import paid_external_customer_id_var, paid_token_var, paid_external_agent_id_var
-
-logger = logging.getLogger(__name__)
+from ..tracing import logger
 
 class PaidMistral:
     def __init__(self, mistral_client: Mistral):

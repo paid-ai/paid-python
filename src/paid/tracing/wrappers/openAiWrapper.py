@@ -1,11 +1,9 @@
-import logging
 from openai import OpenAI
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 from typing import Any
 from ..tracing import paid_external_customer_id_var, paid_token_var, paid_external_agent_id_var
-
-logger = logging.getLogger(__name__)
+from ..tracing import logger
 
 class PaidOpenAI:
     def __init__(self, openai_client: OpenAI):
