@@ -3,6 +3,9 @@ import asyncio
 import contextvars
 import logging
 import os
+import atexit
+import signal
+import sys
 from typing import Optional, TypeVar, Callable, Union, Awaitable, Tuple, Dict
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
@@ -53,6 +56,9 @@ def _initialize_tracing(api_key: str, collector_endpoint: str = "https://collect
         api_key: The API key for authentication
     """
     try:
+        if _token is not None:
+            raise RuntimeError("Tracing is already initialized.")
+
         set_token(api_key)
 
         # Set up tracer provider
@@ -80,6 +86,39 @@ def _initialize_tracing(api_key: str, collector_endpoint: str = "https://collect
         # )
         # if not instrumentor.is_instrumented_by_opentelemetry:
         #     instrumentor.instrument()
+
+        # Terminate gracefully and don't lose traces
+        def flush_traces():
+            try:
+                if not tracer_provider.force_flush(10000):
+                    logger.error("OTEL force flush : timeout reached")
+            except Exception as e:
+                logger.error(f"Error flushing traces: {e}")
+
+        def create_chained_signal_handler(signum: int):
+            current_handler = signal.getsignal(signum)
+            def chained_handler(_signum, frame):
+                logger.warning(f"Received signal {_signum}, flushing traces")
+                flush_traces()
+                if callable(current_handler):
+                    current_handler(_signum, frame)
+
+                sys.exit(0) # exit if other handlers didn't
+            return chained_handler
+
+        def create_chained_exception_handler():
+            original_excepthook = sys.excepthook
+            def chained_exception_handler(exc_type, exc_value, exc_traceback):
+                logger.warning("Uncaught exception occurred, flushing telemetry...")
+                flush_traces()
+                original_excepthook(exc_type, exc_value, exc_traceback)
+            return chained_exception_handler
+
+        # Register cleanup handlers
+        atexit.register(flush_traces)
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            signal.signal(sig, create_chained_signal_handler(sig))
+        sys.excepthook = create_chained_exception_handler()
 
         logger.info("Paid tracing initialized successfully - collector at %s", collector_endpoint)
     except Exception:
