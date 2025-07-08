@@ -1,11 +1,9 @@
-import logging
 from openai import OpenAI
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 from typing import Any
 from ..tracing import paid_external_customer_id_var, paid_token_var, paid_external_agent_id_var
-
-logger = logging.getLogger(__name__)
+from ..tracing import logger
 
 class PaidOpenAI:
     def __init__(self, openai_client: OpenAI):
@@ -54,29 +52,30 @@ class ChatCompletionsWrapper:
         # Check if there's an active span (from capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
-            logger.warning("No active span found")
-            # Call OpenAI directly without tracing
-            return self.openai.chat.completions.create(
-                model=model,
-                messages=messages,
-                **kwargs
+            raise RuntimeError(
+                "No OTEL span found."
+                " Make sure to call this method from Paid.trace()."
             )
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
         token = paid_token_var.get()
 
+        if not (external_customer_id and token):
+            raise RuntimeError(
+                "Missing required tracing information: external_customer_id or token."
+                " Make sure to call this method from Paid.trace()."
+            )
+
         with self.tracer.start_as_current_span("trace.openai.chat") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
             }
-            if external_customer_id:
-                attributes["external_customer_id"] = external_customer_id
+            attributes["external_customer_id"] = external_customer_id
+            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
-            if token:
-                attributes["token"] = token
             span.set_attributes(attributes)
 
             try:
@@ -137,25 +136,30 @@ class EmbeddingsWrapper:
         # Check if there's an active span (from paid.capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
-            logger.warning("No active span found")
-            # Call OpenAI directly without tracing
-            return self.openai.embeddings.create(**kwargs)
+            raise RuntimeError(
+                "No OTEL span found."
+                " Make sure to call this method from Paid.trace()."
+            )
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
         token = paid_token_var.get()
+
+        if not (external_customer_id and token):
+            raise RuntimeError(
+                "Missing required tracing information: external_customer_id or token."
+                " Make sure to call this method from Paid.trace()."
+            )
 
         with self.tracer.start_as_current_span("trace.openai.embeddings") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "embeddings",
             }
-            if external_customer_id:
-                attributes["external_customer_id"] = external_customer_id
+            attributes["external_customer_id"] = external_customer_id
+            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
-            if token:
-                attributes["token"] = token
             span.set_attributes(attributes)
 
             try:
@@ -193,13 +197,20 @@ class ImagesWrapper:
         # Check if there's an active span (from paid.capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
-            logger.warning("No active span found")
-            # Call OpenAI directly without tracing
-            return self.openai.images.generate(**kwargs)
+            raise RuntimeError(
+                "No OTEL span found."
+                " Make sure to call this method from Paid.trace()."
+            )
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
         token = paid_token_var.get()
+
+        if not (external_customer_id and token):
+            raise RuntimeError(
+                "Missing required tracing information: external_customer_id or token."
+                " Make sure to call this method from Paid.trace()."
+            )
 
         # Extract model for span naming with proper defaults
         model = kwargs.get('model', 'dall-e-3')  # Default to dall-e-3
@@ -210,12 +221,10 @@ class ImagesWrapper:
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "image_generation",
             }
-            if external_customer_id:
-                attributes["external_customer_id"] = external_customer_id
+            attributes["external_customer_id"] = external_customer_id
+            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
-            if token:
-                attributes["token"] = token
             span.set_attributes(attributes)
 
             try:
@@ -261,25 +270,30 @@ class ResponsesWrapper:
         # Check if there's an active span (from paid.capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
-            logger.warning("No active span found")
-            # Call OpenAI directly without tracing
-            return self.openai.responses.create(**kwargs)
+            raise RuntimeError(
+                "No OTEL span found."
+                " Make sure to call this method from Paid.trace()."
+            )
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
         token = paid_token_var.get()
+
+        if not (external_customer_id and token):
+            raise RuntimeError(
+                "Missing required tracing information: external_customer_id or token."
+                " Make sure to call this method from Paid.trace()."
+            )
 
         with self.tracer.start_as_current_span("trace.openai.responses") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
             }
-            if external_customer_id:
-                attributes["external_customer_id"] = external_customer_id
+            attributes["external_customer_id"] = external_customer_id
+            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
-            if token:
-                attributes["token"] = token
             span.set_attributes(attributes)
 
             try:

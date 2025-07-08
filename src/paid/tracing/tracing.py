@@ -3,6 +3,9 @@ import asyncio
 import contextvars
 import logging
 import os
+import atexit
+import signal
+import sys
 from typing import Optional, TypeVar, Callable, Union, Awaitable, Tuple, Dict
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
@@ -14,11 +17,17 @@ from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExport
 # Configure logging
 log_level_name = os.environ.get("PAID_LOG_LEVEL")
 if log_level_name is not None:
-    log_level = getattr(logging, log_level_name.upper(), logging.INFO)
+    log_level = getattr(logging, log_level_name.upper())
 else:
-    log_level = 100  # No logs by default
-logging.basicConfig(level=log_level)
+    log_level = 100 # Default to no logging
 logger = logging.getLogger(__name__)
+logger.setLevel(log_level)
+if not logger.hasHandlers():
+    handler = logging.StreamHandler()
+    handler.setLevel(log_level)
+    formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 _token: Optional[str] = None
 # Context variables for passing data to nested spans (e.g., in openAiWrapper)
@@ -39,16 +48,17 @@ def set_token(token: str) -> None:
     _token = token
 
 
-def _initialize_tracing(api_key: str):
+def _initialize_tracing(api_key: str, collector_endpoint: str):
     """
     Initialize OpenTelemetry with OTLP exporter for Paid backend.
 
     Args:
         api_key: The API key for authentication
     """
-    endpoint = "https://collector.agentpaid.io:4318/v1/traces"
-    # endpoint = "http://localhost:4318/v1/traces"
     try:
+        if _token is not None:
+            raise RuntimeError("Tracing is already initialized.")
+
         set_token(api_key)
 
         # Set up tracer provider
@@ -57,7 +67,7 @@ def _initialize_tracing(api_key: str):
 
         # Set up OTLP exporter
         otlp_exporter = OTLPSpanExporter(
-            endpoint=endpoint,
+            endpoint=collector_endpoint,
             headers={},  # No additional headers needed for OTLP
         )
 
@@ -77,7 +87,40 @@ def _initialize_tracing(api_key: str):
         # if not instrumentor.is_instrumented_by_opentelemetry:
         #     instrumentor.instrument()
 
-        logger.info("Paid tracing initialized successfully")
+        # Terminate gracefully and don't lose traces
+        def flush_traces():
+            try:
+                if not tracer_provider.force_flush(10000):
+                    logger.error("OTEL force flush : timeout reached")
+            except Exception as e:
+                logger.error(f"Error flushing traces: {e}")
+
+        def create_chained_signal_handler(signum: int):
+            current_handler = signal.getsignal(signum)
+            def chained_handler(_signum, frame):
+                logger.warning(f"Received signal {_signum}, flushing traces")
+                flush_traces()
+                if callable(current_handler):
+                    current_handler(_signum, frame)
+
+                sys.exit(0) # exit if other handlers didn't
+            return chained_handler
+
+        def create_chained_exception_handler():
+            original_excepthook = sys.excepthook
+            def chained_exception_handler(exc_type, exc_value, exc_traceback):
+                logger.warning("Uncaught exception occurred, flushing telemetry...")
+                flush_traces()
+                original_excepthook(exc_type, exc_value, exc_traceback)
+            return chained_exception_handler
+
+        # Register cleanup handlers
+        atexit.register(flush_traces)
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            signal.signal(sig, create_chained_signal_handler(sig))
+        sys.excepthook = create_chained_exception_handler()
+
+        logger.info("Paid tracing initialized successfully - collector at %s", collector_endpoint)
     except Exception:
         logger.exception("Failed to initialize Paid tracing")
         raise
@@ -93,10 +136,9 @@ def _trace(
     kwargs = kwargs or {}
     token = get_token()
     if not token:
-        logger.warning(
-            "No token found - tracing is not initialized and will not be captured"
+        raise RuntimeError(
+            "No token found - tracing is not initialized and will not be captured. Call Paid.initialize_tracing() first."
         )
-        return fn(*args, **kwargs)
 
     # Set context variables for access by nested spans
     reset_id_ctx_token = paid_external_customer_id_var.set(external_customer_id)

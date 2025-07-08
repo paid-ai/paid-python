@@ -1,11 +1,9 @@
-import logging
 import typing
 import json
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 from .tracing import paid_external_customer_id_var, paid_token_var, paid_external_agent_id_var
-
-logger = logging.getLogger(__name__)
+from .tracing import logger
 
 def _signal(event_name: str, data: typing.Optional[typing.Dict] = None):
     if (not event_name):

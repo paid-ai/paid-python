@@ -1,4 +1,3 @@
-import logging
 import time
 from typing import Any, Dict, List, Optional, Sequence
 from uuid import UUID
@@ -9,9 +8,7 @@ from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
 from ..tracing import paid_external_customer_id_var, paid_token_var
-
-logger = logging.getLogger(__name__)
-
+from ..tracing import logger
 
 class PaidLangChainCallback(BaseCallbackHandler):
     """
