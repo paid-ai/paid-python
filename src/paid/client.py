@@ -81,7 +81,7 @@ class Paid:
         self.orders = OrdersClient(client_wrapper=self._client_wrapper)
         self.usage = UsageClient(client_wrapper=self._client_wrapper)
 
-    def initialize_tracing(self) -> None:
+    def initialize_tracing(self, collector_endpoint: str = "https://collector.agentpaid.io:4318/v1/traces") -> None:
         """
         Initializes tracing for the AsyncPaid client.
         Call this method before using tracing features to ensure proper setup.
@@ -91,7 +91,7 @@ class Paid:
         None
         """
         token = self._client_wrapper._get_token()
-        _initialize_tracing(token)
+        _initialize_tracing(token, collector_endpoint=collector_endpoint)
 
     def capture(self,
                 external_customer_id: str,
@@ -217,7 +217,7 @@ class AsyncPaid:
         self.orders = AsyncOrdersClient(client_wrapper=self._client_wrapper)
         self.usage = AsyncUsageClient(client_wrapper=self._client_wrapper)
 
-    def initialize_tracing(self) -> None:
+    def initialize_tracing(self, collector_endpoint: str = "https://collector.agentpaid.io:4318/v1/traces") -> None:
         """
         Initializes tracing for the AsyncPaid client.
         Call this method before using tracing features to ensure proper setup.
@@ -227,7 +227,7 @@ class AsyncPaid:
         None
         """
         token = self._client_wrapper._get_token()
-        _initialize_tracing(token)
+        _initialize_tracing(token, collector_endpoint=collector_endpoint)
 
     async def capture(self,
                 external_customer_id: str,

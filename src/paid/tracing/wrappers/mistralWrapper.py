@@ -63,21 +63,9 @@ class OCRWrapper:
         # Check if there's an active span (from capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
-            logger.warning("No active span found, no tracing will be applied")
-            return self.mistral.ocr.process(
-                model=model,
-                document=document,
-                id=id,
-                pages=pages,
-                include_image_base64=include_image_base64,
-                image_limit=image_limit,
-                image_min_size=image_min_size,
-                bbox_annotation_format=bbox_annotation_format,
-                document_annotation_format=document_annotation_format,
-                retries=retries,
-                server_url=server_url,
-                timeout_ms=timeout_ms,
-                http_headers=http_headers,
+            raise RuntimeError(
+                "No OTEL span found."
+                " Make sure to call this method from Paid.trace()."
             )
 
         external_customer_id = paid_external_customer_id_var.get()
@@ -85,25 +73,10 @@ class OCRWrapper:
         token = paid_token_var.get()
 
         if not (external_customer_id and token):
-            logger.warning("Missing required tracing information: "
-                           "external_customer_id or token. "
-                           "Tracing will not be applied.")
-            return self.mistral.ocr.process(
-                model=model,
-                document=document,
-                id=id,
-                pages=pages,
-                include_image_base64=include_image_base64,
-                image_limit=image_limit,
-                image_min_size=image_min_size,
-                bbox_annotation_format=bbox_annotation_format,
-                document_annotation_format=document_annotation_format,
-                retries=retries,
-                server_url=server_url,
-                timeout_ms=timeout_ms,
-                http_headers=http_headers,
+            raise RuntimeError(
+                "Missing required tracing information: external_customer_id or token."
+                " Make sure to call this method from Paid.trace()."
             )
-
 
         with self.tracer.start_as_current_span("trace.mistral.ocr") as span:
             attributes = {
@@ -137,12 +110,10 @@ class OCRWrapper:
                     http_headers=http_headers,
                 )
 
-                usage_attrs = {}
                 if hasattr(response, 'usage_info') and response.usage_info and hasattr(response.usage_info, 'pages_processed'):
-                    usage_attrs["gen_ai.ocr.pages_processed"] = response.usage_info.pages_processed
+                    span.set_attribute("gen_ai.ocr.pages_processed", response.usage_info.pages_processed)
                 if hasattr(response, 'model'):
-                    usage_attrs["gen_ai.response.model"] = response.model
-                span.set_attributes(usage_attrs)
+                    span.set_attribute("gen_ai.response.model", response.model)
 
                 # Mark span as successful
                 span.set_status(Status(StatusCode.OK))
@@ -196,21 +167,9 @@ class OCRWrapper:
         # Check if there's an active span (from capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
-            logger.warning("No active span found")
-            return await self.mistral.ocr.process_async(
-                model=model,
-                document=document,
-                id=id,
-                pages=pages,
-                include_image_base64=include_image_base64,
-                image_limit=image_limit,
-                image_min_size=image_min_size,
-                bbox_annotation_format=bbox_annotation_format,
-                document_annotation_format=document_annotation_format,
-                retries=retries,
-                server_url=server_url,
-                timeout_ms=timeout_ms,
-                http_headers=http_headers,
+            raise RuntimeError(
+                "No OTEL span found."
+                " Make sure to call this method from Paid.trace()."
             )
 
         external_customer_id = paid_external_customer_id_var.get()
@@ -218,23 +177,9 @@ class OCRWrapper:
         token = paid_token_var.get()
 
         if not (external_customer_id and token):
-            logger.warning("Missing required tracing information: "
-                           "external_customer_id or token. "
-                           "Tracing will not be applied.")
-            return await self.mistral.ocr.process_async(
-                model=model,
-                document=document,
-                id=id,
-                pages=pages,
-                include_image_base64=include_image_base64,
-                image_limit=image_limit,
-                image_min_size=image_min_size,
-                bbox_annotation_format=bbox_annotation_format,
-                document_annotation_format=document_annotation_format,
-                retries=retries,
-                server_url=server_url,
-                timeout_ms=timeout_ms,
-                http_headers=http_headers,
+            raise RuntimeError(
+                "Missing required tracing information: external_customer_id or token."
+                " Make sure to call this method from Paid.trace()."
             )
 
         with self.tracer.start_as_current_span("trace.mistral.ocr.async") as span:
@@ -269,13 +214,10 @@ class OCRWrapper:
                     http_headers=http_headers,
                 )
 
-                # Add usage information if available
-                usage_attrs = {}
                 if hasattr(response, 'usage_info') and response.usage_info and hasattr(response.usage_info, 'pages_processed'):
-                    usage_attrs["gen_ai.ocr.pages_processed"] = response.usage_info.pages_processed
+                    span.set_attribute("gen_ai.ocr.pages_processed", response.usage_info.pages_processed)
                 if hasattr(response, 'model'):
-                    usage_attrs["gen_ai.response.model"] = response.model
-                span.set_attributes(usage_attrs)
+                    span.set_attribute("gen_ai.response.model", response.model)
 
                 # Mark span as successful
                 span.set_status(Status(StatusCode.OK))

@@ -48,7 +48,7 @@ def set_token(token: str) -> None:
     _token = token
 
 
-def _initialize_tracing(api_key: str, collector_endpoint: str = "https://collector.agentpaid.io:4318/v1/traces"):
+def _initialize_tracing(api_key: str, collector_endpoint: str):
     """
     Initialize OpenTelemetry with OTLP exporter for Paid backend.
 
@@ -137,7 +137,7 @@ def _trace(
     token = get_token()
     if not token:
         raise RuntimeError(
-            "No token found - tracing is not initialized and will not be captured. Call Paid.initialize_tracing(<token>) first."
+            "No token found - tracing is not initialized and will not be captured. Call Paid.initialize_tracing() first."
         )
 
     # Set context variables for access by nested spans
