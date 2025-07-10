@@ -5,12 +5,11 @@ import logging
 import os
 import atexit
 import signal
-import sys
 from typing import Optional, TypeVar, Callable, Union, Awaitable, Tuple, Dict
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 # from opentelemetry.instrumentation.openai import OpenAIInstrumentor
 
@@ -78,21 +77,11 @@ def _initialize_tracing(api_key: str, collector_endpoint: str):
             headers={},  # No additional headers needed for OTLP
         )
 
-        # Set up span processor
-        span_processor = BatchSpanProcessor(otlp_exporter)
+        # Use SimpleSpanProcessor for immediate span export.
+        # There are problems with BatchSpanProcessor in some environments - ex. Airflow.
+        # Airflow terminates processes before the batch is sent, losing traces.
+        span_processor = SimpleSpanProcessor(otlp_exporter)
         tracer_provider.add_span_processor(span_processor)
-
-        # Don't need auto-instrumentation,
-        # will add it when implementing automatic tracing (w/o explicit capture)
-        # instrumentor = OpenAIInstrumentor(
-        #     # exception_logger=lambda e: Telemetry().log_exception(e),
-        #     # enrich_assistant=True,
-        #     enrich_token_usage=True,
-        #     # get_common_metrics_attributes=metrics_common_attributes,
-        #     # upload_base64_image=base64_image_uploader,
-        # )
-        # if not instrumentor.is_instrumented_by_opentelemetry:
-        #     instrumentor.instrument()
 
         # Terminate gracefully and don't lose traces
         def flush_traces():
@@ -107,25 +96,19 @@ def _initialize_tracing(api_key: str, collector_endpoint: str):
             def chained_handler(_signum, frame):
                 logger.warning(f"Received signal {_signum}, flushing traces")
                 flush_traces()
-                if callable(current_handler):
-                    current_handler(_signum, frame)
-
-                sys.exit(0) # exit if other handlers didn't
+                # Restore the original handler
+                signal.signal(_signum, current_handler)
+                # Re-raise the signal to let the original handler (or default) handle it
+                os.kill(os.getpid(), _signum)
             return chained_handler
 
-        def create_chained_exception_handler():
-            original_excepthook = sys.excepthook
-            def chained_exception_handler(exc_type, exc_value, exc_traceback):
-                logger.warning("Uncaught exception occurred, flushing telemetry...")
-                flush_traces()
-                original_excepthook(exc_type, exc_value, exc_traceback)
-            return chained_exception_handler
-
-        # Register cleanup handlers
+        # This is already done by default OTEL shutdown,
+        # but user might turn that off - so register it explicitly
         atexit.register(flush_traces)
+
+        # Handle signals
         for sig in (signal.SIGINT, signal.SIGTERM):
             signal.signal(sig, create_chained_signal_handler(sig))
-        sys.excepthook = create_chained_exception_handler()
 
         logger.info("Paid tracing initialized successfully - collector at %s", collector_endpoint)
     except Exception:
