@@ -3,7 +3,7 @@ name = "paid-python"
 
 [tool.poetry]
 name = "paid-python"
-version = "0.0.5-alpha10"
+version = "0.0.5-alpha11"
 description = ""
 readme = "README.md"
 authors = []
@@ -45,7 +45,8 @@ opentelemetry-sdk = "^1.23.0"
 opentelemetry-exporter-otlp-proto-http = "^1.23.0"
 mistralai = "^1.9.1"
 anthropic = "^0.57.1"
-llama-index = "^0.12.42"
+llama-index-core = "0.12.42"
+llama-index-llms-openai = "0.3.44"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "==1.13.0"
