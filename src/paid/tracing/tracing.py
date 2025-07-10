@@ -62,8 +62,15 @@ def _initialize_tracing(api_key: str, collector_endpoint: str):
         set_token(api_key)
 
         # Set up tracer provider
-        tracer_provider = TracerProvider()
-        trace.set_tracer_provider(tracer_provider)
+        tracer_provider = trace.get_tracer_provider()
+        if not tracer_provider or tracer_provider.__class__.__name__ == 'NoOpTracerProvider' or tracer_provider.__class__.__name__ == 'ProxyTracerProvider':
+            logger.info("No existing tracer provider found, creating a new one.")
+            tracer_provider = TracerProvider()
+            trace.set_tracer_provider(tracer_provider)
+
+        # Fix static type checkers that don't understand the above logic
+        if not isinstance(tracer_provider, TracerProvider):
+            raise RuntimeError("Failed to create a valid TracerProvider instance.")
 
         # Set up OTLP exporter
         otlp_exporter = OTLPSpanExporter(
