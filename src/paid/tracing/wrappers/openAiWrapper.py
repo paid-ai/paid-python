@@ -213,7 +213,7 @@ class ImagesWrapper:
             )
 
         # Extract model for span naming with proper defaults
-        model = kwargs.get('model', 'dall-e-3')  # Default to dall-e-3
+        model = kwargs.get('model', '')
 
         with self.tracer.start_as_current_span("trace.openai.images") as span:
             attributes = {
@@ -234,17 +234,9 @@ class ImagesWrapper:
                 # Add image generation cost factors with proper defaults
                 span.set_attributes({
                     "gen_ai.image.count": kwargs.get('n', 1),  # Default to 1 image
-                    "gen_ai.image.size": kwargs.get('size', '1024x1024'),  # Default size
+                    "gen_ai.image.size": kwargs.get('size', ''),
+                    "gen_ai.image.quality": kwargs.get('quality', ''),
                 })
-
-                # Add quality with proper defaults based on model
-                if model == 'dall-e-3':
-                    quality = kwargs.get('quality', 'standard')  # Default to standard quality
-                    span.set_attribute("gen_ai.image.quality", quality)
-                elif model == 'gpt-image-1':
-                    quality = kwargs.get('quality', 'medium')  # Default to medium quality for GPT Image 1
-                    span.set_attribute("gen_ai.image.quality", quality)
-                # DALL-E 2 doesn't have quality parameter
 
                 # Mark span as successful
                 span.set_status(Status(StatusCode.OK))
