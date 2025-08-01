@@ -7,19 +7,21 @@ from ..tracing import paid_external_customer_id_var, paid_token_var, paid_extern
 from ..tracing import logger
 
 class PaidMistral:
-    def __init__(self, mistral_client: Mistral):
+    def __init__(self, mistral_client: Mistral, optional_tracing: bool = False):
         self.mistral = mistral_client
         self.tracer = trace.get_tracer("paid.python")
+        self.optional_tracing = optional_tracing
 
     @property
     def ocr(self):
-        return OCRWrapper(self.mistral, self.tracer)
+        return OCRWrapper(self.mistral, self.tracer, self.optional_tracing)
 
 
 class OCRWrapper:
-    def __init__(self, mistral_client: Mistral, tracer: trace.Tracer):
+    def __init__(self, mistral_client: Mistral, tracer: trace.Tracer, optional_tracing: bool):
         self.mistral = mistral_client
         self.tracer = tracer
+        self.optional_tracing = optional_tracing
 
     def process(
         self,
@@ -63,6 +65,23 @@ class OCRWrapper:
         # Check if there's an active span (from capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No tracing, calling Mistral directly.")
+                return self.mistral.ocr.process(
+                    model=model,
+                    document=document,
+                    id=id,
+                    pages=pages,
+                    include_image_base64=include_image_base64,
+                    image_limit=image_limit,
+                    image_min_size=image_min_size,
+                    bbox_annotation_format=bbox_annotation_format,
+                    document_annotation_format=document_annotation_format,
+                    retries=retries,
+                    server_url=server_url,
+                    timeout_ms=timeout_ms,
+                    http_headers=http_headers,
+                )
             raise RuntimeError(
                 "No OTEL span found."
                 " Make sure to call this method from Paid.trace()."
@@ -73,6 +92,23 @@ class OCRWrapper:
         token = paid_token_var.get()
 
         if not (external_customer_id and token):
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling Mistral directly")
+                return self.mistral.ocr.process(
+                    model=model,
+                    document=document,
+                    id=id,
+                    pages=pages,
+                    include_image_base64=include_image_base64,
+                    image_limit=image_limit,
+                    image_min_size=image_min_size,
+                    bbox_annotation_format=bbox_annotation_format,
+                    document_annotation_format=document_annotation_format,
+                    retries=retries,
+                    server_url=server_url,
+                    timeout_ms=timeout_ms,
+                    http_headers=http_headers,
+                )
             raise RuntimeError(
                 "Missing required tracing information: external_customer_id or token."
                 " Make sure to call this method from Paid.trace()."
@@ -167,6 +203,23 @@ class OCRWrapper:
         # Check if there's an active span (from capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No tracing, calling Mistral directly.")
+                return await self.mistral.ocr.process_async(
+                    model=model,
+                    document=document,
+                    id=id,
+                    pages=pages,
+                    include_image_base64=include_image_base64,
+                    image_limit=image_limit,
+                    image_min_size=image_min_size,
+                    bbox_annotation_format=bbox_annotation_format,
+                    document_annotation_format=document_annotation_format,
+                    retries=retries,
+                    server_url=server_url,
+                    timeout_ms=timeout_ms,
+                    http_headers=http_headers,
+                )
             raise RuntimeError(
                 "No OTEL span found."
                 " Make sure to call this method from Paid.trace()."
@@ -177,6 +230,23 @@ class OCRWrapper:
         token = paid_token_var.get()
 
         if not (external_customer_id and token):
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling Mistral directly")
+                return await self.mistral.ocr.process_async(
+                    model=model,
+                    document=document,
+                    id=id,
+                    pages=pages,
+                    include_image_base64=include_image_base64,
+                    image_limit=image_limit,
+                    image_min_size=image_min_size,
+                    bbox_annotation_format=bbox_annotation_format,
+                    document_annotation_format=document_annotation_format,
+                    retries=retries,
+                    server_url=server_url,
+                    timeout_ms=timeout_ms,
+                    http_headers=http_headers,
+                )
             raise RuntimeError(
                 "Missing required tracing information: external_customer_id or token."
                 " Make sure to call this method from Paid.trace()."
