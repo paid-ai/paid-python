@@ -7,14 +7,21 @@ from ..tracing import paid_external_customer_id_var, paid_token_var, paid_extern
 from ..tracing import logger
 
 class PaidLlamaIndexOpenAI:
-    def __init__(self, openai_client: OpenAI):
+    def __init__(self, openai_client: OpenAI, optional_tracing: bool = False):
         self.openai = openai_client
         self.tracer = trace.get_tracer("paid.python")
+        self.optional_tracing = optional_tracing
 
     def chat(self, messages: Sequence[ChatMessage], **kwargs: Any) -> ChatResponse:
         # Check if there's an active span (from trace())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No tracing, calling LlamaIndex OpenAI directly.")
+                return self.openai.chat(
+                    messages=messages,
+                    **kwargs
+                )
             raise RuntimeError(
                 "No OTEL span found."
                 " Make sure to call this method from Paid.trace()."
@@ -25,6 +32,12 @@ class PaidLlamaIndexOpenAI:
         token = paid_token_var.get()
 
         if not (external_customer_id and token):
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling LlamaIndex OpenAI directly")
+                return self.openai.chat(
+                    messages=messages,
+                    **kwargs
+                )
             raise RuntimeError(
                 "Missing required tracing information: external_customer_id or token."
                 " Make sure to call this method from Paid.trace()."

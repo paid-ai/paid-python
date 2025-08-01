@@ -6,41 +6,44 @@ from ..tracing import paid_external_customer_id_var, paid_token_var, paid_extern
 from ..tracing import logger
 
 class PaidOpenAI:
-    def __init__(self, openai_client: OpenAI):
+    def __init__(self, openai_client: OpenAI, optional_tracing: bool = False):
         self.openai = openai_client
         self.tracer = trace.get_tracer("paid.python")
+        self.optional_tracing = optional_tracing
 
     @property
     def chat(self):
-        return ChatWrapper(self.openai, self.tracer)
+        return ChatWrapper(self.openai, self.tracer, self.optional_tracing)
 
     @property
     def responses(self):
-        return ResponsesWrapper(self.openai, self.tracer)
+        return ResponsesWrapper(self.openai, self.tracer, self.optional_tracing)
 
     @property
     def embeddings(self):
-        return EmbeddingsWrapper(self.openai, self.tracer)
+        return EmbeddingsWrapper(self.openai, self.tracer, self.optional_tracing)
 
     @property
     def images(self):
-        return ImagesWrapper(self.openai, self.tracer)
+        return ImagesWrapper(self.openai, self.tracer, self.optional_tracing)
 
 
 class ChatWrapper:
-    def __init__(self, openai_client: OpenAI, tracer: trace.Tracer):
+    def __init__(self, openai_client: OpenAI, tracer: trace.Tracer, optional_tracing: bool):
         self.openai = openai_client
         self.tracer = tracer
+        self.optional_tracing = optional_tracing
 
     @property
     def completions(self):
-        return ChatCompletionsWrapper(self.openai, self.tracer)
+        return ChatCompletionsWrapper(self.openai, self.tracer, self.optional_tracing)
 
 
 class ChatCompletionsWrapper:
-    def __init__(self, openai_client: OpenAI, tracer: trace.Tracer):
+    def __init__(self, openai_client: OpenAI, tracer: trace.Tracer, optional_tracing: bool):
         self.openai = openai_client
         self.tracer = tracer
+        self.optional_tracing = optional_tracing
 
     def create(
         self,
@@ -52,6 +55,13 @@ class ChatCompletionsWrapper:
         # Check if there's an active span (from capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No tracing, calling OpenAI directly.")
+                return self.openai.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    **kwargs
+                )
             raise RuntimeError(
                 "No OTEL span found."
                 " Make sure to call this method from Paid.trace()."
@@ -62,6 +72,13 @@ class ChatCompletionsWrapper:
         token = paid_token_var.get()
 
         if not (external_customer_id and token):
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
+                return self.openai.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    **kwargs
+                )
             raise RuntimeError(
                 "Missing required tracing information: external_customer_id or token."
                 " Make sure to call this method from Paid.trace()."
@@ -125,9 +142,10 @@ class ChatCompletionsWrapper:
 
 
 class EmbeddingsWrapper:
-    def __init__(self, openai_client: OpenAI, tracer: trace.Tracer):
+    def __init__(self, openai_client: OpenAI, tracer: trace.Tracer, optional_tracing: bool):
         self.openai = openai_client
         self.tracer = tracer
+        self.optional_tracing = optional_tracing
 
     def create(
         self,
@@ -136,6 +154,9 @@ class EmbeddingsWrapper:
         # Check if there's an active span (from paid.capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No tracing, calling OpenAI directly.")
+                return self.openai.embeddings.create(**kwargs)
             raise RuntimeError(
                 "No OTEL span found."
                 " Make sure to call this method from Paid.trace()."
@@ -146,6 +167,9 @@ class EmbeddingsWrapper:
         token = paid_token_var.get()
 
         if not (external_customer_id and token):
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
+                return self.openai.embeddings.create(**kwargs)
             raise RuntimeError(
                 "Missing required tracing information: external_customer_id or token."
                 " Make sure to call this method from Paid.trace()."
@@ -186,9 +210,10 @@ class EmbeddingsWrapper:
 
 
 class ImagesWrapper:
-    def __init__(self, openai_client: OpenAI, tracer: trace.Tracer):
+    def __init__(self, openai_client: OpenAI, tracer: trace.Tracer, optional_tracing: bool):
         self.openai = openai_client
         self.tracer = tracer
+        self.optional_tracing = optional_tracing
 
     def generate(
         self,
@@ -197,6 +222,9 @@ class ImagesWrapper:
         # Check if there's an active span (from paid.capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No tracing, calling OpenAI directly.")
+                return self.openai.images.generate(**kwargs)
             raise RuntimeError(
                 "No OTEL span found."
                 " Make sure to call this method from Paid.trace()."
@@ -207,6 +235,9 @@ class ImagesWrapper:
         token = paid_token_var.get()
 
         if not (external_customer_id and token):
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
+                return self.openai.images.generate(**kwargs)
             raise RuntimeError(
                 "Missing required tracing information: external_customer_id or token."
                 " Make sure to call this method from Paid.trace()."
@@ -251,9 +282,10 @@ class ImagesWrapper:
 
 
 class ResponsesWrapper:
-    def __init__(self, openai_client: OpenAI, tracer: trace.Tracer):
+    def __init__(self, openai_client: OpenAI, tracer: trace.Tracer, optional_tracing: bool):
         self.openai = openai_client
         self.tracer = tracer
+        self.optional_tracing = optional_tracing
 
     def create(
         self,
@@ -262,6 +294,9 @@ class ResponsesWrapper:
         # Check if there's an active span (from paid.capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No tracing, calling OpenAI directly.")
+                return self.openai.responses.create(**kwargs)
             raise RuntimeError(
                 "No OTEL span found."
                 " Make sure to call this method from Paid.trace()."
@@ -272,6 +307,9 @@ class ResponsesWrapper:
         token = paid_token_var.get()
 
         if not (external_customer_id and token):
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
+                return self.openai.responses.create(**kwargs)
             raise RuntimeError(
                 "Missing required tracing information: external_customer_id or token."
                 " Make sure to call this method from Paid.trace()."

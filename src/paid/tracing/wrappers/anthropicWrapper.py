@@ -5,21 +5,24 @@ import typing
 from anthropic.types.message_param import MessageParam
 from anthropic.types import ModelParam
 from ..tracing import paid_external_customer_id_var, paid_token_var, paid_external_agent_id_var
+from ..tracing import logger
 
 class PaidAnthropic:
-    def __init__(self, anthropic_client: Anthropic):
+    def __init__(self, anthropic_client: Anthropic, optional_tracing: bool = False):
         self.anthropic = anthropic_client
         self.tracer = trace.get_tracer("paid.python")
+        self.optional_tracing = optional_tracing
 
     @property
     def messages(self):
-        return MessagesWrapper(self.anthropic, self.tracer)
+        return MessagesWrapper(self.anthropic, self.tracer, self.optional_tracing)
 
 
 class MessagesWrapper:
-    def __init__(self, anthropic_client: Anthropic, tracer: trace.Tracer):
+    def __init__(self, anthropic_client: Anthropic, tracer: trace.Tracer, optional_tracing: bool):
         self.anthropic = anthropic_client
         self.tracer = tracer
+        self.optional_tracing = optional_tracing
 
     def create(
         self,
@@ -31,6 +34,14 @@ class MessagesWrapper:
     ) -> typing.Any:
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No tracing, calling Anthropic directly.")
+                return self.anthropic.messages.create(
+                    model=model,
+                    messages=messages,
+                    max_tokens=max_tokens,
+                    **kwargs
+                )
             raise RuntimeError(
                 "No OTEL span found."
                 " Make sure to call this method from Paid.trace()."
@@ -41,6 +52,14 @@ class MessagesWrapper:
         token = paid_token_var.get()
 
         if not (external_customer_id and token):
+            if self.optional_tracing:
+                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling Anthropic directly")
+                return self.anthropic.messages.create(
+                    model=model,
+                    messages=messages,
+                    max_tokens=max_tokens,
+                    **kwargs
+                )
             raise RuntimeError(
                 "Missing required tracing information: external_customer_id or token."
                 " Make sure to call this method from Paid.trace()."
