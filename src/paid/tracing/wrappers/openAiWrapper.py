@@ -140,6 +140,8 @@ class ChatCompletionsWrapper:
                 span.record_exception(error)
                 raise error
 
+    def parse(self, **kwargs):
+        return self.openai.chat.completions.parse(**kwargs)
 
 class EmbeddingsWrapper:
     def __init__(self, openai_client: OpenAI, tracer: trace.Tracer, optional_tracing: bool):
