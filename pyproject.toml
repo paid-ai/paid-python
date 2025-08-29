@@ -45,8 +45,8 @@ opentelemetry-sdk = "^1.23.0"
 opentelemetry-exporter-otlp-proto-http = "^1.23.0"
 mistralai = "^1.9.1"
 anthropic = "^0.57.1"
-llama-index-core = "0.12.42"
-llama-index-llms-openai = "0.3.44"
+llama-index-core = "^0.13.0"
+llama-index-llms-openai = "^0.5.3"
 google-genai = "1.19.0"
 
 [tool.poetry.group.dev.dependencies]
