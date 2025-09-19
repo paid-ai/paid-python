@@ -13,7 +13,8 @@ from .environment import PaidEnvironment
 from .orders.client import AsyncOrdersClient, OrdersClient
 from .usage.client import AsyncUsageClient, UsageClient
 
-T = typing.TypeVar('T')
+T = typing.TypeVar("T")
+
 
 class Paid:
     """
@@ -93,17 +94,20 @@ class Paid:
         token = self._client_wrapper._get_token()
         _initialize_tracing(token, collector_endpoint=collector_endpoint)
 
-    def capture(self,
-                external_customer_id: str,
-                fn: typing.Callable[[], typing.Union[T, typing.Awaitable[T]]],
-                args: typing.Optional[typing.Tuple] = None,
-                kwargs: typing.Optional[typing.Dict] = None,
+    def capture(
+        self,
+        external_customer_id: str,
+        fn: typing.Callable[[], typing.Union[T, typing.Awaitable[T]]],
+        args: typing.Optional[typing.Tuple] = None,
+        kwargs: typing.Optional[typing.Dict] = None,
     ) -> typing.Union[T, typing.Awaitable[T]]:
         print("capture() is deprecated. Please rename it to trace() to remove this message.")
-        return _trace( external_customer_id = external_customer_id, fn = fn,
-            external_agent_id = None, args = args, kwargs = kwargs)
+        return _trace(
+            external_customer_id=external_customer_id, fn=fn, external_agent_id=None, args=args, kwargs=kwargs
+        )
 
-    def trace(self,
+    def trace(
+        self,
         external_customer_id: str,
         fn: typing.Callable[[], typing.Union[T, typing.Awaitable[T]]],
         external_agent_id: typing.Optional[str] = None,
@@ -131,8 +135,13 @@ class Paid:
         typing.Union[T, typing.Awaitable[T]]
             The result of the traced function, either as a value or an awaitable.
         """
-        return _trace( external_customer_id = external_customer_id, fn = fn,
-            external_agent_id = external_agent_id, args = args, kwargs = kwargs)
+        return _trace(
+            external_customer_id=external_customer_id,
+            fn=fn,
+            external_agent_id=external_agent_id,
+            args=args,
+            kwargs=kwargs,
+        )
 
     def signal(self, event_name: str, data: typing.Optional[typing.Dict] = None):
         """
@@ -149,7 +158,8 @@ class Paid:
         -------
         None
         """
-        _signal(event_name = event_name, data = data)
+        _signal(event_name=event_name, data=data)
+
 
 class AsyncPaid:
     """
@@ -217,7 +227,9 @@ class AsyncPaid:
         self.orders = AsyncOrdersClient(client_wrapper=self._client_wrapper)
         self.usage = AsyncUsageClient(client_wrapper=self._client_wrapper)
 
-    def initialize_tracing(self, collector_endpoint: str = "https://collector.agentpaid.io:4318/v1/traces") -> None:
+    async def initialize_tracing(
+        self, collector_endpoint: str = "https://collector.agentpaid.io:4318/v1/traces"
+    ) -> None:
         """
         Initializes tracing for the AsyncPaid client.
         Call this method before using tracing features to ensure proper setup.
@@ -229,20 +241,23 @@ class AsyncPaid:
         token = self._client_wrapper._get_token()
         _initialize_tracing(token, collector_endpoint=collector_endpoint)
 
-    async def capture(self,
-                external_customer_id: str,
-                fn: typing.Callable[[], typing.Union[T, typing.Awaitable[T]]],
-                args: typing.Optional[typing.Tuple] = None,
-                kwargs: typing.Optional[typing.Dict] = None,
+    async def capture(
+        self,
+        external_customer_id: str,
+        fn: typing.Callable[[], typing.Union[T, typing.Awaitable[T]]],
+        args: typing.Optional[typing.Tuple] = None,
+        kwargs: typing.Optional[typing.Dict] = None,
     ) -> typing.Union[T, typing.Awaitable[T]]:
         print("capture() is deprecated. Please rename it to trace() to remove this message.")
-        result = _trace(external_customer_id=external_customer_id, fn=fn,
-            external_agent_id=None, args=args, kwargs=kwargs)
+        result = _trace(
+            external_customer_id=external_customer_id, fn=fn, external_agent_id=None, args=args, kwargs=kwargs
+        )
         if asyncio.iscoroutine(result):
             return await result
         return result
 
-    async def trace(self,
+    async def trace(
+        self,
         external_customer_id: str,
         fn: typing.Callable[[], typing.Union[T, typing.Awaitable[T]]],
         external_agent_id: typing.Optional[str] = None,
@@ -270,13 +285,18 @@ class AsyncPaid:
         typing.Union[T, typing.Awaitable[T]]
             The result of the traced function, either as a value or an awaitable.
         """
-        result = _trace(external_customer_id=external_customer_id, fn=fn,
-            external_agent_id=external_agent_id, args=args, kwargs=kwargs)
+        result = _trace(
+            external_customer_id=external_customer_id,
+            fn=fn,
+            external_agent_id=external_agent_id,
+            args=args,
+            kwargs=kwargs,
+        )
         if asyncio.iscoroutine(result):
             return await result
         return result
 
-    def signal(self, event_name: str, data: typing.Optional[typing.Dict] = None):
+    async def signal(self, event_name: str, data: typing.Optional[typing.Dict] = None):
         """
         Sends a signal event with the specified event name and optional data.
 
@@ -291,7 +311,8 @@ class AsyncPaid:
         -------
         None
         """
-        _signal(event_name = event_name, data = data)
+        _signal(event_name=event_name, data=data)
+
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidEnvironment) -> str:
     if base_url is not None:
