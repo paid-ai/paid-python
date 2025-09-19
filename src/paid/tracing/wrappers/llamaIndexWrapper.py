@@ -6,6 +6,7 @@ from typing import Any, Sequence, cast
 from ..tracing import paid_external_customer_id_var, paid_token_var, paid_external_agent_id_var
 from ..tracing import logger
 
+
 class PaidLlamaIndexOpenAI:
     def __init__(self, openai_client: OpenAI, optional_tracing: bool = False):
         self.openai = openai_client
@@ -18,14 +19,8 @@ class PaidLlamaIndexOpenAI:
         if current_span == trace.INVALID_SPAN:
             if self.optional_tracing:
                 logger.info(f"{self.__class__.__name__} No tracing, calling LlamaIndex OpenAI directly.")
-                return self.openai.chat(
-                    messages=messages,
-                    **kwargs
-                )
-            raise RuntimeError(
-                "No OTEL span found."
-                " Make sure to call this method from Paid.trace()."
-            )
+                return self.openai.chat(messages=messages, **kwargs)
+            raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
@@ -33,11 +28,10 @@ class PaidLlamaIndexOpenAI:
 
         if not (external_customer_id and token):
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling LlamaIndex OpenAI directly")
-                return self.openai.chat(
-                    messages=messages,
-                    **kwargs
+                logger.info(
+                    f"{self.__class__.__name__} No external_customer_id or token, calling LlamaIndex OpenAI directly"
                 )
+                return self.openai.chat(messages=messages, **kwargs)
             raise RuntimeError(
                 "Missing required tracing information: external_customer_id or token."
                 " Make sure to call this method from Paid.trace()."
@@ -56,36 +50,38 @@ class PaidLlamaIndexOpenAI:
 
             try:
                 # Make the actual OpenAI API call
-                response = self.openai.chat(
-                    messages=messages,
-                    **kwargs
-                )
+                response = self.openai.chat(messages=messages, **kwargs)
                 cast_response = cast(Any, response.raw)
 
                 # Add usage information if available
-                if hasattr(cast_response, 'usage') and cast_response.usage:
-                    span.set_attributes({
-                        "gen_ai.usage.input_tokens": cast_response.usage.prompt_tokens,
-                        "gen_ai.usage.output_tokens": cast_response.usage.completion_tokens,
-                        "gen_ai.response.model": cast_response.model,
-                    })
+                if hasattr(cast_response, "usage") and cast_response.usage:
+                    span.set_attributes(
+                        {
+                            "gen_ai.usage.input_tokens": cast_response.usage.prompt_tokens,
+                            "gen_ai.usage.output_tokens": cast_response.usage.completion_tokens,
+                            "gen_ai.response.model": cast_response.model,
+                        }
+                    )
 
                     # Add cached tokens if available (for newer models)
-                    if (hasattr(cast_response.usage, 'prompt_tokens_details') and
-                        cast_response.usage.prompt_tokens_details and
-                        hasattr(cast_response.usage.prompt_tokens_details, 'cached_tokens')):
+                    if (
+                        hasattr(cast_response.usage, "prompt_tokens_details")
+                        and cast_response.usage.prompt_tokens_details
+                        and hasattr(cast_response.usage.prompt_tokens_details, "cached_tokens")
+                    ):
                         span.set_attribute(
-                            "gen_ai.usage.cached_input_tokens",
-                            cast_response.usage.prompt_tokens_details.cached_tokens
+                            "gen_ai.usage.cached_input_tokens", cast_response.usage.prompt_tokens_details.cached_tokens
                         )
 
                     # Add reasoning tokens if available (for o1 models)
-                    if (hasattr(cast_response.usage, 'completion_tokens_details') and
-                        cast_response.usage.completion_tokens_details and
-                        hasattr(cast_response.usage.completion_tokens_details, 'reasoning_tokens')):
+                    if (
+                        hasattr(cast_response.usage, "completion_tokens_details")
+                        and cast_response.usage.completion_tokens_details
+                        and hasattr(cast_response.usage.completion_tokens_details, "reasoning_tokens")
+                    ):
                         span.set_attribute(
                             "gen_ai.usage.reasoning_output_tokens",
-                            cast_response.usage.completion_tokens_details.reasoning_tokens
+                            cast_response.usage.completion_tokens_details.reasoning_tokens,
                         )
 
                 # Mark span as successful

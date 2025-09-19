@@ -5,6 +5,7 @@ from typing import Any
 from ..tracing import paid_external_customer_id_var, paid_token_var, paid_external_agent_id_var
 from ..tracing import logger
 
+
 class PaidOpenAI:
     def __init__(self, openai_client: OpenAI, optional_tracing: bool = False):
         self.openai = openai_client
@@ -45,27 +46,14 @@ class ChatCompletionsWrapper:
         self.tracer = tracer
         self.optional_tracing = optional_tracing
 
-    def create(
-        self,
-        *,
-        model: str,
-        messages: list,
-        **kwargs
-    ) -> Any:
+    def create(self, *, model: str, messages: list, **kwargs) -> Any:
         # Check if there's an active span (from capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
             if self.optional_tracing:
                 logger.info(f"{self.__class__.__name__} No tracing, calling OpenAI directly.")
-                return self.openai.chat.completions.create(
-                    model=model,
-                    messages=messages,
-                    **kwargs
-                )
-            raise RuntimeError(
-                "No OTEL span found."
-                " Make sure to call this method from Paid.trace()."
-            )
+                return self.openai.chat.completions.create(model=model, messages=messages, **kwargs)
+            raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
@@ -74,11 +62,7 @@ class ChatCompletionsWrapper:
         if not (external_customer_id and token):
             if self.optional_tracing:
                 logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
-                return self.openai.chat.completions.create(
-                    model=model,
-                    messages=messages,
-                    **kwargs
-                )
+                return self.openai.chat.completions.create(model=model, messages=messages, **kwargs)
             raise RuntimeError(
                 "Missing required tracing information: external_customer_id or token."
                 " Make sure to call this method from Paid.trace()."
@@ -97,36 +81,37 @@ class ChatCompletionsWrapper:
 
             try:
                 # Make the actual OpenAI API call
-                response = self.openai.chat.completions.create(
-                    model=model,
-                    messages=messages,
-                    **kwargs
-                )
+                response = self.openai.chat.completions.create(model=model, messages=messages, **kwargs)
 
                 # Add usage information if available
-                if hasattr(response, 'usage') and response.usage:
-                    span.set_attributes({
-                        "gen_ai.usage.input_tokens": response.usage.prompt_tokens,
-                        "gen_ai.usage.output_tokens": response.usage.completion_tokens,
-                        "gen_ai.response.model": response.model,
-                    })
+                if hasattr(response, "usage") and response.usage:
+                    span.set_attributes(
+                        {
+                            "gen_ai.usage.input_tokens": response.usage.prompt_tokens,
+                            "gen_ai.usage.output_tokens": response.usage.completion_tokens,
+                            "gen_ai.response.model": response.model,
+                        }
+                    )
 
                     # Add cached tokens if available (for newer models)
-                    if (hasattr(response.usage, 'prompt_tokens_details') and
-                        response.usage.prompt_tokens_details and
-                        hasattr(response.usage.prompt_tokens_details, 'cached_tokens')):
+                    if (
+                        hasattr(response.usage, "prompt_tokens_details")
+                        and response.usage.prompt_tokens_details
+                        and hasattr(response.usage.prompt_tokens_details, "cached_tokens")
+                    ):
                         span.set_attribute(
-                            "gen_ai.usage.cached_input_tokens",
-                            response.usage.prompt_tokens_details.cached_tokens
+                            "gen_ai.usage.cached_input_tokens", response.usage.prompt_tokens_details.cached_tokens
                         )
 
                     # Add reasoning tokens if available (for o1 models)
-                    if (hasattr(response.usage, 'completion_tokens_details') and
-                        response.usage.completion_tokens_details and
-                        hasattr(response.usage.completion_tokens_details, 'reasoning_tokens')):
+                    if (
+                        hasattr(response.usage, "completion_tokens_details")
+                        and response.usage.completion_tokens_details
+                        and hasattr(response.usage.completion_tokens_details, "reasoning_tokens")
+                    ):
                         span.set_attribute(
                             "gen_ai.usage.reasoning_output_tokens",
-                            response.usage.completion_tokens_details.reasoning_tokens
+                            response.usage.completion_tokens_details.reasoning_tokens,
                         )
 
                 # Mark span as successful
@@ -143,6 +128,7 @@ class ChatCompletionsWrapper:
     def parse(self, **kwargs):
         return self.openai.chat.completions.parse(**kwargs)
 
+
 class EmbeddingsWrapper:
     def __init__(self, openai_client: OpenAI, tracer: trace.Tracer, optional_tracing: bool):
         self.openai = openai_client
@@ -151,7 +137,7 @@ class EmbeddingsWrapper:
 
     def create(
         self,
-        **kwargs  # Accept all parameters as-is to match the actual API
+        **kwargs,  # Accept all parameters as-is to match the actual API
     ) -> Any:
         # Check if there's an active span (from paid.capture())
         current_span = trace.get_current_span()
@@ -159,10 +145,7 @@ class EmbeddingsWrapper:
             if self.optional_tracing:
                 logger.info(f"{self.__class__.__name__} No tracing, calling OpenAI directly.")
                 return self.openai.embeddings.create(**kwargs)
-            raise RuntimeError(
-                "No OTEL span found."
-                " Make sure to call this method from Paid.trace()."
-            )
+            raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
@@ -193,11 +176,13 @@ class EmbeddingsWrapper:
                 response = self.openai.embeddings.create(**kwargs)
 
                 # Add usage information if available
-                if hasattr(response, 'usage') and response.usage:
-                    span.set_attributes({
-                        "gen_ai.usage.input_tokens": response.usage.prompt_tokens,
-                        "gen_ai.response.model": response.model,
-                    })
+                if hasattr(response, "usage") and response.usage:
+                    span.set_attributes(
+                        {
+                            "gen_ai.usage.input_tokens": response.usage.prompt_tokens,
+                            "gen_ai.response.model": response.model,
+                        }
+                    )
 
                 # Mark span as successful
                 span.set_status(Status(StatusCode.OK))
@@ -219,7 +204,7 @@ class ImagesWrapper:
 
     def generate(
         self,
-        **kwargs  # Accept all parameters as-is to match the actual API
+        **kwargs,  # Accept all parameters as-is to match the actual API
     ) -> Any:
         # Check if there's an active span (from paid.capture())
         current_span = trace.get_current_span()
@@ -227,10 +212,7 @@ class ImagesWrapper:
             if self.optional_tracing:
                 logger.info(f"{self.__class__.__name__} No tracing, calling OpenAI directly.")
                 return self.openai.images.generate(**kwargs)
-            raise RuntimeError(
-                "No OTEL span found."
-                " Make sure to call this method from Paid.trace()."
-            )
+            raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
@@ -246,11 +228,11 @@ class ImagesWrapper:
             )
 
         # Extract model for span naming with proper defaults
-        model = kwargs.get('model', '')
+        model = kwargs.get("model", "")
 
         with self.tracer.start_as_current_span("trace.openai.images") as span:
             attributes = {
-                "gen_ai.request.model": model, # there's no model in response, so extract from request
+                "gen_ai.request.model": model,  # there's no model in response, so extract from request
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "image_generation",
             }
@@ -265,11 +247,13 @@ class ImagesWrapper:
                 response = self.openai.images.generate(**kwargs)
 
                 # Add image generation cost factors with proper defaults
-                span.set_attributes({
-                    "gen_ai.image.count": kwargs.get('n', 1),  # Default to 1 image
-                    "gen_ai.image.size": kwargs.get('size', ''),
-                    "gen_ai.image.quality": kwargs.get('quality', ''),
-                })
+                span.set_attributes(
+                    {
+                        "gen_ai.image.count": kwargs.get("n", 1),  # Default to 1 image
+                        "gen_ai.image.size": kwargs.get("size", ""),
+                        "gen_ai.image.quality": kwargs.get("quality", ""),
+                    }
+                )
 
                 # Mark span as successful
                 span.set_status(Status(StatusCode.OK))
@@ -291,7 +275,7 @@ class ResponsesWrapper:
 
     def create(
         self,
-        **kwargs  # Accept all parameters as-is to match the actual API
+        **kwargs,  # Accept all parameters as-is to match the actual API
     ) -> Any:
         # Check if there's an active span (from paid.capture())
         current_span = trace.get_current_span()
@@ -299,10 +283,7 @@ class ResponsesWrapper:
             if self.optional_tracing:
                 logger.info(f"{self.__class__.__name__} No tracing, calling OpenAI directly.")
                 return self.openai.responses.create(**kwargs)
-            raise RuntimeError(
-                "No OTEL span found."
-                " Make sure to call this method from Paid.trace()."
-            )
+            raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
@@ -333,29 +314,34 @@ class ResponsesWrapper:
                 response = self.openai.responses.create(**kwargs)
 
                 # Add usage information if available
-                if hasattr(response, 'usage') and response.usage:
-                    span.set_attributes({
-                        "gen_ai.usage.input_tokens": response.usage.input_tokens,
-                        "gen_ai.usage.output_tokens": response.usage.output_tokens,
-                        "gen_ai.response.model": response.model,
-                    })
+                if hasattr(response, "usage") and response.usage:
+                    span.set_attributes(
+                        {
+                            "gen_ai.usage.input_tokens": response.usage.input_tokens,
+                            "gen_ai.usage.output_tokens": response.usage.output_tokens,
+                            "gen_ai.response.model": response.model,
+                        }
+                    )
 
                     # Add cached tokens if available (for newer models)
-                    if (hasattr(response.usage, 'input_tokens_details') and
-                        response.usage.input_tokens_details and
-                        hasattr(response.usage.input_tokens_details, 'cached_tokens')):
+                    if (
+                        hasattr(response.usage, "input_tokens_details")
+                        and response.usage.input_tokens_details
+                        and hasattr(response.usage.input_tokens_details, "cached_tokens")
+                    ):
                         span.set_attribute(
-                            "gen_ai.usage.cached_input_tokens",
-                            response.usage.input_tokens_details.cached_tokens
+                            "gen_ai.usage.cached_input_tokens", response.usage.input_tokens_details.cached_tokens
                         )
 
                     # Add reasoning tokens if available (for o1 models)
-                    if (hasattr(response.usage, 'output_tokens_details') and
-                        response.usage.output_tokens_details and
-                        hasattr(response.usage.output_tokens_details, 'reasoning_tokens')):
+                    if (
+                        hasattr(response.usage, "output_tokens_details")
+                        and response.usage.output_tokens_details
+                        and hasattr(response.usage.output_tokens_details, "reasoning_tokens")
+                    ):
                         span.set_attribute(
                             "gen_ai.usage.reasoning_output_tokens",
-                            response.usage.output_tokens_details.reasoning_tokens
+                            response.usage.output_tokens_details.reasoning_tokens,
                         )
 
                 # Mark span as successful
