@@ -7,6 +7,7 @@ from anthropic.types import ModelParam
 from ..tracing import paid_external_customer_id_var, paid_token_var, paid_external_agent_id_var
 from ..tracing import logger
 
+
 class PaidAnthropic:
     def __init__(self, anthropic_client: Anthropic, optional_tracing: bool = False):
         self.anthropic = anthropic_client
@@ -25,27 +26,14 @@ class MessagesWrapper:
         self.optional_tracing = optional_tracing
 
     def create(
-        self,
-        *,
-        model: ModelParam,
-        messages: typing.Iterable[MessageParam],
-        max_tokens: int,
-        **kwargs
+        self, *, model: ModelParam, messages: typing.Iterable[MessageParam], max_tokens: int, **kwargs
     ) -> typing.Any:
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
             if self.optional_tracing:
                 logger.info(f"{self.__class__.__name__} No tracing, calling Anthropic directly.")
-                return self.anthropic.messages.create(
-                    model=model,
-                    messages=messages,
-                    max_tokens=max_tokens,
-                    **kwargs
-                )
-            raise RuntimeError(
-                "No OTEL span found."
-                " Make sure to call this method from Paid.trace()."
-            )
+                return self.anthropic.messages.create(model=model, messages=messages, max_tokens=max_tokens, **kwargs)
+            raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
@@ -54,12 +42,7 @@ class MessagesWrapper:
         if not (external_customer_id and token):
             if self.optional_tracing:
                 logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling Anthropic directly")
-                return self.anthropic.messages.create(
-                    model=model,
-                    messages=messages,
-                    max_tokens=max_tokens,
-                    **kwargs
-                )
+                return self.anthropic.messages.create(model=model, messages=messages, max_tokens=max_tokens, **kwargs)
             raise RuntimeError(
                 "Missing required tracing information: external_customer_id or token."
                 " Make sure to call this method from Paid.trace()."
@@ -77,20 +60,22 @@ class MessagesWrapper:
 
             try:
                 response = self.anthropic.messages.create(
-                    model=model,
-                    messages=messages,
-                    max_tokens=max_tokens,
-                    **kwargs
+                    model=model, messages=messages, max_tokens=max_tokens, **kwargs
                 )
 
                 # Add usage information
-                if hasattr(response, 'usage') and response.usage:
+                if hasattr(response, "usage") and response.usage:
                     attributes["gen_ai.usage.input_tokens"] = response.usage.input_tokens
                     attributes["gen_ai.usage.output_tokens"] = response.usage.output_tokens
                     attributes["gen_ai.response.model"] = response.model
-                    if hasattr(response.usage, 'cache_creation_input_tokens') and response.usage.cache_creation_input_tokens:
-                        attributes["gen_ai.usage.cache_creation_input_tokens"] = response.usage.cache_creation_input_tokens
-                    if hasattr(response.usage, 'cache_read_input_tokens') and response.usage.cache_read_input_tokens:
+                    if (
+                        hasattr(response.usage, "cache_creation_input_tokens")
+                        and response.usage.cache_creation_input_tokens
+                    ):
+                        attributes["gen_ai.usage.cache_creation_input_tokens"] = (
+                            response.usage.cache_creation_input_tokens
+                        )
+                    if hasattr(response.usage, "cache_read_input_tokens") and response.usage.cache_read_input_tokens:
                         attributes["gen_ai.usage.cache_read_input_tokens"] = response.usage.cache_read_input_tokens
 
                 span.set_attributes(attributes)

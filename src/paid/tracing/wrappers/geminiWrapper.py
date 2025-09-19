@@ -35,9 +35,7 @@ class PaidGemini:
 class ModelsWrapper:
     """Wrapper for models with OTEL instrumentation."""
 
-    def __init__(
-        self, original_client: genai.Client, tracer: trace.Tracer, optional_tracing: bool
-    ):
+    def __init__(self, original_client: genai.Client, tracer: trace.Tracer, optional_tracing: bool):
         self._client = original_client
         self.tracer = tracer
         self.optional_tracing = optional_tracing
@@ -48,14 +46,9 @@ class ModelsWrapper:
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
             if self.optional_tracing:
-                logger.info(
-                    f"{self.__class__.__name__} No tracing wasn't enabled, only calling the client."
-                )
+                logger.info(f"{self.__class__.__name__} No tracing wasn't enabled, only calling the client.")
                 return self._client.models.generate_content(**kwargs)
-            raise RuntimeError(
-                "No OTEL span found."
-                " Make sure to call this method from Paid.trace()."
-            )
+            raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
@@ -78,10 +71,7 @@ class ModelsWrapper:
                 response = self._client.models.generate_content(**kwargs)
                 if response.usage_metadata is None:
                     # unnecessary but need this for type checker
-                    raise ValueError(
-                        "Response usage metadata is None. "
-                        "Ensure the response contains usage metadata."
-                    )
+                    raise ValueError("Response usage metadata is None. Ensure the response contains usage metadata.")
 
                 # Set OTEL attributes (best-effort)
                 attributes: dict[str, Union[str, int]] = {}

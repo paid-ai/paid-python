@@ -2,13 +2,14 @@ import time
 from typing import Any, Dict, List, Optional, Sequence
 from uuid import UUID
 
-from langchain_core.callbacks import BaseCallbackHandler # type: ignore
-from langchain_core.outputs import LLMResult # type: ignore
+from langchain_core.callbacks import BaseCallbackHandler  # type: ignore
+from langchain_core.outputs import LLMResult  # type: ignore
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
 from ..tracing import paid_external_customer_id_var, paid_token_var
 from ..tracing import logger
+
 
 class PaidLangChainCallback(BaseCallbackHandler):
     """
@@ -64,7 +65,7 @@ class PaidLangChainCallback(BaseCallbackHandler):
 
         # Set common attributes
         base_attributes = {
-            "langchain.operation": span_name.split()[0].split('.')[-1],
+            "langchain.operation": span_name.split()[0].split(".")[-1],
             "langchain.run_id": str(run_id),
         }
 
@@ -129,15 +130,15 @@ class PaidLangChainCallback(BaseCallbackHandler):
             logger.warning("No metadata provided for LLM start")
             return None
 
-        model_type = metadata.get('ls_model_type', 'unknown')
-        model_name = metadata.get('ls_model_name', 'unknown')
+        model_type = metadata.get("ls_model_type", "unknown")
+        model_name = metadata.get("ls_model_name", "unknown")
         logger.info(f"LLM start: {metadata}")
         logger.info(f"model_name: {model_name}")
         span_name = self._get_span_name(f"trace.{model_type}", model_name)
 
         attributes = {
             "gen_ai.system": self._extract_provider(serialized),
-            "gen_ai.operation.name": metadata['ls_model_type'],
+            "gen_ai.operation.name": metadata["ls_model_type"],
             "gen_ai.request.model": model_name,
             "langchain.prompts.count": len(prompts),
         }

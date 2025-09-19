@@ -6,6 +6,7 @@ from typing import Any, Dict, Union, List, Optional
 from ..tracing import paid_external_customer_id_var, paid_token_var, paid_external_agent_id_var
 from ..tracing import logger
 
+
 class PaidMistral:
     def __init__(self, mistral_client: Mistral, optional_tracing: bool = False):
         self.mistral = mistral_client
@@ -33,9 +34,7 @@ class OCRWrapper:
         include_image_base64: Optional[bool] = None,
         image_limit: Optional[int] = None,
         image_min_size: Optional[int] = None,
-        bbox_annotation_format: OptionalNullable[
-            Union[models.ResponseFormat, models.ResponseFormatTypedDict]
-        ] = UNSET,
+        bbox_annotation_format: OptionalNullable[Union[models.ResponseFormat, models.ResponseFormatTypedDict]] = UNSET,
         document_annotation_format: OptionalNullable[
             Union[models.ResponseFormat, models.ResponseFormatTypedDict]
         ] = UNSET,
@@ -82,10 +81,7 @@ class OCRWrapper:
                     timeout_ms=timeout_ms,
                     http_headers=http_headers,
                 )
-            raise RuntimeError(
-                "No OTEL span found."
-                " Make sure to call this method from Paid.trace()."
-            )
+            raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
@@ -146,9 +142,13 @@ class OCRWrapper:
                     http_headers=http_headers,
                 )
 
-                if hasattr(response, 'usage_info') and response.usage_info and hasattr(response.usage_info, 'pages_processed'):
+                if (
+                    hasattr(response, "usage_info")
+                    and response.usage_info
+                    and hasattr(response.usage_info, "pages_processed")
+                ):
                     span.set_attribute("gen_ai.ocr.pages_processed", response.usage_info.pages_processed)
-                if hasattr(response, 'model'):
+                if hasattr(response, "model"):
                     span.set_attribute("gen_ai.response.model", response.model)
 
                 # Mark span as successful
@@ -171,9 +171,7 @@ class OCRWrapper:
         include_image_base64: Optional[bool] = None,
         image_limit: Optional[int] = None,
         image_min_size: Optional[int] = None,
-        bbox_annotation_format: OptionalNullable[
-            Union[models.ResponseFormat, models.ResponseFormatTypedDict]
-        ] = UNSET,
+        bbox_annotation_format: OptionalNullable[Union[models.ResponseFormat, models.ResponseFormatTypedDict]] = UNSET,
         document_annotation_format: OptionalNullable[
             Union[models.ResponseFormat, models.ResponseFormatTypedDict]
         ] = UNSET,
@@ -220,10 +218,7 @@ class OCRWrapper:
                     timeout_ms=timeout_ms,
                     http_headers=http_headers,
                 )
-            raise RuntimeError(
-                "No OTEL span found."
-                " Make sure to call this method from Paid.trace()."
-            )
+            raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
@@ -284,9 +279,13 @@ class OCRWrapper:
                     http_headers=http_headers,
                 )
 
-                if hasattr(response, 'usage_info') and response.usage_info and hasattr(response.usage_info, 'pages_processed'):
+                if (
+                    hasattr(response, "usage_info")
+                    and response.usage_info
+                    and hasattr(response.usage_info, "pages_processed")
+                ):
                     span.set_attribute("gen_ai.ocr.pages_processed", response.usage_info.pages_processed)
-                if hasattr(response, 'model'):
+                if hasattr(response, "model"):
                     span.set_attribute("gen_ai.response.model", response.model)
 
                 # Mark span as successful

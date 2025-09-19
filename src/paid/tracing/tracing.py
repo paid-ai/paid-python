@@ -18,28 +18,34 @@ log_level_name = os.environ.get("PAID_LOG_LEVEL")
 if log_level_name is not None:
     log_level = getattr(logging, log_level_name.upper())
 else:
-    log_level = 100 # Default to no logging
+    log_level = 100  # Default to no logging
 logger = logging.getLogger(__name__)
 logger.setLevel(log_level)
 if not logger.hasHandlers():
     handler = logging.StreamHandler()
     handler.setLevel(log_level)
-    formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+    formatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
 _token: Optional[str] = None
 # Context variables for passing data to nested spans (e.g., in openAiWrapper)
-paid_external_customer_id_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar("paid_external_customer_id", default=None)
-paid_external_agent_id_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar("paid_external_agent_id", default=None)
+paid_external_customer_id_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
+    "paid_external_customer_id", default=None
+)
+paid_external_agent_id_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
+    "paid_external_agent_id", default=None
+)
 paid_token_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar("paid_token", default=None)
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 def get_token() -> Optional[str]:
     """Get the stored API token."""
     global _token
     return _token
+
 
 def set_token(token: str) -> None:
     """Set the API token."""
@@ -62,7 +68,11 @@ def _initialize_tracing(api_key: str, collector_endpoint: str):
 
         # Set up tracer provider
         tracer_provider = trace.get_tracer_provider()
-        if not tracer_provider or tracer_provider.__class__.__name__ == 'NoOpTracerProvider' or tracer_provider.__class__.__name__ == 'ProxyTracerProvider':
+        if (
+            not tracer_provider
+            or tracer_provider.__class__.__name__ == "NoOpTracerProvider"
+            or tracer_provider.__class__.__name__ == "ProxyTracerProvider"
+        ):
             logger.info("No existing tracer provider found, creating a new one.")
             tracer_provider = TracerProvider()
             trace.set_tracer_provider(tracer_provider)
@@ -93,6 +103,7 @@ def _initialize_tracing(api_key: str, collector_endpoint: str):
 
         def create_chained_signal_handler(signum: int):
             current_handler = signal.getsignal(signum)
+
             def chained_handler(_signum, frame):
                 logger.warning(f"Received signal {_signum}, flushing traces")
                 flush_traces()
@@ -100,6 +111,7 @@ def _initialize_tracing(api_key: str, collector_endpoint: str):
                 signal.signal(_signum, current_handler)
                 # Re-raise the signal to let the original handler (or default) handle it
                 os.kill(os.getpid(), _signum)
+
             return chained_handler
 
         # This is already done by default OTEL shutdown,
@@ -114,6 +126,7 @@ def _initialize_tracing(api_key: str, collector_endpoint: str):
     except Exception:
         logger.exception("Failed to initialize Paid tracing")
         raise
+
 
 def _trace(
     external_customer_id: str,
@@ -143,6 +156,7 @@ def _trace(
         paid_external_customer_id_var.reset(reset_id_ctx_token)
         paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
         paid_token_var.reset(reset_token_ctx_token)
+
 
 def _trace_sync(
     external_customer_id: str,
