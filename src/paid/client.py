@@ -10,7 +10,14 @@ from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .customers.client import AsyncCustomersClient, CustomersClient
 from .environment import PaidEnvironment
 from .orders.client import AsyncOrdersClient, OrdersClient
-from .tracing import _initialize_tracing, _signal, _trace
+from .tracing import (
+    _generate_and_set_tracing_token,
+    _initialize_tracing,
+    _set_tracing_token,
+    _signal,
+    _trace,
+    _unset_tracing_token,
+)
 from .usage.client import AsyncUsageClient, UsageClient
 
 T = typing.TypeVar("T")
@@ -93,6 +100,49 @@ class Paid:
         """
         token = self._client_wrapper._get_token()
         _initialize_tracing(token, collector_endpoint=collector_endpoint)
+
+    def generate_and_set_tracing_token(self) -> int:
+        """
+        *Advanced feature*
+        In cases when you can't share the same Paid.trace() context with
+        code that you want to track together (complex concurrency logic,
+        or disjoint workflows, or work is separated between processes),
+        then you can manually generate a tracing token with generate_and_set_traceing_token()
+        and share it with the other parts of your application or service using set_tracing_token().
+
+        This function generates tracing token and attaches it to all consequent
+        Paid.trace() tracing contexts. So all the costs and signals that share this
+        tracing context are associated with each other.
+
+        To stop associating the traces one can either call
+        generate_and_set_tracing_token() once again or call unset_tracing_token().
+        The former is suitable if you still want to trace but in a fresh
+        context, and the latter will go back to unique traces per Paid.trace().
+        """
+        return _generate_and_set_tracing_token()
+
+    def set_tracing_token(self, token: int):
+        """
+        *Advanced feature*
+        In cases when you can't share the same Paid.trace() context with
+        code that you want to track together (complex concurrency logic,
+        or disjoint workflows, or work is separated between processes),
+        then you can manually generate a tracing token with generate_and_set_traceing_token()
+        and share it with the other parts of your application or service using set_tracing_token().
+
+        Sets tracing token. Provided token should come from generate_and_set_tracing_token().
+        Once set, the consequent traces will be related to each other.
+        """
+
+        _set_tracing_token(token)
+
+    def unset_tracing_token(self):
+        """
+        Unsets the token previously set by generate_and_set_tracing_token()
+        or by set_tracing_token(token). Does nothing if the token was never set.
+        When tracing token is unset, traces are unique for a single Paid.trace() context.
+        """
+        _unset_tracing_token()
 
     def capture(
         self,

@@ -8,12 +8,12 @@ import signal
 from typing import Awaitable, Callable, Dict, Optional, Tuple, TypeVar, Union
 
 from opentelemetry import trace
+from opentelemetry.context import Context
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-from opentelemetry.trace import Status, StatusCode
-
-# from opentelemetry.instrumentation.openai import OpenAIInstrumentor
+from opentelemetry.sdk.trace.id_generator import RandomIdGenerator
+from opentelemetry.trace import NonRecordingSpan, SpanContext, Status, StatusCode, TraceFlags
 
 # Configure logging
 log_level_name = os.environ.get("PAID_LOG_LEVEL")
@@ -30,7 +30,6 @@ if not logger.hasHandlers():
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-_token: Optional[str] = None
 # Context variables for passing data to nested spans (e.g., in openAiWrapper)
 paid_external_customer_id_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
     "paid_external_customer_id", default=None
@@ -38,9 +37,14 @@ paid_external_customer_id_var: contextvars.ContextVar[Optional[str]] = contextva
 paid_external_agent_id_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
     "paid_external_agent_id", default=None
 )
+# api_key storage
 paid_token_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar("paid_token", default=None)
+# trace id storage (generated from token)
+paid_trace_id: contextvars.ContextVar[Optional[int]] = contextvars.ContextVar("paid_trace_id", default=None)
 
 T = TypeVar("T")
+
+_token: Optional[str] = None
 
 
 def get_token() -> Optional[str]:
@@ -53,6 +57,9 @@ def set_token(token: str) -> None:
     """Set the API token."""
     global _token
     _token = token
+
+
+otel_id_generator = RandomIdGenerator()
 
 
 def _initialize_tracing(api_key: str, collector_endpoint: str):
@@ -149,11 +156,24 @@ def _trace(
     reset_id_ctx_token = paid_external_customer_id_var.set(external_customer_id)
     reset_agent_id_ctx_token = paid_external_agent_id_var.set(external_agent_id)
     reset_token_ctx_token = paid_token_var.set(token)
+
+    # If user set trace context manually
+    override_trace_id = paid_trace_id.get()
+    ctx: Optional[Context] = None
+    if override_trace_id is not None:
+        span_context = SpanContext(
+            trace_id=override_trace_id,
+            span_id=otel_id_generator.generate_span_id(),
+            is_remote=True,
+            trace_flags=TraceFlags(TraceFlags.SAMPLED),
+        )
+        ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
+
     try:
         if asyncio.iscoroutinefunction(fn):
-            return _trace_async(external_customer_id, fn, token, external_agent_id, args, kwargs)
+            return _trace_async(external_customer_id, fn, token, external_agent_id, ctx, args, kwargs)
         else:
-            return _trace_sync(external_customer_id, fn, token, external_agent_id, args, kwargs)
+            return _trace_sync(external_customer_id, fn, token, external_agent_id, ctx, args, kwargs)
     finally:
         paid_external_customer_id_var.reset(reset_id_ctx_token)
         paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
@@ -165,12 +185,13 @@ def _trace_sync(
     fn: Callable[..., T],
     token: str,
     external_agent_id: Optional[str] = None,
+    ctx: Optional[Context] = None,
     args: Tuple = (),
     kwargs: Dict = {},
 ) -> T:
     tracer = trace.get_tracer("paid.python")
     logger.info(f"Creating span for external_customer_id: {external_customer_id}")
-    with tracer.start_as_current_span(f"paid.python:{external_customer_id}") as span:
+    with tracer.start_as_current_span(f"paid.python:{external_customer_id}", context=ctx) as span:
         span.set_attribute("external_customer_id", external_customer_id)
         if external_agent_id:
             span.set_attribute("external_agent_id", external_agent_id)
@@ -190,12 +211,13 @@ async def _trace_async(
     fn: Callable[..., Awaitable[T]],
     token: str,
     external_agent_id: Optional[str] = None,
+    ctx: Optional[Context] = None,
     args: Tuple = (),
     kwargs: Dict = {},
 ) -> T:
     tracer = trace.get_tracer("paid.python")
     logger.info(f"Creating span for external_customer_id: {external_customer_id}")
-    with tracer.start_as_current_span(f"paid.python:{external_customer_id}") as span:
+    with tracer.start_as_current_span(f"paid.python:{external_customer_id}", context=ctx) as span:
         span.set_attribute("external_customer_id", external_customer_id)
         if external_agent_id:
             span.set_attribute("external_agent_id", external_agent_id)
@@ -208,3 +230,17 @@ async def _trace_async(
         except Exception as error:
             span.set_status(Status(StatusCode.ERROR, str(error)))
             raise
+
+
+def _generate_and_set_tracing_token() -> int:
+    random_trace_id = otel_id_generator.generate_trace_id()
+    _ = paid_trace_id.set(random_trace_id)
+    return random_trace_id
+
+
+def _set_tracing_token(token: int):
+    _ = paid_trace_id.set(token)
+
+
+def _unset_tracing_token():
+    _ = paid_trace_id.set(None)
