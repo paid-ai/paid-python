@@ -1,11 +1,11 @@
+import typing
+
+from ..tracing import logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
 from anthropic import Anthropic
+from anthropic.types import ModelParam
+from anthropic.types.message_param import MessageParam
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
-import typing
-from anthropic.types.message_param import MessageParam
-from anthropic.types import ModelParam
-from ..tracing import paid_external_customer_id_var, paid_token_var, paid_external_agent_id_var
-from ..tracing import logger
 
 
 class PaidAnthropic:

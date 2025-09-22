@@ -2,13 +2,11 @@ import time
 from typing import Any, Dict, List, Optional, Sequence
 from uuid import UUID
 
+from ..tracing import logger, paid_external_customer_id_var, paid_token_var
 from langchain_core.callbacks import BaseCallbackHandler  # type: ignore
 from langchain_core.outputs import LLMResult  # type: ignore
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
-
-from ..tracing import paid_external_customer_id_var, paid_token_var
-from ..tracing import logger
 
 
 class PaidLangChainCallback(BaseCallbackHandler):
