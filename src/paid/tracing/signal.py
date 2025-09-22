@@ -1,9 +1,9 @@
-import typing
 import json
+import typing
+
+from .tracing import logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
-from .tracing import paid_external_customer_id_var, paid_token_var, paid_external_agent_id_var
-from .tracing import logger
 
 
 def _signal(event_name: str, enable_cost_tracing: bool, data: typing.Optional[typing.Dict] = None):

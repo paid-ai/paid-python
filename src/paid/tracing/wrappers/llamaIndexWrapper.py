@@ -1,10 +1,10 @@
-from llama_index.llms.openai import OpenAI
+from typing import Any, Sequence, cast
+
+from ..tracing import logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
 from llama_index.core.llms import ChatMessage, ChatResponse
+from llama_index.llms.openai import OpenAI
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
-from typing import Any, Sequence, cast
-from ..tracing import paid_external_customer_id_var, paid_token_var, paid_external_agent_id_var
-from ..tracing import logger
 
 
 class PaidLlamaIndexOpenAI:

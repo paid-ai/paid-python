@@ -1,10 +1,10 @@
+from typing import Any, Dict, List, Optional, Union
+
+from ..tracing import logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
 from mistralai import Mistral, models
-from mistralai.types import OptionalNullable, UNSET
+from mistralai.types import UNSET, OptionalNullable
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
-from typing import Any, Dict, Union, List, Optional
-from ..tracing import paid_external_customer_id_var, paid_token_var, paid_external_agent_id_var
-from ..tracing import logger
 
 
 class PaidMistral:

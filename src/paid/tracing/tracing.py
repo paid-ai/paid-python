@@ -1,16 +1,18 @@
 # Initializing tracing for OTLP
 import asyncio
+import atexit
 import contextvars
 import logging
 import os
-import atexit
 import signal
-from typing import Optional, TypeVar, Callable, Union, Awaitable, Tuple, Dict
+from typing import Awaitable, Callable, Dict, Optional, Tuple, TypeVar, Union
+
 from opentelemetry import trace
-from opentelemetry.trace import Status, StatusCode
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.trace import Status, StatusCode
+
 # from opentelemetry.instrumentation.openai import OpenAIInstrumentor
 
 # Configure logging
