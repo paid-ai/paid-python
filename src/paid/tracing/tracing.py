@@ -137,7 +137,61 @@ def _initialize_tracing(api_key: str, collector_endpoint: str):
         raise
 
 
-def _trace(
+def _trace_sync(
+    external_customer_id: str,
+    fn: Callable[..., T],
+    external_agent_id: Optional[str] = None,
+    args: Optional[Tuple] = None,
+    kwargs: Optional[Dict] = None,
+) -> T:
+    args = args or ()
+    kwargs = kwargs or {}
+    token = get_token()
+    if not token:
+        raise RuntimeError(
+            "No token found - tracing is not initialized and will not be captured. Call Paid.initialize_tracing() first."
+        )
+
+    # Set context variables for access by nested spans
+    reset_id_ctx_token = paid_external_customer_id_var.set(external_customer_id)
+    reset_agent_id_ctx_token = paid_external_agent_id_var.set(external_agent_id)
+    reset_token_ctx_token = paid_token_var.set(token)
+
+    # If user set trace context manually
+    override_trace_id = paid_trace_id.get()
+    ctx: Optional[Context] = None
+    if override_trace_id is not None:
+        span_context = SpanContext(
+            trace_id=override_trace_id,
+            span_id=otel_id_generator.generate_span_id(),
+            is_remote=True,
+            trace_flags=TraceFlags(TraceFlags.SAMPLED),
+        )
+        ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
+
+    try:
+        tracer = trace.get_tracer("paid.python")
+        logger.info(f"Creating span for external_customer_id: {external_customer_id}")
+        with tracer.start_as_current_span(f"paid.python:{external_customer_id}", context=ctx) as span:
+            span.set_attribute("external_customer_id", external_customer_id)
+            if external_agent_id:
+                span.set_attribute("external_agent_id", external_agent_id)
+            span.set_attribute("token", token)
+            try:
+                result = fn(*args, **kwargs)
+                span.set_status(Status(StatusCode.OK))
+                logger.info(f"Function {fn.__name__} executed successfully")
+                return result
+            except Exception as error:
+                span.set_status(Status(StatusCode.ERROR, str(error)))
+                raise
+    finally:
+        paid_external_customer_id_var.reset(reset_id_ctx_token)
+        paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
+        paid_token_var.reset(reset_token_ctx_token)
+
+
+async def _trace_async(
     external_customer_id: str,
     fn: Callable[..., Union[T, Awaitable[T]]],
     external_agent_id: Optional[str] = None,
@@ -170,66 +224,28 @@ def _trace(
         ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
 
     try:
-        if asyncio.iscoroutinefunction(fn):
-            return _trace_async(external_customer_id, fn, token, external_agent_id, ctx, args, kwargs)
-        else:
-            return _trace_sync(external_customer_id, fn, token, external_agent_id, ctx, args, kwargs)
+        tracer = trace.get_tracer("paid.python")
+        logger.info(f"Creating span for external_customer_id: {external_customer_id}")
+        with tracer.start_as_current_span(f"paid.python:{external_customer_id}", context=ctx) as span:
+            span.set_attribute("external_customer_id", external_customer_id)
+            if external_agent_id:
+                span.set_attribute("external_agent_id", external_agent_id)
+            span.set_attribute("token", token)
+            try:
+                if asyncio.iscoroutinefunction(fn):
+                    result = await fn(*args, **kwargs)
+                else:
+                    result = fn(*args, **kwargs)
+                span.set_status(Status(StatusCode.OK))
+                logger.info(f"Async function {fn.__name__} executed successfully")
+                return result
+            except Exception as error:
+                span.set_status(Status(StatusCode.ERROR, str(error)))
+                raise
     finally:
         paid_external_customer_id_var.reset(reset_id_ctx_token)
         paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
         paid_token_var.reset(reset_token_ctx_token)
-
-
-def _trace_sync(
-    external_customer_id: str,
-    fn: Callable[..., T],
-    token: str,
-    external_agent_id: Optional[str] = None,
-    ctx: Optional[Context] = None,
-    args: Tuple = (),
-    kwargs: Dict = {},
-) -> T:
-    tracer = trace.get_tracer("paid.python")
-    logger.info(f"Creating span for external_customer_id: {external_customer_id}")
-    with tracer.start_as_current_span(f"paid.python:{external_customer_id}", context=ctx) as span:
-        span.set_attribute("external_customer_id", external_customer_id)
-        if external_agent_id:
-            span.set_attribute("external_agent_id", external_agent_id)
-        span.set_attribute("token", token)
-        try:
-            result = fn(*args, **kwargs)
-            span.set_status(Status(StatusCode.OK))
-            logger.info(f"Function {fn.__name__} executed successfully")
-            return result
-        except Exception as error:
-            span.set_status(Status(StatusCode.ERROR, str(error)))
-            raise
-
-
-async def _trace_async(
-    external_customer_id: str,
-    fn: Callable[..., Awaitable[T]],
-    token: str,
-    external_agent_id: Optional[str] = None,
-    ctx: Optional[Context] = None,
-    args: Tuple = (),
-    kwargs: Dict = {},
-) -> T:
-    tracer = trace.get_tracer("paid.python")
-    logger.info(f"Creating span for external_customer_id: {external_customer_id}")
-    with tracer.start_as_current_span(f"paid.python:{external_customer_id}", context=ctx) as span:
-        span.set_attribute("external_customer_id", external_customer_id)
-        if external_agent_id:
-            span.set_attribute("external_agent_id", external_agent_id)
-        span.set_attribute("token", token)
-        try:
-            result = await fn(*args, **kwargs)
-            span.set_status(Status(StatusCode.OK))
-            logger.info(f"Async function {fn.__name__} executed successfully")
-            return result
-        except Exception as error:
-            span.set_status(Status(StatusCode.ERROR, str(error)))
-            raise
 
 
 def _generate_and_set_tracing_token() -> int:
