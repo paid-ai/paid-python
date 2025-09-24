@@ -5,5 +5,14 @@ from .llamaIndexWrapper import PaidLlamaIndexOpenAI
 from .mistralWrapper import PaidMistral
 from .openAiWrapper import PaidOpenAI
 from .paidLangChainCallback import PaidLangChainCallback
+from .openaiAgentsWrapper import PaidRunner
 
-__all__ = ["PaidOpenAI", "PaidLangChainCallback", "PaidMistral", "PaidAnthropic", "PaidLlamaIndexOpenAI", "PaidGemini"]
+__all__ = [
+    "PaidOpenAI",
+    "PaidLangChainCallback",
+    "PaidMistral",
+    "PaidAnthropic",
+    "PaidLlamaIndexOpenAI",
+    "PaidGemini",
+    "PaidRunner",
+]
