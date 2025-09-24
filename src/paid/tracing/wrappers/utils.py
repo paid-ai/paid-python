@@ -1,7 +1,8 @@
-from typing import Optional
-from pathlib import Path
-import tempfile
 import os
+import tempfile
+from pathlib import Path
+from typing import Optional
+
 import mutagen
 
 

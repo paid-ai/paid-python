@@ -1,10 +1,10 @@
 from typing import Any
 
 from ..tracing import logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
-from openai import OpenAI, AsyncOpenAI
+from .utils import get_audio_duration
+from openai import AsyncOpenAI, OpenAI
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
-from .utils import get_audio_duration
 
 
 class PaidOpenAI:
