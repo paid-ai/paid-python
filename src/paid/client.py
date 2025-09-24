@@ -91,7 +91,7 @@ class Paid:
 
     def initialize_tracing(self, collector_endpoint: str = "https://collector.agentpaid.io:4318/v1/traces") -> None:
         """
-        Initializes tracing for the AsyncPaid client.
+        Initializes tracing for the Paid client.
         Call this method before using tracing features to ensure proper setup.
 
         Returns
@@ -299,7 +299,7 @@ class AsyncPaid:
         self.orders = AsyncOrdersClient(client_wrapper=self._client_wrapper)
         self.usage = AsyncUsageClient(client_wrapper=self._client_wrapper)
 
-    async def initialize_tracing(
+    def initialize_tracing(
         self, collector_endpoint: str = "https://collector.agentpaid.io:4318/v1/traces"
     ) -> None:
         """
