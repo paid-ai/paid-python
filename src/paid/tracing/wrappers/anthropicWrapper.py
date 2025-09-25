@@ -76,7 +76,7 @@ class MessagesWrapper:
                             response.usage.cache_creation_input_tokens
                         )
                     if hasattr(response.usage, "cache_read_input_tokens") and response.usage.cache_read_input_tokens:
-                        attributes["gen_ai.usage.cache_read_input_tokens"] = response.usage.cache_read_input_tokens
+                        attributes["gen_ai.usage.cached_input_tokens"] = response.usage.cache_read_input_tokens
 
                 span.set_attributes(attributes)
                 span.set_status(Status(StatusCode.OK))
