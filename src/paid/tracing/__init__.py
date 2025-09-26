@@ -7,6 +7,7 @@ from .tracing import (
     _trace_async,
     _trace_sync,
     _unset_tracing_token,
+    paid_tracing,
 )
 
 __all__ = [
@@ -17,4 +18,5 @@ __all__ = [
     "_generate_and_set_tracing_token",
     "_set_tracing_token",
     "_unset_tracing_token",
+    "paid_tracing",
 ]

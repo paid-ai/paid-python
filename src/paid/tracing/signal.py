@@ -14,7 +14,7 @@ def _signal(event_name: str, enable_cost_tracing: bool, data: typing.Optional[ty
     # Check if there's an active span (from capture())
     current_span = trace.get_current_span()
     if current_span == trace.INVALID_SPAN:
-        logger.error("Cannot send signal: you should call signal() within capture()")
+        logger.error("Cannot send signal: you should call signal() within tracing context")
         return
 
     external_customer_id = paid_external_customer_id_var.get()
@@ -22,7 +22,9 @@ def _signal(event_name: str, enable_cost_tracing: bool, data: typing.Optional[ty
     token = paid_token_var.get()
     if not (external_customer_id and external_agent_id and token):
         logger.error(
-            f"Missing some of: external_customer_id: {external_customer_id}, external_agent_id: {external_agent_id}, or token"
+            f"Missing some of: external_customer_id: {external_customer_id}, "
+            f"external_agent_id: {external_agent_id}, or token. "
+            f"You should call signal() within a tracing context"
         )
         return
 
