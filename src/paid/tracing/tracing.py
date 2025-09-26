@@ -2,6 +2,7 @@
 import asyncio
 import atexit
 import contextvars
+import functools
 import logging
 import os
 import signal
@@ -20,7 +21,7 @@ log_level_name = os.environ.get("PAID_LOG_LEVEL")
 if log_level_name is not None:
     log_level = getattr(logging, log_level_name.upper())
 else:
-    log_level = 100  # Default to no logging
+    log_level = logging.ERROR  # Default to show errors
 logger = logging.getLogger(__name__)
 logger.setLevel(log_level)
 if not logger.hasHandlers():
@@ -62,16 +63,30 @@ def set_token(token: str) -> None:
 otel_id_generator = RandomIdGenerator()
 
 
-def _initialize_tracing(api_key: str, collector_endpoint: str):
+def _initialize_tracing(
+    api_key: Optional[str] = None, collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces"
+):
     """
     Initialize OpenTelemetry with OTLP exporter for Paid backend.
 
     Args:
-        api_key: The API key for authentication
+        api_key: The API key for authentication. If not provided, will try to get from PAID_API_KEY environment variable.
+        collector_endpoint: The OTLP collector endpoint URL.
     """
     try:
         if _token is not None:
             raise RuntimeError("Tracing is already initialized.")
+
+        # Get API key from parameter or environment
+        if api_key is None:
+            import dotenv
+
+            dotenv.load_dotenv()
+            api_key = os.environ.get("PAID_API_KEY")
+            if api_key is None:
+                raise ValueError(
+                    "API key must be provided either as parameter or via PAID_API_KEY environment variable"
+                )
 
         set_token(api_key)
 
@@ -260,3 +275,102 @@ def _set_tracing_token(token: int):
 
 def _unset_tracing_token():
     _ = paid_trace_id.set(None)
+
+
+def paid_tracing(
+    external_customer_id: str,
+    external_agent_id: Optional[str] = None,
+    collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces",
+):
+    """
+    Decorator for tracing function execution with Paid.
+
+    This decorator automatically handles both synchronous and asynchronous functions,
+    providing the same functionality as client.trace() but in a more convenient form.
+
+    Parameters
+    ----------
+    external_customer_id : str
+        The external customer ID to associate with the trace.
+    external_agent_id : Optional[str], optional
+        The external agent ID to associate with the trace, by default None.
+    collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces",
+        Most likely unneded to pass in, but can change OTEL collector HTTP endpoint if needed.
+
+    Returns
+    -------
+    Callable
+        The decorated function with tracing capabilities.
+
+    Examples
+    --------
+    @paid_tracing(external_customer_id="customer123", external_agent_id="agent456")
+    def my_function(arg1, arg2):
+        return arg1 + arg2
+
+    @paid_tracing(external_customer_id="customer123")
+    async def my_async_function(arg1, arg2):
+        return arg1 + arg2
+
+    Notes
+    -----
+    If paid client and tracing are not already initialized, this decorator will automatically
+    initialize it using the PAID_API_KEY environment variable. If even then initialization fails,
+    the decorator will act as a noop.
+    """
+
+    def decorator(func: Callable) -> Callable:
+        if asyncio.iscoroutinefunction(func):
+
+            @functools.wraps(func)
+            async def async_wrapper(*args, **kwargs):
+                # Auto-initialize tracing if not done
+                if get_token() is None:
+                    try:
+                        _initialize_tracing(None, collector_endpoint)
+                    except Exception as e:
+                        logger.error(f"Failed to auto-initialize tracing: {e}")
+                        # Fall back to executing function without tracing
+                        return await func(*args, **kwargs)
+
+                try:
+                    return await _trace_async(
+                        external_customer_id=external_customer_id,
+                        fn=func,
+                        external_agent_id=external_agent_id,
+                        args=args,
+                        kwargs=kwargs,
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to trace async function {func.__name__}: {e}")
+                    raise e
+
+            return async_wrapper
+        else:
+
+            @functools.wraps(func)
+            def sync_wrapper(*args, **kwargs):
+                # Auto-initialize tracing if not done
+                if get_token() is None:
+                    try:
+                        _initialize_tracing(None, collector_endpoint)
+                    except Exception as e:
+                        logger.error(f"Failed to auto-initialize tracing: {e}")
+                        # Fall back to executing function without tracing
+                        return func(*args, **kwargs)
+
+                try:
+                    return _trace_sync(
+                        external_customer_id=external_customer_id,
+                        fn=func,
+                        external_agent_id=external_agent_id,
+                        args=args,
+                        kwargs=kwargs,
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to trace sync function {func.__name__}: {e}")
+                    raise e
+
+            return sync_wrapper
+
+    return decorator
