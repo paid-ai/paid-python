@@ -1,5 +1,6 @@
 # Tracing module for OpenTelemetry integration
-from .anthropicWrapper import PaidAnthropic
+from .anthropicWrapper import PaidAnthropic, PaidAsyncAnthropic
+from .bedrockWrapper import PaidBedrock
 from .geminiWrapper import PaidGemini
 from .llamaIndexWrapper import PaidLlamaIndexOpenAI
 from .mistralWrapper import PaidMistral
@@ -13,6 +14,8 @@ __all__ = [
     "PaidLangChainCallback",
     "PaidMistral",
     "PaidAnthropic",
+    "PaidAsyncAnthropic",
+    "PaidBedrock",
     "PaidLlamaIndexOpenAI",
     "PaidGemini",
     "PaidRunner",

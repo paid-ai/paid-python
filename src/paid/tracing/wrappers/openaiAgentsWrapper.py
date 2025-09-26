@@ -13,7 +13,9 @@ class PaidRunner:
         self.tracer = trace.get_tracer("paid.python")
         self.optional_tracing = optional_tracing
 
-    def run_sync(self, starting_agent: Agent[TContext], input: Union[str, list[TResponseInputItem]], **kwargs) -> RunResult:
+    def run_sync(
+        self, starting_agent: Agent[TContext], input: Union[str, list[TResponseInputItem]], **kwargs
+    ) -> RunResult:
         # Check if there's an active span (from capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
@@ -74,7 +76,9 @@ class PaidRunner:
                 span.record_exception(error)
                 raise error
 
-    async def run(self, starting_agent: Agent[TContext], input: Union[str, list[TResponseInputItem]], **kwargs) -> RunResult:
+    async def run(
+        self, starting_agent: Agent[TContext], input: Union[str, list[TResponseInputItem]], **kwargs
+    ) -> RunResult:
         # Check if there's an active span (from capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
