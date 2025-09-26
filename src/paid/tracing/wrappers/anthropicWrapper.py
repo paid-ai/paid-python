@@ -113,7 +113,9 @@ class AsyncMessagesWrapper:
         if current_span == trace.INVALID_SPAN:
             if self.optional_tracing:
                 logger.info(f"{self.__class__.__name__} No tracing, calling Anthropic directly.")
-                return await self.anthropic.messages.create(model=model, messages=messages, max_tokens=max_tokens, **kwargs)
+                return await self.anthropic.messages.create(
+                    model=model, messages=messages, max_tokens=max_tokens, **kwargs
+                )
             raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
 
         external_customer_id = paid_external_customer_id_var.get()
@@ -123,7 +125,9 @@ class AsyncMessagesWrapper:
         if not (external_customer_id and token):
             if self.optional_tracing:
                 logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling Anthropic directly")
-                return await self.anthropic.messages.create(model=model, messages=messages, max_tokens=max_tokens, **kwargs)
+                return await self.anthropic.messages.create(
+                    model=model, messages=messages, max_tokens=max_tokens, **kwargs
+                )
             raise RuntimeError(
                 "Missing required tracing information: external_customer_id or token."
                 " Make sure to call this method from Paid.trace()."
