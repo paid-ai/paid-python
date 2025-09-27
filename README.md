@@ -85,21 +85,69 @@ For example, to set the log level to debug, you can set the environment variable
 export PAID_LOG_LEVEL=DEBUG
 ```
 
-Falls back to no logging.
+Defaults to ERROR.
 
-## Cost Tracking
+## Cost Tracking via OTEL tracing
 
-It's possible to track usage costs by using Paid wrappers around you AI provider API.
-As of now, the following OpenAI python APIs are supported:
+### Simple Decorator Method
+
+The easiest way to add cost tracking is using the `@paid_tracing` decorator:
+
+```python
+from paid.tracing import paid_tracing
+
+@paid_tracing("<external_customer_id>", "<optional_external_agent_id>")  # add this line
+def some_agent_workflow():  # your function
+    # Your logic - use any AI providers with Paid wrappers or send signals with Paid.signal().
+    # This function is typically an event processor that should lead to AI calls or events emitted as Paid signals
+```
+
+- Initializes tracing using your API key you provided to the Paid client, falls back to `PAID_API_KEY` environment variable.
+- Handles both sync and async functions
+- Gracefully falls back to normal execution if tracing fails
+
+### Using the Paid wrappers
+
+You can track usage costs by using Paid wrappers around your AI provider's SDK.
+As of now, the following SDKs' APIs are wrapped:
 
 ```
-chat.completions.create()
-responses.create()
-images.generate()
-embeddings.create()
+openai
+openai-agents
+anthropic
+langchain (as a callback)
+llamaindex
+bedrock (boto3)
+mistral
+gemini (google-genai)
 ```
 
 Example usage:
+```python
+from openai import OpenAI
+from paid.tracing.wrappers import PaidOpenAI
+
+openAIClient = PaidOpenAI(OpenAI(
+    # This is the default and can be omitted
+    api_key="<OPENAI_API_KEY>",
+))
+
+@paid_tracing("your_external_customer_id", "your_external_agent_id")
+def image_generate():
+    response = openAIClient.images.generate(
+        model="dall-e-3",
+        prompt="A sunset over mountains",
+        size="1024x1024",
+        quality="hd",
+        style="vivid",
+        n=1
+    )
+    return response
+
+image_generate()
+```
+
+Alternatively, instead of the decorators you can use the paid.trace() function (more control by wrapping with a callback).
 
 ```python
 from openai import OpenAI
@@ -134,7 +182,7 @@ _ = client.trace(external_customer_id = "<your_external_customer_id>",
                 fn = lambda: image_generate())
 ```
 
-## Signaling within the traces.
+## Signaling via OTEL tracing
 
 A more reliable and user-friendly way to send signals is to send them from within the traces.
 This allows you to send signals with the same customer and agent IDs as the trace, with less arguments and boilerplate.
@@ -143,6 +191,24 @@ The interface is `Paid.signal()`, which takes in signal name and optional data.
 In contrast to `Paid.usage.record_bulk()`, `Paid.signal()` is using OpenTelemetry to provide reliable delivery.
 
 Here's an example of how to use it:
+```python
+from paid import Paid
+
+# Initialize Paid SDK
+client = Paid(token="PAID_API_KEY")
+
+@paid_tracing("your_external_customer_id", "your_external_agent_id")  # external_agent_id is necessary for sending signals
+def do_work():
+    # ...do some work...
+    client.signal(
+        event_name="<your_signal_name>",
+        data={ } # optional data (ex. manual cost tracking data)
+    )
+
+do_work()
+```
+
+Same, but using callback to specify the function to trace:
 ```python
 from paid import Paid
 
