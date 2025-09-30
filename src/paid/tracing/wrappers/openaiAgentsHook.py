@@ -73,13 +73,7 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
             )
         return False
 
-    async def on_llm_start(self, context, agent, system_prompt, input_items) -> None:
-        """Start a span for each individual LLM call and call user hooks."""
-        # Call user hook first
-        if self.user_hooks and hasattr(self.user_hooks, "on_llm_start"):
-            await self.user_hooks.on_llm_start(context, agent, system_prompt, input_items)
-
-        # Then handle Paid tracing
+    def _start_span(self, context, agent, hook_name) -> None:
         try:
             external_customer_id, external_agent_id, token = self._get_context_vars()
 
@@ -91,12 +85,13 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
             model_name = str(agent.model if agent.model else get_default_model())
 
             # Start span for this LLM call
-            span = self.tracer.start_span("trace.openai.agents")
+            span = self.tracer.start_span(f"trace.openai.agents.{hook_name}")
+            logger.debug(f"{hook_name} : started span")
 
             # Set initial attributes
             attributes = {
                 "gen_ai.system": "openai",
-                "gen_ai.operation.name": "agent_generation",
+                "gen_ai.operation.name": f"{hook_name}",
                 "external_customer_id": external_customer_id,
                 "token": token,
                 "gen_ai.request.model": model_name,
@@ -113,21 +108,18 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
                 # User is using context.context for something else, create a nested dict
                 context.context = {"_user_context": context.context}
 
-            context.context["_paid_span"] = span
+            context.context[f"_paid_{hook_name}_span"] = span
 
         except Exception as error:
-            logger.error(f"Error in PaidAgentsHook.on_llm_start: {error}")
+            logger.error(f"Error while starting span in PaidAgentsHook.{hook_name}: {error}")
 
-    async def on_llm_end(self, context, agent, response) -> None:
-        """End the span and capture usage data for this LLM call, then call user hooks."""
-        # Handle Paid tracing first
+    def _end_span(self, context, hook_name):
         try:
-            # Get the span we stored in on_llm_start
-            span = context.context.get("_paid_span") if hasattr(context, "context") else None
+            span = context.context.get(f"_paid_{hook_name}_span") if hasattr(context, "context") else None
             if span:
                 # Get usage data from the response
-                if hasattr(response, "usage") and response.usage:
-                    usage = response.usage
+                if hasattr(context, "usage") and context.usage:
+                    usage = context.usage
 
                     usage_attributes = {
                         "gen_ai.usage.input_tokens": usage.input_tokens,
@@ -150,12 +142,13 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
                     span.set_status(Status(StatusCode.ERROR, "No usage available"))
 
                 span.end()
+                logger.debug(f"{hook_name} : ended span")
 
         except Exception as error:
-            logger.error(f"Error in PaidAgentsHook.on_llm_end: {error}")
+            logger.error(f"Error while ending span in PaidAgentsHook.{hook_name}_end: {error}")
             # Try to end span on error
             try:
-                span = context.context.get("_paid_span") if hasattr(context, "context") else None
+                span = context.context.get(f"_paid_{hook_name}_span") if hasattr(context, "context") else None
                 if span:
                     span.set_status(Status(StatusCode.ERROR))
                     span.record_exception(error)
@@ -165,36 +158,56 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
         finally:
             if hasattr(context, "context") and isinstance(context.context, dict):
                 # Clean up span from context
-                if "_paid_span" in context.context:
-                    del context.context["_paid_span"]
+                if f"_paid_{hook_name}_span" in context.context:
+                    del context.context[f"_paid_{hook_name}_span"]
                 if "_user_context" in context.context:
                     context.context = context.context["_user_context"]
 
-        # Call user hook after tracing
+    async def on_llm_start(self, context, agent, system_prompt, input_items) -> None:
+        logger.debug(f"on_llm_start : context_usage : {getattr(context, 'usage', None)}")
+
+        if self.user_hooks and hasattr(self.user_hooks, "on_llm_start"):
+            await self.user_hooks.on_llm_start(context, agent, system_prompt, input_items)
+
+    async def on_llm_end(self, context, agent, response) -> None:
+        logger.debug(
+            f"on_llm_end : context_usage : {getattr(context, 'usage', None)} : response_usage : {getattr(response, 'usage', None)}"
+        )
+
         if self.user_hooks and hasattr(self.user_hooks, "on_llm_end"):
             await self.user_hooks.on_llm_end(context, agent, response)
 
     async def on_agent_start(self, context, agent) -> None:
-        """Call user hooks' on_agent_start methods."""
+        """Start a span for agent operations and call user hooks."""
+        logger.debug(f"on_agent_start : context_usage : {getattr(context, 'usage', None)}")
+
         if self.user_hooks and hasattr(self.user_hooks, "on_agent_start"):
             await self.user_hooks.on_agent_start(context, agent)
 
+        self._start_span(context, agent, "on_agent")
+
     async def on_agent_end(self, context, agent, output) -> None:
-        """Call user hooks' on_agent_end methods."""
+        """End the span for agent operations and call user hooks."""
+        logger.debug(f"on_agent_end : context_usage : {getattr(context, 'usage', None)}")
+
+        self._end_span(context, "on_agent")
+
         if self.user_hooks and hasattr(self.user_hooks, "on_agent_end"):
             await self.user_hooks.on_agent_end(context, agent, output)
 
     async def on_handoff(self, context, from_agent, to_agent) -> None:
-        """Call user hooks' on_handoff methods."""
+        logger.debug(f"on_handoff : context_usage : {getattr(context, 'usage', None)}")
         if self.user_hooks and hasattr(self.user_hooks, "on_handoff"):
             await self.user_hooks.on_handoff(context, from_agent, to_agent)
 
     async def on_tool_start(self, context, agent, tool) -> None:
-        """Call user hooks' on_tool_start methods."""
+        logger.debug(f"on_tool_start : context_usage : {getattr(context, 'usage', None)}")
+
         if self.user_hooks and hasattr(self.user_hooks, "on_tool_start"):
             await self.user_hooks.on_tool_start(context, agent, tool)
 
     async def on_tool_end(self, context, agent, tool, result) -> None:
-        """Call user hooks' on_tool_end methods."""
+        logger.debug(f"on_tool_end : context_usage : {getattr(context, 'usage', None)}")
+
         if self.user_hooks and hasattr(self.user_hooks, "on_tool_end"):
             await self.user_hooks.on_tool_end(context, agent, tool, result)
