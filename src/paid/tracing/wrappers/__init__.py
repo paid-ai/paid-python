@@ -4,8 +4,8 @@ from .bedrockWrapper import PaidBedrock
 from .geminiWrapper import PaidGemini
 from .llamaIndexWrapper import PaidLlamaIndexOpenAI
 from .mistralWrapper import PaidMistral
-from .openaiAgentsWrapper import PaidRunner
-from .openAiWrapper import PaidOpenAI, PaidAsyncOpenAI
+from .openaiAgentsHook import PaidOpenAIAgentsHook
+from .openAiWrapper import PaidAsyncOpenAI, PaidOpenAI
 from .paidLangChainCallback import PaidLangChainCallback
 
 __all__ = [
@@ -18,5 +18,5 @@ __all__ = [
     "PaidBedrock",
     "PaidLlamaIndexOpenAI",
     "PaidGemini",
-    "PaidRunner",
+    "PaidOpenAIAgentsHook",
 ]

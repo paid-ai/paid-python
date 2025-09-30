@@ -1,4 +1,4 @@
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 from ..tracing import logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
 from opentelemetry import trace
