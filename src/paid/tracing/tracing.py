@@ -62,6 +62,9 @@ def set_token(token: str) -> None:
 
 otel_id_generator = RandomIdGenerator()
 
+# Isolated tracer provider for Paid - separate from any user OTEL setup
+paid_tracer_provider: Optional[TracerProvider] = None
+
 
 def _initialize_tracing(
     api_key: Optional[str] = None, collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces"
@@ -73,6 +76,8 @@ def _initialize_tracing(
         api_key: The API key for authentication. If not provided, will try to get from PAID_API_KEY environment variable.
         collector_endpoint: The OTLP collector endpoint URL.
     """
+    global paid_tracer_provider
+
     try:
         if _token is not None:
             raise RuntimeError("Tracing is already initialized.")
@@ -90,20 +95,8 @@ def _initialize_tracing(
 
         set_token(api_key)
 
-        # Set up tracer provider
-        tracer_provider = trace.get_tracer_provider()
-        if (
-            not tracer_provider
-            or tracer_provider.__class__.__name__ == "NoOpTracerProvider"
-            or tracer_provider.__class__.__name__ == "ProxyTracerProvider"
-        ):
-            logger.info("No existing tracer provider found, creating a new one.")
-            tracer_provider = TracerProvider()
-            trace.set_tracer_provider(tracer_provider)
-
-        # Fix static type checkers that don't understand the above logic
-        if not isinstance(tracer_provider, TracerProvider):
-            raise RuntimeError("Failed to create a valid TracerProvider instance.")
+        # Create isolated tracer provider for Paid - don't use or modify global provider
+        paid_tracer_provider = TracerProvider()
 
         # Set up OTLP exporter
         otlp_exporter = OTLPSpanExporter(
@@ -115,12 +108,12 @@ def _initialize_tracing(
         # There are problems with BatchSpanProcessor in some environments - ex. Airflow.
         # Airflow terminates processes before the batch is sent, losing traces.
         span_processor = SimpleSpanProcessor(otlp_exporter)
-        tracer_provider.add_span_processor(span_processor)
+        paid_tracer_provider.add_span_processor(span_processor)
 
         # Terminate gracefully and don't lose traces
         def flush_traces():
             try:
-                if not tracer_provider.force_flush(10000):
+                if paid_tracer_provider is not None and not paid_tracer_provider.force_flush(10000):
                     logger.error("OTEL force flush : timeout reached")
             except Exception as e:
                 logger.error(f"Error flushing traces: {e}")
@@ -150,6 +143,21 @@ def _initialize_tracing(
     except Exception:
         logger.exception("Failed to initialize Paid tracing")
         raise
+
+
+def get_paid_tracer() -> trace.Tracer:
+    """
+    Get the tracer from the isolated Paid tracer provider.
+
+    Returns:
+        The Paid tracer instance.
+
+    Raises:
+        RuntimeError: If the tracer provider is not initialized.
+    """
+    if paid_tracer_provider is None:
+        raise RuntimeError("Paid tracer provider is not initialized. Call Paid.initialize_tracing() first.")
+    return paid_tracer_provider.get_tracer("paid.python")
 
 
 def _trace_sync(
@@ -185,7 +193,7 @@ def _trace_sync(
         ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
 
     try:
-        tracer = trace.get_tracer("paid.python")
+        tracer = get_paid_tracer()
         logger.info(f"Creating span for external_customer_id: {external_customer_id}")
         with tracer.start_as_current_span(f"paid.python:{external_customer_id}", context=ctx) as span:
             span.set_attribute("external_customer_id", external_customer_id)
@@ -239,7 +247,7 @@ async def _trace_async(
         ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
 
     try:
-        tracer = trace.get_tracer("paid.python")
+        tracer = get_paid_tracer()
         logger.info(f"Creating span for external_customer_id: {external_customer_id}")
         with tracer.start_as_current_span(f"paid.python:{external_customer_id}", context=ctx) as span:
             span.set_attribute("external_customer_id", external_customer_id)

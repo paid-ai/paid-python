@@ -7,6 +7,7 @@ https://github.com/paid-ai/sdk-wrapper-codegen
 from typing import Union
 
 from ..tracing import (
+    get_paid_tracer,
     logger,
     paid_external_agent_id_var,
     paid_external_customer_id_var,
@@ -23,7 +24,7 @@ class PaidGemini:
 
     def __init__(self, original_client: genai.Client, optional_tracing: bool = False):
         self._client = original_client
-        self.tracer = trace.get_tracer("paid.python")
+        self.tracer = get_paid_tracer()
         self.optional_tracing = optional_tracing
 
     @property

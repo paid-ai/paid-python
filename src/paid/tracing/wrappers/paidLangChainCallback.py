@@ -2,7 +2,7 @@ import time
 from typing import Any, Dict, List, Optional, Sequence
 from uuid import UUID
 
-from ..tracing import logger, paid_external_customer_id_var, paid_token_var
+from ..tracing import get_paid_tracer, logger, paid_external_customer_id_var, paid_token_var
 from langchain_core.callbacks import BaseCallbackHandler  # type: ignore
 from langchain_core.outputs import LLMResult  # type: ignore
 from opentelemetry import trace
@@ -36,7 +36,7 @@ class PaidLangChainCallback(BaseCallbackHandler):
     def __init__(self):
         """Initialize the callback handler."""
         super().__init__()
-        self.tracer = trace.get_tracer("paid.python")
+        self.tracer = get_paid_tracer()
         self._spans: Dict[str, Any] = {}  # Track active spans by run_id
         self._start_times: Dict[str, float] = {}  # Track start times
 
