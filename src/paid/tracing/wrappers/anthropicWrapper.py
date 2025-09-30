@@ -1,6 +1,6 @@
 import typing
 
-from ..tracing import logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
+from ..tracing import get_paid_tracer, logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
 from anthropic import Anthropic, AsyncAnthropic
 from anthropic.types import ModelParam
 from anthropic.types.message_param import MessageParam
@@ -11,7 +11,7 @@ from opentelemetry.trace import Status, StatusCode
 class PaidAnthropic:
     def __init__(self, anthropic_client: Anthropic, optional_tracing: bool = False):
         self.anthropic = anthropic_client
-        self.tracer = trace.get_tracer("paid.python")
+        self.tracer = get_paid_tracer()
         self.optional_tracing = optional_tracing
 
     @property
@@ -92,7 +92,7 @@ class MessagesWrapper:
 class PaidAsyncAnthropic:
     def __init__(self, anthropic_client: AsyncAnthropic, optional_tracing: bool = False):
         self.anthropic = anthropic_client
-        self.tracer = trace.get_tracer("paid.python")
+        self.tracer = get_paid_tracer()
         self.optional_tracing = optional_tracing
 
     @property

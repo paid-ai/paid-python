@@ -1,7 +1,7 @@
 import json
 import typing
 
-from .tracing import logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
+from .tracing import get_paid_tracer, logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
@@ -28,7 +28,7 @@ def _signal(event_name: str, enable_cost_tracing: bool, data: typing.Optional[ty
         )
         return
 
-    tracer = trace.get_tracer("paid.python")
+    tracer = get_paid_tracer()
     with tracer.start_as_current_span("trace.signal") as span:
         attributes: typing.Dict[str, typing.Union[str, bool, int, float]] = {
             "external_customer_id": external_customer_id,

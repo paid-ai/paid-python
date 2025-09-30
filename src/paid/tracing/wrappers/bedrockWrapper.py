@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from ..tracing import logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
+from ..tracing import get_paid_tracer, logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
@@ -8,7 +8,7 @@ from opentelemetry.trace import Status, StatusCode
 class PaidBedrock:
     def __init__(self, bedrock_client: Any, optional_tracing: bool = False):
         self.bedrock_client = bedrock_client
-        self.tracer = trace.get_tracer("paid.python")
+        self.tracer = get_paid_tracer()
         self.optional_tracing = optional_tracing
 
     def converse(self, *, modelId: str, messages: List[Dict[str, Any]], **kwargs) -> Dict[str, Any]:

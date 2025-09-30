@@ -1,6 +1,6 @@
 from typing import Any, Optional
 
-from ..tracing import logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
+from ..tracing import get_paid_tracer, logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
 from agents import RunHooks
 from agents.models import get_default_model
 from opentelemetry import trace
@@ -42,7 +42,7 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
             hook = PaidAgentsHook(optional_tracing=True)
         """
         super().__init__()
-        self.tracer = trace.get_tracer("paid.python")
+        self.tracer = get_paid_tracer()
         self.optional_tracing = optional_tracing
         self.user_hooks = user_hooks
 

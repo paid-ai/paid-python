@@ -1,6 +1,6 @@
 from typing import Any
 
-from ..tracing import logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
+from ..tracing import get_paid_tracer, logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
 from .utils import get_audio_duration
 from openai import AsyncOpenAI, OpenAI
 from opentelemetry import trace
@@ -10,7 +10,7 @@ from opentelemetry.trace import Status, StatusCode
 class PaidOpenAI:
     def __init__(self, openai_client: OpenAI, optional_tracing: bool = False):
         self.openai = openai_client
-        self.tracer = trace.get_tracer("paid.python")
+        self.tracer = get_paid_tracer()
         self.optional_tracing = optional_tracing
 
     @property
@@ -442,7 +442,7 @@ class AudioTranscriptionsWrapper:
 class PaidAsyncOpenAI:
     def __init__(self, openai_client: AsyncOpenAI, optional_tracing: bool = False):
         self.openai = openai_client
-        self.tracer = trace.get_tracer("paid.python")
+        self.tracer = get_paid_tracer()
         self.optional_tracing = optional_tracing
 
     @property
