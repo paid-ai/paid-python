@@ -51,12 +51,21 @@ class PaidLangChainCallback(BaseCallbackHandler):
         # Check if there's an active span (from capture())
         current_span = trace.get_current_span()
         if current_span == trace.INVALID_SPAN:
-            logger.warning("No active span found - LangChain operations will not be traced")
+            logger.info(f"{self.__class__.__name__} No active span found - LangChain operations will not be traced")
             return None
 
         # Get context variables
         external_customer_id = paid_external_customer_id_var.get()
         token = paid_token_var.get()
+
+        # Check if required context is available
+        if not (external_customer_id and token):
+            logger.info(
+                f"{self.__class__.__name__} Missing required tracing information "
+                f"(external_customer_id={bool(external_customer_id)}, token={bool(token)}) - "
+                f"LangChain operation '{span_name}' will not be traced"
+            )
+            return None
 
         # Create child span
         span = self.tracer.start_span(span_name)
@@ -80,6 +89,8 @@ class PaidLangChainCallback(BaseCallbackHandler):
         self._spans[str(run_id)] = span
         self._start_times[str(run_id)] = time.time()
 
+        logger.info(f"{self.__class__.__name__} Started span '{span_name}' for run_id={run_id}")
+
         return span
 
     def _end_span(self, run_id: UUID, error: Optional[BaseException] = None, **attributes):
@@ -88,6 +99,7 @@ class PaidLangChainCallback(BaseCallbackHandler):
         span = self._spans.get(span_key)
 
         if not span:
+            logger.info(f"{self.__class__.__name__} No span found for run_id={run_id} - span was not created or already ended")
             return
 
         try:
@@ -104,8 +116,10 @@ class PaidLangChainCallback(BaseCallbackHandler):
             if error:
                 span.set_status(Status(StatusCode.ERROR, str(error)))
                 span.record_exception(error)
+                logger.info(f"{self.__class__.__name__} Ended span with error for run_id={run_id}: {error}")
             else:
                 span.set_status(Status(StatusCode.OK))
+                logger.info(f"{self.__class__.__name__} Successfully ended span for run_id={run_id}")
 
         finally:
             span.end()
@@ -125,13 +139,12 @@ class PaidLangChainCallback(BaseCallbackHandler):
     ) -> Any:
         """Called when LLM starts running."""
         if not metadata:
-            logger.warning("No metadata provided for LLM start")
+            logger.info(f"{self.__class__.__name__} No metadata provided for LLM start (run_id={run_id})")
             return None
 
         model_type = metadata.get("ls_model_type", "unknown")
         model_name = metadata.get("ls_model_name", "unknown")
-        logger.info(f"LLM start: {metadata}")
-        logger.info(f"model_name: {model_name}")
+        logger.info(f"{self.__class__.__name__} LLM start - model_type={model_type}, model_name={model_name}, run_id={run_id}")
         span_name = self._get_span_name(f"trace.{model_type}", model_name)
 
         attributes = {
