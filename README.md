@@ -113,9 +113,9 @@ As of now, the following SDKs' APIs are wrapped:
 
 ```
 openai
-openai-agents
+openai-agents (as a hook)
 anthropic
-langchain (as a callback)
+langchain (as a hook)
 llamaindex
 bedrock (boto3)
 mistral
@@ -125,6 +125,7 @@ gemini (google-genai)
 Example usage:
 ```python
 from openai import OpenAI
+from paid.tracing import paid_tracing
 from paid.tracing.wrappers import PaidOpenAI
 
 openAIClient = PaidOpenAI(OpenAI(
@@ -162,7 +163,7 @@ openAIClient = PaidOpenAI(OpenAI(
     api_key="<OPENAI_API_KEY>",
 ))
 
-# Initialize tracing, must be after initializeing Paid SKD
+# Initialize tracing, must be after initializing Paid SDK
 client.initialize_tracing()
 
 def image_generate():
@@ -177,22 +178,24 @@ def image_generate():
     return response
 
 # Finally, capture the traces!
-_ = client.trace(external_customer_id = "<your_external_customer_id>",
+# Returns whatever is returned by `fn` callback
+client.trace(external_customer_id = "<your_external_customer_id>",
                 external_agent_id = "<your_external_agent_id>",  # can optionally include external_agent_id to enable agent-level cost tracking
                 fn = lambda: image_generate())
 ```
 
 ## Signaling via OTEL tracing
 
-A more reliable and user-friendly way to send signals is to send them from within the traces.
-This allows you to send signals with the same customer and agent IDs as the trace, with less arguments and boilerplate.
-The interface is `Paid.signal()`, which takes in signal name and optional data.
+A more reliable and user-friendly way to send signals is to send them via OTEL tracing.
+This allows you to send signals with less arguments and boilerplate as the information is available in the tracing context `Paid.trace()` or `@paid_tracing()`.
+The interface is `Paid.signal()`, which takes in signal name, optional data, and a flag that attaches costs from the same trace.
 `Paid.signal()` has to be called within a trace - meaning inside of a callback to `Paid.trace()`.
 In contrast to `Paid.usage.record_bulk()`, `Paid.signal()` is using OpenTelemetry to provide reliable delivery.
 
 Here's an example of how to use it:
 ```python
 from paid import Paid
+from paid.tracing import paid_tracing
 
 # Initialize Paid SDK
 client = Paid(token="PAID_API_KEY")
@@ -226,15 +229,82 @@ def do_work():
     )
 
 # Finally, capture the traces!
-_ = client.trace(external_customer_id = "<your_external_customer_id>",
+client.trace(external_customer_id = "<your_external_customer_id>",
                 external_agent_id = "<your_external_agent_id>",  # external_agent_id is required for signals
                 fn = lambda: do_work())
 ```
 
+### Signal-costs - Attaching cost traces to a signal
+
+If you want a signal to carry information about costs,
+then the signal should be sent from the same tracing context
+as the wrappers and hooks that recorded those costs.
+
+This will look something like this:
+
+```python
+from paid import Paid
+from paid.tracing import paid_tracing
+
+# Initialize Paid SDK
+client = Paid(token="PAID_API_KEY")
+
+@paid_tracing("your_external_customer_id", "your_external_agent_id")  # external_agent_id is necessary for sending signals
+def do_work():
+    # ... your workflow logic
+    # ... your AI calls made through Paid wrappers or hooks
+    client.signal(
+        event_name="<your_signal_name>",
+        data={ }, # optional data (ex. manual cost tracking data)
+        enable_cost_tracing=True, # set this flag to associate it with costs
+    )
+    # ... your workflow logic
+    # ... your AI calls made through Paid wrappers or hooks (can be sent after the signal too)
+
+do_work()
+```
+
+Then, all of the costs traced in @paid_tracing() context are related to that signal.
+
+### Signal-costs - Distributed tracing
+
+Sometimes your agent workflow cannot fit into a single traceable function like above,
+because it has to be disjoint for whatever reason. It could even be running across different machines.
+
+For such case, there's a grain-level way to control tracing context.
+These 3 functions allow to generate, set, and unset tracing token (internally - OTEL traceId)
+
+```python
+def generate_and_set_tracing_token(self) -> int:
+    """
+    This function returns tracing token and attaches it to all consequent
+    Paid.trace() or @paid_tracing tracing contexts. So all the costs and signals that share this
+    tracing context are associated with each other.
+
+    To stop associating the traces one can either call
+    generate_and_set_tracing_token() once again or call unset_tracing_token().
+    The former is suitable if you still want to trace but in a fresh
+    context, and the latter will go back to unique traces per Paid.trace().
+    """
+
+def set_tracing_token(self, token: int):
+    """
+    Sets tracing token. Provided token should come from generate_and_set_tracing_token().
+    Once set, the consequent traces Paid.trace() or @paid_tracing() will be related to each other.
+    """
+
+def unset_tracing_token(self):
+    """
+    Unsets the token previously set by generate_and_set_tracing_token()
+    or by set_tracing_token(token). Does nothing if the token was never set.
+    """
+```
+
+
 ## Manual Cost Tracking
 
-Manual cost tracking allow to insert your own costs to the usage data and
-cost traces will be created based on that info.
+If you would prefer to not use Paid to track your costs automatically but you want to send us the costs yourself,
+then you can use manual cost tracking mechanism. Just attach the cost information in the following format to a signal payload:
 
 ```python
 from paid import Paid, Signal
@@ -247,7 +317,7 @@ signal = Signal(
     customer_id="<your_external_customer_id>",
     data = {
         "costData": {
-            "vendor": "<any_vendor_name>", # can be anything
+            "vendor": "<any_vendor_name>", # can be anything, traces are grouped by vendors in the UI
             "cost": {
                 "amount": 0.002,
                 "currency": "USD"
@@ -257,7 +327,172 @@ signal = Signal(
     }
 )
 
-_ = client.usage.record_bulk(signals=[signal])
+client.usage.record_bulk(signals=[signal])
+```
+
+Alternatively the same `costData` payload can be passed to OTLP signaling mechanism:
+
+```python
+from paid import Paid
+from paid.tracing import paid_tracing
+
+# Initialize Paid SDK
+client = Paid(token="PAID_API_KEY")
+
+@paid_tracing("your_external_customer_id", "your_external_agent_id")  # external_agent_id is required for sending signals
+def do_work():
+    # ...do some work...
+    client.signal(
+        event_name="<your_signal_name>",
+        data={
+            "costData": {
+                "vendor": "<any_vendor_name>", # can be anything, traces are grouped by vendors in the UI
+                "cost": {
+                    "amount": 0.002,
+                    "currency": "USD"
+                },
+                "gen_ai.response.model": "<ai_model_name>",
+            }
+        }
+    )
+
+do_work()
+```
+
+### Manual Usage Tracking
+
+If you would prefer to send us raw usage manually (without wrappers) and have us compute the cost, you can attach usage data in the following format:
+
+```python
+from paid import Paid, Signal
+
+client = Paid(token="<PAID_API_KEY>")
+
+signal = Signal(
+    event_name="<your_signal_name>",
+    agent_id="<your_agent_id>",
+    customer_id="<your_external_customer_id>",
+    data = {
+        "costData": {
+            "vendor": "<any_vendor_name>", # can be anything, traces are grouped by vendors in the UI
+            "attributes": {
+                "gen_ai.response.model": "gpt-4.1-mini",
+                "gen_ai.usage.input_tokens": 100,
+                "gen_ai.usage.output_tokens": 300,
+                "gen_ai.usage.cached_input_tokens": 600,
+            },
+        }
+    }
+)
+
+client.usage.record_bulk(signals=[signal])
+```
+
+Same but via OTEL signaling:
+
+```python
+from paid import Paid
+from paid.tracing import paid_tracing
+
+# Initialize Paid SDK
+client = Paid(token="PAID_API_KEY")
+
+@paid_tracing("your_external_customer_id", "your_external_agent_id")  # external_agent_id is required for sending signals
+def do_work():
+    # ...do some work...
+    client.signal(
+        event_name="<your_signal_name>",
+        data={
+            "costData": {
+                "vendor": "<any_vendor_name>", # can be anything, traces are grouped by vendors in the UI
+                "attributes": {
+                    "gen_ai.response.model": "gpt-4.1-mini",
+                    "gen_ai.usage.input_tokens": 100,
+                    "gen_ai.usage.output_tokens": 300,
+                    "gen_ai.usage.cached_input_tokens": 600,
+                },
+            }
+        }
+    )
+
+do_work()
+```
+
+## Async Support
+
+All of the functionality from above is available in async flavor too.
+
+### Async Client
+
+Use `AsyncPaid` instead of `Paid` for async operations:
+
+```python
+from paid import AsyncPaid
+
+client = AsyncPaid(token="API_KEY")
+
+# Async API calls
+customer = await client.customers.create(name="John Doe")
+```
+
+### Async Cost Tracking with Decorator
+
+The `@paid_tracing` decorator automatically handles both sync and async functions:
+
+```python
+from openai import AsyncOpenAI
+from paid.tracing import paid_tracing
+from paid.tracing.wrappers import PaidAsyncOpenAI
+
+# Wrap the async OpenAI client
+openai_client = PaidAsyncOpenAI(AsyncOpenAI(api_key="<OPENAI_API_KEY>"))
+
+@paid_tracing("your_external_customer_id", "your_external_agent_id")
+async def generate_image():
+    response = await openai_client.images.generate(
+        model="dall-e-3",
+        prompt="A sunset over mountains",
+        size="1024x1024",
+        quality="hd",
+        n=1
+    )
+    return response
+
+# Call the async function
+await generate_image()
+```
+
+### Async Signaling
+
+The `signal()` method works seamlessly in async contexts:
+
+```python
+from paid import AsyncPaid
+from paid.tracing import paid_tracing
+from paid.tracing.wrappers import PaidAsyncOpenAI
+from openai import AsyncOpenAI
+
+client = AsyncPaid(token="PAID_API_KEY")
+openai_client = PaidAsyncOpenAI(AsyncOpenAI(api_key="<OPENAI_API_KEY>"))
+
+@paid_tracing("your_external_customer_id", "your_external_agent_id")
+async def do_work():
+    # Perform async AI operations
+    response = await openai_client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+
+    # Send signal (synchronous call within async function)
+    client.signal(
+        event_name="<your_signal_name>",
+        enable_cost_tracing=True  # Associate with traced costs
+    )
+
+    return response
+
+# Execute
+await do_work()
 ```
 
 ## Contributing
