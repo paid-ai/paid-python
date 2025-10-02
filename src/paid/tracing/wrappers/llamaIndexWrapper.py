@@ -1,10 +1,18 @@
 from typing import Any, Sequence, cast
 
 from ..tracing import get_paid_tracer, logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
-from llama_index.core.llms import ChatMessage, ChatResponse
-from llama_index.llms.openai import OpenAI
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
+
+try:
+    from llama_index.core.llms import ChatMessage, ChatResponse
+    from llama_index.llms.openai import OpenAI
+except ImportError:
+    raise ImportError(
+        "llama-index-core and llama-index-llms-openai packages are peer-dependencies. "
+        "To use the Paid wrapper around llama-index you're assumed to already have "
+        "llama-index-core and llama-index-llms-openai packages installed."
+    )
 
 
 class PaidLlamaIndexOpenAI:

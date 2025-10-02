@@ -1,10 +1,17 @@
 from typing import Any, Optional
 
 from ..tracing import get_paid_tracer, logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
-from agents import RunHooks
-from agents.models import get_default_model
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
+
+try:
+    from agents import RunHooks
+    from agents.models import get_default_model
+except ImportError:
+    raise ImportError(
+        "openai-agents package is a peer-dependency. To use the Paid wrapper around openai-agents "
+        "you're assumed to already have openai-agents package installed."
+    )
 
 
 class PaidOpenAIAgentsHook(RunHooks[Any]):

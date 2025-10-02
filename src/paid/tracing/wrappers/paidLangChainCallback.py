@@ -3,10 +3,17 @@ from typing import Any, Dict, List, Optional, Sequence
 from uuid import UUID
 
 from ..tracing import get_paid_tracer, logger, paid_external_customer_id_var, paid_token_var
-from langchain_core.callbacks import BaseCallbackHandler  # type: ignore
-from langchain_core.outputs import LLMResult  # type: ignore
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
+
+try:
+    from langchain_core.callbacks import BaseCallbackHandler  # type: ignore
+    from langchain_core.outputs import LLMResult  # type: ignore
+except ImportError:
+    raise ImportError(
+        "langchain-core package is a peer-dependency. To use the Paid wrapper around langchain "
+        "you're assumed to already have langchain-core package installed."
+    )
 
 
 class PaidLangChainCallback(BaseCallbackHandler):
@@ -99,7 +106,9 @@ class PaidLangChainCallback(BaseCallbackHandler):
         span = self._spans.get(span_key)
 
         if not span:
-            logger.info(f"{self.__class__.__name__} No span found for run_id={run_id} - span was not created or already ended")
+            logger.info(
+                f"{self.__class__.__name__} No span found for run_id={run_id} - span was not created or already ended"
+            )
             return
 
         try:
@@ -144,7 +153,9 @@ class PaidLangChainCallback(BaseCallbackHandler):
 
         model_type = metadata.get("ls_model_type", "unknown")
         model_name = metadata.get("ls_model_name", "unknown")
-        logger.info(f"{self.__class__.__name__} LLM start - model_type={model_type}, model_name={model_name}, run_id={run_id}")
+        logger.info(
+            f"{self.__class__.__name__} LLM start - model_type={model_type}, model_name={model_name}, run_id={run_id}"
+        )
         span_name = self._get_span_name(f"trace.{model_type}", model_name)
 
         attributes = {

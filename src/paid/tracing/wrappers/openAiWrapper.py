@@ -2,9 +2,16 @@ from typing import Any
 
 from ..tracing import get_paid_tracer, logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
 from .utils import get_audio_duration
-from openai import AsyncOpenAI, OpenAI
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
+
+try:
+    from openai import AsyncOpenAI, OpenAI
+except ImportError:
+    raise ImportError(
+        "openai package is a peer-dependency. To use the Paid wrapper around openai "
+        "you're assumed to already have openai package installed."
+    )
 
 
 class PaidOpenAI:
