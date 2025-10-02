@@ -50,7 +50,7 @@ llama-index-llms-openai = ">=0.5.0"
 google-genai = ">=1.19.0"
 mutagen = ">=1.47.0"
 openai-agents = ">=0.2.0"
-python-dotenv = ">=1.0.0"
+python-dotenv = ">=0.15.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "==1.13.0"
