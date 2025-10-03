@@ -1,8 +1,15 @@
 from typing import Any, Sequence, cast
 
-from ..tracing import get_paid_tracer, logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
+
+from paid.tracing.tracing import (
+    get_paid_tracer,
+    logger,
+    paid_external_agent_id_var,
+    paid_external_customer_id_var,
+    paid_token_var,
+)
 
 try:
     from llama_index.core.llms import ChatMessage, ChatResponse

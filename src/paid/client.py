@@ -9,16 +9,16 @@ from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .customers.client import AsyncCustomersClient, CustomersClient
 from .environment import PaidEnvironment
 from .orders.client import AsyncOrdersClient, OrdersClient
+from .tracing.signal import _signal
 from .tracing.tracing import (
+    _initialize_tracing,
+    _trace_async,
+    _trace_sync,
     generate_and_set_tracing_token,
     generate_tracing_token,
     set_tracing_token,
     unset_tracing_token,
-    _initialize_tracing,
-    _trace_sync,
-    _trace_async
 )
-from .tracing.signal import _signal
 from .usage.client import AsyncUsageClient, UsageClient
 
 T = typing.TypeVar("T")

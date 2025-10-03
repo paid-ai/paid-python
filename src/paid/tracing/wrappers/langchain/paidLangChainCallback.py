@@ -2,9 +2,10 @@ import time
 from typing import Any, Dict, List, Optional, Sequence
 from uuid import UUID
 
-from ..tracing import get_paid_tracer, logger, paid_external_customer_id_var, paid_token_var
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
+
+from paid.tracing.tracing import get_paid_tracer, logger, paid_external_customer_id_var, paid_token_var
 
 try:
     from langchain_core.callbacks import BaseCallbackHandler  # type: ignore
