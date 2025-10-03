@@ -9,15 +9,16 @@ from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .customers.client import AsyncCustomersClient, CustomersClient
 from .environment import PaidEnvironment
 from .orders.client import AsyncOrdersClient, OrdersClient
-from .tracing import (
+from .tracing.tracing import (
     generate_and_set_tracing_token,
-    _initialize_tracing,
+    generate_tracing_token,
     set_tracing_token,
-    _signal,
-    _trace_async,
-    _trace_sync,
     unset_tracing_token,
+    _initialize_tracing,
+    _trace_sync,
+    _trace_async
 )
+from .tracing.signal import _signal
 from .usage.client import AsyncUsageClient, UsageClient
 
 T = typing.TypeVar("T")
@@ -100,6 +101,14 @@ class Paid:
         """
         token = self._client_wrapper._get_token()
         _initialize_tracing(token, collector_endpoint=collector_endpoint)
+
+    def generate_tracing_token(self) -> int:
+        """
+        This will generate and return a tracing token but it will not set it
+        for the tracing context. Needed when you only want to store or send a tracing token
+        somewhere else.
+        """
+        return generate_tracing_token()
 
     def generate_and_set_tracing_token(self) -> int:
         """
@@ -310,6 +319,14 @@ class AsyncPaid:
         """
         token = self._client_wrapper._get_token()
         _initialize_tracing(token, collector_endpoint=collector_endpoint)
+
+    def generate_tracing_token(self) -> int:
+        """
+        This will generate and return a tracing token but it will not set it
+        for the tracing context. Needed when you only want to store or send a tracing token
+        somewhere else.
+        """
+        return generate_tracing_token()
 
     def generate_and_set_tracing_token(self) -> int:
         """

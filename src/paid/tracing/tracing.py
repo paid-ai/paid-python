@@ -271,6 +271,15 @@ async def _trace_async(
         paid_token_var.reset(reset_token_ctx_token)
 
 
+def generate_tracing_token() -> int:
+    """
+    This will generate and return a tracing token but it will not set it
+    for the tracing context. Needed when you only want to store or send a tracing token
+    somewhere else.
+    """
+    return otel_id_generator.generate_trace_id()
+
+
 def generate_and_set_tracing_token() -> int:
     """
     *Advanced feature*
