@@ -13,10 +13,17 @@ from ..tracing import (
     paid_external_customer_id_var,
     paid_token_var,
 )
-from google import genai
-from google.genai.types import GenerateContentResponse
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
+
+try:
+    from google import genai
+    from google.genai.types import GenerateContentResponse
+except ImportError:
+    raise ImportError(
+        "google-genai package is a peer-dependency. To use the Paid wrapper around google-genai "
+        "you're assumed to already have google-genai package installed."
+    )
 
 
 class PaidGemini:

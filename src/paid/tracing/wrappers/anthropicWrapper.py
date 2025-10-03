@@ -1,11 +1,18 @@
 import typing
 
 from ..tracing import get_paid_tracer, logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
-from anthropic import Anthropic, AsyncAnthropic
-from anthropic.types import ModelParam
-from anthropic.types.message_param import MessageParam
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
+
+try:
+    from anthropic import Anthropic, AsyncAnthropic
+    from anthropic.types import ModelParam
+    from anthropic.types.message_param import MessageParam
+except ImportError:
+    raise ImportError(
+        "anthropic package is a peer-dependency. To use the Paid wrapper around anthropic "
+        "you're assumed to already have anthropic package installed."
+    )
 
 
 class PaidAnthropic:

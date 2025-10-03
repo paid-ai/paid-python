@@ -1,10 +1,17 @@
 from typing import Any, Dict, List, Optional, Union
 
 from ..tracing import get_paid_tracer, logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
-from mistralai import Mistral, models
-from mistralai.types import UNSET, OptionalNullable
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
+
+try:
+    from mistralai import Mistral, models
+    from mistralai.types import UNSET, OptionalNullable
+except ImportError:
+    raise ImportError(
+        "mistralai package is a peer-dependency. To use the Paid wrapper around mistralai "
+        "you're assumed to already have mistralai package installed."
+    )
 
 
 class PaidMistral:

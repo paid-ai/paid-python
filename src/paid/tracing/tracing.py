@@ -271,17 +271,99 @@ async def _trace_async(
         paid_token_var.reset(reset_token_ctx_token)
 
 
-def _generate_and_set_tracing_token() -> int:
+def generate_tracing_token() -> int:
+    """
+    This will generate and return a tracing token but it will not set it
+    for the tracing context. Needed when you only want to store or send a tracing token
+    somewhere else.
+    """
+    return otel_id_generator.generate_trace_id()
+
+
+def generate_and_set_tracing_token() -> int:
+    """
+    *Advanced feature*
+    In cases when you can't share the same Paid.trace() or @paid_tracing() context with
+    code that you want to track together (complex concurrency logic,
+    or disjoint workflows, or work is separated between processes),
+    then you can manually generate a tracing token with generate_and_set_tracing_token()
+    and share it with the other parts of your application or service using set_tracing_token().
+
+    This function returns tracing token and attaches it to all consequent
+    Paid.trace() or @paid_tracing() tracing contexts. So all the costs and signals that share this
+    tracing context are associated with each other.
+
+    To stop associating the traces one can either call
+    generate_and_set_tracing_token() once again or call unset_tracing_token().
+    The former is suitable if you still want to trace but in a fresh
+    context, and the latter will go back to unique traces per Paid.trace() or @paid_tracing().
+
+    Returns:
+        int: The tracing token (OpenTelemetry trace ID)
+
+    Example:
+        >>> from paid.tracing import generate_and_set_tracing_token, set_tracing_token, unset_tracing_token
+        >>> # Process 1: Generate token
+        >>> token = generate_and_set_tracing_token()
+        >>> save_to_redis("workflow_123", token)
+        >>>
+        >>> # Process 2: Use token
+        >>> token = load_from_redis("workflow_123")
+        >>> set_tracing_token(token)
+        >>> # ... do traced work ...
+        >>> unset_tracing_token()
+    """
     random_trace_id = otel_id_generator.generate_trace_id()
     _ = paid_trace_id.set(random_trace_id)
     return random_trace_id
 
 
-def _set_tracing_token(token: int):
+def set_tracing_token(token: int):
+    """
+    *Advanced feature*
+    In cases when you can't share the same Paid.trace() or @paid_tracing() context with
+    code that you want to track together (complex concurrency logic,
+    or disjoint workflows, or work is separated between processes),
+    then you can manually generate a tracing token with generate_and_set_tracing_token()
+    and share it with the other parts of your application or service using set_tracing_token().
+
+    Sets tracing token. Provided token should come from generate_and_set_tracing_token().
+    Once set, the consequent traces will be related to each other.
+
+    Args:
+        token (int): A tracing token from generate_and_set_tracing_token()
+
+    Example:
+        >>> from paid.tracing import set_tracing_token, unset_tracing_token, paid_tracing
+        >>> # Retrieve token from storage
+        >>> token = get_from_redis("workflow_123")
+        >>> set_tracing_token(token)
+        >>>
+        >>> @paid_tracing("customer_123", "agent_123")
+        >>> def process_workflow():
+        ...     # This trace will be linked to the token
+        ...     pass
+        >>>
+        >>> process_workflow()
+        >>> unset_tracing_token()
+    """
     _ = paid_trace_id.set(token)
 
 
-def _unset_tracing_token():
+def unset_tracing_token():
+    """
+    Unsets the token previously set by generate_and_set_tracing_token()
+    or by set_tracing_token(token). Does nothing if the token was never set.
+    When tracing token is unset, traces are unique for a single Paid.trace() or @paid_tracing() context.
+
+    Example:
+        >>> from paid.tracing import set_tracing_token, unset_tracing_token
+        >>> set_tracing_token(stored_token)
+        >>> try:
+        ...     process_workflow()
+        ... finally:
+        ...     unset_tracing_token()  # Always clean up
+    """
     _ = paid_trace_id.set(None)
 
 

@@ -9,15 +9,16 @@ from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .customers.client import AsyncCustomersClient, CustomersClient
 from .environment import PaidEnvironment
 from .orders.client import AsyncOrdersClient, OrdersClient
-from .tracing import (
-    _generate_and_set_tracing_token,
+from .tracing.tracing import (
+    generate_and_set_tracing_token,
+    generate_tracing_token,
+    set_tracing_token,
+    unset_tracing_token,
     _initialize_tracing,
-    _set_tracing_token,
-    _signal,
-    _trace_async,
     _trace_sync,
-    _unset_tracing_token,
+    _trace_async
 )
+from .tracing.signal import _signal
 from .usage.client import AsyncUsageClient, UsageClient
 
 T = typing.TypeVar("T")
@@ -101,6 +102,14 @@ class Paid:
         token = self._client_wrapper._get_token()
         _initialize_tracing(token, collector_endpoint=collector_endpoint)
 
+    def generate_tracing_token(self) -> int:
+        """
+        This will generate and return a tracing token but it will not set it
+        for the tracing context. Needed when you only want to store or send a tracing token
+        somewhere else.
+        """
+        return generate_tracing_token()
+
     def generate_and_set_tracing_token(self) -> int:
         """
         *Advanced feature*
@@ -119,7 +128,7 @@ class Paid:
         The former is suitable if you still want to trace but in a fresh
         context, and the latter will go back to unique traces per Paid.trace().
         """
-        return _generate_and_set_tracing_token()
+        return generate_and_set_tracing_token()
 
     def set_tracing_token(self, token: int):
         """
@@ -134,7 +143,7 @@ class Paid:
         Once set, the consequent traces will be related to each other.
         """
 
-        _set_tracing_token(token)
+        set_tracing_token(token)
 
     def unset_tracing_token(self):
         """
@@ -142,7 +151,7 @@ class Paid:
         or by set_tracing_token(token). Does nothing if the token was never set.
         When tracing token is unset, traces are unique for a single Paid.trace() context.
         """
-        _unset_tracing_token()
+        unset_tracing_token()
 
     def capture(
         self,
@@ -311,6 +320,14 @@ class AsyncPaid:
         token = self._client_wrapper._get_token()
         _initialize_tracing(token, collector_endpoint=collector_endpoint)
 
+    def generate_tracing_token(self) -> int:
+        """
+        This will generate and return a tracing token but it will not set it
+        for the tracing context. Needed when you only want to store or send a tracing token
+        somewhere else.
+        """
+        return generate_tracing_token()
+
     def generate_and_set_tracing_token(self) -> int:
         """
         *Advanced feature*
@@ -329,7 +346,7 @@ class AsyncPaid:
         The former is suitable if you still want to trace but in a fresh
         context, and the latter will go back to unique traces per Paid.trace() or @paid_tracing().
         """
-        return _generate_and_set_tracing_token()
+        return generate_and_set_tracing_token()
 
     def set_tracing_token(self, token: int):
         """
@@ -344,7 +361,7 @@ class AsyncPaid:
         Once set, the consequent traces will be related to each other.
         """
 
-        _set_tracing_token(token)
+        set_tracing_token(token)
 
     def unset_tracing_token(self):
         """
@@ -352,7 +369,7 @@ class AsyncPaid:
         or by set_tracing_token(token). Does nothing if the token was never set.
         When tracing token is unset, traces are unique for a single Paid.trace() or @paid_tracing() context.
         """
-        _unset_tracing_token()
+        unset_tracing_token()
 
     async def capture(
         self,
