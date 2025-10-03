@@ -275,7 +275,14 @@ For such case, there's a grain-level way to control tracing context.
 These 3 functions allow to generate, set, and unset tracing token (internally - OTEL traceId)
 
 ```python
-def generate_and_set_tracing_token(self) -> int:
+from paid.tracing import generate_and_set_tracing_token, set_tracing_token, unset_tracing_token
+
+# Can be used directly without a client instance
+token = generate_and_set_tracing_token()
+# Or via the client
+token = client.generate_and_set_tracing_token()
+
+def generate_and_set_tracing_token() -> int:
     """
     This function returns tracing token and attaches it to all consequent
     Paid.trace() or @paid_tracing tracing contexts. So all the costs and signals that share this
@@ -287,17 +294,68 @@ def generate_and_set_tracing_token(self) -> int:
     context, and the latter will go back to unique traces per Paid.trace().
     """
 
-def set_tracing_token(self, token: int):
+def set_tracing_token(token: int):
     """
     Sets tracing token. Provided token should come from generate_and_set_tracing_token().
     Once set, the consequent traces Paid.trace() or @paid_tracing() will be related to each other.
     """
 
-def unset_tracing_token(self):
+def unset_tracing_token():
     """
     Unsets the token previously set by generate_and_set_tracing_token()
     or by set_tracing_token(token). Does nothing if the token was never set.
     """
+```
+
+Example usage:
+
+```python
+from paid import Paid
+from paid.tracing import paid_tracing, generate_and_set_tracing_token, set_tracing_token, unset_tracing_token
+from paid.tracing.wrappers import PaidOpenAI
+from openai import OpenAI
+
+# Initialize
+client = Paid(token="<PAID_API_KEY>")
+openai_client = PaidOpenAI(OpenAI(api_key="<OPENAI_API_KEY>"))
+
+# Process 1: Generate token and do initial work
+token = generate_and_set_tracing_token()
+print(f"Tracing token: {token}")
+
+# Store token for other processes (e.g., in Redis, database, message queue)
+save_to_storage("workflow_123", token)
+
+@paid_tracing("customer_123", "agent_123")
+def process_part_1():
+    # AI calls here will be traced
+    response = openai_client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": "Analyze data"}]
+    )
+    # Signal without cost tracing
+    client.signal("part_1_complete", enable_cost_tracing=False)
+
+process_part_1()
+
+# Process 2 (different machine/process): Retrieve and use token
+token = load_from_storage("workflow_123")
+set_tracing_token(token)
+
+@paid_tracing("customer_123", "agent_123")
+def process_part_2():
+    # AI calls here will be linked to the same trace
+    response = openai_client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": "Generate response"}]
+    )
+    # Signal WITH cost tracing - links all costs from both processes
+    client.signal("workflow_complete", enable_cost_tracing=True)
+
+process_part_2()
+
+# Clean up
+unset_tracing_token()
 ```
 
 
