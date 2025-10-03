@@ -6,6 +6,9 @@ https://github.com/paid-ai/sdk-wrapper-codegen
 
 from typing import Union
 
+from opentelemetry import trace
+from opentelemetry.trace import Status, StatusCode
+
 from paid.tracing.tracing import (
     get_paid_tracer,
     logger,
@@ -13,8 +16,6 @@ from paid.tracing.tracing import (
     paid_external_customer_id_var,
     paid_token_var,
 )
-from opentelemetry import trace
-from opentelemetry.trace import Status, StatusCode
 
 try:
     from google import genai

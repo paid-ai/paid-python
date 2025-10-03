@@ -1,3 +1,5 @@
 from .openaiAgentsHook import PaidOpenAIAgentsHook
 
-__all__ = [ "PaidOpenAIAgentsHook", ]
+__all__ = [
+    "PaidOpenAIAgentsHook",
+]

@@ -1,9 +1,16 @@
 from typing import Any
 
-from paid.tracing.tracing import get_paid_tracer, logger, paid_external_agent_id_var, paid_external_customer_id_var, paid_token_var
-from paid.tracing.wrappers.utils import get_audio_duration
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
+
+from paid.tracing.tracing import (
+    get_paid_tracer,
+    logger,
+    paid_external_agent_id_var,
+    paid_external_customer_id_var,
+    paid_token_var,
+)
+from paid.tracing.wrappers.utils import get_audio_duration
 
 try:
     from openai import AsyncOpenAI, OpenAI
