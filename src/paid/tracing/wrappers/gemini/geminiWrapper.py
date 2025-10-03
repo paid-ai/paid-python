@@ -6,7 +6,7 @@ https://github.com/paid-ai/sdk-wrapper-codegen
 
 from typing import Union
 
-from ..tracing import (
+from paid.tracing.tracing import (
     get_paid_tracer,
     logger,
     paid_external_agent_id_var,

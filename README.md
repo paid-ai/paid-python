@@ -126,7 +126,7 @@ Example usage:
 ```python
 from openai import OpenAI
 from paid.tracing import paid_tracing
-from paid.tracing.wrappers import PaidOpenAI
+from paid.tracing.wrappers.openai import PaidOpenAI
 
 openAIClient = PaidOpenAI(OpenAI(
     # This is the default and can be omitted
@@ -153,7 +153,7 @@ Alternatively, instead of the decorators you can use the paid.trace() function (
 ```python
 from openai import OpenAI
 from paid import Paid
-from paid.tracing.wrappers import PaidOpenAI
+from paid.tracing.wrappers.openai import PaidOpenAI
 
 # Initialize Paid SDK
 client = Paid(token="PAID_API_KEY")
@@ -334,7 +334,7 @@ Example usage with `generate_and_set_tracing_token()`:
 ```python
 from paid import Paid
 from paid.tracing import paid_tracing, generate_and_set_tracing_token, set_tracing_token, unset_tracing_token
-from paid.tracing.wrappers import PaidOpenAI
+from paid.tracing.wrappers.openai import PaidOpenAI
 from openai import OpenAI
 
 # Initialize
@@ -385,7 +385,7 @@ Alternative: Using `generate_tracing_token()` for deferred activation:
 ```python
 from paid import Paid
 from paid.tracing import paid_tracing, generate_tracing_token, set_tracing_token, unset_tracing_token
-from paid.tracing.wrappers import PaidOpenAI
+from paid.tracing.wrappers.openai import PaidOpenAI
 from openai import OpenAI
 
 # Initialize
@@ -560,7 +560,7 @@ The `@paid_tracing` decorator automatically handles both sync and async function
 ```python
 from openai import AsyncOpenAI
 from paid.tracing import paid_tracing
-from paid.tracing.wrappers import PaidAsyncOpenAI
+from paid.tracing.wrappers.openai import PaidAsyncOpenAI
 
 # Wrap the async OpenAI client
 openai_client = PaidAsyncOpenAI(AsyncOpenAI(api_key="<OPENAI_API_KEY>"))
@@ -587,7 +587,7 @@ The `signal()` method works seamlessly in async contexts:
 ```python
 from paid import AsyncPaid
 from paid.tracing import paid_tracing
-from paid.tracing.wrappers import PaidAsyncOpenAI
+from paid.tracing.wrappers.openai import PaidAsyncOpenAI
 from openai import AsyncOpenAI
 
 client = AsyncPaid(token="PAID_API_KEY")
