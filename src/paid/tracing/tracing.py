@@ -164,6 +164,7 @@ def _trace_sync(
     external_customer_id: str,
     fn: Callable[..., T],
     external_agent_id: Optional[str] = None,
+    tracing_token: Optional[int] = None,
     args: Optional[Tuple] = None,
     kwargs: Optional[Dict] = None,
 ) -> T:
@@ -181,7 +182,9 @@ def _trace_sync(
     reset_token_ctx_token = paid_token_var.set(token)
 
     # If user set trace context manually
-    override_trace_id = paid_trace_id.get()
+    override_trace_id = tracing_token
+    if not override_trace_id:
+        override_trace_id = paid_trace_id.get()
     ctx: Optional[Context] = None
     if override_trace_id is not None:
         span_context = SpanContext(
@@ -218,6 +221,7 @@ async def _trace_async(
     external_customer_id: str,
     fn: Callable[..., Union[T, Awaitable[T]]],
     external_agent_id: Optional[str] = None,
+    tracing_token: Optional[int] = None,
     args: Optional[Tuple] = None,
     kwargs: Optional[Dict] = None,
 ) -> Union[T, Awaitable[T]]:
@@ -235,7 +239,9 @@ async def _trace_async(
     reset_token_ctx_token = paid_token_var.set(token)
 
     # If user set trace context manually
-    override_trace_id = paid_trace_id.get()
+    override_trace_id = tracing_token
+    if not override_trace_id:
+        override_trace_id = paid_trace_id.get()
     ctx: Optional[Context] = None
     if override_trace_id is not None:
         span_context = SpanContext(
@@ -369,6 +375,8 @@ def unset_tracing_token():
 
 def paid_tracing(
     external_customer_id: str,
+    *,
+    tracing_token: Optional[int] = None,
     external_agent_id: Optional[str] = None,
     collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces",
 ):
@@ -428,6 +436,7 @@ def paid_tracing(
                         external_customer_id=external_customer_id,
                         fn=func,
                         external_agent_id=external_agent_id,
+                        tracing_token=tracing_token,
                         args=args,
                         kwargs=kwargs,
                     )
@@ -454,6 +463,7 @@ def paid_tracing(
                         external_customer_id=external_customer_id,
                         fn=func,
                         external_agent_id=external_agent_id,
+                        tracing_token=tracing_token,
                         args=args,
                         kwargs=kwargs,
                     )

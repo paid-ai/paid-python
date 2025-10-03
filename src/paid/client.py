@@ -170,6 +170,7 @@ class Paid:
         external_customer_id: str,
         fn: typing.Callable[[], T],
         external_agent_id: typing.Optional[str] = None,
+        tracing_token: typing.Optional[int] = None,
         args: typing.Optional[typing.Tuple] = None,
         kwargs: typing.Optional[typing.Dict] = None,
     ) -> T:
@@ -198,6 +199,7 @@ class Paid:
             external_customer_id=external_customer_id,
             fn=fn,
             external_agent_id=external_agent_id,
+            tracing_token=tracing_token,
             args=args,
             kwargs=kwargs,
         )
@@ -388,6 +390,7 @@ class AsyncPaid:
         external_customer_id: str,
         fn: typing.Callable[[], typing.Awaitable[T]],
         external_agent_id: typing.Optional[str] = None,
+        tracing_token: typing.Optional[int] = None,
         args: typing.Optional[typing.Tuple] = None,
         kwargs: typing.Optional[typing.Dict] = None,
     ) -> typing.Union[T, typing.Awaitable[T]]:
@@ -416,6 +419,7 @@ class AsyncPaid:
             external_customer_id=external_customer_id,
             fn=fn,
             external_agent_id=external_agent_id,
+            tracing_token=tracing_token,
             args=args,
             kwargs=kwargs,
         )
