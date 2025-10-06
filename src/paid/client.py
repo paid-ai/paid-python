@@ -90,17 +90,48 @@ class Paid:
         self.orders = OrdersClient(client_wrapper=self._client_wrapper)
         self.usage = UsageClient(client_wrapper=self._client_wrapper)
 
-    def initialize_tracing(self, collector_endpoint: str = "https://collector.agentpaid.io:4318/v1/traces") -> None:
+    def initialize_tracing(
+        self,
+        collector_endpoint: str = "https://collector.agentpaid.io:4318/v1/traces",
+        enable_experimental_exporters: bool = False,
+        external_agent_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        exporter_deadline_hours: int = 24,
+        exporter_timeout: int = 30,
+    ) -> None:
         """
         Initializes tracing for the Paid client.
         Call this method before using tracing features to ensure proper setup.
+
+        Parameters
+        ----------
+        collector_endpoint : str
+            The OTLP collector endpoint URL.
+        enable_experimental_exporters : bool, optional
+            Whether to enable experimental exporters (e.g., Paid span processor) in addition to OTLP, by default False.
+        external_agent_id : typing.Optional[str], optional
+            External agent ID (required if enable_experimental_exporters is True).
+        external_customer_id : typing.Optional[str], optional
+            External customer ID (required if enable_experimental_exporters is True).
+        exporter_deadline_hours : int, optional
+            Default deadline in hours for event groups, by default 24.
+        exporter_timeout : int, optional
+            Timeout in seconds for exporter requests, by default 30.
 
         Returns
         -------
         None
         """
         token = self._client_wrapper._get_token()
-        _initialize_tracing(token, collector_endpoint=collector_endpoint)
+        _initialize_tracing(
+            token,
+            collector_endpoint=collector_endpoint,
+            enable_experimental_exporters=enable_experimental_exporters,
+            external_agent_id=external_agent_id,
+            external_customer_id=external_customer_id,
+            exporter_deadline_hours=exporter_deadline_hours,
+            exporter_timeout=exporter_timeout,
+        )
 
     def generate_tracing_token(self) -> int:
         """
@@ -310,17 +341,48 @@ class AsyncPaid:
         self.orders = AsyncOrdersClient(client_wrapper=self._client_wrapper)
         self.usage = AsyncUsageClient(client_wrapper=self._client_wrapper)
 
-    def initialize_tracing(self, collector_endpoint: str = "https://collector.agentpaid.io:4318/v1/traces") -> None:
+    def initialize_tracing(
+        self,
+        collector_endpoint: str = "https://collector.agentpaid.io:4318/v1/traces",
+        enable_experimental_exporters: bool = False,
+        external_agent_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        exporter_deadline_hours: int = 24,
+        exporter_timeout: int = 30,
+    ) -> None:
         """
         Initializes tracing for the AsyncPaid client.
         Call this method before using tracing features to ensure proper setup.
+
+        Parameters
+        ----------
+        collector_endpoint : str
+            The OTLP collector endpoint URL.
+        enable_experimental_exporters : bool, optional
+            Whether to enable experimental exporters (e.g., Paid span processor) in addition to OTLP, by default False.
+        external_agent_id : typing.Optional[str], optional
+            External agent ID (required if enable_experimental_exporters is True).
+        external_customer_id : typing.Optional[str], optional
+            External customer ID (required if enable_experimental_exporters is True).
+        exporter_deadline_hours : int, optional
+            Default deadline in hours for event groups, by default 24.
+        exporter_timeout : int, optional
+            Timeout in seconds for exporter requests, by default 30.
 
         Returns
         -------
         None
         """
         token = self._client_wrapper._get_token()
-        _initialize_tracing(token, collector_endpoint=collector_endpoint)
+        _initialize_tracing(
+            token,
+            collector_endpoint=collector_endpoint,
+            enable_experimental_exporters=enable_experimental_exporters,
+            external_agent_id=external_agent_id,
+            external_customer_id=external_customer_id,
+            exporter_deadline_hours=exporter_deadline_hours,
+            exporter_timeout=exporter_timeout,
+        )
 
     def generate_tracing_token(self) -> int:
         """

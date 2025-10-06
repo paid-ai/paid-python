@@ -16,6 +16,8 @@ from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.id_generator import RandomIdGenerator
 from opentelemetry.trace import NonRecordingSpan, SpanContext, Status, StatusCode, TraceFlags
 
+from paid.environment import PaidEnvironment
+
 # Configure logging
 log_level_name = os.environ.get("PAID_LOG_LEVEL")
 if log_level_name is not None:
@@ -67,7 +69,13 @@ paid_tracer_provider: Optional[TracerProvider] = None
 
 
 def _initialize_tracing(
-    api_key: Optional[str] = None, collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces"
+    api_key: Optional[str] = None,
+    collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces",
+    enable_experimental_exporters: bool = False,
+    external_agent_id: Optional[str] = None,
+    external_customer_id: Optional[str] = None,
+    exporter_deadline_hours: int = 24,
+    exporter_timeout: int = 30,
 ):
     """
     Initialize OpenTelemetry with OTLP exporter for Paid backend.
@@ -75,6 +83,11 @@ def _initialize_tracing(
     Args:
         api_key: The API key for authentication. If not provided, will try to get from PAID_API_KEY environment variable.
         collector_endpoint: The OTLP collector endpoint URL.
+        enable_experimental_exporters: Whether to enable experimental exporters (e.g., Paid span processor) in addition to OTLP.
+        external_agent_id: External agent ID (required if enable_experimental_exporters is True).
+        external_customer_id: External customer ID (required if enable_experimental_exporters is True).
+        exporter_deadline_hours: Default deadline in hours for event groups (default: 24).
+        exporter_timeout: Timeout in seconds for exporter requests (default: 30).
     """
     global paid_tracer_provider
 
@@ -109,6 +122,28 @@ def _initialize_tracing(
         # Airflow terminates processes before the batch is sent, losing traces.
         span_processor = SimpleSpanProcessor(otlp_exporter)
         paid_tracer_provider.add_span_processor(span_processor)
+
+        # Only testing this for now (sbinev)
+        if enable_experimental_exporters:
+            if not all([external_agent_id, external_customer_id]):
+                raise ValueError(
+                    "external_agent_id and external_customer_id are required when enable_experimental_exporters is True"
+                )
+
+            from paid.tracing.span_exporter import PaidSpanProcessor
+
+            paid_span_exporter = PaidSpanProcessor(
+                api_base_url=PaidEnvironment.PRODUCTION.value,
+                api_key=api_key,  # Will fall back to env var if None
+                agent_id=external_agent_id,
+                customer_id=external_customer_id,
+                default_deadline_hours=exporter_deadline_hours,
+                use_bulk=True,
+                timeout=exporter_timeout,
+            )
+            paid_events_processor = SimpleSpanProcessor(paid_span_exporter)
+            paid_tracer_provider.add_span_processor(paid_events_processor)
+            logger.info("Paid span processor initialized successfully")
 
         # Terminate gracefully and don't lose traces
         def flush_traces():
@@ -379,6 +414,9 @@ def paid_tracing(
     tracing_token: Optional[int] = None,
     external_agent_id: Optional[str] = None,
     collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces",
+    enable_experimental_exporters: bool = False,
+    exporter_deadline_hours: int = 24,
+    exporter_timeout: int = 30,
 ):
     """
     Decorator for tracing function execution with Paid.
@@ -394,6 +432,12 @@ def paid_tracing(
         The external agent ID to associate with the trace, by default None.
     collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces",
         Most likely unneded to pass in, but can change OTEL collector HTTP endpoint if needed.
+    enable_experimental_exporters : bool, optional
+        Whether to enable experimental exporters (e.g., Paid span processor) in addition to OTLP, by default False.
+    exporter_deadline_hours : int, optional
+        Default deadline in hours for event groups, by default 24.
+    exporter_timeout : int, optional
+        Timeout in seconds for exporter requests, by default 30.
 
     Returns
     -------
@@ -409,12 +453,23 @@ def paid_tracing(
     @paid_tracing(external_customer_id="customer123")
     async def my_async_function(arg1, arg2):
         return arg1 + arg2
+    
+    @paid_tracing(
+        external_customer_id="customer123",
+        external_agent_id="agent_123",
+        enable_experimental_exporters=True
+    )
+    def my_function_with_exporters(arg1, arg2):
+        return arg1 + arg2
 
     Notes
     -----
     If paid client and tracing are not already initialized, this decorator will automatically
     initialize it using the PAID_API_KEY environment variable. If even then initialization fails,
     the decorator will act as a noop.
+    
+    When enable_experimental_exporters is True, the external_customer_id and external_agent_id 
+    from the decorator will be used for both tracing and the experimental exporters.
     """
 
     def decorator(func: Callable) -> Callable:
@@ -425,7 +480,15 @@ def paid_tracing(
                 # Auto-initialize tracing if not done
                 if get_token() is None:
                     try:
-                        _initialize_tracing(None, collector_endpoint)
+                        _initialize_tracing(
+                            None,
+                            collector_endpoint,
+                            enable_experimental_exporters,
+                            external_agent_id,
+                            external_customer_id,
+                            exporter_deadline_hours,
+                            exporter_timeout,
+                        )
                     except Exception as e:
                         logger.error(f"Failed to auto-initialize tracing: {e}")
                         # Fall back to executing function without tracing
@@ -452,7 +515,15 @@ def paid_tracing(
                 # Auto-initialize tracing if not done
                 if get_token() is None:
                     try:
-                        _initialize_tracing(None, collector_endpoint)
+                        _initialize_tracing(
+                            None,
+                            collector_endpoint,
+                            enable_experimental_exporters,
+                            external_agent_id,
+                            external_customer_id,
+                            exporter_deadline_hours,
+                            exporter_timeout,
+                        )
                     except Exception as e:
                         logger.error(f"Failed to auto-initialize tracing: {e}")
                         # Fall back to executing function without tracing

@@ -1,5 +1,6 @@
 [project]
 name = "paid-python"
+version = "0.0.5-alpha33"
 
 [tool.poetry]
 name = "paid-python"
