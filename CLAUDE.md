@@ -89,7 +89,11 @@ Wrapper pattern:
 5. Calculate costs based on usage and model pricing
 6. Pass through original response unchanged
 
-**autoinstrumentation.py** - Placeholder for future auto-instrumentation (currently empty)
+**autoinstrumentation.py** - Auto-instrumentation for AI libraries
+- `paid_autoinstrument()` - Main function to enable auto-instrumentation for supported libraries
+- `_instrument_anthropic()` - Helper to instrument Anthropic library
+- Uses module-level import (`from . import tracing as tracing_module`) to access `paid_tracer_provider` dynamically
+- **Important**: Sets `paid_tracer_provider` as the global tracer provider because instrumentors use `trace.get_tracer_provider()`
 
 #### src/paid/client.py - Main Client Classes
 
@@ -108,7 +112,10 @@ The `Paid` and `AsyncPaid` client classes integrate tracing with the auto-genera
 
 ### Key Design Patterns
 
-1. **Isolated Tracing**: Uses a separate `TracerProvider` (`paid_tracer_provider`) to avoid interfering with user's existing OTEL setup. Never touches `trace.set_tracer_provider()`.
+1. **Isolated Tracing**: Uses a separate `TracerProvider` (`paid_tracer_provider`) that Paid controls entirely.
+   - Manual tracing (wrappers) uses this provider directly without setting it globally
+   - Auto-instrumentation requires setting it as the global provider via `trace.set_tracer_provider()` because instrumentors expect the global provider
+   - Despite being "global", Paid still controls the provider's configuration and lifecycle
 
 2. **Context Variables**: Uses `contextvars` (not thread-local storage) for async-safe propagation of customer IDs, agent IDs, and tokens through nested function calls.
 
@@ -124,6 +131,8 @@ The `Paid` and `AsyncPaid` client classes integrate tracing with the auto-genera
 5. **Sync/Async Support**: Both `_trace_sync()` and `_trace_async()` with identical logic. The `@paid_tracing` decorator auto-detects and wraps appropriately using `functools.wraps`.
 
 6. **Graceful Degradation**: Wrappers are designed to pass through original responses even if cost tracking fails (logged but not raised).
+
+7. **Module-level Imports for Mutable State**: In `autoinstrumentation.py`, we use `from . import tracing as tracing_module` instead of `from .tracing import paid_tracer_provider` because the latter captures the value at import time (None), while the former allows accessing the current value after it's initialized.
 
 ## Development Guidelines
 

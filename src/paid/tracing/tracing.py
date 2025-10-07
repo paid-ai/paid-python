@@ -8,15 +8,18 @@ import os
 import signal
 from typing import Awaitable, Callable, Dict, Optional, Tuple, TypeVar, Union
 
+import dotenv
 from opentelemetry import trace
 from opentelemetry.context import Context
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor, TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.id_generator import RandomIdGenerator
 from opentelemetry.trace import NonRecordingSpan, SpanContext, Status, StatusCode, TraceFlags
 
 # Configure logging
+dotenv.load_dotenv()
 log_level_name = os.environ.get("PAID_LOG_LEVEL")
 if log_level_name is not None:
     log_level = getattr(logging, log_level_name.upper())
@@ -66,6 +69,43 @@ otel_id_generator = RandomIdGenerator()
 paid_tracer_provider: Optional[TracerProvider] = None
 
 
+class PaidSpanProcessor(SpanProcessor):
+    """
+    Span processor that:
+    1. Prefixes all span names with 'paid.trace.'
+    2. Automatically adds external_customer_id and external_agent_id attributes
+       to all spans based on context variables set by the tracing decorator.
+    """
+    SPAN_NAME_PREFIX = "paid.trace."
+
+    def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
+        """Called when a span is started. Prefix the span name and add attributes."""
+        # Prefix the span name
+        if span.name and not span.name.startswith(self.SPAN_NAME_PREFIX):
+            span.update_name(f"{self.SPAN_NAME_PREFIX}{span.name}")
+
+        # Add customer and agent IDs from context
+        customer_id = paid_external_customer_id_var.get()
+        if customer_id:
+            span.set_attribute("external_customer_id", customer_id)
+
+        agent_id = paid_external_agent_id_var.get()
+        if agent_id:
+            span.set_attribute("external_agent_id", agent_id)
+
+    def on_end(self, span: ReadableSpan) -> None:
+        """Called when a span ends. No action needed."""
+        pass
+
+    def shutdown(self) -> None:
+        """Called when the processor is shut down. No action needed."""
+        pass
+
+    def force_flush(self, timeout_millis: int = 30000) -> bool:
+        """Called to force flush. Always returns True since there's nothing to flush."""
+        return True
+
+
 def _initialize_tracing(
     api_key: Optional[str] = None, collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces"
 ):
@@ -95,8 +135,12 @@ def _initialize_tracing(
 
         set_token(api_key)
 
+        resource = Resource(attributes={"api.key": api_key})
         # Create isolated tracer provider for Paid - don't use or modify global provider
-        paid_tracer_provider = TracerProvider()
+        paid_tracer_provider = TracerProvider(resource=resource)
+
+        # Add span processor to prefix span names and add customer/agent ID attributes
+        paid_tracer_provider.add_span_processor(PaidSpanProcessor())
 
         # Set up OTLP exporter
         otlp_exporter = OTLPSpanExporter(
@@ -198,11 +242,10 @@ def _trace_sync(
     try:
         tracer = get_paid_tracer()
         logger.info(f"Creating span for external_customer_id: {external_customer_id}")
-        with tracer.start_as_current_span(f"paid.python:{external_customer_id}", context=ctx) as span:
+        with tracer.start_as_current_span("parent_span", context=ctx) as span:
             span.set_attribute("external_customer_id", external_customer_id)
             if external_agent_id:
                 span.set_attribute("external_agent_id", external_agent_id)
-            span.set_attribute("token", token)
             try:
                 result = fn(*args, **kwargs)
                 span.set_status(Status(StatusCode.OK))
@@ -255,11 +298,10 @@ async def _trace_async(
     try:
         tracer = get_paid_tracer()
         logger.info(f"Creating span for external_customer_id: {external_customer_id}")
-        with tracer.start_as_current_span(f"paid.python:{external_customer_id}", context=ctx) as span:
+        with tracer.start_as_current_span("parent_span", context=ctx) as span:
             span.set_attribute("external_customer_id", external_customer_id)
             if external_agent_id:
                 span.set_attribute("external_agent_id", external_agent_id)
-            span.set_attribute("token", token)
             try:
                 if asyncio.iscoroutinefunction(fn):
                     result = await fn(*args, **kwargs)

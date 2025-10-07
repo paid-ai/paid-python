@@ -200,7 +200,6 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
     async def on_agent_start(self, context, agent) -> None:
         """Start a span for agent operations and call user hooks."""
         logger.debug(f"on_agent_start : context_usage : {getattr(context, 'usage', None)}")
-        logger.debug(f"on_agent_start : agent contents : {agent}")
 
         if self.user_hooks and hasattr(self.user_hooks, "on_agent_start"):
             await self.user_hooks.on_agent_start(context, agent)
