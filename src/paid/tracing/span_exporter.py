@@ -66,16 +66,22 @@ class PaidSpanProcessor(SpanExporter):
             event_data["status"] = {"code": span.status.status_code.name, "description": span.status.description}
 
         if span.attributes:
-            event_data["attributes"] = dict(span.attributes)
+            filtered_attributes = {k: v for k, v in span.attributes.items() if k != "token"}
+            event_data["attributes"] = filtered_attributes
 
         if span.events:
             event_data["events"] = [
-                {"name": event.name, "timestamp": event.timestamp, "attributes": dict(event.attributes) if event.attributes else {}}
+                {
+                    "name": event.name,
+                    "timestamp": event.timestamp,
+                    "attributes": {k: v for k, v in event.attributes.items() if k != "token"} if event.attributes else {},
+                }
                 for event in span.events
             ]
 
         if span.resource:
-            event_data["resource"] = dict(span.resource.attributes)
+            filtered_resource = {k: v for k, v in span.resource.attributes.items() if k != "token"}
+            event_data["resource"] = filtered_resource
 
         return event_data
 
