@@ -20,6 +20,10 @@ except ImportError:
         "you're assumed to already have openai-agents package installed."
     )
 
+# Global dictionary to store spans keyed by context object ID
+# This avoids polluting user's context.context and works across async boundaries
+_paid_span_store: dict[int, trace.Span] = {}
+
 
 class PaidOpenAIAgentsHook(RunHooks[Any]):
     """
@@ -115,21 +119,22 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
 
             span.set_attributes(attributes)
 
-            # Store span in context.context safely (check if user is using it)
-            if not hasattr(context, "context"):
-                context.context = {}
-            elif not isinstance(context.context, dict):
-                # User is using context.context for something else, create a nested dict
-                context.context = {"_user_context": context.context}
-
-            context.context[f"_paid_{hook_name}_span"] = span
+            # Store span in global dict keyed by context object ID
+            # This works across async boundaries without polluting user's context
+            context_id = id(context)
+            _paid_span_store[context_id] = span
+            logger.debug(f"_start_span: Stored span for context ID {context_id}")
 
         except Exception as error:
             logger.error(f"Error while starting span in PaidAgentsHook.{hook_name}: {error}")
 
     def _end_span(self, context, hook_name):
         try:
-            span = context.context.get(f"_paid_{hook_name}_span") if hasattr(context, "context") else None
+            # Retrieve span from global dict using context object ID
+            context_id = id(context)
+            span = _paid_span_store.get(context_id)
+            logger.debug(f"_end_span: Retrieved span for context ID {context_id}: {span}")
+
             if span:
                 # Get usage data from the response
                 if hasattr(context, "usage") and context.usage:
@@ -158,24 +163,25 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
                 span.end()
                 logger.debug(f"{hook_name} : ended span")
 
+                # Clean up from global dict
+                del _paid_span_store[context_id]
+                logger.debug(f"_end_span: Cleaned up span for context ID {context_id}")
+            else:
+                logger.warning(f"_end_span: No span found for context ID {context_id}")
+
         except Exception as error:
             logger.error(f"Error while ending span in PaidAgentsHook.{hook_name}_end: {error}")
             # Try to end span on error
             try:
-                span = context.context.get(f"_paid_{hook_name}_span") if hasattr(context, "context") else None
+                context_id = id(context)
+                span = _paid_span_store.get(context_id)
                 if span:
                     span.set_status(Status(StatusCode.ERROR))
                     span.record_exception(error)
                     span.end()
+                    del _paid_span_store[context_id]
             except:
                 pass
-        finally:
-            if hasattr(context, "context") and isinstance(context.context, dict):
-                # Clean up span from context
-                if f"_paid_{hook_name}_span" in context.context:
-                    del context.context[f"_paid_{hook_name}_span"]
-                if "_user_context" in context.context:
-                    context.context = context.context["_user_context"]
 
     async def on_llm_start(self, context, agent, system_prompt, input_items) -> None:
         logger.debug(f"on_llm_start : context_usage : {getattr(context, 'usage', None)}")
@@ -194,6 +200,7 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
     async def on_agent_start(self, context, agent) -> None:
         """Start a span for agent operations and call user hooks."""
         logger.debug(f"on_agent_start : context_usage : {getattr(context, 'usage', None)}")
+        logger.debug(f"on_agent_start : agent contents : {agent}")
 
         if self.user_hooks and hasattr(self.user_hooks, "on_agent_start"):
             await self.user_hooks.on_agent_start(context, agent)
