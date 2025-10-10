@@ -74,7 +74,7 @@ class ModelsWrapper:
                 " Make sure to call this method from Paid.trace()."
             )
 
-        with self.tracer.start_as_current_span("trace.gemini.generate_content") as span:
+        with self.tracer.start_as_current_span("gemini.models.generate_content") as span:
             try:
                 # Execute the original method
                 response = self._client.models.generate_content(**kwargs)

@@ -103,7 +103,7 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
             model_name = str(agent.model if agent.model else get_default_model())
 
             # Start span for this LLM call
-            span = self.tracer.start_span(f"trace.openai.agents.{hook_name}")
+            span = self.tracer.start_span(f"openai.agents.{hook_name}")
             logger.debug(f"{hook_name} : started span")
 
             # Set initial attributes
@@ -200,7 +200,6 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
     async def on_agent_start(self, context, agent) -> None:
         """Start a span for agent operations and call user hooks."""
         logger.debug(f"on_agent_start : context_usage : {getattr(context, 'usage', None)}")
-        logger.debug(f"on_agent_start : agent contents : {agent}")
 
         if self.user_hooks and hasattr(self.user_hooks, "on_agent_start"):
             await self.user_hooks.on_agent_start(context, agent)

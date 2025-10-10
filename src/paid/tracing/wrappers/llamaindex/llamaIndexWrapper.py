@@ -52,7 +52,7 @@ class PaidLlamaIndexOpenAI:
                 " Make sure to call this method from Paid.trace()."
             )
 
-        with self.tracer.start_as_current_span("trace.openai.chat") as span:
+        with self.tracer.start_as_current_span("openai.chat") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",

@@ -29,7 +29,7 @@ def _signal(event_name: str, enable_cost_tracing: bool, data: typing.Optional[ty
         return
 
     tracer = get_paid_tracer()
-    with tracer.start_as_current_span("trace.signal") as span:
+    with tracer.start_as_current_span("signal") as span:
         attributes: typing.Dict[str, typing.Union[str, bool, int, float]] = {
             "external_customer_id": external_customer_id,
             "external_agent_id": external_agent_id,

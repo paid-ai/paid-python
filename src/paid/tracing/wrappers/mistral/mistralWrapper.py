@@ -124,7 +124,7 @@ class OCRWrapper:
                 " Make sure to call this method from Paid.trace()."
             )
 
-        with self.tracer.start_as_current_span("trace.mistral.ocr") as span:
+        with self.tracer.start_as_current_span("mistral.ocr.process") as span:
             attributes = {
                 "gen_ai.system": "mistral",
                 "gen_ai.operation.name": "ocr",
@@ -261,7 +261,7 @@ class OCRWrapper:
                 " Make sure to call this method from Paid.trace()."
             )
 
-        with self.tracer.start_as_current_span("trace.mistral.ocr.async") as span:
+        with self.tracer.start_as_current_span("mistral.ocr.process_async") as span:
             attributes = {
                 "gen_ai.system": "mistral",
                 "gen_ai.operation.name": "ocr",

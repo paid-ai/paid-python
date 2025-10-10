@@ -8,15 +8,18 @@ import os
 import signal
 from typing import Awaitable, Callable, Dict, Optional, Tuple, TypeVar, Union
 
+import dotenv
 from opentelemetry import trace
 from opentelemetry.context import Context
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor, TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.id_generator import RandomIdGenerator
 from opentelemetry.trace import NonRecordingSpan, SpanContext, Status, StatusCode, TraceFlags
 
 # Configure logging
+dotenv.load_dotenv()
 log_level_name = os.environ.get("PAID_LOG_LEVEL")
 if log_level_name is not None:
     log_level = getattr(logging, log_level_name.upper())
@@ -42,6 +45,8 @@ paid_external_agent_id_var: contextvars.ContextVar[Optional[str]] = contextvars.
 paid_token_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar("paid_token", default=None)
 # trace id storage (generated from token)
 paid_trace_id: contextvars.ContextVar[Optional[int]] = contextvars.ContextVar("paid_trace_id", default=None)
+# flag to enable storing prompt contents
+paid_store_prompt_var: contextvars.ContextVar[Optional[bool]] = contextvars.ContextVar("paid_store_prompt", default=False)
 
 T = TypeVar("T")
 
@@ -64,6 +69,67 @@ otel_id_generator = RandomIdGenerator()
 
 # Isolated tracer provider for Paid - separate from any user OTEL setup
 paid_tracer_provider: Optional[TracerProvider] = None
+
+
+class PaidSpanProcessor(SpanProcessor):
+    """
+    Span processor that:
+    1. Prefixes all span names with 'paid.trace.'
+    2. Automatically adds external_customer_id and external_agent_id attributes
+       to all spans based on context variables set by the tracing decorator.
+    """
+    SPAN_NAME_PREFIX = "paid.trace."
+    PROMPT_ATTRIBUTES_PREFIXES = {
+        "gen_ai.prompt",
+        "gen_ai.completion",
+        "gen_ai.request.messages",
+        "gen_ai.response.messages",
+        "llm.output_message",
+        "llm.input_message",
+        "output.value",
+        "input.value",
+    }
+
+    def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
+        """Called when a span is started. Prefix the span name and add attributes."""
+        # Prefix the span name
+        if span.name and not span.name.startswith(self.SPAN_NAME_PREFIX):
+            span.update_name(f"{self.SPAN_NAME_PREFIX}{span.name}")
+
+        # Add customer and agent IDs from context
+        customer_id = paid_external_customer_id_var.get()
+        if customer_id:
+            span.set_attribute("external_customer_id", customer_id)
+
+        agent_id = paid_external_agent_id_var.get()
+        if agent_id:
+            span.set_attribute("external_agent_id", agent_id)
+
+    def on_end(self, span: ReadableSpan) -> None:
+        """Filter out prompt and response contents unless explicitly asked to store"""
+        store_prompt = paid_store_prompt_var.get()
+        if store_prompt:
+            return
+
+        original_attributes = span.attributes
+
+        if original_attributes:
+            # Filter out prompt-related attributes
+            filtered_attrs = {
+                k: v for k, v in original_attributes.items()
+                if not any(k.startswith(prefix) for prefix in self.PROMPT_ATTRIBUTES_PREFIXES)
+            }
+            # Temporarily replace attributes for export
+            # This works because the exporter reads attributes during serialization
+            object.__setattr__(span, '_attributes', filtered_attrs)
+
+    def shutdown(self) -> None:
+        """Called when the processor is shut down. No action needed."""
+        pass
+
+    def force_flush(self, timeout_millis: int = 30000) -> bool:
+        """Called to force flush. Always returns True since there's nothing to flush."""
+        return True
 
 
 def _initialize_tracing(
@@ -95,8 +161,12 @@ def _initialize_tracing(
 
         set_token(api_key)
 
+        resource = Resource(attributes={"api.key": api_key})
         # Create isolated tracer provider for Paid - don't use or modify global provider
-        paid_tracer_provider = TracerProvider()
+        paid_tracer_provider = TracerProvider(resource=resource)
+
+        # Add span processor to prefix span names and add customer/agent ID attributes
+        paid_tracer_provider.add_span_processor(PaidSpanProcessor())
 
         # Set up OTLP exporter
         otlp_exporter = OTLPSpanExporter(
@@ -165,6 +235,7 @@ def _trace_sync(
     fn: Callable[..., T],
     external_agent_id: Optional[str] = None,
     tracing_token: Optional[int] = None,
+    store_prompt: bool = False,
     args: Optional[Tuple] = None,
     kwargs: Optional[Dict] = None,
 ) -> T:
@@ -180,6 +251,7 @@ def _trace_sync(
     reset_id_ctx_token = paid_external_customer_id_var.set(external_customer_id)
     reset_agent_id_ctx_token = paid_external_agent_id_var.set(external_agent_id)
     reset_token_ctx_token = paid_token_var.set(token)
+    reset_store_prompt_ctx_token = paid_store_prompt_var.set(store_prompt)
 
     # If user set trace context manually
     override_trace_id = tracing_token
@@ -198,11 +270,10 @@ def _trace_sync(
     try:
         tracer = get_paid_tracer()
         logger.info(f"Creating span for external_customer_id: {external_customer_id}")
-        with tracer.start_as_current_span(f"paid.python:{external_customer_id}", context=ctx) as span:
+        with tracer.start_as_current_span("parent_span", context=ctx) as span:
             span.set_attribute("external_customer_id", external_customer_id)
             if external_agent_id:
                 span.set_attribute("external_agent_id", external_agent_id)
-            span.set_attribute("token", token)
             try:
                 result = fn(*args, **kwargs)
                 span.set_status(Status(StatusCode.OK))
@@ -215,6 +286,7 @@ def _trace_sync(
         paid_external_customer_id_var.reset(reset_id_ctx_token)
         paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
         paid_token_var.reset(reset_token_ctx_token)
+        paid_store_prompt_var.reset(reset_store_prompt_ctx_token)
 
 
 async def _trace_async(
@@ -222,6 +294,7 @@ async def _trace_async(
     fn: Callable[..., Union[T, Awaitable[T]]],
     external_agent_id: Optional[str] = None,
     tracing_token: Optional[int] = None,
+    store_prompt: bool = False,
     args: Optional[Tuple] = None,
     kwargs: Optional[Dict] = None,
 ) -> Union[T, Awaitable[T]]:
@@ -237,6 +310,7 @@ async def _trace_async(
     reset_id_ctx_token = paid_external_customer_id_var.set(external_customer_id)
     reset_agent_id_ctx_token = paid_external_agent_id_var.set(external_agent_id)
     reset_token_ctx_token = paid_token_var.set(token)
+    reset_store_prompt_ctx_token = paid_store_prompt_var.set(store_prompt)
 
     # If user set trace context manually
     override_trace_id = tracing_token
@@ -255,11 +329,10 @@ async def _trace_async(
     try:
         tracer = get_paid_tracer()
         logger.info(f"Creating span for external_customer_id: {external_customer_id}")
-        with tracer.start_as_current_span(f"paid.python:{external_customer_id}", context=ctx) as span:
+        with tracer.start_as_current_span("parent_span", context=ctx) as span:
             span.set_attribute("external_customer_id", external_customer_id)
             if external_agent_id:
                 span.set_attribute("external_agent_id", external_agent_id)
-            span.set_attribute("token", token)
             try:
                 if asyncio.iscoroutinefunction(fn):
                     result = await fn(*args, **kwargs)
@@ -275,6 +348,7 @@ async def _trace_async(
         paid_external_customer_id_var.reset(reset_id_ctx_token)
         paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
         paid_token_var.reset(reset_token_ctx_token)
+        paid_store_prompt_var.reset(reset_store_prompt_ctx_token)
 
 
 def generate_tracing_token() -> int:
@@ -378,6 +452,7 @@ def paid_tracing(
     *,
     tracing_token: Optional[int] = None,
     external_agent_id: Optional[str] = None,
+    store_prompt: bool = False,
     collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces",
 ):
     """
@@ -392,6 +467,8 @@ def paid_tracing(
         The external customer ID to associate with the trace.
     external_agent_id : Optional[str], optional
         The external agent ID to associate with the trace, by default None.
+    store_prompt : bool, optional
+        Whether to store prompt contents in span attributes, by default False.
     collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces",
         Most likely unneded to pass in, but can change OTEL collector HTTP endpoint if needed.
 
@@ -437,6 +514,7 @@ def paid_tracing(
                         fn=func,
                         external_agent_id=external_agent_id,
                         tracing_token=tracing_token,
+                        store_prompt=store_prompt,
                         args=args,
                         kwargs=kwargs,
                     )
@@ -464,6 +542,7 @@ def paid_tracing(
                         fn=func,
                         external_agent_id=external_agent_id,
                         tracing_token=tracing_token,
+                        store_prompt=store_prompt,
                         args=args,
                         kwargs=kwargs,
                     )
