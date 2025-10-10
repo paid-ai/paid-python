@@ -62,7 +62,7 @@ class MessagesWrapper:
                 " Make sure to call this method from Paid.trace()."
             )
 
-        with self.tracer.start_as_current_span("trace.anthropic.messages") as span:
+        with self.tracer.start_as_current_span("anthropic.messages.create") as span:
             attributes = {
                 "gen_ai.system": "anthropic",
                 "gen_ai.operation.name": "messages",
@@ -147,7 +147,7 @@ class AsyncMessagesWrapper:
                 " Make sure to call this method from Paid.trace()."
             )
 
-        with self.tracer.start_as_current_span("trace.anthropic.messages") as span:
+        with self.tracer.start_as_current_span("anthropic.messages.create") as span:
             attributes = {
                 "gen_ai.system": "anthropic",
                 "gen_ai.operation.name": "messages",

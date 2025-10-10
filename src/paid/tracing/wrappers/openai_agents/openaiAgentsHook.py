@@ -103,7 +103,7 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
             model_name = str(agent.model if agent.model else get_default_model())
 
             # Start span for this LLM call
-            span = self.tracer.start_span(f"trace.openai.agents.{hook_name}")
+            span = self.tracer.start_span(f"openai.agents.{hook_name}")
             logger.debug(f"{hook_name} : started span")
 
             # Set initial attributes

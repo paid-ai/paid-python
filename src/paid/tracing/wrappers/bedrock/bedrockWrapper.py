@@ -39,7 +39,7 @@ class PaidBedrock:
                 " Make sure to call this method from Paid.trace()."
             )
 
-        with self.tracer.start_as_current_span("trace.bedrock.converse") as span:
+        with self.tracer.start_as_current_span("bedrock.converse") as span:
             attributes = {
                 "gen_ai.system": "bedrock",
                 "gen_ai.operation.name": "converse",

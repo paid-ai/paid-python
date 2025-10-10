@@ -87,7 +87,7 @@ class ChatCompletionsWrapper:
                 " Make sure to call this method from Paid.trace()."
             )
 
-        with self.tracer.start_as_current_span("trace.openai.chat") as span:
+        with self.tracer.start_as_current_span("openai.chat.completions.create") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
@@ -179,7 +179,7 @@ class EmbeddingsWrapper:
                 " Make sure to call this method from Paid.trace()."
             )
 
-        with self.tracer.start_as_current_span("trace.openai.embeddings") as span:
+        with self.tracer.start_as_current_span("openai.embeddings.create") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "embeddings",
@@ -249,7 +249,7 @@ class ImagesWrapper:
         # Extract model for span naming with proper defaults
         model = kwargs.get("model", "")
 
-        with self.tracer.start_as_current_span("trace.openai.images") as span:
+        with self.tracer.start_as_current_span("openai.images.generate") as span:
             attributes = {
                 "gen_ai.request.model": model,  # there's no model in response, so extract from request
                 "gen_ai.system": "openai",
@@ -317,7 +317,7 @@ class ResponsesWrapper:
                 " Make sure to call this method from Paid.trace()."
             )
 
-        with self.tracer.start_as_current_span("trace.openai.responses") as span:
+        with self.tracer.start_as_current_span("openai.responses.create") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
@@ -423,7 +423,7 @@ class AudioTranscriptionsWrapper:
 
         audio_duration = get_audio_duration(file_input) if file_input else None
 
-        with self.tracer.start_as_current_span("trace.openai.audio.transcriptions") as span:
+        with self.tracer.start_as_current_span("openai.audio.transcriptions.create") as span:
             attributes = {
                 "gen_ai.request.model": model,
                 "gen_ai.system": "openai",
@@ -519,7 +519,7 @@ class AsyncChatCompletionsWrapper:
                 " Make sure to call this method from Paid.trace()."
             )
 
-        with self.tracer.start_as_current_span("trace.openai.chat") as span:
+        with self.tracer.start_as_current_span("openai.chat.completions.create") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
@@ -611,7 +611,7 @@ class AsyncEmbeddingsWrapper:
                 " Make sure to call this method from Paid.trace()."
             )
 
-        with self.tracer.start_as_current_span("trace.openai.embeddings") as span:
+        with self.tracer.start_as_current_span("openai.embeddings.create") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "embeddings",
@@ -681,7 +681,7 @@ class AsyncImagesWrapper:
         # Extract model for span naming with proper defaults
         model = kwargs.get("model", "")
 
-        with self.tracer.start_as_current_span("trace.openai.images") as span:
+        with self.tracer.start_as_current_span("openai.images.generate") as span:
             attributes = {
                 "gen_ai.request.model": model,  # there's no model in response, so extract from request
                 "gen_ai.system": "openai",
@@ -749,7 +749,7 @@ class AsyncResponsesWrapper:
                 " Make sure to call this method from Paid.trace()."
             )
 
-        with self.tracer.start_as_current_span("trace.openai.responses") as span:
+        with self.tracer.start_as_current_span("openai.responses.create") as span:
             attributes = {
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
@@ -856,7 +856,7 @@ class AsyncAudioTranscriptionsWrapper:
         # Get audio duration if possible
         audio_duration = get_audio_duration(file_input) if file_input else None
 
-        with self.tracer.start_as_current_span("trace.openai.audio.transcriptions") as span:
+        with self.tracer.start_as_current_span("openai.audio.transcriptions.create") as span:
             attributes = {
                 "gen_ai.request.model": model,
                 "gen_ai.system": "openai",
