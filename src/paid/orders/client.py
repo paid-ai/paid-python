@@ -56,12 +56,12 @@ class OrdersClient:
     def create(
         self,
         *,
-        customer_id: str,
-        billing_contact_id: str,
         name: str,
         start_date: str,
         currency: str,
+        customer_id: typing.Optional[str] = OMIT,
         customer_external_id: typing.Optional[str] = OMIT,
+        billing_contact_id: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         end_date: typing.Optional[str] = OMIT,
         order_lines: typing.Optional[typing.Sequence[OrderLineCreate]] = OMIT,
@@ -70,17 +70,17 @@ class OrdersClient:
         """
         Parameters
         ----------
-        customer_id : str
-
-        billing_contact_id : str
-
         name : str
 
         start_date : str
 
         currency : str
 
+        customer_id : typing.Optional[str]
+
         customer_external_id : typing.Optional[str]
+
+        billing_contact_id : typing.Optional[str]
 
         description : typing.Optional[str]
 
@@ -104,20 +104,21 @@ class OrdersClient:
             token="YOUR_TOKEN",
         )
         client.orders.create(
-            customer_id="customerId",
-            billing_contact_id="billingContactId",
-            name="name",
-            start_date="startDate",
-            currency="currency",
+            customer_external_id="acme-inc",
+            name="Acme Order",
+            description="Acme Order is an order for Acme, Inc.",
+            start_date="2025-01-01",
+            end_date="2026-01-01",
+            currency="USD",
         )
         """
         _response = self._raw_client.create(
-            customer_id=customer_id,
-            billing_contact_id=billing_contact_id,
             name=name,
             start_date=start_date,
             currency=currency,
+            customer_id=customer_id,
             customer_external_id=customer_external_id,
+            billing_contact_id=billing_contact_id,
             description=description,
             end_date=end_date,
             order_lines=order_lines,
@@ -260,12 +261,12 @@ class AsyncOrdersClient:
     async def create(
         self,
         *,
-        customer_id: str,
-        billing_contact_id: str,
         name: str,
         start_date: str,
         currency: str,
+        customer_id: typing.Optional[str] = OMIT,
         customer_external_id: typing.Optional[str] = OMIT,
+        billing_contact_id: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         end_date: typing.Optional[str] = OMIT,
         order_lines: typing.Optional[typing.Sequence[OrderLineCreate]] = OMIT,
@@ -274,17 +275,17 @@ class AsyncOrdersClient:
         """
         Parameters
         ----------
-        customer_id : str
-
-        billing_contact_id : str
-
         name : str
 
         start_date : str
 
         currency : str
 
+        customer_id : typing.Optional[str]
+
         customer_external_id : typing.Optional[str]
+
+        billing_contact_id : typing.Optional[str]
 
         description : typing.Optional[str]
 
@@ -313,23 +314,24 @@ class AsyncOrdersClient:
 
         async def main() -> None:
             await client.orders.create(
-                customer_id="customerId",
-                billing_contact_id="billingContactId",
-                name="name",
-                start_date="startDate",
-                currency="currency",
+                customer_external_id="acme-inc",
+                name="Acme Order",
+                description="Acme Order is an order for Acme, Inc.",
+                start_date="2025-01-01",
+                end_date="2026-01-01",
+                currency="USD",
             )
 
 
         asyncio.run(main())
         """
         _response = await self._raw_client.create(
-            customer_id=customer_id,
-            billing_contact_id=billing_contact_id,
             name=name,
             start_date=start_date,
             currency=currency,
+            customer_id=customer_id,
             customer_external_id=customer_external_id,
+            billing_contact_id=billing_contact_id,
             description=description,
             end_date=end_date,
             order_lines=order_lines,

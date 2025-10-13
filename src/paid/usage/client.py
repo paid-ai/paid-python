@@ -31,7 +31,7 @@ class UsageClient:
         *,
         signals: typing.Optional[typing.Sequence[Signal]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.List[typing.Optional[typing.Any]]:
+    ) -> None:
         """
         Parameters
         ----------
@@ -42,17 +42,18 @@ class UsageClient:
 
         Returns
         -------
-        typing.List[typing.Optional[typing.Any]]
-            Success response
+        None
 
         Examples
         --------
-        from paid import Paid
+        from paid import Paid, Signal
 
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.usage.record_bulk()
+        client.usage.record_bulk(
+            signals=[Signal(), Signal(), Signal()],
+        )
         """
         _response = self._raw_client.record_bulk(signals=signals, request_options=request_options)
         return _response.data
@@ -78,7 +79,7 @@ class AsyncUsageClient:
         *,
         signals: typing.Optional[typing.Sequence[Signal]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> typing.List[typing.Optional[typing.Any]]:
+    ) -> None:
         """
         Parameters
         ----------
@@ -89,14 +90,13 @@ class AsyncUsageClient:
 
         Returns
         -------
-        typing.List[typing.Optional[typing.Any]]
-            Success response
+        None
 
         Examples
         --------
         import asyncio
 
-        from paid import AsyncPaid
+        from paid import AsyncPaid, Signal
 
         client = AsyncPaid(
             token="YOUR_TOKEN",
@@ -104,7 +104,9 @@ class AsyncUsageClient:
 
 
         async def main() -> None:
-            await client.usage.record_bulk()
+            await client.usage.record_bulk(
+                signals=[Signal(), Signal(), Signal()],
+            )
 
 
         asyncio.run(main())

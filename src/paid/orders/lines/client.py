@@ -51,13 +51,25 @@ class LinesClient:
 
         Examples
         --------
-        from paid import Paid
+        from paid import OrderLineCreate, Paid
 
         client = Paid(
             token="YOUR_TOKEN",
         )
         client.orders.lines.update(
             order_id="orderId",
+            lines=[
+                OrderLineCreate(
+                    agent_external_id="acme-agent",
+                    name="Order Line One",
+                    description="Order Line One is an order line for Acme, Inc.",
+                ),
+                OrderLineCreate(
+                    agent_external_id="acme-agent-2",
+                    name="Order Line Two",
+                    description="Order Line Two is an order line for Acme, Inc.",
+                ),
+            ],
         )
         """
         _response = self._raw_client.update(order_id, lines=lines, request_options=request_options)
@@ -105,7 +117,7 @@ class AsyncLinesClient:
         --------
         import asyncio
 
-        from paid import AsyncPaid
+        from paid import AsyncPaid, OrderLineCreate
 
         client = AsyncPaid(
             token="YOUR_TOKEN",
@@ -115,6 +127,18 @@ class AsyncLinesClient:
         async def main() -> None:
             await client.orders.lines.update(
                 order_id="orderId",
+                lines=[
+                    OrderLineCreate(
+                        agent_external_id="acme-agent",
+                        name="Order Line One",
+                        description="Order Line One is an order line for Acme, Inc.",
+                    ),
+                    OrderLineCreate(
+                        agent_external_id="acme-agent-2",
+                        name="Order Line Two",
+                        description="Order Line Two is an order line for Acme, Inc.",
+                    ),
+                ],
             )
 
 

@@ -58,15 +58,15 @@ class ContactsClient:
         first_name: str,
         last_name: str,
         email: str,
-        billing_street: str,
-        billing_city: str,
-        billing_country: str,
-        billing_postal_code: str,
         external_id: typing.Optional[str] = OMIT,
         customer_id: typing.Optional[str] = OMIT,
         customer_external_id: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
+        billing_street: typing.Optional[str] = OMIT,
+        billing_city: typing.Optional[str] = OMIT,
         billing_state_province: typing.Optional[str] = OMIT,
+        billing_country: typing.Optional[str] = OMIT,
+        billing_postal_code: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
@@ -80,14 +80,6 @@ class ContactsClient:
 
         email : str
 
-        billing_street : str
-
-        billing_city : str
-
-        billing_country : str
-
-        billing_postal_code : str
-
         external_id : typing.Optional[str]
 
         customer_id : typing.Optional[str]
@@ -96,7 +88,15 @@ class ContactsClient:
 
         phone : typing.Optional[str]
 
+        billing_street : typing.Optional[str]
+
+        billing_city : typing.Optional[str]
+
         billing_state_province : typing.Optional[str]
+
+        billing_country : typing.Optional[str]
+
+        billing_postal_code : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -114,14 +114,11 @@ class ContactsClient:
             token="YOUR_TOKEN",
         )
         client.contacts.create(
+            customer_external_id="acme-inc",
             salutation="Mr.",
-            first_name="firstName",
-            last_name="lastName",
-            email="email",
-            billing_street="billingStreet",
-            billing_city="billingCity",
-            billing_country="billingCountry",
-            billing_postal_code="billingPostalCode",
+            first_name="John",
+            last_name="Doe",
+            email="john.doe@example.com",
         )
         """
         _response = self._raw_client.create(
@@ -129,15 +126,15 @@ class ContactsClient:
             first_name=first_name,
             last_name=last_name,
             email=email,
-            billing_street=billing_street,
-            billing_city=billing_city,
-            billing_country=billing_country,
-            billing_postal_code=billing_postal_code,
             external_id=external_id,
             customer_id=customer_id,
             customer_external_id=customer_external_id,
             phone=phone,
+            billing_street=billing_street,
+            billing_city=billing_city,
             billing_state_province=billing_state_province,
+            billing_country=billing_country,
+            billing_postal_code=billing_postal_code,
             request_options=request_options,
         )
         return _response.data
@@ -311,15 +308,15 @@ class AsyncContactsClient:
         first_name: str,
         last_name: str,
         email: str,
-        billing_street: str,
-        billing_city: str,
-        billing_country: str,
-        billing_postal_code: str,
         external_id: typing.Optional[str] = OMIT,
         customer_id: typing.Optional[str] = OMIT,
         customer_external_id: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
+        billing_street: typing.Optional[str] = OMIT,
+        billing_city: typing.Optional[str] = OMIT,
         billing_state_province: typing.Optional[str] = OMIT,
+        billing_country: typing.Optional[str] = OMIT,
+        billing_postal_code: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
@@ -333,14 +330,6 @@ class AsyncContactsClient:
 
         email : str
 
-        billing_street : str
-
-        billing_city : str
-
-        billing_country : str
-
-        billing_postal_code : str
-
         external_id : typing.Optional[str]
 
         customer_id : typing.Optional[str]
@@ -349,7 +338,15 @@ class AsyncContactsClient:
 
         phone : typing.Optional[str]
 
+        billing_street : typing.Optional[str]
+
+        billing_city : typing.Optional[str]
+
         billing_state_province : typing.Optional[str]
+
+        billing_country : typing.Optional[str]
+
+        billing_postal_code : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -372,14 +369,11 @@ class AsyncContactsClient:
 
         async def main() -> None:
             await client.contacts.create(
+                customer_external_id="acme-inc",
                 salutation="Mr.",
-                first_name="firstName",
-                last_name="lastName",
-                email="email",
-                billing_street="billingStreet",
-                billing_city="billingCity",
-                billing_country="billingCountry",
-                billing_postal_code="billingPostalCode",
+                first_name="John",
+                last_name="Doe",
+                email="john.doe@example.com",
             )
 
 
@@ -390,15 +384,15 @@ class AsyncContactsClient:
             first_name=first_name,
             last_name=last_name,
             email=email,
-            billing_street=billing_street,
-            billing_city=billing_city,
-            billing_country=billing_country,
-            billing_postal_code=billing_postal_code,
             external_id=external_id,
             customer_id=customer_id,
             customer_external_id=customer_external_id,
             phone=phone,
+            billing_street=billing_street,
+            billing_city=billing_city,
             billing_state_province=billing_state_province,
+            billing_country=billing_country,
+            billing_postal_code=billing_postal_code,
             request_options=request_options,
         )
         return _response.data

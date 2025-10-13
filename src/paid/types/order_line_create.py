@@ -6,13 +6,40 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
+from .order_line_attribute_create import OrderLineAttributeCreate
 
 
 class OrderLineCreate(UniversalBaseModel):
-    agent_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="agentId")] = None
-    agent_external_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="agentExternalId")] = None
-    name: typing.Optional[str] = None
-    description: typing.Optional[str] = None
+    agent_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="agentId")] = pydantic.Field(
+        default=None
+    )
+    """
+    Paid's internal ID for the agent/product
+    """
+
+    agent_external_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="agentExternalId")] = (
+        pydantic.Field(default=None)
+    )
+    """
+    The external ID of the agent/product i.e. the id within your system
+    """
+
+    name: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Name of the order line
+    """
+
+    description: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Description of the order line
+    """
+
+    agent_attributes: typing_extensions.Annotated[
+        typing.Optional[typing.List[OrderLineAttributeCreate]], FieldMetadata(alias="agentAttributes")
+    ] = pydantic.Field(default=None)
+    """
+    Optional array of custom agent attributes to override default pricing, allowing per customer pricing. If not provided, attributes will be auto-generated from the product definition.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
