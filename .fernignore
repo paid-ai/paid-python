@@ -1,8 +1,11 @@
 # Specify files that shouldn't be modified by Fern
-
+CLAUDE.md
 README.md
-
-assets
-
+LICENSE
+assets/
 src/paid/client.py
 src/paid/tracing/
+pyproject.toml
+poetry.lock
+.github/workflows/ci.yml
+.gitignore

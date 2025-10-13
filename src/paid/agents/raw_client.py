@@ -60,6 +60,7 @@ class RawAgentsClient:
         description: str,
         agent_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        active: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Agent]:
         """
@@ -72,6 +73,8 @@ class RawAgentsClient:
         agent_code : typing.Optional[str]
 
         external_id : typing.Optional[str]
+
+        active : typing.Optional[bool]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -89,6 +92,7 @@ class RawAgentsClient:
                 "description": description,
                 "agentCode": agent_code,
                 "externalId": external_id,
+                "active": active,
             },
             headers={
                 "content-type": "application/json",
@@ -423,6 +427,7 @@ class AsyncRawAgentsClient:
         description: str,
         agent_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        active: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Agent]:
         """
@@ -435,6 +440,8 @@ class AsyncRawAgentsClient:
         agent_code : typing.Optional[str]
 
         external_id : typing.Optional[str]
+
+        active : typing.Optional[bool]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -452,6 +459,7 @@ class AsyncRawAgentsClient:
                 "description": description,
                 "agentCode": agent_code,
                 "externalId": external_id,
+                "active": active,
             },
             headers={
                 "content-type": "application/json",

@@ -2,4 +2,6 @@
 
 import typing
 
-PricingModelType = typing.Union[typing.Literal["PerUnit", "VolumePricing", "GraduatedPricing"], typing.Any]
+PricingModelType = typing.Union[
+    typing.Literal["PerUnit", "VolumePricing", "GraduatedPricing", "PrepaidCredits"], typing.Any
+]

@@ -13,6 +13,7 @@ from .tax_exempt_status import TaxExemptStatus
 
 class CustomerUpdate(UniversalBaseModel):
     name: typing.Optional[str] = None
+    email: typing.Optional[str] = None
     external_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="externalId")] = None
     phone: typing.Optional[str] = None
     employee_count: typing_extensions.Annotated[typing.Optional[float], FieldMetadata(alias="employeeCount")] = None
@@ -25,6 +26,7 @@ class CustomerUpdate(UniversalBaseModel):
     ] = None
     website: typing.Optional[str] = None
     billing_address: typing_extensions.Annotated[typing.Optional[Address], FieldMetadata(alias="billingAddress")] = None
+    vat_number: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="vatNumber")] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

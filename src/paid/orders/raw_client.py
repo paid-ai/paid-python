@@ -56,12 +56,12 @@ class RawOrdersClient:
     def create(
         self,
         *,
-        customer_id: str,
-        billing_contact_id: str,
         name: str,
         start_date: str,
         currency: str,
+        customer_id: typing.Optional[str] = OMIT,
         customer_external_id: typing.Optional[str] = OMIT,
+        billing_contact_id: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         end_date: typing.Optional[str] = OMIT,
         order_lines: typing.Optional[typing.Sequence[OrderLineCreate]] = OMIT,
@@ -70,17 +70,17 @@ class RawOrdersClient:
         """
         Parameters
         ----------
-        customer_id : str
-
-        billing_contact_id : str
-
         name : str
 
         start_date : str
 
         currency : str
 
+        customer_id : typing.Optional[str]
+
         customer_external_id : typing.Optional[str]
+
+        billing_contact_id : typing.Optional[str]
 
         description : typing.Optional[str]
 
@@ -271,12 +271,12 @@ class AsyncRawOrdersClient:
     async def create(
         self,
         *,
-        customer_id: str,
-        billing_contact_id: str,
         name: str,
         start_date: str,
         currency: str,
+        customer_id: typing.Optional[str] = OMIT,
         customer_external_id: typing.Optional[str] = OMIT,
+        billing_contact_id: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         end_date: typing.Optional[str] = OMIT,
         order_lines: typing.Optional[typing.Sequence[OrderLineCreate]] = OMIT,
@@ -285,17 +285,17 @@ class AsyncRawOrdersClient:
         """
         Parameters
         ----------
-        customer_id : str
-
-        billing_contact_id : str
-
         name : str
 
         start_date : str
 
         currency : str
 
+        customer_id : typing.Optional[str]
+
         customer_external_id : typing.Optional[str]
+
+        billing_contact_id : typing.Optional[str]
 
         description : typing.Optional[str]
 

@@ -58,6 +58,7 @@ class AgentsClient:
         description: str,
         agent_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        active: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Agent:
         """
@@ -70,6 +71,8 @@ class AgentsClient:
         agent_code : typing.Optional[str]
 
         external_id : typing.Optional[str]
+
+        active : typing.Optional[bool]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -87,8 +90,9 @@ class AgentsClient:
             token="YOUR_TOKEN",
         )
         client.agents.create(
-            name="name",
-            description="description",
+            name="Acme Agent",
+            description="Acme Agent is an AI agent that does things.",
+            external_id="acme-agent",
         )
         """
         _response = self._raw_client.create(
@@ -96,6 +100,7 @@ class AgentsClient:
             description=description,
             agent_code=agent_code,
             external_id=external_id,
+            active=active,
             request_options=request_options,
         )
         return _response.data
@@ -167,13 +172,53 @@ class AgentsClient:
 
         Examples
         --------
-        from paid import Paid
+        from paid import (
+            AgentAttribute,
+            AgentPricePoint,
+            AgentPricePointTiers,
+            Paid,
+            Pricing,
+        )
 
         client = Paid(
             token="YOUR_TOKEN",
         )
         client.agents.update(
             agent_id="agentId",
+            name="Acme Agent (Updated)",
+            agent_attributes=[
+                AgentAttribute(
+                    name="Emails sent signal",
+                    active=True,
+                    pricing=Pricing(
+                        event_name="emails_sent",
+                        taxable=True,
+                        charge_type="usage",
+                        pricing_model="PerUnit",
+                        billing_frequency="monthly",
+                        price_points={
+                            "USD": AgentPricePoint(
+                                tiers=[
+                                    AgentPricePointTiers(
+                                        min_quantity=0.0,
+                                        max_quantity=10.0,
+                                        unit_price=100.0,
+                                    ),
+                                    AgentPricePointTiers(
+                                        min_quantity=11.0,
+                                        max_quantity=100.0,
+                                        unit_price=90.0,
+                                    ),
+                                    AgentPricePointTiers(
+                                        min_quantity=101.0,
+                                        unit_price=80.0,
+                                    ),
+                                ],
+                            )
+                        },
+                    ),
+                )
+            ],
         )
         """
         _response = self._raw_client.update(
@@ -282,13 +327,32 @@ class AgentsClient:
 
         Examples
         --------
-        from paid import Paid
+        from paid import AgentAttribute, AgentPricePoint, Paid, Pricing
 
         client = Paid(
             token="YOUR_TOKEN",
         )
         client.agents.update_by_external_id(
             external_id_="externalId",
+            name="Acme Agent (Updated)",
+            agent_attributes=[
+                AgentAttribute(
+                    name="Emails sent signal",
+                    active=True,
+                    pricing=Pricing(
+                        event_name="emails_sent",
+                        taxable=True,
+                        charge_type="usage",
+                        pricing_model="PerUnit",
+                        billing_frequency="monthly",
+                        price_points={
+                            "USD": AgentPricePoint(
+                                unit_price=150.0,
+                            )
+                        },
+                    ),
+                )
+            ],
         )
         """
         _response = self._raw_client.update_by_external_id(
@@ -387,6 +451,7 @@ class AsyncAgentsClient:
         description: str,
         agent_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        active: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Agent:
         """
@@ -399,6 +464,8 @@ class AsyncAgentsClient:
         agent_code : typing.Optional[str]
 
         external_id : typing.Optional[str]
+
+        active : typing.Optional[bool]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -421,8 +488,9 @@ class AsyncAgentsClient:
 
         async def main() -> None:
             await client.agents.create(
-                name="name",
-                description="description",
+                name="Acme Agent",
+                description="Acme Agent is an AI agent that does things.",
+                external_id="acme-agent",
             )
 
 
@@ -433,6 +501,7 @@ class AsyncAgentsClient:
             description=description,
             agent_code=agent_code,
             external_id=external_id,
+            active=active,
             request_options=request_options,
         )
         return _response.data
@@ -514,7 +583,13 @@ class AsyncAgentsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaid
+        from paid import (
+            AgentAttribute,
+            AgentPricePoint,
+            AgentPricePointTiers,
+            AsyncPaid,
+            Pricing,
+        )
 
         client = AsyncPaid(
             token="YOUR_TOKEN",
@@ -524,6 +599,40 @@ class AsyncAgentsClient:
         async def main() -> None:
             await client.agents.update(
                 agent_id="agentId",
+                name="Acme Agent (Updated)",
+                agent_attributes=[
+                    AgentAttribute(
+                        name="Emails sent signal",
+                        active=True,
+                        pricing=Pricing(
+                            event_name="emails_sent",
+                            taxable=True,
+                            charge_type="usage",
+                            pricing_model="PerUnit",
+                            billing_frequency="monthly",
+                            price_points={
+                                "USD": AgentPricePoint(
+                                    tiers=[
+                                        AgentPricePointTiers(
+                                            min_quantity=0.0,
+                                            max_quantity=10.0,
+                                            unit_price=100.0,
+                                        ),
+                                        AgentPricePointTiers(
+                                            min_quantity=11.0,
+                                            max_quantity=100.0,
+                                            unit_price=90.0,
+                                        ),
+                                        AgentPricePointTiers(
+                                            min_quantity=101.0,
+                                            unit_price=80.0,
+                                        ),
+                                    ],
+                                )
+                            },
+                        ),
+                    )
+                ],
             )
 
 
@@ -655,7 +764,7 @@ class AsyncAgentsClient:
         --------
         import asyncio
 
-        from paid import AsyncPaid
+        from paid import AgentAttribute, AgentPricePoint, AsyncPaid, Pricing
 
         client = AsyncPaid(
             token="YOUR_TOKEN",
@@ -665,6 +774,25 @@ class AsyncAgentsClient:
         async def main() -> None:
             await client.agents.update_by_external_id(
                 external_id_="externalId",
+                name="Acme Agent (Updated)",
+                agent_attributes=[
+                    AgentAttribute(
+                        name="Emails sent signal",
+                        active=True,
+                        pricing=Pricing(
+                            event_name="emails_sent",
+                            taxable=True,
+                            charge_type="usage",
+                            pricing_model="PerUnit",
+                            billing_frequency="monthly",
+                            price_points={
+                                "USD": AgentPricePoint(
+                                    unit_price=150.0,
+                                )
+                            },
+                        ),
+                    )
+                ],
             )
 
 
