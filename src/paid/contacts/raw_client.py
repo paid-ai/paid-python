@@ -59,15 +59,15 @@ class RawContactsClient:
         first_name: str,
         last_name: str,
         email: str,
-        billing_street: str,
-        billing_city: str,
-        billing_country: str,
-        billing_postal_code: str,
         external_id: typing.Optional[str] = OMIT,
         customer_id: typing.Optional[str] = OMIT,
         customer_external_id: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
+        billing_street: typing.Optional[str] = OMIT,
+        billing_city: typing.Optional[str] = OMIT,
         billing_state_province: typing.Optional[str] = OMIT,
+        billing_country: typing.Optional[str] = OMIT,
+        billing_postal_code: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Contact]:
         """
@@ -81,14 +81,6 @@ class RawContactsClient:
 
         email : str
 
-        billing_street : str
-
-        billing_city : str
-
-        billing_country : str
-
-        billing_postal_code : str
-
         external_id : typing.Optional[str]
 
         customer_id : typing.Optional[str]
@@ -97,7 +89,15 @@ class RawContactsClient:
 
         phone : typing.Optional[str]
 
+        billing_street : typing.Optional[str]
+
+        billing_city : typing.Optional[str]
+
         billing_state_province : typing.Optional[str]
+
+        billing_country : typing.Optional[str]
+
+        billing_postal_code : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -316,15 +316,15 @@ class AsyncRawContactsClient:
         first_name: str,
         last_name: str,
         email: str,
-        billing_street: str,
-        billing_city: str,
-        billing_country: str,
-        billing_postal_code: str,
         external_id: typing.Optional[str] = OMIT,
         customer_id: typing.Optional[str] = OMIT,
         customer_external_id: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
+        billing_street: typing.Optional[str] = OMIT,
+        billing_city: typing.Optional[str] = OMIT,
         billing_state_province: typing.Optional[str] = OMIT,
+        billing_country: typing.Optional[str] = OMIT,
+        billing_postal_code: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Contact]:
         """
@@ -338,14 +338,6 @@ class AsyncRawContactsClient:
 
         email : str
 
-        billing_street : str
-
-        billing_city : str
-
-        billing_country : str
-
-        billing_postal_code : str
-
         external_id : typing.Optional[str]
 
         customer_id : typing.Optional[str]
@@ -354,7 +346,15 @@ class AsyncRawContactsClient:
 
         phone : typing.Optional[str]
 
+        billing_street : typing.Optional[str]
+
+        billing_city : typing.Optional[str]
+
         billing_state_province : typing.Optional[str]
+
+        billing_country : typing.Optional[str]
+
+        billing_postal_code : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

@@ -2,4 +2,4 @@
 
 import typing
 
-BillingFrequency = typing.Union[typing.Literal["Monthly", "Quarterly", "Annual"], typing.Any]
+BillingFrequency = typing.Union[typing.Literal["monthly", "quarterly", "annual"], typing.Any]

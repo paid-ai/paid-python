@@ -6,7 +6,6 @@ from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.http_response import AsyncHttpResponse, HttpResponse
-from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
 from ..types.signal import Signal
@@ -24,7 +23,7 @@ class RawUsageClient:
         *,
         signals: typing.Optional[typing.Sequence[Signal]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[typing.List[typing.Optional[typing.Any]]]:
+    ) -> HttpResponse[None]:
         """
         Parameters
         ----------
@@ -35,8 +34,7 @@ class RawUsageClient:
 
         Returns
         -------
-        HttpResponse[typing.List[typing.Optional[typing.Any]]]
-            Success response
+        HttpResponse[None]
         """
         _response = self._client_wrapper.httpx_client.request(
             "usage/signals/bulk",
@@ -54,14 +52,7 @@ class RawUsageClient:
         )
         try:
             if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    typing.List[typing.Optional[typing.Any]],
-                    parse_obj_as(
-                        type_=typing.List[typing.Optional[typing.Any]],  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
+                return HttpResponse(response=_response, data=None)
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
@@ -77,7 +68,7 @@ class AsyncRawUsageClient:
         *,
         signals: typing.Optional[typing.Sequence[Signal]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[typing.List[typing.Optional[typing.Any]]]:
+    ) -> AsyncHttpResponse[None]:
         """
         Parameters
         ----------
@@ -88,8 +79,7 @@ class AsyncRawUsageClient:
 
         Returns
         -------
-        AsyncHttpResponse[typing.List[typing.Optional[typing.Any]]]
-            Success response
+        AsyncHttpResponse[None]
         """
         _response = await self._client_wrapper.httpx_client.request(
             "usage/signals/bulk",
@@ -107,14 +97,7 @@ class AsyncRawUsageClient:
         )
         try:
             if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    typing.List[typing.Optional[typing.Any]],
-                    parse_obj_as(
-                        type_=typing.List[typing.Optional[typing.Any]],  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
+                return AsyncHttpResponse(response=_response, data=None)
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)

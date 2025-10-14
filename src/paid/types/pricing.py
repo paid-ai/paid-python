@@ -15,6 +15,7 @@ from .pricing_model_type import PricingModelType
 class Pricing(UniversalBaseModel):
     event_name: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="eventName")] = None
     taxable: bool
+    credit_cost: typing_extensions.Annotated[typing.Optional[float], FieldMetadata(alias="creditCost")] = None
     charge_type: typing_extensions.Annotated[ChargeType, FieldMetadata(alias="chargeType")]
     pricing_model: typing_extensions.Annotated[PricingModelType, FieldMetadata(alias="pricingModel")]
     billing_frequency: typing_extensions.Annotated[BillingFrequency, FieldMetadata(alias="billingFrequency")]
