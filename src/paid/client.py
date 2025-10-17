@@ -171,6 +171,7 @@ class Paid:
         fn: typing.Callable[[], T],
         external_agent_id: typing.Optional[str] = None,
         tracing_token: typing.Optional[int] = None,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = None,
         args: typing.Optional[typing.Tuple] = None,
         kwargs: typing.Optional[typing.Dict] = None,
     ) -> T:
@@ -185,6 +186,10 @@ class Paid:
             The function to be traced.
         external_agent_id : typing.Optional[str], optional
             The external agent ID to associate with the trace, by default None.
+        tracing_token : typing.Optional[int], optional
+            The tracing token for distributed tracing, by default None.
+        metadata : typing.Optional[typing.Dict[str, typing.Any]], optional
+            Additional metadata to associate with the trace, by default None.
         args : typing.Optional[typing.Tuple], optional
             Positional arguments to pass to the function, by default None.
         kwargs : typing.Optional[typing.Dict], optional
@@ -200,6 +205,7 @@ class Paid:
             fn=fn,
             external_agent_id=external_agent_id,
             tracing_token=tracing_token,
+            metadata=metadata,
             args=args,
             kwargs=kwargs,
         )
@@ -391,6 +397,7 @@ class AsyncPaid:
         fn: typing.Callable[[], typing.Awaitable[T]],
         external_agent_id: typing.Optional[str] = None,
         tracing_token: typing.Optional[int] = None,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = None,
         args: typing.Optional[typing.Tuple] = None,
         kwargs: typing.Optional[typing.Dict] = None,
     ) -> typing.Union[T, typing.Awaitable[T]]:
@@ -405,6 +412,10 @@ class AsyncPaid:
             The async function to be traced.
         external_agent_id : typing.Optional[str], optional
             The external agent ID to associate with the trace, by default None.
+        tracing_token : typing.Optional[int], optional
+            The tracing token for distributed tracing, by default None.
+        metadata : typing.Optional[typing.Dict[str, typing.Any]], optional
+            Additional metadata to associate with the trace, by default None.
         args : typing.Optional[typing.Tuple], optional
             Positional arguments to pass to the function, by default None.
         kwargs : typing.Optional[typing.Dict], optional
@@ -420,6 +431,7 @@ class AsyncPaid:
             fn=fn,
             external_agent_id=external_agent_id,
             tracing_token=tracing_token,
+            metadata=metadata,
             args=args,
             kwargs=kwargs,
         )
