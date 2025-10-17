@@ -34,7 +34,6 @@ def _signal(event_name: str, enable_cost_tracing: bool, data: typing.Optional[ty
             "external_customer_id": external_customer_id,
             "external_agent_id": external_agent_id,
             "event_name": event_name,
-            "token": token,
         }
 
         if enable_cost_tracing:
@@ -52,3 +51,4 @@ def _signal(event_name: str, enable_cost_tracing: bool, data: typing.Optional[ty
         span.set_attributes(attributes)
         # Mark span as successful
         span.set_status(Status(StatusCode.OK))
+        logger.info(f"Signal [{event_name}] was sent")

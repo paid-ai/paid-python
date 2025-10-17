@@ -6,7 +6,8 @@ import functools
 import logging
 import os
 import signal
-from typing import Awaitable, Callable, Dict, Optional, Tuple, TypeVar, Union
+import json
+from typing import Any, Awaitable, Callable, Dict, Optional, Tuple, TypeVar, Union
 
 import dotenv
 from opentelemetry import trace
@@ -47,6 +48,8 @@ paid_token_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar("
 paid_trace_id: contextvars.ContextVar[Optional[int]] = contextvars.ContextVar("paid_trace_id", default=None)
 # flag to enable storing prompt contents
 paid_store_prompt_var: contextvars.ContextVar[Optional[bool]] = contextvars.ContextVar("paid_store_prompt", default=False)
+# user metadata
+paid_user_metadata_var: contextvars.ContextVar[Optional[Dict[str, Any]]] = contextvars.ContextVar("paid_user_metadata", default=None)
 
 T = TypeVar("T")
 
@@ -104,6 +107,14 @@ class PaidSpanProcessor(SpanProcessor):
         agent_id = paid_external_agent_id_var.get()
         if agent_id:
             span.set_attribute("external_agent_id", agent_id)
+
+        metadata = paid_user_metadata_var.get()
+        if metadata:
+            try:
+                span.set_attribute("metadata", json.dumps(metadata))
+            except (TypeError, ValueError) as e:
+                logger.warning(f"Failed to serialize metadata to JSON: {e}. Using string representation instead.")
+                span.set_attribute("metadata", str(metadata))
 
     def on_end(self, span: ReadableSpan) -> None:
         """Filter out prompt and response contents unless explicitly asked to store"""
@@ -236,6 +247,7 @@ def _trace_sync(
     external_agent_id: Optional[str] = None,
     tracing_token: Optional[int] = None,
     store_prompt: bool = False,
+    metadata: Optional[Dict[str, Any]] = None,
     args: Optional[Tuple] = None,
     kwargs: Optional[Dict] = None,
 ) -> T:
@@ -252,6 +264,7 @@ def _trace_sync(
     reset_agent_id_ctx_token = paid_external_agent_id_var.set(external_agent_id)
     reset_token_ctx_token = paid_token_var.set(token)
     reset_store_prompt_ctx_token = paid_store_prompt_var.set(store_prompt)
+    reset_user_metadata_ctx_token = paid_user_metadata_var.set(metadata)
 
     # If user set trace context manually
     override_trace_id = tracing_token
@@ -287,6 +300,7 @@ def _trace_sync(
         paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
         paid_token_var.reset(reset_token_ctx_token)
         paid_store_prompt_var.reset(reset_store_prompt_ctx_token)
+        paid_user_metadata_var.reset(reset_user_metadata_ctx_token)
 
 
 async def _trace_async(
@@ -295,6 +309,7 @@ async def _trace_async(
     external_agent_id: Optional[str] = None,
     tracing_token: Optional[int] = None,
     store_prompt: bool = False,
+    metadata: Optional[Dict[str, Any]] = None,
     args: Optional[Tuple] = None,
     kwargs: Optional[Dict] = None,
 ) -> Union[T, Awaitable[T]]:
@@ -311,6 +326,7 @@ async def _trace_async(
     reset_agent_id_ctx_token = paid_external_agent_id_var.set(external_agent_id)
     reset_token_ctx_token = paid_token_var.set(token)
     reset_store_prompt_ctx_token = paid_store_prompt_var.set(store_prompt)
+    reset_user_metadata_ctx_token = paid_user_metadata_var.set(metadata)
 
     # If user set trace context manually
     override_trace_id = tracing_token
@@ -349,6 +365,7 @@ async def _trace_async(
         paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
         paid_token_var.reset(reset_token_ctx_token)
         paid_store_prompt_var.reset(reset_store_prompt_ctx_token)
+        paid_user_metadata_var.reset(reset_user_metadata_ctx_token)
 
 
 def generate_tracing_token() -> int:
@@ -454,6 +471,7 @@ def paid_tracing(
     external_agent_id: Optional[str] = None,
     store_prompt: bool = False,
     collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces",
+    metadata: Optional[Dict[str, Any]] = None,
 ):
     """
     Decorator for tracing function execution with Paid.
@@ -515,6 +533,7 @@ def paid_tracing(
                         external_agent_id=external_agent_id,
                         tracing_token=tracing_token,
                         store_prompt=store_prompt,
+                        metadata=metadata,
                         args=args,
                         kwargs=kwargs,
                     )
@@ -543,6 +562,7 @@ def paid_tracing(
                         external_agent_id=external_agent_id,
                         tracing_token=tracing_token,
                         store_prompt=store_prompt,
+                        metadata=metadata,
                         args=args,
                         kwargs=kwargs,
                     )

@@ -11,6 +11,7 @@ class Signal(UniversalBaseModel):
     agent_id: typing.Optional[str] = None
     external_agent_id: typing.Optional[str] = None
     customer_id: typing.Optional[str] = None
+    external_customer_id: typing.Optional[str] = None
     data: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
 
     if IS_PYDANTIC_V2:
