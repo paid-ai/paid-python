@@ -110,11 +110,25 @@ class PaidSpanProcessor(SpanProcessor):
 
         metadata = paid_user_metadata_var.get()
         if metadata:
-            try:
-                span.set_attribute("metadata", json.dumps(metadata))
-            except (TypeError, ValueError) as e:
-                logger.warning(f"Failed to serialize metadata to JSON: {e}. Using string representation instead.")
-                span.set_attribute("metadata", str(metadata))
+            metadata_attributes: dict[str, Any] = {}
+
+            def flatten_dict(d: dict[str, Any], parent_key: str = "") -> None:
+                """Recursively flatten nested dictionaries into dot-notation keys."""
+                for k, v in d.items():
+                    new_key = f"{parent_key}.{k}" if parent_key else k
+                    if isinstance(v, dict):
+                        flatten_dict(v, new_key)
+                    else:
+                        metadata_attributes[new_key] = v
+
+            flatten_dict(metadata)
+
+            # Add all flattened metadata attributes to the span
+            for key, value in metadata_attributes.items():
+                span.set_attribute(f"metadata.{key}", value)
+
+
+
 
     def on_end(self, span: ReadableSpan) -> None:
         """Filter out prompt and response contents unless explicitly asked to store"""
