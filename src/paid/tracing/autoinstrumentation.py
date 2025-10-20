@@ -13,30 +13,35 @@ from .tracing import _initialize_tracing, logger
 # Safe imports for instrumentation libraries
 try:
     from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
+
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
 
 try:
     from opentelemetry.instrumentation.google_generativeai import GoogleGenerativeAiInstrumentor
+
     GEMINI_AVAILABLE = True
 except ImportError:
     GEMINI_AVAILABLE = False
 
 try:
     from opentelemetry.instrumentation.openai import OpenAIInstrumentor
+
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
 
 try:
     from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
+
     OPENAI_AGENTS_AVAILABLE = True
 except ImportError:
     OPENAI_AGENTS_AVAILABLE = False
 
 try:
     from openinference.instrumentation.bedrock import BedrockInstrumentor
+
     BEDROCK_AVAILABLE = True
 except ImportError:
     BEDROCK_AVAILABLE = False
@@ -108,7 +113,9 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
         elif library == "bedrock":
             _instrument_bedrock()
         else:
-            logger.warning(f"Unknown library '{library}' - supported libraries: anthropic, gemini, openai, openai-agents, bedrock")
+            logger.warning(
+                f"Unknown library '{library}' - supported libraries: anthropic, gemini, openai, openai-agents, bedrock"
+            )
 
     logger.info(f"Auto-instrumentation enabled for: {', '.join(_initialized_instrumentors)}")
 
