@@ -6,7 +6,6 @@ import functools
 import logging
 import os
 import signal
-import json
 from typing import Any, Awaitable, Callable, Dict, Optional, Tuple, TypeVar, Union
 
 import dotenv
@@ -47,9 +46,13 @@ paid_token_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar("
 # trace id storage (generated from token)
 paid_trace_id: contextvars.ContextVar[Optional[int]] = contextvars.ContextVar("paid_trace_id", default=None)
 # flag to enable storing prompt contents
-paid_store_prompt_var: contextvars.ContextVar[Optional[bool]] = contextvars.ContextVar("paid_store_prompt", default=False)
+paid_store_prompt_var: contextvars.ContextVar[Optional[bool]] = contextvars.ContextVar(
+    "paid_store_prompt", default=False
+)
 # user metadata
-paid_user_metadata_var: contextvars.ContextVar[Optional[Dict[str, Any]]] = contextvars.ContextVar("paid_user_metadata", default=None)
+paid_user_metadata_var: contextvars.ContextVar[Optional[Dict[str, Any]]] = contextvars.ContextVar(
+    "paid_user_metadata", default=None
+)
 
 T = TypeVar("T")
 
@@ -81,6 +84,7 @@ class PaidSpanProcessor(SpanProcessor):
     2. Automatically adds external_customer_id and external_agent_id attributes
        to all spans based on context variables set by the tracing decorator.
     """
+
     SPAN_NAME_PREFIX = "paid.trace."
     PROMPT_ATTRIBUTES_PREFIXES = {
         "gen_ai.prompt",
@@ -127,9 +131,6 @@ class PaidSpanProcessor(SpanProcessor):
             for key, value in metadata_attributes.items():
                 span.set_attribute(f"metadata.{key}", value)
 
-
-
-
     def on_end(self, span: ReadableSpan) -> None:
         """Filter out prompt and response contents unless explicitly asked to store"""
         store_prompt = paid_store_prompt_var.get()
@@ -141,12 +142,13 @@ class PaidSpanProcessor(SpanProcessor):
         if original_attributes:
             # Filter out prompt-related attributes
             filtered_attrs = {
-                k: v for k, v in original_attributes.items()
+                k: v
+                for k, v in original_attributes.items()
                 if not any(k.startswith(prefix) for prefix in self.PROMPT_ATTRIBUTES_PREFIXES)
             }
             # Temporarily replace attributes for export
             # This works because the exporter reads attributes during serialization
-            object.__setattr__(span, '_attributes', filtered_attrs)
+            object.__setattr__(span, "_attributes", filtered_attrs)
 
     def shutdown(self) -> None:
         """Called when the processor is shut down. No action needed."""
