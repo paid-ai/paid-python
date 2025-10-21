@@ -480,20 +480,12 @@ def unset_tracing_token():
     _ = paid_trace_id.set(None)
 
 
-def paid_tracing(
-    external_customer_id: str,
-    *,
-    tracing_token: Optional[int] = None,
-    external_agent_id: Optional[str] = None,
-    store_prompt: bool = False,
-    collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces",
-    metadata: Optional[Dict[str, Any]] = None,
-):
+class paid_tracing:
     """
-    Decorator for tracing function execution with Paid.
+    Decorator and context manager for tracing with Paid.
 
-    This decorator automatically handles both synchronous and asynchronous functions,
-    providing the same functionality as client.trace() but in a more convenient form.
+    This class can be used both as a decorator and as a context manager (with/async with),
+    providing flexible tracing capabilities for both functions and code blocks.
 
     Parameters
     ----------
@@ -501,34 +493,203 @@ def paid_tracing(
         The external customer ID to associate with the trace.
     external_agent_id : Optional[str], optional
         The external agent ID to associate with the trace, by default None.
+    tracing_token : Optional[int], optional
+        Optional tracing token for distributed tracing, by default None.
     store_prompt : bool, optional
         Whether to store prompt contents in span attributes, by default False.
-    collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces",
-        Most likely unneded to pass in, but can change OTEL collector HTTP endpoint if needed.
-
-    Returns
-    -------
-    Callable
-        The decorated function with tracing capabilities.
+    collector_endpoint: Optional[str], optional
+        OTEL collector HTTP endpoint, by default "https://collector.agentpaid.io:4318/v1/traces".
+    metadata : Optional[Dict[str, Any]], optional
+        Optional metadata to attach to the trace, by default None.
 
     Examples
     --------
-    @paid_tracing(external_customer_id="customer123", external_agent_id="agent456")
-    def my_function(arg1, arg2):
-        return arg1 + arg2
+    As a decorator (sync):
+    >>> @paid_tracing(external_customer_id="customer123", external_agent_id="agent456")
+    ... def my_function(arg1, arg2):
+    ...     return arg1 + arg2
 
-    @paid_tracing(external_customer_id="customer123")
-    async def my_async_function(arg1, arg2):
-        return arg1 + arg2
+    As a decorator (async):
+    >>> @paid_tracing(external_customer_id="customer123")
+    ... async def my_async_function(arg1, arg2):
+    ...     return arg1 + arg2
+
+    As a context manager (sync):
+    >>> with paid_tracing(external_customer_id="customer123", external_agent_id="agent456"):
+    ...     result = expensive_computation()
+
+    As a context manager (async):
+    >>> async with paid_tracing(external_customer_id="customer123"):
+    ...     result = await async_operation()
 
     Notes
     -----
-    If paid client and tracing are not already initialized, this decorator will automatically
-    initialize it using the PAID_API_KEY environment variable. If even then initialization fails,
-    the decorator will act as a noop.
+    If tracing is not already initialized, the decorator will automatically
+    initialize it using the PAID_API_KEY environment variable.
     """
 
-    def decorator(func: Callable) -> Callable:
+    def __init__(
+        self,
+        external_customer_id: str,
+        *,
+        external_agent_id: Optional[str] = None,
+        tracing_token: Optional[int] = None,
+        store_prompt: bool = False,
+        collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces",
+        metadata: Optional[Dict[str, Any]] = None,
+    ):
+        self.external_customer_id = external_customer_id
+        self.external_agent_id = external_agent_id
+        self.tracing_token = tracing_token
+        self.store_prompt = store_prompt
+        self.collector_endpoint = collector_endpoint
+        self.metadata = metadata
+        self._span: Any = None
+        self._reset_tokens: Optional[
+            Tuple[
+                contextvars.Token[Optional[str]],
+                contextvars.Token[Optional[str]],
+                contextvars.Token[Optional[str]],
+                contextvars.Token[Optional[bool]],
+                contextvars.Token[Optional[Dict[str, Any]]],
+            ]
+        ] = None
+
+    def _setup_context(self) -> Optional[Context]:
+        """Set up context variables and return OTEL context if needed."""
+        token = get_token()
+        if not token:
+            raise RuntimeError("No token found - tracing is not initialized. Call Paid.initialize_tracing() first.")
+
+        # Set context variables
+        reset_id_ctx_token = paid_external_customer_id_var.set(self.external_customer_id)
+        reset_agent_id_ctx_token = paid_external_agent_id_var.set(self.external_agent_id)
+        reset_token_ctx_token = paid_token_var.set(token)
+        reset_store_prompt_ctx_token = paid_store_prompt_var.set(self.store_prompt)
+        reset_user_metadata_ctx_token = paid_user_metadata_var.set(self.metadata)
+
+        # Store reset tokens for cleanup
+        self._reset_tokens = (
+            reset_id_ctx_token,
+            reset_agent_id_ctx_token,
+            reset_token_ctx_token,
+            reset_store_prompt_ctx_token,
+            reset_user_metadata_ctx_token,
+        )
+
+        # Handle distributed tracing token
+        override_trace_id = self.tracing_token
+        if not override_trace_id:
+            override_trace_id = paid_trace_id.get()
+
+        ctx: Optional[Context] = None
+        if override_trace_id is not None:
+            span_context = SpanContext(
+                trace_id=override_trace_id,
+                span_id=otel_id_generator.generate_span_id(),
+                is_remote=True,
+                trace_flags=TraceFlags(TraceFlags.SAMPLED),
+            )
+            ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
+
+        return ctx
+
+    def _cleanup_context(self):
+        """Reset all context variables."""
+        if self._reset_tokens:
+            (
+                reset_id_ctx_token,
+                reset_agent_id_ctx_token,
+                reset_token_ctx_token,
+                reset_store_prompt_ctx_token,
+                reset_user_metadata_ctx_token,
+            ) = self._reset_tokens
+            paid_external_customer_id_var.reset(reset_id_ctx_token)
+            paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
+            paid_token_var.reset(reset_token_ctx_token)
+            paid_store_prompt_var.reset(reset_store_prompt_ctx_token)
+            paid_user_metadata_var.reset(reset_user_metadata_ctx_token)
+            self._reset_tokens = None
+
+    # Context manager methods for sync
+    def __enter__(self):
+        """Enter synchronous context."""
+        ctx = self._setup_context()
+
+        tracer = get_paid_tracer()
+        logger.info(f"Creating span for external_customer_id: {self.external_customer_id}")
+        self._span = tracer.start_as_current_span("parent_span", context=ctx)
+        span = self._span.__enter__()
+
+        span.set_attribute("external_customer_id", self.external_customer_id)
+        if self.external_agent_id:
+            span.set_attribute("external_agent_id", self.external_agent_id)
+
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit synchronous context."""
+        try:
+            if self._span:
+                if exc_type is not None:
+                    # Get the actual span object to set status
+                    span_obj = trace.get_current_span()
+                    if span_obj:
+                        span_obj.set_status(Status(StatusCode.ERROR, str(exc_val)))
+                else:
+                    span_obj = trace.get_current_span()
+                    if span_obj:
+                        span_obj.set_status(Status(StatusCode.OK))
+                        logger.info("Context block executed successfully")
+
+                self._span.__exit__(exc_type, exc_val, exc_tb)
+                self._span = None
+        finally:
+            self._cleanup_context()
+
+        return False  # Don't suppress exceptions
+
+    # Context manager methods for async
+    async def __aenter__(self):
+        """Enter asynchronous context."""
+        ctx = self._setup_context()
+
+        tracer = get_paid_tracer()
+        logger.info(f"Creating span for external_customer_id: {self.external_customer_id}")
+        self._span = tracer.start_as_current_span("parent_span", context=ctx)
+        span = self._span.__enter__()
+
+        span.set_attribute("external_customer_id", self.external_customer_id)
+        if self.external_agent_id:
+            span.set_attribute("external_agent_id", self.external_agent_id)
+
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Exit asynchronous context."""
+        try:
+            if self._span:
+                if exc_type is not None:
+                    # Get the actual span object to set status
+                    span_obj = trace.get_current_span()
+                    if span_obj:
+                        span_obj.set_status(Status(StatusCode.ERROR, str(exc_val)))
+                else:
+                    span_obj = trace.get_current_span()
+                    if span_obj:
+                        span_obj.set_status(Status(StatusCode.OK))
+                        logger.info("Async context block executed successfully")
+
+                self._span.__exit__(exc_type, exc_val, exc_tb)
+                self._span = None
+        finally:
+            self._cleanup_context()
+
+        return False  # Don't suppress exceptions
+
+    # Decorator functionality
+    def __call__(self, func: Callable) -> Callable:
+        """Use as a decorator."""
         if asyncio.iscoroutinefunction(func):
 
             @functools.wraps(func)
@@ -536,7 +697,7 @@ def paid_tracing(
                 # Auto-initialize tracing if not done
                 if get_token() is None:
                     try:
-                        _initialize_tracing(None, collector_endpoint)
+                        _initialize_tracing(None, self.collector_endpoint)
                     except Exception as e:
                         logger.error(f"Failed to auto-initialize tracing: {e}")
                         # Fall back to executing function without tracing
@@ -544,12 +705,12 @@ def paid_tracing(
 
                 try:
                     return await _trace_async(
-                        external_customer_id=external_customer_id,
+                        external_customer_id=self.external_customer_id,
                         fn=func,
-                        external_agent_id=external_agent_id,
-                        tracing_token=tracing_token,
-                        store_prompt=store_prompt,
-                        metadata=metadata,
+                        external_agent_id=self.external_agent_id,
+                        tracing_token=self.tracing_token,
+                        store_prompt=self.store_prompt,
+                        metadata=self.metadata,
                         args=args,
                         kwargs=kwargs,
                     )
@@ -565,7 +726,7 @@ def paid_tracing(
                 # Auto-initialize tracing if not done
                 if get_token() is None:
                     try:
-                        _initialize_tracing(None, collector_endpoint)
+                        _initialize_tracing(None, self.collector_endpoint)
                     except Exception as e:
                         logger.error(f"Failed to auto-initialize tracing: {e}")
                         # Fall back to executing function without tracing
@@ -573,12 +734,12 @@ def paid_tracing(
 
                 try:
                     return _trace_sync(
-                        external_customer_id=external_customer_id,
+                        external_customer_id=self.external_customer_id,
                         fn=func,
-                        external_agent_id=external_agent_id,
-                        tracing_token=tracing_token,
-                        store_prompt=store_prompt,
-                        metadata=metadata,
+                        external_agent_id=self.external_agent_id,
+                        tracing_token=self.tracing_token,
+                        store_prompt=self.store_prompt,
+                        metadata=self.metadata,
                         args=args,
                         kwargs=kwargs,
                     )
@@ -587,5 +748,3 @@ def paid_tracing(
                     raise e
 
             return sync_wrapper
-
-    return decorator
