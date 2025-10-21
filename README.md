@@ -148,41 +148,68 @@ def image_generate():
 image_generate()
 ```
 
-Alternatively, instead of the decorators you can use the paid.trace() function (more control by wrapping with a callback).
+### Auto-Instrumentation (OpenTelemetry Instrumentors)
+
+For maximum convenience, you can use OpenTelemetry auto-instrumentation to automatically track costs without modifying your AI library calls. This approach uses official OpenTelemetry instrumentors for supported AI libraries.
+
+#### Quick Start
 
 ```python
-from openai import OpenAI
 from paid import Paid
-from paid.tracing.wrappers.openai import PaidOpenAI
+from paid.tracing import paid_autoinstrument
+from openai import OpenAI
 
 # Initialize Paid SDK
 client = Paid(token="PAID_API_KEY")
 
-openAIClient = PaidOpenAI(OpenAI(
-    # This is the default and can be omitted
-    api_key="<OPENAI_API_KEY>",
-))
+# Enable auto-instrumentation for all supported libraries
+paid_autoinstrument()  # instruments all available: anthropic, gemini, openai, openai-agents, bedrock
 
-# Initialize tracing, must be after initializing Paid SDK
-client.initialize_tracing()
+# Now all OpenAI calls will be automatically traced
+openai_client = OpenAI(api_key="<OPENAI_API_KEY>")
 
-def image_generate():
-    response = openAIClient.images.generate(
-        model="dall-e-3",
-        prompt="A sunset over mountains",
-        size="1024x1024",
-        quality="hd",
-        style="vivid",
-        n=1
+@paid_tracing("your_external_customer_id", "your_external_agent_id")
+def chat_with_gpt():
+    response = openai_client.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": "Hello!"}]
     )
     return response
 
-# Finally, capture the traces!
-# Returns whatever is returned by `fn` callback
-client.trace(external_customer_id = "<your_external_customer_id>",
-                external_agent_id = "<your_external_agent_id>",  # can optionally include external_agent_id to enable agent-level cost tracking
-                fn = lambda: image_generate())
+chat_with_gpt()  # Costs are automatically tracked!
 ```
+
+#### Supported Libraries
+
+Auto-instrumentation supports the following AI libraries:
+
+```
+anthropic          - Anthropic SDK
+gemini             - Google Generative AI (google-generativeai)
+openai             - OpenAI Python SDK
+openai-agents      - OpenAI Agents SDK
+bedrock            - AWS Bedrock (boto3)
+```
+
+#### Selective Instrumentation
+
+If you only want to instrument specific libraries, pass them to `paid_autoinstrument()`:
+
+```python
+from paid.tracing import paid_autoinstrument
+
+# Instrument only Anthropic and OpenAI
+paid_autoinstrument(libraries=["anthropic", "openai"])
+```
+
+#### How It Works
+
+- Auto-instrumentation uses official OpenTelemetry instrumentors for each AI library
+- It automatically wraps library calls without requiring you to use Paid wrapper classes
+- Works seamlessly with `@paid_tracing()` decorator or `Paid.trace()` callback
+- Costs are tracked in the same way as when using manual wrappers
+- Should be called once during application startup, typically before creating AI client instances
+
 
 ## Signaling via OTEL tracing
 
