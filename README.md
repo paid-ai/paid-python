@@ -89,22 +89,42 @@ Defaults to ERROR.
 
 ## Cost Tracking via OTEL tracing
 
-### Simple Decorator Method
+### Simple Decorator and Context Manager Methods
 
-The easiest way to add cost tracking is using the `@paid_tracing` decorator:
+The easiest way to add cost tracking is using the `@paid_tracing` decorator or context manager:
+
+#### As a Decorator
 
 ```python
 from paid.tracing import paid_tracing
 
-@paid_tracing("<external_customer_id>", "<optional_external_agent_id>")  # add this line
+@paid_tracing("<external_customer_id>", external_agent_id="<optional_external_agent_id>")
 def some_agent_workflow():  # your function
     # Your logic - use any AI providers with Paid wrappers or send signals with Paid.signal().
     # This function is typically an event processor that should lead to AI calls or events emitted as Paid signals
 ```
 
-- Initializes tracing using your API key you provided to the Paid client, falls back to `PAID_API_KEY` environment variable.
-- Handles both sync and async functions
-- Gracefully falls back to normal execution if tracing fails
+#### As a Context Manager
+
+You can also use `paid_tracing` as a context manager with `with` statements:
+
+```python
+from paid.tracing import paid_tracing
+
+# Synchronous
+with paid_tracing("customer_123", external_agent_id="agent_456"):
+    result = workflow()
+
+# Asynchronous
+async with paid_tracing("customer_123", external_agent_id="agent_456"):
+    result = await workflow()
+```
+
+Both approaches:
+- Initialize tracing using your API key you provided to the Paid client, falls back to `PAID_API_KEY` environment variable.
+- Handle both sync and async functions/code blocks
+- Gracefully fall back to normal execution if tracing fails
+- Support the same parameters: `external_customer_id`, `external_agent_id`, `tracing_token`, `store_prompt`, `metadata`
 
 ### Using the Paid wrappers
 

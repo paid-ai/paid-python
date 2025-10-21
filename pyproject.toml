@@ -3,7 +3,7 @@ name = "paid-python"
 
 [tool.poetry]
 name = "paid-python"
-version = "0.0.5-alpha38"
+version = "0.0.5-alpha39"
 description = ""
 readme = "README.md"
 authors = []
