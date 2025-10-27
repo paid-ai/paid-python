@@ -7,6 +7,7 @@ from .tracing import (
     set_tracing_token,
     unset_tracing_token,
 )
+from .signal import signal
 
 __all__ = [
     "generate_and_set_tracing_token",
@@ -15,4 +16,5 @@ __all__ = [
     "paid_tracing",
     "set_tracing_token",
     "unset_tracing_token",
+    "signal",
 ]

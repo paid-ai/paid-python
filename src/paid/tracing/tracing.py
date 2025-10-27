@@ -146,7 +146,6 @@ class PaidSpanProcessor(SpanProcessor):
                 for k, v in original_attributes.items()
                 if not any(k.startswith(prefix) for prefix in self.PROMPT_ATTRIBUTES_PREFIXES)
             }
-            # Temporarily replace attributes for export
             # This works because the exporter reads attributes during serialization
             object.__setattr__(span, "_attributes", filtered_attrs)
 
@@ -173,7 +172,8 @@ def initialize_tracing_(
 
     try:
         if _token is not None:
-            raise RuntimeError("Tracing is already initialized.")
+            logger.warn("Tracing is already initialized - skipping re-initialization")
+            return
 
         # Get API key from parameter or environment
         if api_key is None:
@@ -182,9 +182,9 @@ def initialize_tracing_(
             dotenv.load_dotenv()
             api_key = os.environ.get("PAID_API_KEY")
             if api_key is None:
-                raise ValueError(
-                    "API key must be provided either as parameter or via PAID_API_KEY environment variable"
-                )
+                logger.error("API key must be provided via PAID_API_KEY environment variable")
+                # don't throw - tracing should not break the app
+                return
 
         set_token(api_key)
 
@@ -237,12 +237,12 @@ def initialize_tracing_(
             signal.signal(sig, create_chained_signal_handler(sig))
 
         logger.info("Paid tracing initialized successfully - collector at %s", collector_endpoint)
-    except Exception:
-        logger.exception("Failed to initialize Paid tracing")
-        raise
+    except Exception as e:
+        logger.error(f"Failed to initialize Paid tracing: {e}")
+        # don't throw - tracing should not break the app
 
 
-def get_paid_tracer() -> trace.Tracer:
+def get_paid_tracer() -> Optional[trace.Tracer]:
     """
     Get the tracer from the isolated Paid tracer provider.
 
@@ -251,11 +251,16 @@ def get_paid_tracer() -> trace.Tracer:
 
     Raises:
         RuntimeError: If the tracer provider is not initialized.
-    """
-    if paid_tracer_provider is None:
-        raise RuntimeError("Paid tracer provider is not initialized. Call Paid.initialize_tracing() first.")
-    return paid_tracer_provider.get_tracer("paid.python")
 
+    Notes:
+        Tracing is automatically initialized when using @paid_tracing decorator or context manager.
+    """
+    try:
+        return paid_tracer_provider.get_tracer("paid.python")
+    except Exception as e:
+        logger.error(f"Failed to get Paid tracer: {e}")
+        # don't throw - tracing should not break the app
+        return None
 
 def trace_sync_(
     external_customer_id: str,
@@ -267,18 +272,34 @@ def trace_sync_(
     args: Optional[Tuple] = None,
     kwargs: Optional[Dict] = None,
 ) -> T:
+    """
+    Internal function for synchronous tracing. Use @paid_tracing decorator instead.
+
+    This is a low-level internal function. Users should use the @paid_tracing decorator
+    or context manager for a more Pythonic interface.
+
+    Parameters:
+        external_customer_id: The external customer ID to associate with the trace.
+        fn: The function to execute and trace.
+        external_agent_id: Optional external agent ID.
+        tracing_token: Optional token for distributed tracing.
+        store_prompt: Whether to store prompt/completion contents.
+        metadata: Optional metadata to attach to the trace.
+        args: Positional arguments for the function.
+        kwargs: Keyword arguments for the function.
+
+    Returns:
+        The result of executing fn(*args, **kwargs).
+
+    Raises:
+        Only when user callback raises.
+    """
     args = args or ()
     kwargs = kwargs or {}
-    token = get_token()
-    if not token:
-        raise RuntimeError(
-            "No token found - tracing is not initialized and will not be captured. Call Paid.initialize_tracing() first."
-        )
 
     # Set context variables for access by nested spans
     reset_id_ctx_token = paid_external_customer_id_var.set(external_customer_id)
     reset_agent_id_ctx_token = paid_external_agent_id_var.set(external_agent_id)
-    reset_token_ctx_token = paid_token_var.set(token)
     reset_store_prompt_ctx_token = paid_store_prompt_var.set(store_prompt)
     reset_user_metadata_ctx_token = paid_user_metadata_var.set(metadata)
 
@@ -298,6 +319,9 @@ def trace_sync_(
 
     try:
         tracer = get_paid_tracer()
+        if not tracer:
+            logger.error("Can't trace, no tracer available")
+            return fn(*args, **kwargs)
         logger.info(f"Creating span for external_customer_id: {external_customer_id}")
         with tracer.start_as_current_span("parent_span", context=ctx) as span:
             span.set_attribute("external_customer_id", external_customer_id)
@@ -314,7 +338,6 @@ def trace_sync_(
     finally:
         paid_external_customer_id_var.reset(reset_id_ctx_token)
         paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
-        paid_token_var.reset(reset_token_ctx_token)
         paid_store_prompt_var.reset(reset_store_prompt_ctx_token)
         paid_user_metadata_var.reset(reset_user_metadata_ctx_token)
 
@@ -329,18 +352,34 @@ async def trace_async_(
     args: Optional[Tuple] = None,
     kwargs: Optional[Dict] = None,
 ) -> Union[T, Awaitable[T]]:
+    """
+    Internal function for asynchronous tracing. Use @paid_tracing decorator instead.
+
+    This is a low-level internal function. Users should use the @paid_tracing decorator
+    or context manager for a more Pythonic interface.
+
+    Parameters:
+        external_customer_id: The external customer ID to associate with the trace.
+        fn: The async function to execute and trace.
+        external_agent_id: Optional external agent ID.
+        tracing_token: Optional token for distributed tracing.
+        store_prompt: Whether to store prompt/completion contents.
+        metadata: Optional metadata to attach to the trace.
+        args: Positional arguments for the function.
+        kwargs: Keyword arguments for the function.
+
+    Returns:
+        The result of executing fn(*args, **kwargs).
+
+    Raises:
+        Only when user callback raises.
+    """
     args = args or ()
     kwargs = kwargs or {}
-    token = get_token()
-    if not token:
-        raise RuntimeError(
-            "No token found - tracing is not initialized and will not be captured. Call Paid.initialize_tracing() first."
-        )
 
     # Set context variables for access by nested spans
     reset_id_ctx_token = paid_external_customer_id_var.set(external_customer_id)
     reset_agent_id_ctx_token = paid_external_agent_id_var.set(external_agent_id)
-    reset_token_ctx_token = paid_token_var.set(token)
     reset_store_prompt_ctx_token = paid_store_prompt_var.set(store_prompt)
     reset_user_metadata_ctx_token = paid_user_metadata_var.set(metadata)
 
@@ -361,6 +400,12 @@ async def trace_async_(
     try:
         tracer = get_paid_tracer()
         logger.info(f"Creating span for external_customer_id: {external_customer_id}")
+        if not tracer:
+            logger.error("Can't trace, no tracer available")
+            if asyncio.iscoroutinefunction(fn):
+                return await fn(*args, **kwargs)
+            else:
+                return fn(*args, **kwargs)
         with tracer.start_as_current_span("parent_span", context=ctx) as span:
             span.set_attribute("external_customer_id", external_customer_id)
             if external_agent_id:
@@ -379,53 +424,91 @@ async def trace_async_(
     finally:
         paid_external_customer_id_var.reset(reset_id_ctx_token)
         paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
-        paid_token_var.reset(reset_token_ctx_token)
         paid_store_prompt_var.reset(reset_store_prompt_ctx_token)
         paid_user_metadata_var.reset(reset_user_metadata_ctx_token)
 
 
 def generate_tracing_token() -> int:
     """
-    This will generate and return a tracing token but it will not set it
-    for the tracing context. Needed when you only want to store or send a tracing token
-    somewhere else.
+    Generate a unique tracing token without setting it in the context.
+
+    Use this when you want to generate a trace ID to store or pass to another
+    process/service without immediately associating it with the current tracing context.
+    The token can later be used with set_tracing_token() to link traces across
+    different execution contexts.
+
+    Returns:
+        int: A unique OpenTelemetry trace ID.
+
+    Notes:
+        - This function only generates and returns the token; it does NOT set it in the context.
+        - For most use cases, use generate_and_set_tracing_token() instead.
+        - Use this when you need to store the token separately before setting it.
+
+    Examples:
+        Generate token to store for later use:
+
+            from paid.tracing import generate_tracing_token, set_tracing_token
+
+            # Process 1: Generate and store
+            token = generate_tracing_token()
+            save_to_database("task_123", token)
+
+            # Process 2: Retrieve and use
+            token = load_from_database("task_123")
+            set_tracing_token(token)
+
+            @paid_tracing(external_customer_id="cust_123", external_agent_id="agent_456")
+            def process_task():
+                # This trace is now linked to the same token
+                pass
+
+    See Also:
+        generate_and_set_tracing_token: Generate and immediately set the token.
+        set_tracing_token: Set a previously generated token.
     """
     return otel_id_generator.generate_trace_id()
 
 
 def generate_and_set_tracing_token() -> int:
     """
-    *Advanced feature*
-    In cases when you can't share the same Paid.trace() or @paid_tracing() context with
-    code that you want to track together (complex concurrency logic,
-    or disjoint workflows, or work is separated between processes),
-    then you can manually generate a tracing token with generate_and_set_tracing_token()
-    and share it with the other parts of your application or service using set_tracing_token().
+    Deprecated: Pass tracing_token directly to @paid_tracing() decorator instead.
 
-    This function returns tracing token and attaches it to all consequent
-    Paid.trace() or @paid_tracing() tracing contexts. So all the costs and signals that share this
-    tracing context are associated with each other.
+    This function is deprecated and will be removed in a future version.
+    Use the tracing_token parameter in @paid_tracing() to link traces across processes.
 
-    To stop associating the traces one can either call
-    generate_and_set_tracing_token() once again or call unset_tracing_token().
-    The former is suitable if you still want to trace but in a fresh
-    context, and the latter will go back to unique traces per Paid.trace() or @paid_tracing().
+    Instead of:
+        token = generate_and_set_tracing_token()
+        @paid_tracing(external_customer_id="cust_123", external_agent_id="agent_456")
+        def my_function():
+            ...
+
+    Use:
+        from paid.tracing import generate_tracing_token
+        token = generate_tracing_token()
+
+        @paid_tracing(
+            external_customer_id="cust_123",
+            external_agent_id="agent_456",
+            tracing_token=token
+        )
+        def my_function():
+            ...
+
+    Old behavior (for reference):
+        This function generated a tracing token and set it in the context,
+        so all subsequent @paid_tracing() calls would use it automatically.
 
     Returns:
-        int: The tracing token (OpenTelemetry trace ID)
-
-    Example:
-        >>> from paid.tracing import generate_and_set_tracing_token, set_tracing_token, unset_tracing_token
-        >>> # Process 1: Generate token
-        >>> token = generate_and_set_tracing_token()
-        >>> save_to_redis("workflow_123", token)
-        >>>
-        >>> # Process 2: Use token
-        >>> token = load_from_redis("workflow_123")
-        >>> set_tracing_token(token)
-        >>> # ... do traced work ...
-        >>> unset_tracing_token()
+        int: A unique OpenTelemetry trace ID (for backward compatibility).
     """
+    import warnings
+    warnings.warn(
+        "generate_and_set_tracing_token() is deprecated and will be removed in a future version. "
+        "Pass tracing_token directly to @paid_tracing(tracing_token=...) decorator instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     random_trace_id = otel_id_generator.generate_trace_id()
     _ = paid_trace_id.set(random_trace_id)
     return random_trace_id
@@ -433,50 +516,71 @@ def generate_and_set_tracing_token() -> int:
 
 def set_tracing_token(token: int):
     """
-    *Advanced feature*
-    In cases when you can't share the same Paid.trace() or @paid_tracing() context with
-    code that you want to track together (complex concurrency logic,
-    or disjoint workflows, or work is separated between processes),
-    then you can manually generate a tracing token with generate_and_set_tracing_token()
-    and share it with the other parts of your application or service using set_tracing_token().
+    Deprecated: Pass tracing_token directly to @paid_tracing() decorator instead.
 
-    Sets tracing token. Provided token should come from generate_and_set_tracing_token().
-    Once set, the consequent traces will be related to each other.
+    This function is deprecated and will be removed in a future version.
+    Use the tracing_token parameter in @paid_tracing() to link traces across processes.
 
-    Args:
-        token (int): A tracing token from generate_and_set_tracing_token()
+    Instead of:
+        token = load_from_storage("workflow_123")
+        set_tracing_token(token)
+        @paid_tracing(external_customer_id="cust_123", external_agent_id="agent_456")
+        def process_workflow():
+            ...
+        unset_tracing_token()
 
-    Example:
-        >>> from paid.tracing import set_tracing_token, unset_tracing_token, paid_tracing
-        >>> # Retrieve token from storage
-        >>> token = get_from_redis("workflow_123")
-        >>> set_tracing_token(token)
-        >>>
-        >>> @paid_tracing("customer_123", "agent_123")
-        >>> def process_workflow():
-        ...     # This trace will be linked to the token
-        ...     pass
-        >>>
-        >>> process_workflow()
-        >>> unset_tracing_token()
+    Use:
+        token = load_from_storage("workflow_123")
+
+        @paid_tracing(
+            external_customer_id="cust_123",
+            external_agent_id="agent_456",
+            tracing_token=token
+        )
+        def process_workflow():
+            ...
+
+    Parameters:
+        token (int): A tracing token (for backward compatibility only).
+
+    Old behavior (for reference):
+        This function set a token in the context, so all subsequent @paid_tracing() calls
+        would use it automatically until unset_tracing_token() was called.
     """
+    import warnings
+    warnings.warn(
+        "set_tracing_token() is deprecated and will be removed in a future version. "
+        "Pass tracing_token directly to @paid_tracing(tracing_token=...) decorator instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     _ = paid_trace_id.set(token)
 
 
 def unset_tracing_token():
     """
-    Unsets the token previously set by generate_and_set_tracing_token()
-    or by set_tracing_token(token). Does nothing if the token was never set.
-    When tracing token is unset, traces are unique for a single Paid.trace() or @paid_tracing() context.
+    Deprecated: No longer needed. Use tracing_token parameter in @paid_tracing() instead.
 
-    Example:
-        >>> from paid.tracing import set_tracing_token, unset_tracing_token
-        >>> set_tracing_token(stored_token)
-        >>> try:
-        ...     process_workflow()
-        ... finally:
-        ...     unset_tracing_token()  # Always clean up
+    This function is deprecated and will be removed in a future version.
+    Since tracing_token is now passed directly to @paid_tracing(), there's no need
+    to manually set/unset tokens in the context.
+
+    Old behavior (for reference):
+        This function unset a token previously set by set_tracing_token() or
+        generate_and_set_tracing_token(), allowing subsequent @paid_tracing() calls
+        to have independent traces.
+
+    Migration:
+        If you were using set_tracing_token() + unset_tracing_token() pattern,
+        simply pass the token directly to @paid_tracing(tracing_token=...) instead.
     """
+    import warnings
+    warnings.warn(
+        "unset_tracing_token() is deprecated and will be removed in a future version. "
+        "Use tracing_token parameter in @paid_tracing(tracing_token=...) decorator instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     _ = paid_trace_id.set(None)
 
 
