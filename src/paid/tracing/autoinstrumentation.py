@@ -8,7 +8,7 @@ sending traces to the Paid collector endpoint.
 from typing import List, Optional
 
 from . import tracing
-from .tracing import _initialize_tracing, logger
+from .tracing import initialize_tracing_, logger
 
 # Safe imports for instrumentation libraries
 try:
@@ -91,7 +91,7 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
     # Initialize tracing if not already initialized
     if not tracing.paid_tracer_provider:
         logger.info("Tracing not initialized, initializing automatically")
-        _initialize_tracing()
+        initialize_tracing_()
 
     # Default to all supported libraries if none specified
     if libraries is None:

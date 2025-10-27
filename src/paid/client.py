@@ -9,11 +9,11 @@ from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .customers.client import AsyncCustomersClient, CustomersClient
 from .environment import PaidEnvironment
 from .orders.client import AsyncOrdersClient, OrdersClient
-from .tracing.signal import _signal
+from .tracing.signal import signal_
 from .tracing.tracing import (
-    _initialize_tracing,
-    _trace_async,
-    _trace_sync,
+    initialize_tracing_,
+    trace_async_,
+    trace_sync_,
     generate_and_set_tracing_token,
     generate_tracing_token,
     set_tracing_token,
@@ -100,7 +100,7 @@ class Paid:
         None
         """
         token = self._client_wrapper._get_token()
-        _initialize_tracing(token, collector_endpoint=collector_endpoint)
+        initialize_tracing_(token, collector_endpoint=collector_endpoint)
 
     def generate_tracing_token(self) -> int:
         """
@@ -161,7 +161,7 @@ class Paid:
         kwargs: typing.Optional[typing.Dict] = None,
     ) -> T:
         print("capture() is deprecated. Please rename it to trace() to remove this message.")
-        return _trace_sync(
+        return trace_sync_(
             external_customer_id=external_customer_id, fn=fn, external_agent_id=None, args=args, kwargs=kwargs
         )
 
@@ -200,7 +200,7 @@ class Paid:
         T
             The result of the traced function.
         """
-        return _trace_sync(
+        return trace_sync_(
             external_customer_id=external_customer_id,
             fn=fn,
             external_agent_id=external_agent_id,
@@ -247,7 +247,7 @@ class Paid:
         with enable_cost_tracing per Paid.trace() context.
         Otherwise, there will be multiple signals that refer to the same costs.
         """
-        _signal(event_name=event_name, enable_cost_tracing=enable_cost_tracing, data=data)
+        signal_(event_name=event_name, enable_cost_tracing=enable_cost_tracing, data=data)
 
 
 class AsyncPaid:
@@ -326,7 +326,7 @@ class AsyncPaid:
         None
         """
         token = self._client_wrapper._get_token()
-        _initialize_tracing(token, collector_endpoint=collector_endpoint)
+        initialize_tracing_(token, collector_endpoint=collector_endpoint)
 
     def generate_tracing_token(self) -> int:
         """
@@ -387,7 +387,7 @@ class AsyncPaid:
         kwargs: typing.Optional[typing.Dict] = None,
     ) -> typing.Union[T, typing.Awaitable[T]]:
         print("capture() is deprecated. Please rename it to trace() to remove this message.")
-        return await _trace_async(
+        return await trace_async_(
             external_customer_id=external_customer_id, fn=fn, external_agent_id=None, args=args, kwargs=kwargs
         )
 
@@ -426,7 +426,7 @@ class AsyncPaid:
         T
             The result of the traced function.
         """
-        return await _trace_async(
+        return await trace_async_(
             external_customer_id=external_customer_id,
             fn=fn,
             external_agent_id=external_agent_id,
@@ -473,7 +473,7 @@ class AsyncPaid:
         with enable_cost_tracing per Paid.trace() context.
         Otherwise, there will be multiple signals that refer to the same costs.
         """
-        _signal(event_name=event_name, enable_cost_tracing=enable_cost_tracing, data=data)
+        signal_(event_name=event_name, enable_cost_tracing=enable_cost_tracing, data=data)
 
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidEnvironment) -> str:

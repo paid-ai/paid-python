@@ -159,7 +159,7 @@ class PaidSpanProcessor(SpanProcessor):
         return True
 
 
-def _initialize_tracing(
+def initialize_tracing_(
     api_key: Optional[str] = None, collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces"
 ):
     """
@@ -257,7 +257,7 @@ def get_paid_tracer() -> trace.Tracer:
     return paid_tracer_provider.get_tracer("paid.python")
 
 
-def _trace_sync(
+def trace_sync_(
     external_customer_id: str,
     fn: Callable[..., T],
     external_agent_id: Optional[str] = None,
@@ -319,7 +319,7 @@ def _trace_sync(
         paid_user_metadata_var.reset(reset_user_metadata_ctx_token)
 
 
-async def _trace_async(
+async def trace_async_(
     external_customer_id: str,
     fn: Callable[..., Union[T, Awaitable[T]]],
     external_agent_id: Optional[str] = None,
@@ -697,14 +697,14 @@ class paid_tracing:
                 # Auto-initialize tracing if not done
                 if get_token() is None:
                     try:
-                        _initialize_tracing(None, self.collector_endpoint)
+                        initialize_tracing_(None, self.collector_endpoint)
                     except Exception as e:
                         logger.error(f"Failed to auto-initialize tracing: {e}")
                         # Fall back to executing function without tracing
                         return await func(*args, **kwargs)
 
                 try:
-                    return await _trace_async(
+                    return await trace_async_(
                         external_customer_id=self.external_customer_id,
                         fn=func,
                         external_agent_id=self.external_agent_id,
@@ -726,14 +726,14 @@ class paid_tracing:
                 # Auto-initialize tracing if not done
                 if get_token() is None:
                     try:
-                        _initialize_tracing(None, self.collector_endpoint)
+                        initialize_tracing_(None, self.collector_endpoint)
                     except Exception as e:
                         logger.error(f"Failed to auto-initialize tracing: {e}")
                         # Fall back to executing function without tracing
                         return func(*args, **kwargs)
 
                 try:
-                    return _trace_sync(
+                    return trace_sync_(
                         external_customer_id=self.external_customer_id,
                         fn=func,
                         external_agent_id=self.external_agent_id,
