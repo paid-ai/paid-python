@@ -8,7 +8,6 @@ from paid.tracing.tracing import (
     logger,
     paid_external_agent_id_var,
     paid_external_customer_id_var,
-    paid_token_var,
 )
 
 try:
@@ -99,11 +98,10 @@ class OCRWrapper:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling Mistral directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling Mistral directly")
                 return self.mistral.ocr.process(
                     model=model,
                     document=document,
@@ -120,7 +118,7 @@ class OCRWrapper:
                     http_headers=http_headers,
                 )
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -133,7 +131,6 @@ class OCRWrapper:
                 attributes["gen_ai.ocr.annotated"] = "true"
 
             attributes["external_customer_id"] = external_customer_id
-            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
             span.set_attributes(attributes)
@@ -236,11 +233,10 @@ class OCRWrapper:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling Mistral directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling Mistral directly")
                 return await self.mistral.ocr.process_async(
                     model=model,
                     document=document,
@@ -257,7 +253,7 @@ class OCRWrapper:
                     http_headers=http_headers,
                 )
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -270,7 +266,6 @@ class OCRWrapper:
                 attributes["gen_ai.ocr.annotated"] = "true"
 
             attributes["external_customer_id"] = external_customer_id
-            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
             span.set_attributes(attributes)

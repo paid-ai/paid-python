@@ -8,7 +8,6 @@ from paid.tracing.tracing import (
     logger,
     paid_external_agent_id_var,
     paid_external_customer_id_var,
-    paid_token_var,
 )
 from paid.tracing.wrappers.utils import get_audio_duration
 
@@ -76,14 +75,13 @@ class ChatCompletionsWrapper:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling OpenAI directly")
                 return self.openai.chat.completions.create(model=model, messages=messages, **kwargs)
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -93,7 +91,6 @@ class ChatCompletionsWrapper:
                 "gen_ai.operation.name": "chat",
             }
             attributes["external_customer_id"] = external_customer_id
-            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
             span.set_attributes(attributes)
@@ -168,14 +165,13 @@ class EmbeddingsWrapper:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling OpenAI directly")
                 return self.openai.embeddings.create(**kwargs)
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -185,7 +181,6 @@ class EmbeddingsWrapper:
                 "gen_ai.operation.name": "embeddings",
             }
             attributes["external_customer_id"] = external_customer_id
-            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
             span.set_attributes(attributes)
@@ -235,14 +230,13 @@ class ImagesWrapper:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling OpenAI directly")
                 return self.openai.images.generate(**kwargs)
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -256,7 +250,6 @@ class ImagesWrapper:
                 "gen_ai.operation.name": "image_generation",
             }
             attributes["external_customer_id"] = external_customer_id
-            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
             span.set_attributes(attributes)
@@ -306,14 +299,13 @@ class ResponsesWrapper:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling OpenAI directly")
                 return self.openai.responses.create(**kwargs)
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -323,7 +315,6 @@ class ResponsesWrapper:
                 "gen_ai.operation.name": "chat",
             }
             attributes["external_customer_id"] = external_customer_id
-            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
             span.set_attributes(attributes)
@@ -406,14 +397,13 @@ class AudioTranscriptionsWrapper:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling OpenAI directly")
                 return self.openai.audio.transcriptions.create(**kwargs)
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -430,7 +420,6 @@ class AudioTranscriptionsWrapper:
                 "gen_ai.operation.name": "transcription",
             }
             attributes["external_customer_id"] = external_customer_id
-            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
             if audio_duration:
@@ -508,14 +497,13 @@ class AsyncChatCompletionsWrapper:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling OpenAI directly")
                 return await self.openai.chat.completions.create(model=model, messages=messages, **kwargs)
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -525,7 +513,6 @@ class AsyncChatCompletionsWrapper:
                 "gen_ai.operation.name": "chat",
             }
             attributes["external_customer_id"] = external_customer_id
-            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
             span.set_attributes(attributes)
@@ -600,14 +587,13 @@ class AsyncEmbeddingsWrapper:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling OpenAI directly")
                 return await self.openai.embeddings.create(**kwargs)
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -617,7 +603,6 @@ class AsyncEmbeddingsWrapper:
                 "gen_ai.operation.name": "embeddings",
             }
             attributes["external_customer_id"] = external_customer_id
-            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
             span.set_attributes(attributes)
@@ -667,14 +652,13 @@ class AsyncImagesWrapper:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling OpenAI directly")
                 return await self.openai.images.generate(**kwargs)
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -688,7 +672,6 @@ class AsyncImagesWrapper:
                 "gen_ai.operation.name": "image_generation",
             }
             attributes["external_customer_id"] = external_customer_id
-            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
             span.set_attributes(attributes)
@@ -738,14 +721,13 @@ class AsyncResponsesWrapper:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling OpenAI directly")
                 return await self.openai.responses.create(**kwargs)
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -755,7 +737,6 @@ class AsyncResponsesWrapper:
                 "gen_ai.operation.name": "chat",
             }
             attributes["external_customer_id"] = external_customer_id
-            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
             span.set_attributes(attributes)
@@ -838,14 +819,13 @@ class AsyncAudioTranscriptionsWrapper:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling OpenAI directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling OpenAI directly")
                 return await self.openai.audio.transcriptions.create(**kwargs)
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -863,7 +843,6 @@ class AsyncAudioTranscriptionsWrapper:
                 "gen_ai.operation.name": "transcription",
             }
             attributes["external_customer_id"] = external_customer_id
-            attributes["token"] = token
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
             if audio_duration:

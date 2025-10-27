@@ -56,7 +56,7 @@ This is where most development work happens. The tracing system provides automat
 - `_trace_sync()` / `_trace_async()` - Core tracing logic for sync/async workflows
 - `paid_tracing` decorator - Main decorator for wrapping user functions
 - `generate_tracing_token()` / `set_tracing_token()` / `unset_tracing_token()` - Distributed tracing token management
-- Context variables: `paid_external_customer_id_var`, `paid_external_agent_id_var`, `paid_token_var`, `paid_trace_id`
+- Context variables: `paid_external_customer_id_var`, `paid_external_agent_id_var`, `paid_trace_id`
 
 Key implementation details:
 - Uses `SimpleSpanProcessor` instead of `BatchSpanProcessor` to avoid losing traces in environments like Airflow that terminate processes early

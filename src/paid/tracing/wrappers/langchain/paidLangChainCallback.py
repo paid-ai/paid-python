@@ -5,7 +5,7 @@ from uuid import UUID
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
-from paid.tracing.tracing import get_paid_tracer, logger, paid_external_customer_id_var, paid_token_var
+from paid.tracing.tracing import get_paid_tracer, logger, paid_external_customer_id_var
 
 try:
     from langchain_core.callbacks import BaseCallbackHandler  # type: ignore
@@ -64,13 +64,12 @@ class PaidLangChainCallback(BaseCallbackHandler):
 
         # Get context variables
         external_customer_id = paid_external_customer_id_var.get()
-        token = paid_token_var.get()
 
         # Check if required context is available
-        if not (external_customer_id and token):
+        if not external_customer_id:
             logger.info(
                 f"{self.__class__.__name__} Missing required tracing information "
-                f"(external_customer_id={bool(external_customer_id)}, token={bool(token)}) - "
+                f"(external_customer_id={bool(external_customer_id)}) - "
                 f"LangChain operation '{span_name}' will not be traced"
             )
             return None
@@ -86,8 +85,6 @@ class PaidLangChainCallback(BaseCallbackHandler):
 
         if external_customer_id:
             base_attributes["external_customer_id"] = external_customer_id
-        if token:
-            base_attributes["token"] = token
 
         # Add custom attributes
         base_attributes.update(attributes)

@@ -8,7 +8,6 @@ from paid.tracing.tracing import (
     logger,
     paid_external_agent_id_var,
     paid_external_customer_id_var,
-    paid_token_var,
 )
 
 try:
@@ -51,14 +50,13 @@ class MessagesWrapper:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling Anthropic directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling Anthropic directly")
                 return self.anthropic.messages.create(model=model, messages=messages, max_tokens=max_tokens, **kwargs)
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -67,7 +65,6 @@ class MessagesWrapper:
                 "gen_ai.system": "anthropic",
                 "gen_ai.operation.name": "messages",
                 "external_customer_id": external_customer_id,
-                "token": token,
             }
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id
@@ -134,16 +131,15 @@ class AsyncMessagesWrapper:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling Anthropic directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling Anthropic directly")
                 return await self.anthropic.messages.create(
                     model=model, messages=messages, max_tokens=max_tokens, **kwargs
                 )
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -152,7 +148,6 @@ class AsyncMessagesWrapper:
                 "gen_ai.system": "anthropic",
                 "gen_ai.operation.name": "messages",
                 "external_customer_id": external_customer_id,
-                "token": token,
             }
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id

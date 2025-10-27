@@ -8,7 +8,6 @@ from paid.tracing.tracing import (
     logger,
     paid_external_agent_id_var,
     paid_external_customer_id_var,
-    paid_token_var,
 )
 
 
@@ -28,14 +27,13 @@ class PaidBedrock:
 
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling Bedrock directly")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, calling Bedrock directly")
                 return self.bedrock_client.converse(modelId=modelId, messages=messages, **kwargs)
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
 
@@ -44,7 +42,6 @@ class PaidBedrock:
                 "gen_ai.system": "bedrock",
                 "gen_ai.operation.name": "converse",
                 "external_customer_id": external_customer_id,
-                "token": token,
             }
             if external_agent_id:
                 attributes["external_agent_id"] = external_agent_id

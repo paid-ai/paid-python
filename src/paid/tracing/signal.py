@@ -76,6 +76,10 @@ def signal(event_name: str, enable_cost_tracing: bool = False, data: typing.Opti
         return
 
     tracer = get_paid_tracer()
+    if tracer is None:
+        logger.error("Cannot send signal: tracer is not available")
+        return
+
     with tracer.start_as_current_span("signal") as span:
         attributes: dict[str, typing.Union[str, bool, int, float]] = {
             "external_customer_id": external_customer_id,

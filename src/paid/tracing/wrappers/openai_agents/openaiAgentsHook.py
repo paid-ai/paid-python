@@ -8,7 +8,6 @@ from paid.tracing.tracing import (
     logger,
     paid_external_agent_id_var,
     paid_external_customer_id_var,
-    paid_token_var,
 )
 
 try:
@@ -68,10 +67,9 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
         """Get tracing context from context variables set by Paid.trace()."""
         external_customer_id = paid_external_customer_id_var.get()
         external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
-        return external_customer_id, external_agent_id, token
+        return external_customer_id, external_agent_id
 
-    def _should_skip_tracing(self, external_customer_id: Optional[str], token: Optional[str]) -> bool:
+    def _should_skip_tracing(self, external_customer_id: Optional[str]) -> bool:
         """Check if tracing should be skipped."""
         # Check if there's an active span (from Paid.trace())
         current_span = trace.get_current_span()
@@ -81,22 +79,22 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
                 return True
             raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
 
-        if not (external_customer_id and token):
+        if not external_customer_id:
             if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, skipping LLM tracking")
+                logger.info(f"{self.__class__.__name__} No external_customer_id, skipping LLM tracking")
                 return True
             raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
+                "Missing required tracing information: external_customer_id."
                 " Make sure to call this method from Paid.trace()."
             )
         return False
 
     def _start_span(self, context, agent, hook_name) -> None:
         try:
-            external_customer_id, external_agent_id, token = self._get_context_vars()
+            external_customer_id, external_agent_id = self._get_context_vars()
 
             # Skip tracing if required context is missing
-            if self._should_skip_tracing(external_customer_id, token):
+            if self._should_skip_tracing(external_customer_id):
                 return
 
             # Get model name from agent
@@ -111,7 +109,6 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": f"{hook_name}",
                 "external_customer_id": external_customer_id,
-                "token": token,
                 "gen_ai.request.model": model_name,
             }
             if external_agent_id:

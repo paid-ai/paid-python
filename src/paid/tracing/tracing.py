@@ -41,8 +41,6 @@ paid_external_customer_id_var: contextvars.ContextVar[Optional[str]] = contextva
 paid_external_agent_id_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
     "paid_external_agent_id", default=None
 )
-# api_key storage
-paid_token_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar("paid_token", default=None)
 # trace id storage (generated from token)
 paid_trace_id: contextvars.ContextVar[Optional[int]] = contextvars.ContextVar("paid_trace_id", default=None)
 # flag to enable storing prompt contents
@@ -653,7 +651,6 @@ class paid_tracing:
             Tuple[
                 contextvars.Token[Optional[str]],
                 contextvars.Token[Optional[str]],
-                contextvars.Token[Optional[str]],
                 contextvars.Token[Optional[bool]],
                 contextvars.Token[Optional[Dict[str, Any]]],
             ]
@@ -661,14 +658,10 @@ class paid_tracing:
 
     def _setup_context(self) -> Optional[Context]:
         """Set up context variables and return OTEL context if needed."""
-        token = get_token()
-        if not token:
-            raise RuntimeError("No token found - tracing is not initialized. Call Paid.initialize_tracing() first.")
 
         # Set context variables
         reset_id_ctx_token = paid_external_customer_id_var.set(self.external_customer_id)
         reset_agent_id_ctx_token = paid_external_agent_id_var.set(self.external_agent_id)
-        reset_token_ctx_token = paid_token_var.set(token)
         reset_store_prompt_ctx_token = paid_store_prompt_var.set(self.store_prompt)
         reset_user_metadata_ctx_token = paid_user_metadata_var.set(self.metadata)
 
@@ -676,7 +669,6 @@ class paid_tracing:
         self._reset_tokens = (
             reset_id_ctx_token,
             reset_agent_id_ctx_token,
-            reset_token_ctx_token,
             reset_store_prompt_ctx_token,
             reset_user_metadata_ctx_token,
         )
@@ -704,13 +696,11 @@ class paid_tracing:
             (
                 reset_id_ctx_token,
                 reset_agent_id_ctx_token,
-                reset_token_ctx_token,
                 reset_store_prompt_ctx_token,
                 reset_user_metadata_ctx_token,
             ) = self._reset_tokens
             paid_external_customer_id_var.reset(reset_id_ctx_token)
             paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
-            paid_token_var.reset(reset_token_ctx_token)
             paid_store_prompt_var.reset(reset_store_prompt_ctx_token)
             paid_user_metadata_var.reset(reset_user_metadata_ctx_token)
             self._reset_tokens = None
