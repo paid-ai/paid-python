@@ -6,15 +6,9 @@ https://github.com/paid-ai/sdk-wrapper-codegen
 
 from typing import Union
 
-from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
-from paid.tracing.tracing import (
-    get_paid_tracer,
-    logger,
-    paid_external_agent_id_var,
-    paid_external_customer_id_var,
-)
+from paid.tracing.tracing import get_paid_tracer
 
 try:
     from google import genai
@@ -29,50 +23,26 @@ except ImportError:
 class PaidGemini:
     """OpenTelemetry instrumented wrapper for Gemini Python SDK SDK."""
 
-    def __init__(self, original_client: genai.Client, optional_tracing: bool = False):
+    def __init__(self, original_client: genai.Client):
         self._client = original_client
-        self.tracer = get_paid_tracer()
-        self.optional_tracing = optional_tracing
 
     @property
     def models(self):
         """Access models with OTEL instrumentation."""
-        return ModelsWrapper(self._client, self.tracer, self.optional_tracing)
+        return ModelsWrapper(self._client)
 
 
 class ModelsWrapper:
     """Wrapper for models with OTEL instrumentation."""
 
-    def __init__(self, original_client: genai.Client, tracer: trace.Tracer, optional_tracing: bool):
+    def __init__(self, original_client: genai.Client):
         self._client = original_client
-        self.tracer = tracer
-        self.optional_tracing = optional_tracing
 
     def generate_content(self, **kwargs) -> GenerateContentResponse:
         """GenerateContentResponse method with OTEL instrumentation."""
-        # Check if tracing is active (optional tracing mode)
-        current_span = trace.get_current_span()
-        if current_span == trace.INVALID_SPAN:
-            if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No tracing wasn't enabled, only calling the client.")
-                return self._client.models.generate_content(**kwargs)
-            raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
+        tracer = get_paid_tracer()
 
-        external_customer_id = paid_external_customer_id_var.get()
-        external_agent_id = paid_external_agent_id_var.get()
-
-        if not external_customer_id:
-            if self.optional_tracing:
-                logger.info(
-                    f"{self.__class__.__name__} No external_customer_id, so no tracing, only calling the client."
-                )
-                return self._client.models.generate_content(**kwargs)
-            raise RuntimeError(
-                "Missing required tracing information: external_customer_id."
-                " Make sure to call this method from Paid.trace()."
-            )
-
-        with self.tracer.start_as_current_span("gemini.models.generate_content") as span:
+        with tracer.start_as_current_span("gemini.models.generate_content") as span:
             try:
                 # Execute the original method
                 response = self._client.models.generate_content(**kwargs)
@@ -82,10 +52,6 @@ class ModelsWrapper:
 
                 # Set OTEL attributes (best-effort)
                 attributes: dict[str, Union[str, int]] = {}
-                attributes["external_customer_id"] = external_customer_id
-                if external_agent_id:
-                    attributes["external_agent_id"] = external_agent_id
-
                 attributes["gen_ai.system"] = "gemini"
                 attributes["gen_ai.operation.name"] = "generate_content"
                 try:

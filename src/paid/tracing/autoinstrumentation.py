@@ -9,6 +9,7 @@ from typing import List, Optional
 
 from . import tracing
 from .tracing import initialize_tracing_, logger
+from opentelemetry.trace import NoOpTracerProvider
 
 # Safe imports for instrumentation libraries
 try:
@@ -89,7 +90,7 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
         >>> anthropic_client.messages.create(...)
     """
     # Initialize tracing if not already initialized
-    if not tracing.paid_tracer_provider:
+    if isinstance(tracing.paid_tracer_provider, NoOpTracerProvider):
         logger.info("Tracing not initialized, initializing automatically")
         initialize_tracing_()
 

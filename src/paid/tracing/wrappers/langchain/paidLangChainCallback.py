@@ -2,10 +2,9 @@ import time
 from typing import Any, Dict, List, Optional, Sequence
 from uuid import UUID
 
-from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
-from paid.tracing.tracing import get_paid_tracer, logger, paid_external_customer_id_var
+from paid.tracing.tracing import get_paid_tracer
 
 try:
     from langchain_core.callbacks import BaseCallbackHandler  # type: ignore
@@ -44,7 +43,6 @@ class PaidLangChainCallback(BaseCallbackHandler):
     def __init__(self):
         """Initialize the callback handler."""
         super().__init__()
-        self.tracer = get_paid_tracer()
         self._spans: Dict[str, Any] = {}  # Track active spans by run_id
         self._start_times: Dict[str, float] = {}  # Track start times
 
@@ -56,35 +54,16 @@ class PaidLangChainCallback(BaseCallbackHandler):
 
     def _start_span(self, run_id: UUID, span_name: str, **attributes: Any) -> Optional[Any]:
         """Start a new span and store it."""
-        # Check if there's an active span (from capture())
-        current_span = trace.get_current_span()
-        if current_span == trace.INVALID_SPAN:
-            logger.info(f"{self.__class__.__name__} No active span found - LangChain operations will not be traced")
-            return None
-
-        # Get context variables
-        external_customer_id = paid_external_customer_id_var.get()
-
-        # Check if required context is available
-        if not external_customer_id:
-            logger.info(
-                f"{self.__class__.__name__} Missing required tracing information "
-                f"(external_customer_id={bool(external_customer_id)}) - "
-                f"LangChain operation '{span_name}' will not be traced"
-            )
-            return None
+        tracer = get_paid_tracer()
 
         # Create child span
-        span = self.tracer.start_span(span_name)
+        span = tracer.start_span(span_name)
 
         # Set common attributes
         base_attributes = {
             "langchain.operation": span_name.split()[0].split(".")[-1],
             "langchain.run_id": str(run_id),
         }
-
-        if external_customer_id:
-            base_attributes["external_customer_id"] = external_customer_id
 
         # Add custom attributes
         base_attributes.update(attributes)
@@ -94,8 +73,6 @@ class PaidLangChainCallback(BaseCallbackHandler):
         self._spans[str(run_id)] = span
         self._start_times[str(run_id)] = time.time()
 
-        logger.info(f"{self.__class__.__name__} Started span '{span_name}' for run_id={run_id}")
-
         return span
 
     def _end_span(self, run_id: UUID, error: Optional[BaseException] = None, **attributes):
@@ -104,9 +81,6 @@ class PaidLangChainCallback(BaseCallbackHandler):
         span = self._spans.get(span_key)
 
         if not span:
-            logger.info(
-                f"{self.__class__.__name__} No span found for run_id={run_id} - span was not created or already ended"
-            )
             return
 
         try:
@@ -123,10 +97,8 @@ class PaidLangChainCallback(BaseCallbackHandler):
             if error:
                 span.set_status(Status(StatusCode.ERROR, str(error)))
                 span.record_exception(error)
-                logger.info(f"{self.__class__.__name__} Ended span with error for run_id={run_id}: {error}")
             else:
                 span.set_status(Status(StatusCode.OK))
-                logger.info(f"{self.__class__.__name__} Successfully ended span for run_id={run_id}")
 
         finally:
             span.end()
@@ -146,14 +118,10 @@ class PaidLangChainCallback(BaseCallbackHandler):
     ) -> Any:
         """Called when LLM starts running."""
         if not metadata:
-            logger.info(f"{self.__class__.__name__} No metadata provided for LLM start (run_id={run_id})")
             return None
 
         model_type = metadata.get("ls_model_type", "unknown")
         model_name = metadata.get("ls_model_name", "unknown")
-        logger.info(
-            f"{self.__class__.__name__} LLM start - model_type={model_type}, model_name={model_name}, run_id={run_id}"
-        )
         span_name = self._get_span_name(f"trace.{model_type}", model_name)
 
         attributes = {

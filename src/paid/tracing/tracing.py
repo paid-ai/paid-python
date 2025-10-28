@@ -16,7 +16,9 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor, TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.id_generator import RandomIdGenerator
-from opentelemetry.trace import NonRecordingSpan, SpanContext, Status, StatusCode, TraceFlags
+from opentelemetry.trace import NonRecordingSpan, NoOpTracerProvider, SpanContext, Status, StatusCode, TraceFlags
+
+DEFAULT_COLLECTOR_ENDPOINT = "https://collector.agentpaid.io:4318/v1/traces"
 
 # Configure logging
 dotenv.load_dotenv()
@@ -72,7 +74,8 @@ def set_token(token: str) -> None:
 otel_id_generator = RandomIdGenerator()
 
 # Isolated tracer provider for Paid - separate from any user OTEL setup
-paid_tracer_provider: Optional[TracerProvider] = None
+# Initialized at module load with defaults, never None (uses no-op provider if not initialized or API key isn't available)
+paid_tracer_provider: Union[TracerProvider, NoOpTracerProvider] = NoOpTracerProvider()
 
 
 class PaidSpanProcessor(SpanProcessor):
@@ -156,9 +159,7 @@ class PaidSpanProcessor(SpanProcessor):
         return True
 
 
-def initialize_tracing_(
-    api_key: Optional[str] = None, collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces"
-):
+def initialize_tracing_(api_key: Optional[str] = None, collector_endpoint: str = DEFAULT_COLLECTOR_ENDPOINT):
     """
     Initialize OpenTelemetry with OTLP exporter for Paid backend.
 
@@ -169,7 +170,7 @@ def initialize_tracing_(
     global paid_tracer_provider
 
     try:
-        if _token is not None:
+        if get_token() is not None:
             logger.warn("Tracing is already initialized - skipping re-initialization")
             return
 
@@ -208,7 +209,9 @@ def initialize_tracing_(
         # Terminate gracefully and don't lose traces
         def flush_traces():
             try:
-                if paid_tracer_provider is not None and not paid_tracer_provider.force_flush(10000):
+                if not isinstance(paid_tracer_provider, NoOpTracerProvider) and not paid_tracer_provider.force_flush(
+                    10000
+                ):
                     logger.error("OTEL force flush : timeout reached")
             except Exception as e:
                 logger.error(f"Error flushing traces: {e}")
@@ -240,7 +243,7 @@ def initialize_tracing_(
         # don't throw - tracing should not break the app
 
 
-def get_paid_tracer() -> Optional[trace.Tracer]:
+def get_paid_tracer() -> trace.Tracer:
     """
     Get the tracer from the isolated Paid tracer provider.
 
@@ -253,12 +256,9 @@ def get_paid_tracer() -> Optional[trace.Tracer]:
     Notes:
         Tracing is automatically initialized when using @paid_tracing decorator or context manager.
     """
-    try:
-        return paid_tracer_provider.get_tracer("paid.python")
-    except Exception as e:
-        logger.error(f"Failed to get Paid tracer: {e}")
-        # don't throw - tracing should not break the app
-        return None
+    global paid_tracer_provider
+    return paid_tracer_provider.get_tracer("paid.python")
+
 
 def trace_sync_(
     external_customer_id: str,
@@ -501,6 +501,7 @@ def generate_and_set_tracing_token() -> int:
         int: A unique OpenTelemetry trace ID (for backward compatibility).
     """
     import warnings
+
     warnings.warn(
         "generate_and_set_tracing_token() is deprecated and will be removed in a future version. "
         "Pass tracing_token directly to @paid_tracing(tracing_token=...) decorator instead.",
@@ -546,6 +547,7 @@ def set_tracing_token(token: int):
         would use it automatically until unset_tracing_token() was called.
     """
     import warnings
+
     warnings.warn(
         "set_tracing_token() is deprecated and will be removed in a future version. "
         "Pass tracing_token directly to @paid_tracing(tracing_token=...) decorator instead.",
@@ -573,6 +575,7 @@ def unset_tracing_token():
         simply pass the token directly to @paid_tracing(tracing_token=...) instead.
     """
     import warnings
+
     warnings.warn(
         "unset_tracing_token() is deprecated and will be removed in a future version. "
         "Use tracing_token parameter in @paid_tracing(tracing_token=...) decorator instead.",
@@ -637,7 +640,7 @@ class paid_tracing:
         external_agent_id: Optional[str] = None,
         tracing_token: Optional[int] = None,
         store_prompt: bool = False,
-        collector_endpoint: Optional[str] = "https://collector.agentpaid.io:4318/v1/traces",
+        collector_endpoint: Optional[str] = DEFAULT_COLLECTOR_ENDPOINT,
         metadata: Optional[Dict[str, Any]] = None,
     ):
         self.external_customer_id = external_customer_id
