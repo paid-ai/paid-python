@@ -121,6 +121,7 @@ async with paid_tracing("customer_123", external_agent_id="agent_456"):
 ```
 
 Both approaches:
+
 - Initialize tracing using your API key you provided to the Paid client, falls back to `PAID_API_KEY` environment variable.
 - Handle both sync and async functions/code blocks
 - Gracefully fall back to normal execution if tracing fails
@@ -143,6 +144,7 @@ gemini (google-genai)
 ```
 
 Example usage:
+
 ```python
 from openai import OpenAI
 from paid.tracing import paid_tracing
@@ -230,7 +232,6 @@ paid_autoinstrument(libraries=["anthropic", "openai"])
 - Costs are tracked in the same way as when using manual wrappers
 - Should be called once during application startup, typically before creating AI client instances
 
-
 ## Signaling via OTEL tracing
 
 A more reliable and user-friendly way to send signals is to send them via OTEL tracing.
@@ -240,6 +241,7 @@ The interface is `Paid.signal()`, which takes in signal name, optional data, and
 In contrast to `Paid.usage.record_bulk()`, `Paid.signal()` is using OpenTelemetry to provide reliable delivery.
 
 Here's an example of how to use it:
+
 ```python
 from paid import Paid
 from paid.tracing import paid_tracing
@@ -259,6 +261,7 @@ do_work()
 ```
 
 Same, but using callback to specify the function to trace:
+
 ```python
 from paid import Paid
 
@@ -524,7 +527,6 @@ process_part_2()
 unset_tracing_token()
 ```
 
-
 ## Manual Cost Tracking
 
 If you would prefer to not use Paid to track your costs automatically but you want to send us the costs yourself,
@@ -538,7 +540,7 @@ client = Paid(token="<PAID_API_KEY>")
 signal = Signal(
     event_name="<your_signal_name>",
     agent_id="<your_agent_id>",
-    customer_id="<your_external_customer_id>",
+    external_customer_id="<your_external_customer_id>",
     data = {
         "costData": {
             "vendor": "<any_vendor_name>", # can be anything, traces are grouped by vendors in the UI
@@ -595,7 +597,7 @@ client = Paid(token="<PAID_API_KEY>")
 signal = Signal(
     event_name="<your_signal_name>",
     agent_id="<your_agent_id>",
-    customer_id="<your_external_customer_id>",
+    external_customer_id="<your_external_customer_id>",
     data = {
         "costData": {
             "vendor": "<any_vendor_name>", # can be anything, traces are grouped by vendors in the UI

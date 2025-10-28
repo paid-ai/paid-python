@@ -11,8 +11,25 @@ class Signal(UniversalBaseModel):
     agent_id: typing.Optional[str] = None
     external_agent_id: typing.Optional[str] = None
     customer_id: typing.Optional[str] = None
-    external_customer_id: typing.Optional[str] = None
+    """
+    Deprecated. The external customer id. Use `external_customer_id` or `internal_customer_id` instead.
+    """
+
     data: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
+    idempotency_key: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    A unique key to ensure idempotent signal processing
+    """
+
+    internal_customer_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Paid's internal customer ID
+    """
+
+    external_customer_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Your system's customer ID
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
