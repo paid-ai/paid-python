@@ -17,7 +17,7 @@ from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.id_generator import RandomIdGenerator
 from opentelemetry.trace import NonRecordingSpan, NoOpTracerProvider, SpanContext, Status, StatusCode, TraceFlags
 
-DEFAULT_COLLECTOR_ENDPOINT = "https://collector.agentpaid.io:4318/v1/traces"
+DEFAULT_COLLECTOR_ENDPOINT = os.environ.get("PAID_OTEL_COLLECTOR_ENDPOINT") or "https://collector.agentpaid.io:4318/v1/traces"
 
 # Context variables for passing data to nested spans (e.g., in openAiWrapper)
 paid_external_customer_id_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
