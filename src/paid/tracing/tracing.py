@@ -39,19 +39,30 @@ paid_user_metadata_var: contextvars.ContextVar[Optional[Dict[str, Any]]] = conte
 
 T = TypeVar("T")
 
-_token: Optional[str] = None
+class _TokenStore:
+    """Private token storage to enforce access through getter/setter."""
+
+    __token: Optional[str] = None
+
+    @classmethod
+    def get(cls) -> Optional[str]:
+        """Get the stored API token."""
+        return cls.__token
+
+    @classmethod
+    def set(cls, token: str) -> None:
+        """Set the API token."""
+        cls.__token = token
 
 
 def get_token() -> Optional[str]:
     """Get the stored API token."""
-    global _token
-    return _token
+    return _TokenStore.get()
 
 
 def set_token(token: str) -> None:
     """Set the API token."""
-    global _token
-    _token = token
+    _TokenStore.set(token)
 
 
 otel_id_generator = RandomIdGenerator()
