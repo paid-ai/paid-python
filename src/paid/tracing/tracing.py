@@ -3,12 +3,11 @@ import asyncio
 import atexit
 import contextvars
 import functools
-import logging
 import os
 import signal
 from typing import Any, Awaitable, Callable, Dict, Optional, Tuple, TypeVar, Union
+from paid.logger import logger
 
-import dotenv
 from opentelemetry import trace
 from opentelemetry.context import Context
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -19,22 +18,6 @@ from opentelemetry.sdk.trace.id_generator import RandomIdGenerator
 from opentelemetry.trace import NonRecordingSpan, NoOpTracerProvider, SpanContext, Status, StatusCode, TraceFlags
 
 DEFAULT_COLLECTOR_ENDPOINT = "https://collector.agentpaid.io:4318/v1/traces"
-
-# Configure logging
-dotenv.load_dotenv()
-log_level_name = os.environ.get("PAID_LOG_LEVEL")
-if log_level_name is not None:
-    log_level = getattr(logging, log_level_name.upper())
-else:
-    log_level = logging.ERROR  # Default to show errors
-logger = logging.getLogger(__name__)
-logger.setLevel(log_level)
-if not logger.hasHandlers():
-    handler = logging.StreamHandler()
-    handler.setLevel(log_level)
-    formatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
 
 # Context variables for passing data to nested spans (e.g., in openAiWrapper)
 paid_external_customer_id_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(

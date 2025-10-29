@@ -1,7 +1,8 @@
 import json
 import typing
 
-from .tracing import get_paid_tracer, logger, paid_external_agent_id_var, paid_external_customer_id_var
+from .tracing import get_paid_tracer, paid_external_agent_id_var, paid_external_customer_id_var
+from paid.logger import logger
 from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 

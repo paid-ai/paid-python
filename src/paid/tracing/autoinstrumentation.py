@@ -8,7 +8,8 @@ sending traces to the Paid collector endpoint.
 from typing import List, Optional
 
 from . import tracing
-from .tracing import initialize_tracing_, logger
+from .tracing import initialize_tracing_
+from paid.logger import logger
 from opentelemetry.trace import NoOpTracerProvider
 
 # Safe imports for instrumentation libraries
