@@ -1,14 +1,9 @@
 import typing
 
-from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
 from paid.tracing.tracing import (
     get_paid_tracer,
-    logger,
-    paid_external_agent_id_var,
-    paid_external_customer_id_var,
-    paid_token_var,
 )
 
 try:
@@ -23,54 +18,28 @@ except ImportError:
 
 
 class PaidAnthropic:
-    def __init__(self, anthropic_client: Anthropic, optional_tracing: bool = False):
+    def __init__(self, anthropic_client: Anthropic):
         self.anthropic = anthropic_client
-        self.tracer = get_paid_tracer()
-        self.optional_tracing = optional_tracing
 
     @property
     def messages(self):
-        return MessagesWrapper(self.anthropic, self.tracer, self.optional_tracing)
+        return MessagesWrapper(self.anthropic)
 
 
 class MessagesWrapper:
-    def __init__(self, anthropic_client: Anthropic, tracer: trace.Tracer, optional_tracing: bool):
+    def __init__(self, anthropic_client: Anthropic):
         self.anthropic = anthropic_client
-        self.tracer = tracer
-        self.optional_tracing = optional_tracing
 
     def create(
         self, *, model: ModelParam, messages: typing.Iterable[MessageParam], max_tokens: int, **kwargs
     ) -> typing.Any:
-        current_span = trace.get_current_span()
-        if current_span == trace.INVALID_SPAN:
-            if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No tracing, calling Anthropic directly.")
-                return self.anthropic.messages.create(model=model, messages=messages, max_tokens=max_tokens, **kwargs)
-            raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
+        tracer = get_paid_tracer()
 
-        external_customer_id = paid_external_customer_id_var.get()
-        external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
-
-        if not (external_customer_id and token):
-            if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling Anthropic directly")
-                return self.anthropic.messages.create(model=model, messages=messages, max_tokens=max_tokens, **kwargs)
-            raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
-                " Make sure to call this method from Paid.trace()."
-            )
-
-        with self.tracer.start_as_current_span("anthropic.messages.create") as span:
+        with tracer.start_as_current_span("anthropic.messages.create") as span:
             attributes = {
                 "gen_ai.system": "anthropic",
                 "gen_ai.operation.name": "messages",
-                "external_customer_id": external_customer_id,
-                "token": token,
             }
-            if external_agent_id:
-                attributes["external_agent_id"] = external_agent_id
 
             try:
                 response = self.anthropic.messages.create(
@@ -104,58 +73,28 @@ class MessagesWrapper:
 
 
 class PaidAsyncAnthropic:
-    def __init__(self, anthropic_client: AsyncAnthropic, optional_tracing: bool = False):
+    def __init__(self, anthropic_client: AsyncAnthropic):
         self.anthropic = anthropic_client
-        self.tracer = get_paid_tracer()
-        self.optional_tracing = optional_tracing
 
     @property
     def messages(self):
-        return AsyncMessagesWrapper(self.anthropic, self.tracer, self.optional_tracing)
+        return AsyncMessagesWrapper(self.anthropic)
 
 
 class AsyncMessagesWrapper:
-    def __init__(self, anthropic_client: AsyncAnthropic, tracer: trace.Tracer, optional_tracing: bool):
+    def __init__(self, anthropic_client: AsyncAnthropic):
         self.anthropic = anthropic_client
-        self.tracer = tracer
-        self.optional_tracing = optional_tracing
 
     async def create(
         self, *, model: ModelParam, messages: typing.Iterable[MessageParam], max_tokens: int, **kwargs
     ) -> typing.Any:
-        current_span = trace.get_current_span()
-        if current_span == trace.INVALID_SPAN:
-            if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No tracing, calling Anthropic directly.")
-                return await self.anthropic.messages.create(
-                    model=model, messages=messages, max_tokens=max_tokens, **kwargs
-                )
-            raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
+        tracer = get_paid_tracer()
 
-        external_customer_id = paid_external_customer_id_var.get()
-        external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
-
-        if not (external_customer_id and token):
-            if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling Anthropic directly")
-                return await self.anthropic.messages.create(
-                    model=model, messages=messages, max_tokens=max_tokens, **kwargs
-                )
-            raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
-                " Make sure to call this method from Paid.trace()."
-            )
-
-        with self.tracer.start_as_current_span("anthropic.messages.create") as span:
+        with tracer.start_as_current_span("anthropic.messages.create") as span:
             attributes = {
                 "gen_ai.system": "anthropic",
                 "gen_ai.operation.name": "messages",
-                "external_customer_id": external_customer_id,
-                "token": token,
             }
-            if external_agent_id:
-                attributes["external_agent_id"] = external_agent_id
 
             try:
                 response = await self.anthropic.messages.create(

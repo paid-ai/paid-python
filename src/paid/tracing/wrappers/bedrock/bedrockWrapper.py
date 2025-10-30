@@ -1,53 +1,24 @@
 from typing import Any, Dict, List
 
-from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
 
 from paid.tracing.tracing import (
     get_paid_tracer,
-    logger,
-    paid_external_agent_id_var,
-    paid_external_customer_id_var,
-    paid_token_var,
 )
 
 
 class PaidBedrock:
-    def __init__(self, bedrock_client: Any, optional_tracing: bool = False):
+    def __init__(self, bedrock_client: Any):
         self.bedrock_client = bedrock_client
-        self.tracer = get_paid_tracer()
-        self.optional_tracing = optional_tracing
 
     def converse(self, *, modelId: str, messages: List[Dict[str, Any]], **kwargs) -> Dict[str, Any]:
-        current_span = trace.get_current_span()
-        if current_span == trace.INVALID_SPAN:
-            if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No tracing, calling Bedrock directly.")
-                return self.bedrock_client.converse(modelId=modelId, messages=messages, **kwargs)
-            raise RuntimeError("No OTEL span found. Make sure to call this method from Paid.trace().")
+        tracer = get_paid_tracer()
 
-        external_customer_id = paid_external_customer_id_var.get()
-        external_agent_id = paid_external_agent_id_var.get()
-        token = paid_token_var.get()
-
-        if not (external_customer_id and token):
-            if self.optional_tracing:
-                logger.info(f"{self.__class__.__name__} No external_customer_id or token, calling Bedrock directly")
-                return self.bedrock_client.converse(modelId=modelId, messages=messages, **kwargs)
-            raise RuntimeError(
-                "Missing required tracing information: external_customer_id or token."
-                " Make sure to call this method from Paid.trace()."
-            )
-
-        with self.tracer.start_as_current_span("bedrock.converse") as span:
+        with tracer.start_as_current_span("bedrock.converse") as span:
             attributes = {
                 "gen_ai.system": "bedrock",
                 "gen_ai.operation.name": "converse",
-                "external_customer_id": external_customer_id,
-                "token": token,
             }
-            if external_agent_id:
-                attributes["external_agent_id"] = external_agent_id
 
             try:
                 response = self.bedrock_client.converse(modelId=modelId, messages=messages, **kwargs)
