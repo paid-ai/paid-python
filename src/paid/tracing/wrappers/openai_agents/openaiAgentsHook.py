@@ -1,7 +1,8 @@
 from typing import Any, Optional
 
-from opentelemetry.trace import Status, StatusCode
+from opentelemetry.trace import Span, Status, StatusCode
 
+from paid.logger import logger
 from paid.tracing.tracing import (
     get_paid_tracer,
 )
@@ -17,7 +18,7 @@ except ImportError:
 
 # Global dictionary to store spans keyed by context object ID
 # This avoids polluting user's context.context and works across async boundaries
-_paid_span_store: dict = {}
+_paid_span_store: dict[int, Span] = {}
 
 
 class PaidOpenAIAgentsHook(RunHooks[Any]):
@@ -77,7 +78,7 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
             _paid_span_store[context_id] = span
 
         except Exception as error:
-            pass
+            logger.error(f"Error while starting span in PaidAgentsHook.{hook_name}: {error}")
 
     def _end_span(self, context, hook_name):
         try:
@@ -117,6 +118,7 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
 
         except Exception as error:
             # Try to end span on error
+            logger.error(f"Error while ending span in PaidAgentsHook.{hook_name}: {error}")
             try:
                 context_id = id(context)
                 span = _paid_span_store.get(context_id)
@@ -126,7 +128,7 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
                     span.end()
                     del _paid_span_store[context_id]
             except:
-                pass
+                logger.error(f"Failed to end span after error in PaidAgentsHook.{hook_name}")
 
     async def on_llm_start(self, context, agent, system_prompt, input_items) -> None:
         if self.user_hooks and hasattr(self.user_hooks, "on_llm_start"):

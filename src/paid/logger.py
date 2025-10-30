@@ -3,8 +3,9 @@ This file exports `logger` object for unified logging across the Paid SDK.
 """
 
 import logging
-import dotenv
 import os
+
+import dotenv
 
 # Configure logging
 _ = dotenv.load_dotenv()

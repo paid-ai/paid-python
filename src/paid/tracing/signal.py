@@ -2,9 +2,9 @@ import json
 import typing
 
 from .tracing import get_paid_tracer
-from paid.logger import logger
-from opentelemetry import trace
 from opentelemetry.trace import Status, StatusCode
+
+from paid.logger import logger
 
 
 def signal(event_name: str, enable_cost_tracing: bool = False, data: typing.Optional[dict[str, typing.Any]] = None):

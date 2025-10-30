@@ -9,16 +9,17 @@ from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .customers.client import AsyncCustomersClient, CustomersClient
 from .environment import PaidEnvironment
 from .orders.client import AsyncOrdersClient, OrdersClient
+from .tracing.distributed_tracing import (
+    generate_tracing_token,
+    set_tracing_token,
+    unset_tracing_token,
+)
 from .tracing.signal import signal
 from .tracing.tracing import (
     DEFAULT_COLLECTOR_ENDPOINT,
-    generate_and_set_tracing_token,
-    generate_tracing_token,
     initialize_tracing_,
-    set_tracing_token,
     trace_async_,
     trace_sync_,
-    unset_tracing_token,
 )
 from .usage.client import AsyncUsageClient, UsageClient
 
@@ -139,46 +140,6 @@ class Paid:
         )
         return generate_tracing_token()
 
-    def generate_and_set_tracing_token(self) -> int:
-        """
-        Deprecated: Pass tracing_token directly to @paid_tracing() decorator instead.
-
-        This method is deprecated and will be removed in a future version.
-        Use the tracing_token parameter in @paid_tracing() to link traces across processes.
-
-        Instead of:
-            from paid import Paid
-            client = Paid(token="...")
-            token = client.generate_and_set_tracing_token()
-            @paid_tracing(external_customer_id="cust_123", external_agent_id="agent_456")
-            def my_function():
-                ...
-
-        Use:
-            from paid.tracing import generate_tracing_token, paid_tracing
-            token = generate_tracing_token()
-
-            @paid_tracing(
-                external_customer_id="cust_123",
-                external_agent_id="agent_456",
-                tracing_token=token
-            )
-            def my_function():
-                ...
-
-        Returns:
-            int: A unique tracing token (OpenTelemetry trace ID).
-        """
-        import warnings
-
-        warnings.warn(
-            "Paid.generate_and_set_tracing_token() is deprecated and will be removed in a future version. "
-            "Pass tracing_token directly to @paid_tracing(tracing_token=...) decorator instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return generate_and_set_tracing_token()
-
     def set_tracing_token(self, token: int):
         """
         Deprecated: Pass tracing_token directly to @paid_tracing() decorator instead.
@@ -213,8 +174,6 @@ class Paid:
         token : int
             A tracing token to use for the next traces.
         """
-        import warnings
-
         warnings.warn(
             "Paid.set_tracing_token() is deprecated and will be removed in a future version. "
             "Pass tracing_token directly to @paid_tracing(tracing_token=...) decorator instead.",
@@ -250,8 +209,6 @@ class Paid:
             def my_function():
                 ...
         """
-        import warnings
-
         warnings.warn(
             "Paid.unset_tracing_token() is deprecated and will be removed in a future version. "
             "Use tracing_token parameter in @paid_tracing(tracing_token=...) decorator instead.",
@@ -463,46 +420,6 @@ class AsyncPaid:
         )
         return generate_tracing_token()
 
-    def generate_and_set_tracing_token(self) -> int:
-        """
-        Deprecated: Pass tracing_token directly to @paid_tracing() decorator instead.
-
-        This method is deprecated and will be removed in a future version.
-        Use the tracing_token parameter in @paid_tracing() to link traces across processes.
-
-        Instead of:
-            from paid import AsyncPaid
-            client = AsyncPaid(token="...")
-            token = client.generate_and_set_tracing_token()
-            @paid_tracing(external_customer_id="cust_123", external_agent_id="agent_456")
-            async def my_function():
-                ...
-
-        Use:
-            from paid.tracing import generate_tracing_token, paid_tracing
-            token = generate_tracing_token()
-
-            @paid_tracing(
-                external_customer_id="cust_123",
-                external_agent_id="agent_456",
-                tracing_token=token
-            )
-            async def my_function():
-                ...
-
-        Returns:
-            int: A unique tracing token (OpenTelemetry trace ID).
-        """
-        import warnings
-
-        warnings.warn(
-            "AsyncPaid.generate_and_set_tracing_token() is deprecated and will be removed in a future version. "
-            "Pass tracing_token directly to @paid_tracing(tracing_token=...) decorator instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return generate_and_set_tracing_token()
-
     def set_tracing_token(self, token: int):
         """
         Deprecated: Pass tracing_token directly to @paid_tracing() decorator instead.
@@ -537,8 +454,6 @@ class AsyncPaid:
         token : int
             A tracing token to use for the next traces.
         """
-        import warnings
-
         warnings.warn(
             "AsyncPaid.set_tracing_token() is deprecated and will be removed in a future version. "
             "Pass tracing_token directly to @paid_tracing(tracing_token=...) decorator instead.",
@@ -574,8 +489,6 @@ class AsyncPaid:
             async def my_function():
                 ...
         """
-        import warnings
-
         warnings.warn(
             "AsyncPaid.unset_tracing_token() is deprecated and will be removed in a future version. "
             "Use tracing_token parameter in @paid_tracing(tracing_token=...) decorator instead.",

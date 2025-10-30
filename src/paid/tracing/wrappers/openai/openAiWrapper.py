@@ -62,6 +62,7 @@ class ChatCompletionsWrapper:
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
             }
+            span.set_attributes(attributes)
 
             try:
                 # Make the actual OpenAI API call
@@ -128,6 +129,7 @@ class EmbeddingsWrapper:
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "embeddings",
             }
+            span.set_attributes(attributes)
 
             try:
                 # Make the actual OpenAI API call
@@ -173,6 +175,7 @@ class ImagesWrapper:
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "image_generation",
             }
+            span.set_attributes(attributes)
 
             try:
                 # Make the actual OpenAI API call
@@ -214,6 +217,7 @@ class ResponsesWrapper:
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
             }
+            span.set_attributes(attributes)
 
             try:
                 # Make the actual OpenAI API call
@@ -359,6 +363,7 @@ class AsyncChatCompletionsWrapper:
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
             }
+            span.set_attributes(attributes)
 
             try:
                 # Make the actual OpenAI API call
@@ -425,6 +430,7 @@ class AsyncEmbeddingsWrapper:
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "embeddings",
             }
+            span.set_attributes(attributes)
 
             try:
                 # Make the actual OpenAI API call
@@ -470,6 +476,7 @@ class AsyncImagesWrapper:
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "image_generation",
             }
+            span.set_attributes(attributes)
 
             try:
                 # Make the actual OpenAI API call
@@ -511,6 +518,7 @@ class AsyncResponsesWrapper:
                 "gen_ai.system": "openai",
                 "gen_ai.operation.name": "chat",
             }
+            span.set_attributes(attributes)
 
             try:
                 # Make the actual OpenAI API call

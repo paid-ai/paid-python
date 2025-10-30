@@ -8,6 +8,7 @@ from typing import Union
 
 from opentelemetry.trace import Status, StatusCode
 
+from paid.logger import logger
 from paid.tracing.tracing import get_paid_tracer
 
 try:
@@ -47,8 +48,8 @@ class ModelsWrapper:
                 # Execute the original method
                 response = self._client.models.generate_content(**kwargs)
                 if response.usage_metadata is None:
-                    # unnecessary but need this for type checker
-                    raise ValueError("Response usage metadata is None. Ensure the response contains usage metadata.")
+                    logger.error("should be unreachable: response.usage_metadata is None, cannot extract usage data")
+                    return response
 
                 # Set OTEL attributes (best-effort)
                 attributes: dict[str, Union[str, int]] = {}
