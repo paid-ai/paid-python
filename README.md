@@ -170,6 +170,98 @@ def image_generate():
 image_generate()
 ```
 
+### Passing User Metadata
+
+You can attach custom metadata to your traces by passing a `metadata` dictionary to the `paid_tracing()` decorator or context manager. This metadata will be stored with the trace and can be used to filter and query traces later.
+
+<Tabs>
+  <Tab title="Python - Decorator">
+    ```python
+    from paid.tracing import paid_tracing, signal
+    from paid.tracing.wrappers import PaidOpenAI
+    from openai import OpenAI
+
+    openai_client = PaidOpenAI(OpenAI(api_key="<OPENAI_API_KEY>"))
+
+    @paid_tracing(
+        "customer_123",
+        "agent_123",
+        metadata={
+            "campaign_id": "campaign_456",
+            "environment": "production",
+            "user_tier": "enterprise"
+        }
+    )
+    def process_event(event):
+        """Process event with custom metadata"""
+        response = openai_client.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": event.content}]
+        )
+
+        signal("event_processed", enable_cost_tracing=True)
+        return response
+
+    process_event(incoming_event)
+    ```
+  </Tab>
+
+  <Tab title="Python - Context Manager">
+    ```python
+    from paid.tracing import paid_tracing, signal
+    from paid.tracing.wrappers import PaidOpenAI
+    from openai import OpenAI
+
+    openai_client = PaidOpenAI(OpenAI(api_key="<OPENAI_API_KEY>"))
+
+    def process_event(event):
+        """Process event with custom metadata"""
+        response = openai_client.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": event.content}]
+        )
+
+        signal("event_processed", enable_cost_tracing=True)
+        return response
+
+    # Pass metadata to context manager
+    with paid_tracing(
+        "customer_123",
+        external_agent_id="agent_123",
+        metadata={
+            "campaign_id": "campaign_456",
+            "environment": "production",
+            "user_tier": "enterprise"
+        }
+    ):
+        process_event(incoming_event)
+    ```
+  </Tab>
+
+  <Tab title="Node.js">
+    ```typescript
+    // Metadata support is not yet available in the Node.js SDK.
+    // Please use Python for passing custom metadata to traces.
+    ```
+  </Tab>
+</Tabs>
+
+#### Querying Traces by Metadata
+
+Once you've added metadata to your traces, you can filter traces using the metadata parameter in the traces API endpoint:
+
+```bash
+# Filter by single metadata field
+curl -G "https://api.paid.ai/api/organizations/{orgId}/traces" \
+  --data-urlencode 'metadata={"campaign_id":"campaign_456"}' \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Filter by multiple metadata fields (all must match)
+curl -G "https://api.paid.ai/api/organizations/{orgId}/traces" \
+  --data-urlencode 'metadata={"campaign_id":"campaign_456","environment":"production"}' \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
 ### Auto-Instrumentation (OpenTelemetry Instrumentors)
 
 For maximum convenience, you can use OpenTelemetry auto-instrumentation to automatically track costs without modifying your AI library calls. This approach uses official OpenTelemetry instrumentors for supported AI libraries.

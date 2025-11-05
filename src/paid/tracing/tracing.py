@@ -258,7 +258,7 @@ def get_paid_tracer() -> trace.Tracer:
 
 
 def trace_sync_(
-    external_customer_id: str,
+    external_customer_id: Optional[str],
     fn: Callable[..., T],
     external_agent_id: Optional[str] = None,
     tracing_token: Optional[int] = None,
@@ -316,9 +316,6 @@ def trace_sync_(
         tracer = get_paid_tracer()
         logger.info(f"Creating span for external_customer_id: {external_customer_id}")
         with tracer.start_as_current_span("parent_span", context=ctx) as span:
-            span.set_attribute("external_customer_id", external_customer_id)
-            if external_agent_id:
-                span.set_attribute("external_agent_id", external_agent_id)
             try:
                 result = fn(*args, **kwargs)
                 span.set_status(Status(StatusCode.OK))
@@ -335,7 +332,7 @@ def trace_sync_(
 
 
 async def trace_async_(
-    external_customer_id: str,
+    external_customer_id: Optional[str],
     fn: Callable[..., Union[T, Awaitable[T]]],
     external_agent_id: Optional[str] = None,
     tracing_token: Optional[int] = None,
@@ -393,9 +390,6 @@ async def trace_async_(
         tracer = get_paid_tracer()
         logger.info(f"Creating span for external_customer_id: {external_customer_id}")
         with tracer.start_as_current_span("parent_span", context=ctx) as span:
-            span.set_attribute("external_customer_id", external_customer_id)
-            if external_agent_id:
-                span.set_attribute("external_agent_id", external_agent_id)
             try:
                 if asyncio.iscoroutinefunction(fn):
                     result = await fn(*args, **kwargs)
