@@ -62,7 +62,7 @@ class paid_tracing:
 
     def __init__(
         self,
-        external_customer_id: str,
+        external_customer_id: Optional[str] = None,
         *,
         external_agent_id: Optional[str] = None,
         tracing_token: Optional[int] = None,
