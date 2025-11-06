@@ -2004,6 +2004,24 @@ opentelemetry-semantic-conventions = ">=0.50b0"
 opentelemetry-semantic-conventions-ai = ">=0.4.13,<0.5.0"
 
 [[package]]
+name = "opentelemetry-instrumentation-langchain"
+version = "0.47.5"
+description = "OpenTelemetry Langchain instrumentation"
+optional = false
+python-versions = "<4,>=3.9"
+groups = ["main"]
+files = [
+    {file = "opentelemetry_instrumentation_langchain-0.47.5-py3-none-any.whl", hash = "sha256:c35c76c50555c709cca94744c6c37059303097743af05a793f21a008a7d155bb"},
+    {file = "opentelemetry_instrumentation_langchain-0.47.5.tar.gz", hash = "sha256:720c5fc0bc0d060a28bea91045feaf8bb459f9d1f4361fea8ae2afdcdcf4dd3c"},
+]
+
+[package.dependencies]
+opentelemetry-api = ">=1.28.0,<2.0.0"
+opentelemetry-instrumentation = ">=0.50b0"
+opentelemetry-semantic-conventions = ">=0.55b0"
+opentelemetry-semantic-conventions-ai = ">=0.4.13,<0.5.0"
+
+[[package]]
 name = "opentelemetry-instrumentation-openai"
 version = "0.47.3"
 description = "OpenTelemetry OpenAI instrumentation"
@@ -3931,4 +3949,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.14"
-content-hash = "9fda566b3858d96978f83aa4039359012dfddf520c84577f583c0e148a5a2650"
+content-hash = "906adb02015736dd2baabdb581a7637d44edda7d2e3ba8f38b4e669b424bf088"
