@@ -127,6 +127,13 @@ Both approaches:
 - Gracefully fall back to normal execution if tracing fails
 - Support the same parameters: `external_customer_id`, `external_agent_id`, `tracing_token`, `store_prompt`, `metadata`
 
+* Note - if it happens that you're calling `paid_tracing` from non-main thread, then it's advised to call:
+```python
+from paid.tracing import initialize_tracing
+initialize_tracing()
+```
+* `initialize_tracing` also accepts optional arguments like OTEL collector endpoint and api key if you want to reroute your tracing somewhere else :)
+
 ### Using the Paid wrappers
 
 You can track usage costs by using Paid wrappers around your AI provider's SDK.

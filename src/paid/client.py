@@ -17,7 +17,7 @@ from .tracing.distributed_tracing import (
 from .tracing.signal import signal
 from .tracing.tracing import (
     DEFAULT_COLLECTOR_ENDPOINT,
-    initialize_tracing_,
+    initialize_tracing,
     trace_async_,
     trace_sync_,
 )
@@ -114,7 +114,7 @@ class Paid:
             stacklevel=2,
         )
         token = self._client_wrapper._get_token()
-        initialize_tracing_(token, collector_endpoint=collector_endpoint)
+        initialize_tracing(token, collector_endpoint=collector_endpoint)
 
     def generate_tracing_token(self) -> int:
         """
@@ -394,7 +394,7 @@ class AsyncPaid:
             stacklevel=2,
         )
         token = self._client_wrapper._get_token()
-        initialize_tracing_(token, collector_endpoint=collector_endpoint)
+        initialize_tracing(token, collector_endpoint=collector_endpoint)
 
     def generate_tracing_token(self) -> int:
         """

@@ -155,8 +155,43 @@ class PaidSpanProcessor(SpanProcessor):
         """Called to force flush. Always returns True since there's nothing to flush."""
         return True
 
+def setup_graceful_termination():
+    def flush_traces():
+        try:
+            if not isinstance(paid_tracer_provider, NoOpTracerProvider) and not paid_tracer_provider.force_flush(
+                10000
+            ):
+                logger.error("OTEL force flush : timeout reached")
+        except Exception as e:
+            logger.error(f"Error flushing traces: {e}")
 
-def initialize_tracing_(api_key: Optional[str] = None, collector_endpoint: Optional[str] = DEFAULT_COLLECTOR_ENDPOINT):
+    def create_chained_signal_handler(signum: int):
+        current_handler = signal.getsignal(signum)
+
+        def chained_handler(_signum, frame):
+            logger.warning(f"Received signal {_signum}, flushing traces")
+            flush_traces()
+            # Restore the original handler
+            signal.signal(_signum, current_handler)
+            # Re-raise the signal to let the original handler (or default) handle it
+            os.kill(os.getpid(), _signum)
+
+        return chained_handler
+
+    try:
+        # This is already done by default OTEL shutdown,
+        # but user might turn that off - so register it explicitly
+        atexit.register(flush_traces)
+
+        # signal handlers
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            signal.signal(sig, create_chained_signal_handler(sig))
+    except Exception as e:
+        logger.warning(f"Could not set up termination handlers: {e}"
+                       "\nConsider calling initialize_tracing() from the main thread during app initialization if you don't already")
+
+
+def initialize_tracing(api_key: Optional[str] = None, collector_endpoint: Optional[str] = DEFAULT_COLLECTOR_ENDPOINT):
     """
     Initialize OpenTelemetry with OTLP exporter for Paid backend.
 
@@ -203,36 +238,7 @@ def initialize_tracing_(api_key: Optional[str] = None, collector_endpoint: Optio
         span_processor = SimpleSpanProcessor(otlp_exporter)
         paid_tracer_provider.add_span_processor(span_processor)
 
-        # Terminate gracefully and don't lose traces
-        def flush_traces():
-            try:
-                if not isinstance(paid_tracer_provider, NoOpTracerProvider) and not paid_tracer_provider.force_flush(
-                    10000
-                ):
-                    logger.error("OTEL force flush : timeout reached")
-            except Exception as e:
-                logger.error(f"Error flushing traces: {e}")
-
-        def create_chained_signal_handler(signum: int):
-            current_handler = signal.getsignal(signum)
-
-            def chained_handler(_signum, frame):
-                logger.warning(f"Received signal {_signum}, flushing traces")
-                flush_traces()
-                # Restore the original handler
-                signal.signal(_signum, current_handler)
-                # Re-raise the signal to let the original handler (or default) handle it
-                os.kill(os.getpid(), _signum)
-
-            return chained_handler
-
-        # This is already done by default OTEL shutdown,
-        # but user might turn that off - so register it explicitly
-        atexit.register(flush_traces)
-
-        # Handle signals
-        for sig in (signal.SIGINT, signal.SIGTERM):
-            signal.signal(sig, create_chained_signal_handler(sig))
+        setup_graceful_termination() # doesn't throw
 
         logger.info("Paid tracing initialized successfully - collector at %s", collector_endpoint)
     except Exception as e:

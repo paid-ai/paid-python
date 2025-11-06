@@ -4,7 +4,7 @@ import functools
 from typing import Any, Callable, Dict, Optional, Tuple
 
 from . import distributed_tracing, tracing
-from .tracing import get_paid_tracer, get_token, initialize_tracing_, trace_async_, trace_sync_
+from .tracing import get_paid_tracer, get_token, initialize_tracing, trace_async_, trace_sync_
 from opentelemetry import trace
 from opentelemetry.context import Context
 from opentelemetry.trace import NonRecordingSpan, Span, SpanContext, Status, StatusCode, TraceFlags
@@ -88,7 +88,7 @@ class paid_tracing:
         ] = None
 
         if not get_token():
-            initialize_tracing_(None, self.collector_endpoint)
+            initialize_tracing(None, self.collector_endpoint)
 
     def _setup_context(self) -> Optional[Context]:
         """Set up context variables and return OTEL context if needed."""
@@ -190,7 +190,7 @@ class paid_tracing:
                 # Auto-initialize tracing if not done
                 if get_token() is None:
                     try:
-                        initialize_tracing_(None, self.collector_endpoint)
+                        initialize_tracing(None, self.collector_endpoint)
                     except Exception as e:
                         logger.error(f"Failed to auto-initialize tracing: {e}")
                         # Fall back to executing function without tracing
@@ -219,7 +219,7 @@ class paid_tracing:
                 # Auto-initialize tracing if not done
                 if get_token() is None:
                     try:
-                        initialize_tracing_(None, self.collector_endpoint)
+                        initialize_tracing(None, self.collector_endpoint)
                     except Exception as e:
                         logger.error(f"Failed to auto-initialize tracing: {e}")
                         # Fall back to executing function without tracing

@@ -8,7 +8,7 @@ sending traces to the Paid collector endpoint.
 from typing import List, Optional
 
 from . import tracing
-from .tracing import initialize_tracing_
+from .tracing import initialize_tracing
 from opentelemetry.trace import NoOpTracerProvider
 
 from paid.logger import logger
@@ -94,7 +94,7 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
     # Initialize tracing if not already initialized
     if isinstance(tracing.paid_tracer_provider, NoOpTracerProvider):
         logger.info("Tracing not initialized, initializing automatically")
-        initialize_tracing_()
+        initialize_tracing()
 
     # Default to all supported libraries if none specified
     if libraries is None:
