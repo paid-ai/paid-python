@@ -284,7 +284,7 @@ from openai import OpenAI
 client = Paid(token="PAID_API_KEY")
 
 # Enable auto-instrumentation for all supported libraries
-paid_autoinstrument()  # instruments all available: anthropic, gemini, openai, openai-agents, bedrock
+paid_autoinstrument()  # instruments all available: anthropic, gemini, openai, openai-agents, bedrock, langchain
 
 # Now all OpenAI calls will be automatically traced
 openai_client = OpenAI(api_key="<OPENAI_API_KEY>")
@@ -310,6 +310,7 @@ gemini             - Google Generative AI (google-generativeai)
 openai             - OpenAI Python SDK
 openai-agents      - OpenAI Agents SDK
 bedrock            - AWS Bedrock (boto3)
+langchain          - LangChain framework
 ```
 
 #### Selective Instrumentation
