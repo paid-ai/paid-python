@@ -46,6 +46,7 @@ python-dotenv = ">=0.15.0"
 opentelemetry-instrumentation-anthropic = ">=0.47.0"
 opentelemetry-instrumentation-google-generativeai = ">=0.47.0"
 opentelemetry-instrumentation-openai = ">=0.47.0"
+opentelemetry-instrumentation-langchain = ">=0.47.0"
 openinference-instrumentation-openai-agents = ">=1.0.0"
 openinference-instrumentation-bedrock = ">=0.1.0"
 
