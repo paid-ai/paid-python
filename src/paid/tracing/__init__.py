@@ -7,11 +7,13 @@ from .distributed_tracing import (
     unset_tracing_token,
 )
 from .signal import signal
+from .tracing import initialize_tracing
 
 __all__ = [
     "generate_tracing_token",
     "paid_autoinstrument",
     "paid_tracing",
+    "initialize_tracing",
     "set_tracing_token",
     "unset_tracing_token",
     "signal",

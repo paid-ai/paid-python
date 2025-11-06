@@ -127,6 +127,13 @@ Both approaches:
 - Gracefully fall back to normal execution if tracing fails
 - Support the same parameters: `external_customer_id`, `external_agent_id`, `tracing_token`, `store_prompt`, `metadata`
 
+* Note - if it happens that you're calling `paid_tracing` from non-main thread, then it's advised to initialize from main thread:
+```python
+from paid.tracing import initialize_tracing
+initialize_tracing()
+```
+* `initialize_tracing` also accepts optional arguments like OTEL collector endpoint and api key if you want to reroute your tracing somewhere else :)
+
 ### Using the Paid wrappers
 
 You can track usage costs by using Paid wrappers around your AI provider's SDK.
@@ -147,8 +154,10 @@ Example usage:
 
 ```python
 from openai import OpenAI
-from paid.tracing import paid_tracing
+from paid.tracing import paid_tracing, initialize_tracing
 from paid.tracing.wrappers.openai import PaidOpenAI
+
+initialize_tracing()
 
 openAIClient = PaidOpenAI(OpenAI(
     # This is the default and can be omitted
@@ -177,9 +186,11 @@ You can attach custom metadata to your traces by passing a `metadata` dictionary
 <Tabs>
   <Tab title="Python - Decorator">
     ```python
-    from paid.tracing import paid_tracing, signal
+    from paid.tracing import paid_tracing, signal, initialize_tracing
     from paid.tracing.wrappers import PaidOpenAI
     from openai import OpenAI
+
+    initialize_tracing()
 
     openai_client = PaidOpenAI(OpenAI(api_key="<OPENAI_API_KEY>"))
 
@@ -208,9 +219,11 @@ You can attach custom metadata to your traces by passing a `metadata` dictionary
 
   <Tab title="Python - Context Manager">
     ```python
-    from paid.tracing import paid_tracing, signal
+    from paid.tracing import paid_tracing, signal, initialize_tracing
     from paid.tracing.wrappers import PaidOpenAI
     from openai import OpenAI
+
+    initialize_tracing()
 
     openai_client = PaidOpenAI(OpenAI(api_key="<OPENAI_API_KEY>"))
 
@@ -270,14 +283,14 @@ For maximum convenience, you can use OpenTelemetry auto-instrumentation to autom
 
 ```python
 from paid import Paid
-from paid.tracing import paid_autoinstrument
+from paid.tracing import paid_autoinstrument, initialize_tracing
 from openai import OpenAI
 
 # Initialize Paid SDK
 client = Paid(token="PAID_API_KEY")
+initialize_tracing()
 
-# Enable auto-instrumentation for all supported libraries
-paid_autoinstrument()  # instruments all available: anthropic, gemini, openai, openai-agents, bedrock
+paid_autoinstrument()  # instruments all available: anthropic, gemini, openai, openai-agents, bedrock, langchain
 
 # Now all OpenAI calls will be automatically traced
 openai_client = OpenAI(api_key="<OPENAI_API_KEY>")
@@ -303,6 +316,7 @@ gemini             - Google Generative AI (google-generativeai)
 openai             - OpenAI Python SDK
 openai-agents      - OpenAI Agents SDK
 bedrock            - AWS Bedrock (boto3)
+langchain          - LangChain framework
 ```
 
 #### Selective Instrumentation
@@ -402,9 +416,11 @@ For such cases, you can pass a tracing token directly to `@paid_tracing()` or co
 The simplest way to implement distributed tracing is to pass the token directly to the decorator or context manager:
 
 ```python
-from paid.tracing import paid_tracing, signal, generate_tracing_token
+from paid.tracing import paid_tracing, signal, generate_tracing_token, initialize_tracing
 from paid.tracing.wrappers.openai import PaidOpenAI
 from openai import OpenAI
+
+initialize_tracing()
 
 openai_client = PaidOpenAI(OpenAI(api_key="<OPENAI_API_KEY>"))
 
@@ -447,9 +463,11 @@ process_part_2()
 Using context manager instead of decorator:
 
 ```python
-from paid.tracing import paid_tracing, signal, generate_tracing_token
+from paid.tracing import paid_tracing, signal, generate_tracing_token, initialize_tracing
 from paid.tracing.wrappers.openai import PaidOpenAI
 from openai import OpenAI
+
+initialize_tracing()
 
 # Initialize
 openai_client = PaidOpenAI(OpenAI(api_key="<OPENAI_API_KEY>"))
@@ -608,8 +626,10 @@ The `@paid_tracing` decorator automatically handles both sync and async function
 
 ```python
 from openai import AsyncOpenAI
-from paid.tracing import paid_tracing
+from paid.tracing import paid_tracing, initialize_tracing
 from paid.tracing.wrappers.openai import PaidAsyncOpenAI
+
+initialize_tracing()
 
 # Wrap the async OpenAI client
 openai_client = PaidAsyncOpenAI(AsyncOpenAI(api_key="<OPENAI_API_KEY>"))
@@ -634,9 +654,11 @@ await generate_image()
 The `signal()` function works seamlessly in async contexts:
 
 ```python
-from paid.tracing import paid_tracing, signal
+from paid.tracing import paid_tracing, signal, initialize_tracing
 from paid.tracing.wrappers.openai import PaidAsyncOpenAI
 from openai import AsyncOpenAI
+
+initialize_tracing()
 
 openai_client = PaidAsyncOpenAI(AsyncOpenAI(api_key="<OPENAI_API_KEY>"))
 

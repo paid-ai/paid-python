@@ -8,7 +8,7 @@ sending traces to the Paid collector endpoint.
 from typing import List, Optional
 
 from . import tracing
-from .tracing import initialize_tracing_
+from .tracing import initialize_tracing
 from opentelemetry.trace import NoOpTracerProvider
 
 from paid.logger import logger
@@ -49,6 +49,13 @@ try:
 except ImportError:
     BEDROCK_AVAILABLE = False
 
+try:
+    from opentelemetry.instrumentation.langchain import LangchainInstrumentor
+
+    LANGCHAIN_AVAILABLE = True
+except ImportError:
+    LANGCHAIN_AVAILABLE = False
+
 
 # Track which instrumentors have been initialized
 _initialized_instrumentors: List[str] = []
@@ -69,6 +76,7 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
                   - "openai": OpenAI library
                   - "openai-agents": OpenAI Agents SDK
                   - "bedrock": AWS Bedrock
+                  - "langchain": LangChain library
                   If None, all supported libraries that are installed will be instrumented.
 
     Note:
@@ -94,11 +102,11 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
     # Initialize tracing if not already initialized
     if isinstance(tracing.paid_tracer_provider, NoOpTracerProvider):
         logger.info("Tracing not initialized, initializing automatically")
-        initialize_tracing_()
+        initialize_tracing()
 
     # Default to all supported libraries if none specified
     if libraries is None:
-        libraries = ["anthropic", "gemini", "openai", "openai-agents", "bedrock"]
+        libraries = ["anthropic", "gemini", "openai", "openai-agents", "bedrock", "langchain"]
 
     for library in libraries:
         if library in _initialized_instrumentors:
@@ -115,9 +123,11 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
             _instrument_openai_agents()
         elif library == "bedrock":
             _instrument_bedrock()
+        elif library == "langchain":
+            _instrument_langchain()
         else:
             logger.warning(
-                f"Unknown library '{library}' - supported libraries: anthropic, gemini, openai, openai-agents, bedrock"
+                f"Unknown library '{library}' - supported libraries: anthropic, gemini, openai, openai-agents, bedrock, langchain"
             )
 
     logger.info(f"Auto-instrumentation enabled for: {', '.join(_initialized_instrumentors)}")
@@ -196,3 +206,18 @@ def _instrument_bedrock() -> None:
 
     _initialized_instrumentors.append("bedrock")
     logger.info("Bedrock auto-instrumentation enabled")
+
+
+def _instrument_langchain() -> None:
+    """
+    Instrument LangChain using opentelemetry-instrumentation-langchain.
+    """
+    if not LANGCHAIN_AVAILABLE:
+        logger.warning("LangChain instrumentation library not available, skipping instrumentation")
+        return
+
+    # Instrument LangChain with Paid's tracer provider
+    LangchainInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
+
+    _initialized_instrumentors.append("langchain")
+    logger.info("LangChain auto-instrumentation enabled")
