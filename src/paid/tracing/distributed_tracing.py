@@ -1,6 +1,6 @@
 import warnings
 
-from . import tracing
+from .context_data import ContextData
 from opentelemetry.sdk.trace.id_generator import RandomIdGenerator
 
 otel_id_generator = RandomIdGenerator()
@@ -85,7 +85,7 @@ def set_tracing_token(token: int):
         DeprecationWarning,
         stacklevel=2,
     )
-    _ = tracing.paid_trace_id_var.set(token)
+    ContextData.set_context_key("trace_id", token)
 
 
 def unset_tracing_token():
@@ -110,4 +110,4 @@ def unset_tracing_token():
         DeprecationWarning,
         stacklevel=2,
     )
-    _ = tracing.paid_trace_id_var.set(None)
+    ContextData.set_context_key("trace_id", None)

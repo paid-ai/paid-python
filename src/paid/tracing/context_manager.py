@@ -1,9 +1,9 @@
 import asyncio
-import contextvars
 import functools
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, Optional
 
 from . import distributed_tracing, tracing
+from .context_data import ContextData
 from .tracing import get_paid_tracer, get_token, initialize_tracing, trace_async_, trace_sync_
 from opentelemetry import trace
 from opentelemetry.context import Context
@@ -78,14 +78,6 @@ class paid_tracing:
         self.metadata = metadata
         self.span: Optional[Span] = None
         self.span_ctx: Optional[Any] = None  # Context manager for the span
-        self.reset_tokens: Optional[
-            Tuple[
-                contextvars.Token[Optional[str]],  # external_customer_id
-                contextvars.Token[Optional[str]],  # external_agent_id
-                contextvars.Token[Optional[bool]],  # store_prompt
-                contextvars.Token[Optional[Dict[str, Any]]],  # metadata
-            ]
-        ] = None
 
         if not get_token():
             initialize_tracing(None, self.collector_endpoint)
@@ -94,23 +86,15 @@ class paid_tracing:
         """Set up context variables and return OTEL context if needed."""
 
         # Set context variables
-        reset_customer_id_ctx_token = tracing.paid_external_customer_id_var.set(self.external_customer_id)
-        reset_agent_id_ctx_token = tracing.paid_external_agent_id_var.set(self.external_agent_id)
-        reset_store_prompt_ctx_token = tracing.paid_store_prompt_var.set(self.store_prompt)
-        reset_user_metadata_ctx_token = tracing.paid_user_metadata_var.set(self.metadata)
-
-        # Store reset tokens for cleanup
-        self.reset_tokens = (
-            reset_customer_id_ctx_token,
-            reset_agent_id_ctx_token,
-            reset_store_prompt_ctx_token,
-            reset_user_metadata_ctx_token,
-        )
+        ContextData.set_context_key("external_customer_id", self.external_customer_id)
+        ContextData.set_context_key("external_agent_id", self.external_agent_id)
+        ContextData.set_context_key("store_prompt", self.store_prompt)
+        ContextData.set_context_key("user_metadata", self.metadata)
 
         # Handle distributed tracing token
         override_trace_id = self.tracing_token
         if not override_trace_id:
-            override_trace_id = tracing.paid_trace_id_var.get()
+            override_trace_id = ContextData.get_context_key("trace_id")
 
         ctx: Optional[Context] = None
         if override_trace_id is not None:
@@ -126,18 +110,7 @@ class paid_tracing:
 
     def _cleanup_context(self):
         """Reset all context variables."""
-        if self.reset_tokens:
-            (
-                reset_customer_id_ctx_token,
-                reset_agent_id_ctx_token,
-                reset_store_prompt_ctx_token,
-                reset_user_metadata_ctx_token,
-            ) = self.reset_tokens
-            tracing.paid_external_customer_id_var.reset(reset_customer_id_ctx_token)
-            tracing.paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
-            tracing.paid_store_prompt_var.reset(reset_store_prompt_ctx_token)
-            tracing.paid_user_metadata_var.reset(reset_user_metadata_ctx_token)
-            self.reset_tokens = None
+        ContextData.reset_context()
 
     # Context manager methods for sync
     def __enter__(self):

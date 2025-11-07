@@ -1,13 +1,11 @@
 # Initializing tracing for OTLP
 import asyncio
 import atexit
-import contextvars
 import os
 import signal
 from typing import Any, Awaitable, Callable, Dict, Optional, Tuple, TypeVar, Union
 
 import dotenv
-from . import distributed_tracing
 from opentelemetry import trace
 from opentelemetry.context import Context
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -16,29 +14,13 @@ from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor, TracerPro
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.trace import NonRecordingSpan, NoOpTracerProvider, SpanContext, Status, StatusCode, TraceFlags
 
+from . import distributed_tracing
+from .context_data import ContextData
 from paid.logger import logger
 
 _ = dotenv.load_dotenv()
 DEFAULT_COLLECTOR_ENDPOINT = (
     os.environ.get("PAID_OTEL_COLLECTOR_ENDPOINT") or "https://collector.agentpaid.io:4318/v1/traces"
-)
-
-# Context variables for passing data to nested spans (e.g., in openAiWrapper)
-paid_external_customer_id_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
-    "paid_external_customer_id", default=None
-)
-paid_external_agent_id_var: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
-    "paid_external_agent_id", default=None
-)
-# trace id storage (generated from token)
-paid_trace_id_var: contextvars.ContextVar[Optional[int]] = contextvars.ContextVar("paid_trace_id", default=None)
-# flag to enable storing prompt contents
-paid_store_prompt_var: contextvars.ContextVar[Optional[bool]] = contextvars.ContextVar(
-    "paid_store_prompt", default=False
-)
-# user metadata
-paid_user_metadata_var: contextvars.ContextVar[Optional[Dict[str, Any]]] = contextvars.ContextVar(
-    "paid_user_metadata", default=None
 )
 
 T = TypeVar("T")
@@ -102,15 +84,15 @@ class PaidSpanProcessor(SpanProcessor):
             span.update_name(f"{self.SPAN_NAME_PREFIX}{span.name}")
 
         # Add customer and agent IDs from context
-        customer_id = paid_external_customer_id_var.get()
+        customer_id = ContextData.get_context_key("external_customer_id")
         if customer_id:
             span.set_attribute("external_customer_id", customer_id)
 
-        agent_id = paid_external_agent_id_var.get()
+        agent_id = ContextData.get_context_key("external_agent_id")
         if agent_id:
             span.set_attribute("external_agent_id", agent_id)
 
-        metadata = paid_user_metadata_var.get()
+        metadata = ContextData.get_context_key("user_metadata")
         if metadata:
             metadata_attributes: dict[str, Any] = {}
 
@@ -131,7 +113,7 @@ class PaidSpanProcessor(SpanProcessor):
 
     def on_end(self, span: ReadableSpan) -> None:
         """Filter out prompt and response contents unless explicitly asked to store"""
-        store_prompt = paid_store_prompt_var.get()
+        store_prompt = ContextData.get_context_key("store_prompt")
         if store_prompt:
             return
 
@@ -299,15 +281,15 @@ def trace_sync_(
     kwargs = kwargs or {}
 
     # Set context variables for access by nested spans
-    reset_customer_id_ctx_token = paid_external_customer_id_var.set(external_customer_id)
-    reset_agent_id_ctx_token = paid_external_agent_id_var.set(external_agent_id)
-    reset_store_prompt_ctx_token = paid_store_prompt_var.set(store_prompt)
-    reset_user_metadata_ctx_token = paid_user_metadata_var.set(metadata)
+    ContextData.set_context_key("external_customer_id", external_customer_id)
+    ContextData.set_context_key("external_agent_id", external_agent_id)
+    ContextData.set_context_key("store_prompt", store_prompt)
+    ContextData.set_context_key("user_metadata", metadata)
 
     # If user set trace context manually
     override_trace_id = tracing_token
     if not override_trace_id:
-        override_trace_id = paid_trace_id_var.get()
+        override_trace_id = ContextData.get_context_key("trace_id")
     ctx: Optional[Context] = None
     if override_trace_id is not None:
         span_context = SpanContext(
@@ -331,10 +313,7 @@ def trace_sync_(
                 span.set_status(Status(StatusCode.ERROR, str(error)))
                 raise
     finally:
-        paid_external_customer_id_var.reset(reset_customer_id_ctx_token)
-        paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
-        paid_store_prompt_var.reset(reset_store_prompt_ctx_token)
-        paid_user_metadata_var.reset(reset_user_metadata_ctx_token)
+        ContextData.reset_context()
 
 
 async def trace_async_(
@@ -373,15 +352,15 @@ async def trace_async_(
     kwargs = kwargs or {}
 
     # Set context variables for access by nested spans
-    reset_customer_id_ctx_token = paid_external_customer_id_var.set(external_customer_id)
-    reset_agent_id_ctx_token = paid_external_agent_id_var.set(external_agent_id)
-    reset_store_prompt_ctx_token = paid_store_prompt_var.set(store_prompt)
-    reset_user_metadata_ctx_token = paid_user_metadata_var.set(metadata)
+    ContextData.set_context_key("external_customer_id", external_customer_id)
+    ContextData.set_context_key("external_agent_id", external_agent_id)
+    ContextData.set_context_key("store_prompt", store_prompt)
+    ContextData.set_context_key("user_metadata", metadata)
 
     # If user set trace context manually
     override_trace_id = tracing_token
     if not override_trace_id:
-        override_trace_id = paid_trace_id_var.get()
+        override_trace_id = ContextData.get_context_key("trace_id")
     ctx: Optional[Context] = None
     if override_trace_id is not None:
         span_context = SpanContext(
@@ -408,7 +387,4 @@ async def trace_async_(
                 span.set_status(Status(StatusCode.ERROR, str(error)))
                 raise
     finally:
-        paid_external_customer_id_var.reset(reset_customer_id_ctx_token)
-        paid_external_agent_id_var.reset(reset_agent_id_ctx_token)
-        paid_store_prompt_var.reset(reset_store_prompt_ctx_token)
-        paid_user_metadata_var.reset(reset_user_metadata_ctx_token)
+        ContextData.reset_context()
