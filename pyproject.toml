@@ -49,6 +49,7 @@ opentelemetry-instrumentation-openai = ">=0.47.0"
 opentelemetry-instrumentation-langchain = ">=0.47.0"
 openinference-instrumentation-openai-agents = ">=1.0.0"
 openinference-instrumentation-bedrock = ">=0.1.0"
+openinference-instrumentation-google-genai = ">=0.1.8"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "==1.13.0"
