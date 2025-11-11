@@ -6,6 +6,8 @@ import signal
 from typing import Any, Awaitable, Callable, Dict, Optional, Tuple, TypeVar, Union
 
 import dotenv
+from . import distributed_tracing
+from .context_data import ContextData
 from opentelemetry import trace
 from opentelemetry.context import Context
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -14,8 +16,6 @@ from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor, TracerPro
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.trace import NonRecordingSpan, NoOpTracerProvider, SpanContext, Status, StatusCode, TraceFlags
 
-from . import distributed_tracing
-from .context_data import ContextData
 from paid.logger import logger
 
 _ = dotenv.load_dotenv()
