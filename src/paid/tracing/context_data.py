@@ -1,7 +1,8 @@
-from typing import Any, Optional
 import contextvars
+from typing import Any, Optional
 
 from paid.logger import logger
+
 
 # this class is used like a namespace, it's not for instantiation
 class ContextData:

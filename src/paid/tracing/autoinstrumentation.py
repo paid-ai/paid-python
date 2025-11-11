@@ -217,7 +217,8 @@ def _instrument_langchain() -> None:
         return
 
     # Instrument LangChain with Paid's tracer provider
-    LangchainInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
+    LangchainInstrumentor(disable_trace_context_propagation=True).instrument(tracer_provider=tracing.paid_tracer_provider)
+
 
     _initialized_instrumentors.append("langchain")
     logger.info("LangChain auto-instrumentation enabled")
