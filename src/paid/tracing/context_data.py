@@ -20,7 +20,19 @@ class ContextData:
         "user_metadata": _USER_METADATA,
     }
 
-    _reset_tokens: dict[str, Any] = {}
+    # Use ContextVar for reset tokens to avoid race conditions in async/concurrent scenarios
+    _reset_tokens: contextvars.ContextVar[Optional[dict[str, Any]]] = contextvars.ContextVar(
+        "reset_tokens", default=None
+    )
+
+    @classmethod
+    def _get_or_create_reset_tokens(cls) -> dict[str, Any]:
+        """Get the reset tokens dict for this context, creating a new one if needed."""
+        reset_tokens = cls._reset_tokens.get()
+        if reset_tokens is None:
+            reset_tokens = {}
+            cls._reset_tokens.set(reset_tokens)
+        return reset_tokens
 
     @classmethod
     def get_context(cls) -> dict[str, Any]:
@@ -33,13 +45,16 @@ class ContextData:
     @classmethod
     def set_context_key(cls, key: str, value: Any) -> None:
         if key not in cls._context:
-            logger.warning("Invalid context key: {key}")
+            logger.warning(f"Invalid context key: {key}")
             return
         reset_token = cls._context[key].set(value)
-        cls._reset_tokens[key] = reset_token
+        reset_tokens = cls._get_or_create_reset_tokens()
+        reset_tokens[key] = reset_token
 
     @classmethod
     def reset_context(cls) -> None:
-        for key, reset_token in cls._reset_tokens.items():
-            cls._context[key].reset(reset_token)
-        cls._reset_tokens.clear()
+        reset_tokens = cls._reset_tokens.get()
+        if reset_tokens:
+            for key, reset_token in reset_tokens.items():
+                cls._context[key].reset(reset_token)
+            reset_tokens.clear()
