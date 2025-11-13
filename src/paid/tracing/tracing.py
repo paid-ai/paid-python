@@ -73,6 +73,7 @@ class PaidSpanProcessor(SpanProcessor):
         "gen_ai.response.messages",
         "llm.output_message",
         "llm.input_message",
+        "llm.invocation_parameters",
         "output.value",
         "input.value",
     }
