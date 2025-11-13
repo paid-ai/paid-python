@@ -22,13 +22,6 @@ except ImportError:
     ANTHROPIC_AVAILABLE = False
 
 try:
-    from opentelemetry.instrumentation.google_generativeai import GoogleGenerativeAiInstrumentor
-
-    GEMINI_AVAILABLE = True
-except ImportError:
-    GEMINI_AVAILABLE = False
-
-try:
     from opentelemetry.instrumentation.openai import OpenAIInstrumentor
 
     OPENAI_AVAILABLE = True
@@ -79,7 +72,6 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
     Args:
         libraries: List of library names to instrument. Currently supported:
                   - "anthropic": Anthropic library
-                  - "gemini": Gemini library
                   - "openai": OpenAI library
                   - "openai-agents": OpenAI Agents SDK
                   - "bedrock": AWS Bedrock
@@ -114,7 +106,7 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
 
     # Default to all supported libraries if none specified
     if libraries is None:
-        libraries = ["anthropic", "gemini", "openai", "openai-agents", "bedrock", "langchain", "google-genai"]
+        libraries = ["anthropic", "openai", "openai-agents", "bedrock", "langchain", "google-genai"]
 
     for library in libraries:
         if library in _initialized_instrumentors:
@@ -123,8 +115,6 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
 
         if library == "anthropic":
             _instrument_anthropic()
-        elif library == "gemini":
-            _instrument_gemini()
         elif library == "openai":
             _instrument_openai()
         elif library == "openai-agents":
@@ -156,21 +146,6 @@ def _instrument_anthropic() -> None:
 
     _initialized_instrumentors.append("anthropic")
     logger.info("Anthropic auto-instrumentation enabled")
-
-
-def _instrument_gemini() -> None:
-    """
-    Instrument the Google Gemini library using opentelemetry-instrumentation-google-generativeai.
-    """
-    if not GEMINI_AVAILABLE:
-        logger.warning("Gemini library not available, skipping instrumentation")
-        return
-
-    # Instrument Gemini with Paid's tracer provider
-    GoogleGenerativeAiInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
-
-    _initialized_instrumentors.append("gemini")
-    logger.info("Gemini auto-instrumentation enabled")
 
 
 def _instrument_openai() -> None:
