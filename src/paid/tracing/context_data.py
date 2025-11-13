@@ -44,6 +44,8 @@ class ContextData:
 
     @classmethod
     def set_context_key(cls, key: str, value: Any) -> None:
+        if value is None:
+            return
         if key not in cls._context:
             logger.warning(f"Invalid context key: {key}")
             return
@@ -52,9 +54,32 @@ class ContextData:
         reset_tokens[key] = reset_token
 
     @classmethod
+    def unset_context_key(cls, key: str) -> None:
+        """Unset a specific context key"""
+        if key not in cls._context:
+            logger.warning(f"Invalid context key: {key}")
+            return
+        reset_tokens = cls._reset_tokens.get()
+        if reset_tokens:
+            _ = cls._context[key].set(None)
+            if key in reset_tokens:
+                del reset_tokens[key]
+
+    @classmethod
     def reset_context(cls) -> None:
         reset_tokens = cls._reset_tokens.get()
         if reset_tokens:
             for key, reset_token in reset_tokens.items():
                 cls._context[key].reset(reset_token)
             reset_tokens.clear()
+
+    @classmethod
+    def reset_context_key(cls, key: str) -> None:
+        """Reset a specific context key to its previous value using the stored reset token."""
+        if key not in cls._context:
+            logger.warning(f"Invalid context key: {key}")
+            return
+        reset_tokens = cls._reset_tokens.get()
+        if reset_tokens and key in reset_tokens:
+            cls._context[key].reset(reset_tokens[key])
+            del reset_tokens[key]

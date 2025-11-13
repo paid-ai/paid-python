@@ -227,11 +227,13 @@ def _instrument_langchain() -> None:
         return
 
     # Instrument LangChain with Paid's tracer provider
-    LangchainInstrumentor(disable_trace_context_propagation=True).instrument(tracer_provider=tracing.paid_tracer_provider)
-
+    LangchainInstrumentor(disable_trace_context_propagation=True).instrument(
+        tracer_provider=tracing.paid_tracer_provider
+    )
 
     _initialized_instrumentors.append("langchain")
     logger.info("LangChain auto-instrumentation enabled")
+
 
 def _instrument_google_genai() -> None:
     """
@@ -241,7 +243,6 @@ def _instrument_google_genai() -> None:
         logger.warning("Google GenAI instrumentation library not available, skipping instrumentation")
         return
 
-    
     GoogleGenAIInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
     _initialized_instrumentors.append("google-genai")
     logger.info("Google GenAI auto-instrumentation enabled")

@@ -110,4 +110,4 @@ def unset_tracing_token():
         DeprecationWarning,
         stacklevel=2,
     )
-    ContextData.set_context_key("trace_id", None)
+    ContextData.unset_context_key("trace_id")

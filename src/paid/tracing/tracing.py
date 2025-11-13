@@ -137,12 +137,11 @@ class PaidSpanProcessor(SpanProcessor):
         """Called to force flush. Always returns True since there's nothing to flush."""
         return True
 
+
 def setup_graceful_termination():
     def flush_traces():
         try:
-            if not isinstance(paid_tracer_provider, NoOpTracerProvider) and not paid_tracer_provider.force_flush(
-                10000
-            ):
+            if not isinstance(paid_tracer_provider, NoOpTracerProvider) and not paid_tracer_provider.force_flush(10000):
                 logger.error("OTEL force flush : timeout reached")
         except Exception as e:
             logger.error(f"Error flushing traces: {e}")
@@ -169,8 +168,10 @@ def setup_graceful_termination():
         for sig in (signal.SIGINT, signal.SIGTERM):
             signal.signal(sig, create_chained_signal_handler(sig))
     except Exception as e:
-        logger.warning(f"Could not set up termination handlers: {e}"
-                       "\nConsider calling initialize_tracing() from the main thread during app initialization if you don't already")
+        logger.warning(
+            f"Could not set up termination handlers: {e}"
+            "\nConsider calling initialize_tracing() from the main thread during app initialization if you don't already"
+        )
 
 
 def initialize_tracing(api_key: Optional[str] = None, collector_endpoint: Optional[str] = DEFAULT_COLLECTOR_ENDPOINT):
@@ -220,7 +221,7 @@ def initialize_tracing(api_key: Optional[str] = None, collector_endpoint: Option
         span_processor = SimpleSpanProcessor(otlp_exporter)
         paid_tracer_provider.add_span_processor(span_processor)
 
-        setup_graceful_termination() # doesn't throw
+        setup_graceful_termination()  # doesn't throw
 
         logger.info("Paid tracing initialized successfully - collector at %s", collector_endpoint)
     except Exception as e:
