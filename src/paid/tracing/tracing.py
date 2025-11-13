@@ -66,8 +66,9 @@ class PaidSpanProcessor(SpanProcessor):
     """
 
     SPAN_NAME_PREFIX = "paid.trace."
-    PROMPT_ATTRIBUTES_PREFIXES = {
-        "gen_ai.prompt",
+    PROMPT_ATTRIBUTES_SUBSTRINGS = {
+        "prompt",
+        # "gen_ai.prompt",
         "gen_ai.completion",
         "gen_ai.request.messages",
         "gen_ai.response.messages",
@@ -76,6 +77,7 @@ class PaidSpanProcessor(SpanProcessor):
         "llm.invocation_parameters",
         "output.value",
         "input.value",
+        # "langchain.prompt",
     }
 
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
@@ -125,7 +127,7 @@ class PaidSpanProcessor(SpanProcessor):
             filtered_attrs = {
                 k: v
                 for k, v in original_attributes.items()
-                if not any(k.startswith(prefix) for prefix in self.PROMPT_ATTRIBUTES_PREFIXES)
+                if not any(substr in k for substr in self.PROMPT_ATTRIBUTES_SUBSTRINGS)
             }
             # This works because the exporter reads attributes during serialization
             object.__setattr__(span, "_attributes", filtered_attrs)
