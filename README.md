@@ -87,6 +87,56 @@ export PAID_LOG_LEVEL=DEBUG
 
 Defaults to ERROR.
 
+## Environment Variables
+
+The Paid SDK supports the following environment variables for configuration:
+
+### `PAID_API_KEY`
+
+Your Paid API key for authentication. This is used as a fallback when you don't explicitly pass the `token` parameter to the `Paid()` client or `initialize_tracing()`.
+
+```bash
+export PAID_API_KEY="your_api_key_here"
+```
+
+You can then initialize the client without passing the token:
+
+```python
+from paid import Paid
+
+# API key is read from PAID_API_KEY environment variable
+client = Paid()
+```
+
+### `PAID_ENABLED`
+
+Controls whether Paid tracing is enabled. Set to `false` (case-insensitive) to disable all tracing functionality.
+
+```bash
+export PAID_ENABLED=false
+```
+
+This is useful for:
+- Development/testing environments where tracing isn't needed
+- Temporarily disabling tracing without modifying code
+- Feature flagging in different deployment environments
+
+Defaults to `true` if not set.
+
+### `PAID_LOG_LEVEL`
+
+Sets the logging level for Paid SDK operations. See the [Logging](#logging) section for details.
+
+### `PAID_OTEL_COLLECTOR_ENDPOINT`
+
+Overrides the default OpenTelemetry collector endpoint URL. Only needed if you want to route traces to a custom endpoint.
+
+```bash
+export PAID_OTEL_COLLECTOR_ENDPOINT="https://your-custom-endpoint.com:4318/v1/traces"
+```
+
+Defaults to `https://collector.agentpaid.io:4318/v1/traces`.
+
 ## Cost Tracking via OTEL tracing
 
 ### Simple Decorator and Context Manager Methods
