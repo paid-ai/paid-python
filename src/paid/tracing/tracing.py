@@ -141,7 +141,7 @@ class PaidSpanProcessor(SpanProcessor):
         return True
 
 
-def setup_graceful_termination():
+def setup_graceful_termination(paid_tracer_provider: TracerProvider):
     def flush_traces():
         try:
             if not isinstance(paid_tracer_provider, NoOpTracerProvider) and not paid_tracer_provider.force_flush(10000):
@@ -191,6 +191,12 @@ def initialize_tracing(api_key: Optional[str] = None, collector_endpoint: Option
         collector_endpoint = DEFAULT_COLLECTOR_ENDPOINT
 
     try:
+        # Check if tracing is disabled via environment variable
+        paid_enabled = os.environ.get("PAID_ENABLED", "true").lower()
+        if paid_enabled == "false":
+            logger.info("Paid tracing is disabled via PAID_ENABLED environment variable")
+            return
+
         if get_token() is not None:
             logger.warning("Tracing is already initialized - skipping re-initialization")
             return
@@ -224,7 +230,7 @@ def initialize_tracing(api_key: Optional[str] = None, collector_endpoint: Option
         span_processor = SimpleSpanProcessor(otlp_exporter)
         paid_tracer_provider.add_span_processor(span_processor)
 
-        setup_graceful_termination()  # doesn't throw
+        setup_graceful_termination(paid_tracer_provider)  # doesn't throw
 
         logger.info("Paid tracing initialized successfully - collector at %s", collector_endpoint)
     except Exception as e:
