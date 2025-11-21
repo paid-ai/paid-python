@@ -2028,32 +2028,6 @@ opentelemetry-semantic-conventions = ">=0.55b0"
 opentelemetry-semantic-conventions-ai = ">=0.4.13,<0.5.0"
 
 [[package]]
-name = "opentelemetry-instrumentation-openai"
-version = "0.48.1"
-description = "OpenTelemetry OpenAI instrumentation"
-optional = false
-python-versions = ">=3.9,<4"
-groups = ["main"]
-files = []
-develop = false
-
-[package.dependencies]
-opentelemetry-api = "^1.38.0"
-opentelemetry-instrumentation = ">=0.59b0"
-opentelemetry-semantic-conventions = ">=0.59b0"
-opentelemetry-semantic-conventions-ai = "^0.4.13"
-
-[package.extras]
-instruments = []
-
-[package.source]
-type = "git"
-url = "https://github.com/paid-ai/openllmetry-instrumentation-patch.git"
-reference = "HEAD"
-resolved_reference = "5a2f29d66f80c1d508631be9ab87121fb5a8e4db"
-subdirectory = "packages/opentelemetry-instrumentation-openai"
-
-[[package]]
 name = "opentelemetry-proto"
 version = "1.38.0"
 description = "OpenTelemetry Python Proto"
@@ -3963,4 +3937,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.14"
-content-hash = "6a539a8b7050bfa83ca92831a0c5b913475b90a94d717557233be63d97916cff"
+content-hash = "fd88f9de8e05ad56e9ab289ff97ef9ef5dfc5791dfd177e8201c31fb881ac86e"
