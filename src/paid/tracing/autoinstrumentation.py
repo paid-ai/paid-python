@@ -22,7 +22,8 @@ except ImportError:
     ANTHROPIC_AVAILABLE = False
 
 try:
-    from opentelemetry.instrumentation.openai import OpenAIInstrumentor
+    # from opentelemetry.instrumentation.openai import OpenAIInstrumentor
+    from paid._vendor.opentelemetry.instrumentation.openai import OpenAIInstrumentor  # remove once openai instrumentor is upstream
 
     OPENAI_AVAILABLE = True
 except ImportError:
