@@ -63,25 +63,35 @@ class PaidSpanProcessor(SpanProcessor):
     1. Prefixes all span names with 'paid.trace.'
     2. Automatically adds external_customer_id and external_agent_id attributes
        to all spans based on context variables set by the tracing decorator.
+    3. Filters out prompt/response data unless store_prompt=True.
+    4. Filters out duplicate LangChain spans that may duplicate information from other instrumentations.
     """
 
     SPAN_NAME_PREFIX = "paid.trace."
     PROMPT_ATTRIBUTES_SUBSTRINGS = {
-        "prompt",
-        # "gen_ai.prompt",
         "gen_ai.completion",
         "gen_ai.request.messages",
         "gen_ai.response.messages",
         "llm.output_message",
         "llm.input_message",
         "llm.invocation_parameters",
+        "gen_ai.prompt",
+        "langchain.prompt",
         "output.value",
         "input.value",
-        # "langchain.prompt",
     }
 
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
         """Called when a span is started. Prefix the span name and add attributes."""
+
+        LANGCHAIN_SPAN_FILTERS = ["ChatOpenAI", "ChatAnthropic"]
+        if any(f in span.name for f in LANGCHAIN_SPAN_FILTERS):
+            # HACK TO FILTER DUPLICATE SPANS CREATED BY LANGCHAIN INSTRUMENTATION.
+            # Langchain instrumentation creates spans, that are created by other instrumentations (ex. OpenAI, Anthropic).
+            # Not all spans need filtering (ex. ChatGoogleGenerativeAI), so first test actual telemetry before adding filters.
+            logger.debug(f"Dropping Langchain span: {span.name}")
+            raise Exception(f"Dropping Langchain span: {span.name}")
+
         # Prefix the span name
         if span.name and not span.name.startswith(self.SPAN_NAME_PREFIX):
             span.update_name(f"{self.SPAN_NAME_PREFIX}{span.name}")
