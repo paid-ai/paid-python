@@ -89,6 +89,7 @@ class PaidSpanProcessor(SpanProcessor):
             # HACK TO FILTER DUPLICATE SPANS CREATED BY LANGCHAIN INSTRUMENTATION.
             # Langchain instrumentation creates spans, that are created by other instrumentations (ex. OpenAI, Anthropic).
             # Not all spans need filtering (ex. ChatGoogleGenerativeAI), so first test actual telemetry before adding filters.
+            # TODO: maybe consider a dropping sampler for such spans instead of raising an exception?
             logger.debug(f"Dropping Langchain span: {span.name}")
             raise Exception(f"Dropping Langchain span: {span.name}")
 
