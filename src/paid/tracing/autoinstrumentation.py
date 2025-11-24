@@ -44,7 +44,7 @@ except ImportError:
     BEDROCK_AVAILABLE = False
 
 try:
-    from opentelemetry.instrumentation.langchain import LangchainInstrumentor
+    from openinference.instrumentation.langchain import LangChainInstrumentor
 
     LANGCHAIN_AVAILABLE = True
 except ImportError:
@@ -196,16 +196,14 @@ def _instrument_bedrock() -> None:
 
 def _instrument_langchain() -> None:
     """
-    Instrument LangChain using opentelemetry-instrumentation-langchain.
+    Instrument LangChain using openinference-instrumentation-langchain.
     """
     if not LANGCHAIN_AVAILABLE:
         logger.warning("LangChain instrumentation library not available, skipping instrumentation")
         return
 
     # Instrument LangChain with Paid's tracer provider
-    LangchainInstrumentor(disable_trace_context_propagation=True).instrument(
-        tracer_provider=tracing.paid_tracer_provider
-    )
+    LangChainInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
 
     _initialized_instrumentors.append("langchain")
     logger.info("LangChain auto-instrumentation enabled")
