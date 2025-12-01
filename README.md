@@ -732,6 +732,14 @@ async def do_work():
 await do_work()
 ```
 
+### Paid OTEL Tracer Provider
+
+If you would like to use the Paid OTEL tracer provider:
+```python
+from paid.tracing import get_paid_tracer_provider
+paid_tracer_provider = get_paid_tracer_provider()
+```
+
 ## Contributing
 
 While we value open-source contributions to this SDK, this library is generated programmatically.
