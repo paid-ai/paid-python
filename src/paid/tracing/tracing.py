@@ -56,6 +56,22 @@ def set_token(token: str) -> None:
 # Initialized at module load with defaults, never None (uses no-op provider if not initialized or API key isn't available)
 paid_tracer_provider: Union[TracerProvider, NoOpTracerProvider] = NoOpTracerProvider()
 
+def get_paid_tracer_provider() -> Optional[TracerProvider]:
+    """Export the tracer provider to the user.
+    Initialize tracing if not already. Never return NoOpTracerProvider.
+
+    Returns:
+        The tracer provider instance.
+    """
+    global paid_tracer_provider
+
+    if get_token() is None:
+        initialize_tracing()
+
+    if not isinstance(paid_tracer_provider, TracerProvider):
+        return None
+
+    return paid_tracer_provider
 
 class PaidSpanProcessor(SpanProcessor):
     """
