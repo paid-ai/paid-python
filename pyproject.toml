@@ -27,7 +27,7 @@ classifiers = [
 ]
 packages = [
     { include = "paid", from = "src"},
-    # TODO: remove this once opentelemetry-instrumentation-openai is published to upstream
+    # TODO(Ata): remove this once the openai instrumentation isn't vendored anymore
     { include = "opentelemetry", from = "src/opentelemetry-instrumentation-openai" },
 ]
 
@@ -73,11 +73,13 @@ openai = ">=1.12.0"
 [tool.pytest.ini_options]
 testpaths = [ "tests" ]
 asyncio_mode = "auto"
+norecursedirs = ["src/opentelemetry-instrumentation-openai"] # TODO(Ata): remove this once the openai instrumentation isn't vendored anymore
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]
 exclude = [
-    "^src/opentelemetry-instrumentation-openai/",
+    "^src/opentelemetry-instrumentation-openai/", # TODO(Ata): remove this once the openai instrumentation isn't vendored anymore
+
 ]
 
 [[tool.mypy.overrides]]
