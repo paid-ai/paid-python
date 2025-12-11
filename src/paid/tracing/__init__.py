@@ -7,7 +7,7 @@ from .distributed_tracing import (
     unset_tracing_token,
 )
 from .signal import signal
-from .tracing import initialize_tracing, get_paid_tracer_provider
+from .tracing import get_paid_tracer_provider, initialize_tracing
 
 __all__ = [
     "generate_tracing_token",
