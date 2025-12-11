@@ -3,7 +3,7 @@ name = "paid-python"
 
 [tool.poetry]
 name = "paid-python"
-version = "0.4.1-alpha0"
+version = "0.4.0"
 description = ""
 readme = "README.md"
 authors = []
@@ -26,9 +26,7 @@ classifiers = [
     "Typing :: Typed"
 ]
 packages = [
-    { include = "paid", from = "src"},
-    # TODO(Ata): remove this once the openai instrumentation isn't vendored anymore
-    { include = "opentelemetry", from = "src/opentelemetry-instrumentation-openai" },
+    { include = "paid", from = "src"}
 ]
 
 [project.urls]
@@ -46,7 +44,7 @@ opentelemetry-exporter-otlp-proto-http = ">=1.23.0"
 mutagen = ">=1.47.0"
 python-dotenv = ">=0.15.0"
 opentelemetry-instrumentation-anthropic = ">=0.47.0"
-opentelemetry-instrumentation-openai = ">= 0.49.7" # it's not currently used because it's vendored. it's here for dependency resolution
+# opentelemetry-instrumentation-openai is vendored from https://github.com/paid-ai/openllmetry-instrumentation-patch (patched version)
 openinference-instrumentation-langchain = ">=0.1.55"
 openinference-instrumentation-openai-agents = ">=1.0.0"
 openinference-instrumentation-bedrock = ">=0.1.0"
@@ -73,14 +71,9 @@ openai = ">=1.12.0"
 [tool.pytest.ini_options]
 testpaths = [ "tests" ]
 asyncio_mode = "auto"
-norecursedirs = ["src/opentelemetry-instrumentation-openai"] # TODO(Ata): remove this once the openai instrumentation isn't vendored anymore
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]
-exclude = [
-    "^src/opentelemetry-instrumentation-openai/", # TODO(Ata): remove this once the openai instrumentation isn't vendored anymore
-
-]
 
 [[tool.mypy.overrides]]
 module = [
@@ -94,8 +87,11 @@ module = [
     "agents",
     "agents.*",
     "langchain_core.*",
+    "paid._vendor", # remove once openai instrumentor is upstream
+    "paid._vendor.*", # remove once openai instrumentor is upstream
 ]
 ignore_missing_imports = true
+ignore_errors = true # remove once openai instrumentor is upstream
 
 [tool.ruff]
 line-length = 120
