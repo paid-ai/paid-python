@@ -64,6 +64,7 @@ class OrdersClient:
         billing_contact_id: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         end_date: typing.Optional[str] = OMIT,
+        plan_id: typing.Optional[str] = OMIT,
         order_lines: typing.Optional[typing.Sequence[OrderLineCreate]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
@@ -85,6 +86,9 @@ class OrdersClient:
         description : typing.Optional[str]
 
         end_date : typing.Optional[str]
+
+        plan_id : typing.Optional[str]
+            Optional plan ID to associate with this order
 
         order_lines : typing.Optional[typing.Sequence[OrderLineCreate]]
 
@@ -121,6 +125,7 @@ class OrdersClient:
             billing_contact_id=billing_contact_id,
             description=description,
             end_date=end_date,
+            plan_id=plan_id,
             order_lines=order_lines,
             request_options=request_options,
         )
@@ -269,6 +274,7 @@ class AsyncOrdersClient:
         billing_contact_id: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         end_date: typing.Optional[str] = OMIT,
+        plan_id: typing.Optional[str] = OMIT,
         order_lines: typing.Optional[typing.Sequence[OrderLineCreate]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
@@ -290,6 +296,9 @@ class AsyncOrdersClient:
         description : typing.Optional[str]
 
         end_date : typing.Optional[str]
+
+        plan_id : typing.Optional[str]
+            Optional plan ID to associate with this order
 
         order_lines : typing.Optional[typing.Sequence[OrderLineCreate]]
 
@@ -334,6 +343,7 @@ class AsyncOrdersClient:
             billing_contact_id=billing_contact_id,
             description=description,
             end_date=end_date,
+            plan_id=plan_id,
             order_lines=order_lines,
             request_options=request_options,
         )

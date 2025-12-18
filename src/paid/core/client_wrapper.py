@@ -22,7 +22,7 @@ class BaseClientWrapper:
         headers: typing.Dict[str, str] = {
             "X-Fern-Language": "Python",
             "X-Fern-SDK-Name": "paid",
-            "X-Fern-SDK-Version": "0.5.0",
+            "X-Fern-SDK-Version": "0.6.0",
         }
         token = self._get_token()
         if token is not None:
