@@ -7,12 +7,24 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
 class Signal(UniversalBaseModel):
-    event_name: typing.Optional[str] = None
-    agent_id: typing.Optional[str] = None
-    external_agent_id: typing.Optional[str] = None
-    customer_id: typing.Optional[str] = None
     """
-    Deprecated. The external customer id. Use `external_customer_id` or `internal_customer_id` instead.
+    DEPRECATED: Use SignalV2 instead for cleaner field names.
+    """
+
+    event_name: typing.Optional[str] = None
+    agent_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    DEPRECATED: Use product_id in SignalV2 instead.
+    """
+
+    external_agent_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    DEPRECATED: Use external_product_id in SignalV2 instead.
+    """
+
+    customer_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    DEPRECATED: The external customer id. Use `external_customer_id` or `internal_customer_id` instead.
     """
 
     data: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
@@ -23,7 +35,7 @@ class Signal(UniversalBaseModel):
 
     internal_customer_id: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Paid's internal customer ID
+    DEPRECATED: Use customer_id in SignalV2 instead. This was Paid's internal customer ID.
     """
 
     external_customer_id: typing.Optional[str] = pydantic.Field(default=None)

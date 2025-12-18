@@ -5,7 +5,9 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.signal import Signal
+from ..types.signal_v_2 import SignalV2
 from .raw_client import AsyncRawUsageClient, RawUsageClient
+from .types.usage_check_usage_response import UsageCheckUsageResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -33,6 +35,8 @@ class UsageClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> None:
         """
+        DEPRECATED: Use POST /usage/v2/signals/bulk instead for cleaner field names.
+
         Parameters
         ----------
         signals : typing.Optional[typing.Sequence[Signal]]
@@ -58,6 +62,98 @@ class UsageClient:
         _response = self._raw_client.record_bulk(signals=signals, request_options=request_options)
         return _response.data
 
+    def usage_record_bulk_v_2(
+        self,
+        *,
+        signals: typing.Optional[typing.Sequence[SignalV2]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> None:
+        """
+        Parameters
+        ----------
+        signals : typing.Optional[typing.Sequence[SignalV2]]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        from paid import Paid, SignalV2
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.usage.usage_record_bulk_v_2(
+            signals=[
+                SignalV2(
+                    event_name="emails_sent",
+                    product_id="63fd642c-569d-44f9-8d67-5cf4944a16cc",
+                    customer_id="7d0b6fce-d82a-433d-8315-c994f8f1d68d",
+                ),
+                SignalV2(
+                    event_name="emails_sent",
+                    external_product_id="acme-product",
+                    external_customer_id="acme-inc",
+                ),
+                SignalV2(
+                    event_name="meeting_booked",
+                    product_id="63fd642c-569d-44f9-8d67-5cf4944a16cc",
+                    external_customer_id="acme-inc",
+                    data={"meeting_duration": 30, "meeting_type": "demo"},
+                ),
+            ],
+        )
+        """
+        _response = self._raw_client.usage_record_bulk_v_2(signals=signals, request_options=request_options)
+        return _response.data
+
+    def check_usage(
+        self,
+        *,
+        external_customer_id: str,
+        external_product_id: str,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> UsageCheckUsageResponse:
+        """
+        Parameters
+        ----------
+        external_customer_id : str
+            External customer ID
+
+        external_product_id : str
+            External product ID (the external ID of the product/agent)
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UsageCheckUsageResponse
+            Usage check response
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.usage.check_usage(
+            external_customer_id="acme-inc",
+            external_product_id="acme-agent",
+        )
+        """
+        _response = self._raw_client.check_usage(
+            external_customer_id=external_customer_id,
+            external_product_id=external_product_id,
+            request_options=request_options,
+        )
+        return _response.data
+
 
 class AsyncUsageClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -81,6 +177,8 @@ class AsyncUsageClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> None:
         """
+        DEPRECATED: Use POST /usage/v2/signals/bulk instead for cleaner field names.
+
         Parameters
         ----------
         signals : typing.Optional[typing.Sequence[Signal]]
@@ -112,4 +210,112 @@ class AsyncUsageClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.record_bulk(signals=signals, request_options=request_options)
+        return _response.data
+
+    async def usage_record_bulk_v_2(
+        self,
+        *,
+        signals: typing.Optional[typing.Sequence[SignalV2]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> None:
+        """
+        Parameters
+        ----------
+        signals : typing.Optional[typing.Sequence[SignalV2]]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid, SignalV2
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.usage.usage_record_bulk_v_2(
+                signals=[
+                    SignalV2(
+                        event_name="emails_sent",
+                        product_id="63fd642c-569d-44f9-8d67-5cf4944a16cc",
+                        customer_id="7d0b6fce-d82a-433d-8315-c994f8f1d68d",
+                    ),
+                    SignalV2(
+                        event_name="emails_sent",
+                        external_product_id="acme-product",
+                        external_customer_id="acme-inc",
+                    ),
+                    SignalV2(
+                        event_name="meeting_booked",
+                        product_id="63fd642c-569d-44f9-8d67-5cf4944a16cc",
+                        external_customer_id="acme-inc",
+                        data={"meeting_duration": 30, "meeting_type": "demo"},
+                    ),
+                ],
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.usage_record_bulk_v_2(signals=signals, request_options=request_options)
+        return _response.data
+
+    async def check_usage(
+        self,
+        *,
+        external_customer_id: str,
+        external_product_id: str,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> UsageCheckUsageResponse:
+        """
+        Parameters
+        ----------
+        external_customer_id : str
+            External customer ID
+
+        external_product_id : str
+            External product ID (the external ID of the product/agent)
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UsageCheckUsageResponse
+            Usage check response
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.usage.check_usage(
+                external_customer_id="acme-inc",
+                external_product_id="acme-agent",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.check_usage(
+            external_customer_id=external_customer_id,
+            external_product_id=external_product_id,
+            request_options=request_options,
+        )
         return _response.data

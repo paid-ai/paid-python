@@ -2,6 +2,6 @@
 
 # isort: skip_file
 
-from .types import UsageCheckUsageResponse
+from .usage_check_usage_response import UsageCheckUsageResponse
 
 __all__ = ["UsageCheckUsageResponse"]

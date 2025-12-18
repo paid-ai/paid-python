@@ -6,9 +6,16 @@ from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.http_response import AsyncHttpResponse, HttpResponse
+from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
+from ..errors.bad_request_error import BadRequestError
+from ..errors.internal_server_error import InternalServerError
+from ..errors.not_found_error import NotFoundError
+from ..types.error import Error
 from ..types.signal import Signal
+from ..types.signal_v_2 import SignalV2
+from .types.usage_check_usage_response import UsageCheckUsageResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -25,6 +32,8 @@ class RawUsageClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[None]:
         """
+        DEPRECATED: Use POST /usage/v2/signals/bulk instead for cleaner field names.
+
         Parameters
         ----------
         signals : typing.Optional[typing.Sequence[Signal]]
@@ -58,6 +67,142 @@ class RawUsageClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def usage_record_bulk_v_2(
+        self,
+        *,
+        signals: typing.Optional[typing.Sequence[SignalV2]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[None]:
+        """
+        Parameters
+        ----------
+        signals : typing.Optional[typing.Sequence[SignalV2]]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[None]
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "usage/v2/signals/bulk",
+            method="POST",
+            json={
+                "signals": convert_and_respect_annotation_metadata(
+                    object_=signals, annotation=typing.Sequence[SignalV2], direction="write"
+                ),
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return HttpResponse(response=_response, data=None)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def check_usage(
+        self,
+        *,
+        external_customer_id: str,
+        external_product_id: str,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[UsageCheckUsageResponse]:
+        """
+        Parameters
+        ----------
+        external_customer_id : str
+            External customer ID
+
+        external_product_id : str
+            External product ID (the external ID of the product/agent)
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[UsageCheckUsageResponse]
+            Usage check response
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "usage/check-usage",
+            method="POST",
+            json={
+                "externalCustomerId": external_customer_id,
+                "externalProductId": external_product_id,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    UsageCheckUsageResponse,
+                    parse_obj_as(
+                        type_=UsageCheckUsageResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
 
 class AsyncRawUsageClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -70,6 +215,8 @@ class AsyncRawUsageClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[None]:
         """
+        DEPRECATED: Use POST /usage/v2/signals/bulk instead for cleaner field names.
+
         Parameters
         ----------
         signals : typing.Optional[typing.Sequence[Signal]]
@@ -98,6 +245,142 @@ class AsyncRawUsageClient:
         try:
             if 200 <= _response.status_code < 300:
                 return AsyncHttpResponse(response=_response, data=None)
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def usage_record_bulk_v_2(
+        self,
+        *,
+        signals: typing.Optional[typing.Sequence[SignalV2]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[None]:
+        """
+        Parameters
+        ----------
+        signals : typing.Optional[typing.Sequence[SignalV2]]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[None]
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "usage/v2/signals/bulk",
+            method="POST",
+            json={
+                "signals": convert_and_respect_annotation_metadata(
+                    object_=signals, annotation=typing.Sequence[SignalV2], direction="write"
+                ),
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                return AsyncHttpResponse(response=_response, data=None)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def check_usage(
+        self,
+        *,
+        external_customer_id: str,
+        external_product_id: str,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[UsageCheckUsageResponse]:
+        """
+        Parameters
+        ----------
+        external_customer_id : str
+            External customer ID
+
+        external_product_id : str
+            External product ID (the external ID of the product/agent)
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[UsageCheckUsageResponse]
+            Usage check response
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "usage/check-usage",
+            method="POST",
+            json={
+                "externalCustomerId": external_customer_id,
+                "externalProductId": external_product_id,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    UsageCheckUsageResponse,
+                    parse_obj_as(
+                        type_=UsageCheckUsageResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        Error,
+                        parse_obj_as(
+                            type_=Error,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)

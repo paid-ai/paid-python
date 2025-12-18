@@ -60,12 +60,10 @@ class LinesClient:
             order_id="orderId",
             lines=[
                 OrderLineCreate(
-                    agent_external_id="acme-agent",
                     name="Order Line One",
                     description="Order Line One is an order line for Acme, Inc.",
                 ),
                 OrderLineCreate(
-                    agent_external_id="acme-agent-2",
                     name="Order Line Two",
                     description="Order Line Two is an order line for Acme, Inc.",
                 ),
@@ -129,12 +127,10 @@ class AsyncLinesClient:
                 order_id="orderId",
                 lines=[
                     OrderLineCreate(
-                        agent_external_id="acme-agent",
                         name="Order Line One",
                         description="Order Line One is an order line for Acme, Inc.",
                     ),
                     OrderLineCreate(
-                        agent_external_id="acme-agent-2",
                         name="Order Line Two",
                         description="Order Line Two is an order line for Acme, Inc.",
                     ),

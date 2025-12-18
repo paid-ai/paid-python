@@ -10,21 +10,21 @@ from ..core.jsonable_encoder import jsonable_encoder
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
-from ..types.agent import Agent
 from ..types.agent_attribute import AgentAttribute
+from ..types.product import Product
+from ..types.product_update_type import ProductUpdateType
+from .types.product_create_type import ProductCreateType
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
 
 
-class RawAgentsClient:
+class RawProductsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[typing.List[Agent]]:
+    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[typing.List[Product]]:
         """
-        DEPRECATED: Use /products instead. Agents are now products with type='agent'.
-
         Parameters
         ----------
         request_options : typing.Optional[RequestOptions]
@@ -32,20 +32,20 @@ class RawAgentsClient:
 
         Returns
         -------
-        HttpResponse[typing.List[Agent]]
+        HttpResponse[typing.List[Product]]
             Success response
         """
         _response = self._client_wrapper.httpx_client.request(
-            "agents",
+            "products",
             method="GET",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[Agent],
+                    typing.List[Product],
                     parse_obj_as(
-                        type_=typing.List[Agent],  # type: ignore
+                        type_=typing.List[Product],  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -59,44 +59,50 @@ class RawAgentsClient:
         self,
         *,
         name: str,
-        description: str,
-        agent_code: typing.Optional[str] = OMIT,
+        description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        type: typing.Optional[ProductCreateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
+        product_code: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Agent]:
+    ) -> HttpResponse[Product]:
         """
-        DEPRECATED: Use POST /products instead.
-
         Parameters
         ----------
         name : str
 
-        description : str
-
-        agent_code : typing.Optional[str]
+        description : typing.Optional[str]
 
         external_id : typing.Optional[str]
 
+        type : typing.Optional[ProductCreateType]
+
         active : typing.Optional[bool]
+
+        product_code : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[Agent]
+        HttpResponse[Product]
             Success response
         """
         _response = self._client_wrapper.httpx_client.request(
-            "agents",
+            "products",
             method="POST",
             json={
                 "name": name,
                 "description": description,
-                "agentCode": agent_code,
                 "externalId": external_id,
+                "type": type,
                 "active": active,
+                "productCode": product_code,
+                "metadata": metadata,
             },
             headers={
                 "content-type": "application/json",
@@ -107,9 +113,9 @@ class RawAgentsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Agent,
+                    Product,
                     parse_obj_as(
-                        type_=Agent,  # type: ignore
+                        type_=Product,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -119,33 +125,31 @@ class RawAgentsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get(self, agent_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[Agent]:
+    def get(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[Product]:
         """
-        DEPRECATED: Use GET /products/{productId} instead.
-
         Parameters
         ----------
-        agent_id : str
+        product_id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[Agent]
+        HttpResponse[Product]
             Success response
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"agents/{jsonable_encoder(agent_id)}",
+            f"products/{jsonable_encoder(product_id)}",
             method="GET",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Agent,
+                    Product,
                     parse_obj_as(
-                        type_=Agent,  # type: ignore
+                        type_=Product,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -157,22 +161,22 @@ class RawAgentsClient:
 
     def update(
         self,
-        agent_id: str,
+        product_id: str,
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
-        agent_code: typing.Optional[str] = OMIT,
-        agent_attributes: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        product_code: typing.Optional[str] = OMIT,
+        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Agent]:
+    ) -> HttpResponse[Product]:
         """
-        DEPRECATED: Use PUT /products/{productId} instead.
-
         Parameters
         ----------
-        agent_id : str
+        product_id : str
 
         name : typing.Optional[str]
 
@@ -180,32 +184,39 @@ class RawAgentsClient:
 
         external_id : typing.Optional[str]
 
+        type : typing.Optional[ProductUpdateType]
+
         active : typing.Optional[bool]
 
-        agent_code : typing.Optional[str]
+        product_code : typing.Optional[str]
 
-        agent_attributes : typing.Optional[typing.Sequence[AgentAttribute]]
+        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
+            Pricing attributes for this product
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[Agent]
+        HttpResponse[Product]
             Success response
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"agents/{jsonable_encoder(agent_id)}",
+            f"products/{jsonable_encoder(product_id)}",
             method="PUT",
             json={
                 "name": name,
                 "description": description,
                 "externalId": external_id,
+                "type": type,
                 "active": active,
-                "agentCode": agent_code,
-                "agentAttributes": convert_and_respect_annotation_metadata(
-                    object_=agent_attributes, annotation=typing.Sequence[AgentAttribute], direction="write"
+                "productCode": product_code,
+                "ProductAttribute": convert_and_respect_annotation_metadata(
+                    object_=product_attribute, annotation=typing.Sequence[AgentAttribute], direction="write"
                 ),
+                "metadata": metadata,
             },
             headers={
                 "content-type": "application/json",
@@ -216,9 +227,9 @@ class RawAgentsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Agent,
+                    Product,
                     parse_obj_as(
-                        type_=Agent,  # type: ignore
+                        type_=Product,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -228,13 +239,11 @@ class RawAgentsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete(self, agent_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[None]:
+    def delete(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[None]:
         """
-        DEPRECATED: Use DELETE /products/{productId} instead.
-
         Parameters
         ----------
-        agent_id : str
+        product_id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -244,7 +253,7 @@ class RawAgentsClient:
         HttpResponse[None]
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"agents/{jsonable_encoder(agent_id)}",
+            f"products/{jsonable_encoder(product_id)}",
             method="DELETE",
             request_options=request_options,
         )
@@ -258,10 +267,8 @@ class RawAgentsClient:
 
     def get_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[Agent]:
+    ) -> HttpResponse[Product]:
         """
-        DEPRECATED: Use GET /products/external/{externalId} instead.
-
         Parameters
         ----------
         external_id : str
@@ -271,20 +278,20 @@ class RawAgentsClient:
 
         Returns
         -------
-        HttpResponse[Agent]
+        HttpResponse[Product]
             Success response
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"agents/external/{jsonable_encoder(external_id)}",
+            f"products/external/{jsonable_encoder(external_id)}",
             method="GET",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Agent,
+                    Product,
                     parse_obj_as(
-                        type_=Agent,  # type: ignore
+                        type_=Product,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -301,14 +308,14 @@ class RawAgentsClient:
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
-        agent_code: typing.Optional[str] = OMIT,
-        agent_attributes: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        product_code: typing.Optional[str] = OMIT,
+        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Agent]:
+    ) -> HttpResponse[Product]:
         """
-        DEPRECATED: Use PUT /products/external/{externalId} instead.
-
         Parameters
         ----------
         external_id_ : str
@@ -319,32 +326,39 @@ class RawAgentsClient:
 
         external_id : typing.Optional[str]
 
+        type : typing.Optional[ProductUpdateType]
+
         active : typing.Optional[bool]
 
-        agent_code : typing.Optional[str]
+        product_code : typing.Optional[str]
 
-        agent_attributes : typing.Optional[typing.Sequence[AgentAttribute]]
+        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
+            Pricing attributes for this product
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[Agent]
+        HttpResponse[Product]
             Success response
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"agents/external/{jsonable_encoder(external_id_)}",
+            f"products/external/{jsonable_encoder(external_id_)}",
             method="PUT",
             json={
                 "name": name,
                 "description": description,
                 "externalId": external_id,
+                "type": type,
                 "active": active,
-                "agentCode": agent_code,
-                "agentAttributes": convert_and_respect_annotation_metadata(
-                    object_=agent_attributes, annotation=typing.Sequence[AgentAttribute], direction="write"
+                "productCode": product_code,
+                "ProductAttribute": convert_and_respect_annotation_metadata(
+                    object_=product_attribute, annotation=typing.Sequence[AgentAttribute], direction="write"
                 ),
+                "metadata": metadata,
             },
             headers={
                 "content-type": "application/json",
@@ -355,9 +369,9 @@ class RawAgentsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Agent,
+                    Product,
                     parse_obj_as(
-                        type_=Agent,  # type: ignore
+                        type_=Product,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -371,8 +385,6 @@ class RawAgentsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[None]:
         """
-        DEPRECATED: Use DELETE /products/external/{externalId} instead.
-
         Parameters
         ----------
         external_id : str
@@ -385,7 +397,7 @@ class RawAgentsClient:
         HttpResponse[None]
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"agents/external/{jsonable_encoder(external_id)}",
+            f"products/external/{jsonable_encoder(external_id)}",
             method="DELETE",
             request_options=request_options,
         )
@@ -398,16 +410,14 @@ class RawAgentsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
 
-class AsyncRawAgentsClient:
+class AsyncRawProductsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
     async def list(
         self, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[typing.List[Agent]]:
+    ) -> AsyncHttpResponse[typing.List[Product]]:
         """
-        DEPRECATED: Use /products instead. Agents are now products with type='agent'.
-
         Parameters
         ----------
         request_options : typing.Optional[RequestOptions]
@@ -415,20 +425,20 @@ class AsyncRawAgentsClient:
 
         Returns
         -------
-        AsyncHttpResponse[typing.List[Agent]]
+        AsyncHttpResponse[typing.List[Product]]
             Success response
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "agents",
+            "products",
             method="GET",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[Agent],
+                    typing.List[Product],
                     parse_obj_as(
-                        type_=typing.List[Agent],  # type: ignore
+                        type_=typing.List[Product],  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -442,44 +452,50 @@ class AsyncRawAgentsClient:
         self,
         *,
         name: str,
-        description: str,
-        agent_code: typing.Optional[str] = OMIT,
+        description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        type: typing.Optional[ProductCreateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
+        product_code: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Agent]:
+    ) -> AsyncHttpResponse[Product]:
         """
-        DEPRECATED: Use POST /products instead.
-
         Parameters
         ----------
         name : str
 
-        description : str
-
-        agent_code : typing.Optional[str]
+        description : typing.Optional[str]
 
         external_id : typing.Optional[str]
 
+        type : typing.Optional[ProductCreateType]
+
         active : typing.Optional[bool]
+
+        product_code : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[Agent]
+        AsyncHttpResponse[Product]
             Success response
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "agents",
+            "products",
             method="POST",
             json={
                 "name": name,
                 "description": description,
-                "agentCode": agent_code,
                 "externalId": external_id,
+                "type": type,
                 "active": active,
+                "productCode": product_code,
+                "metadata": metadata,
             },
             headers={
                 "content-type": "application/json",
@@ -490,9 +506,9 @@ class AsyncRawAgentsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Agent,
+                    Product,
                     parse_obj_as(
-                        type_=Agent,  # type: ignore
+                        type_=Product,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -503,34 +519,32 @@ class AsyncRawAgentsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def get(
-        self, agent_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[Agent]:
+        self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[Product]:
         """
-        DEPRECATED: Use GET /products/{productId} instead.
-
         Parameters
         ----------
-        agent_id : str
+        product_id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[Agent]
+        AsyncHttpResponse[Product]
             Success response
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"agents/{jsonable_encoder(agent_id)}",
+            f"products/{jsonable_encoder(product_id)}",
             method="GET",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Agent,
+                    Product,
                     parse_obj_as(
-                        type_=Agent,  # type: ignore
+                        type_=Product,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -542,22 +556,22 @@ class AsyncRawAgentsClient:
 
     async def update(
         self,
-        agent_id: str,
+        product_id: str,
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
-        agent_code: typing.Optional[str] = OMIT,
-        agent_attributes: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        product_code: typing.Optional[str] = OMIT,
+        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Agent]:
+    ) -> AsyncHttpResponse[Product]:
         """
-        DEPRECATED: Use PUT /products/{productId} instead.
-
         Parameters
         ----------
-        agent_id : str
+        product_id : str
 
         name : typing.Optional[str]
 
@@ -565,32 +579,39 @@ class AsyncRawAgentsClient:
 
         external_id : typing.Optional[str]
 
+        type : typing.Optional[ProductUpdateType]
+
         active : typing.Optional[bool]
 
-        agent_code : typing.Optional[str]
+        product_code : typing.Optional[str]
 
-        agent_attributes : typing.Optional[typing.Sequence[AgentAttribute]]
+        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
+            Pricing attributes for this product
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[Agent]
+        AsyncHttpResponse[Product]
             Success response
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"agents/{jsonable_encoder(agent_id)}",
+            f"products/{jsonable_encoder(product_id)}",
             method="PUT",
             json={
                 "name": name,
                 "description": description,
                 "externalId": external_id,
+                "type": type,
                 "active": active,
-                "agentCode": agent_code,
-                "agentAttributes": convert_and_respect_annotation_metadata(
-                    object_=agent_attributes, annotation=typing.Sequence[AgentAttribute], direction="write"
+                "productCode": product_code,
+                "ProductAttribute": convert_and_respect_annotation_metadata(
+                    object_=product_attribute, annotation=typing.Sequence[AgentAttribute], direction="write"
                 ),
+                "metadata": metadata,
             },
             headers={
                 "content-type": "application/json",
@@ -601,9 +622,9 @@ class AsyncRawAgentsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Agent,
+                    Product,
                     parse_obj_as(
-                        type_=Agent,  # type: ignore
+                        type_=Product,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -614,14 +635,12 @@ class AsyncRawAgentsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def delete(
-        self, agent_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[None]:
         """
-        DEPRECATED: Use DELETE /products/{productId} instead.
-
         Parameters
         ----------
-        agent_id : str
+        product_id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -631,7 +650,7 @@ class AsyncRawAgentsClient:
         AsyncHttpResponse[None]
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"agents/{jsonable_encoder(agent_id)}",
+            f"products/{jsonable_encoder(product_id)}",
             method="DELETE",
             request_options=request_options,
         )
@@ -645,10 +664,8 @@ class AsyncRawAgentsClient:
 
     async def get_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[Agent]:
+    ) -> AsyncHttpResponse[Product]:
         """
-        DEPRECATED: Use GET /products/external/{externalId} instead.
-
         Parameters
         ----------
         external_id : str
@@ -658,20 +675,20 @@ class AsyncRawAgentsClient:
 
         Returns
         -------
-        AsyncHttpResponse[Agent]
+        AsyncHttpResponse[Product]
             Success response
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"agents/external/{jsonable_encoder(external_id)}",
+            f"products/external/{jsonable_encoder(external_id)}",
             method="GET",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Agent,
+                    Product,
                     parse_obj_as(
-                        type_=Agent,  # type: ignore
+                        type_=Product,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -688,14 +705,14 @@ class AsyncRawAgentsClient:
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
-        agent_code: typing.Optional[str] = OMIT,
-        agent_attributes: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        product_code: typing.Optional[str] = OMIT,
+        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Agent]:
+    ) -> AsyncHttpResponse[Product]:
         """
-        DEPRECATED: Use PUT /products/external/{externalId} instead.
-
         Parameters
         ----------
         external_id_ : str
@@ -706,32 +723,39 @@ class AsyncRawAgentsClient:
 
         external_id : typing.Optional[str]
 
+        type : typing.Optional[ProductUpdateType]
+
         active : typing.Optional[bool]
 
-        agent_code : typing.Optional[str]
+        product_code : typing.Optional[str]
 
-        agent_attributes : typing.Optional[typing.Sequence[AgentAttribute]]
+        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
+            Pricing attributes for this product
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[Agent]
+        AsyncHttpResponse[Product]
             Success response
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"agents/external/{jsonable_encoder(external_id_)}",
+            f"products/external/{jsonable_encoder(external_id_)}",
             method="PUT",
             json={
                 "name": name,
                 "description": description,
                 "externalId": external_id,
+                "type": type,
                 "active": active,
-                "agentCode": agent_code,
-                "agentAttributes": convert_and_respect_annotation_metadata(
-                    object_=agent_attributes, annotation=typing.Sequence[AgentAttribute], direction="write"
+                "productCode": product_code,
+                "ProductAttribute": convert_and_respect_annotation_metadata(
+                    object_=product_attribute, annotation=typing.Sequence[AgentAttribute], direction="write"
                 ),
+                "metadata": metadata,
             },
             headers={
                 "content-type": "application/json",
@@ -742,9 +766,9 @@ class AsyncRawAgentsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Agent,
+                    Product,
                     parse_obj_as(
-                        type_=Agent,  # type: ignore
+                        type_=Product,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -758,8 +782,6 @@ class AsyncRawAgentsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[None]:
         """
-        DEPRECATED: Use DELETE /products/external/{externalId} instead.
-
         Parameters
         ----------
         external_id : str
@@ -772,7 +794,7 @@ class AsyncRawAgentsClient:
         AsyncHttpResponse[None]
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"agents/external/{jsonable_encoder(external_id)}",
+            f"products/external/{jsonable_encoder(external_id)}",
             method="DELETE",
             request_options=request_options,
         )
