@@ -9,9 +9,9 @@ from ..core.serialization import FieldMetadata
 from .cost_amount import CostAmount
 
 
-class CostTrace(UniversalBaseModel):
+class Trace(UniversalBaseModel):
     """
-    A single cost trace record
+    A single cost trace record with customer and product info
     """
 
     name: str = pydantic.Field()
@@ -24,7 +24,7 @@ class CostTrace(UniversalBaseModel):
     The vendor/provider (e.g., "openai", "anthropic", "mistral")
     """
 
-    model: typing.Optional[str] = pydantic.Field(default=None)
+    model: str = pydantic.Field()
     """
     The model used for the operation (e.g., "gpt-4o-mini", "claude-3-sonnet")
     """
@@ -43,6 +43,20 @@ class CostTrace(UniversalBaseModel):
     attributes: typing.Dict[str, typing.Optional[typing.Any]] = pydantic.Field()
     """
     Additional metadata about the trace (e.g., tokens, etc.)
+    """
+
+    customer_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="customerId")] = pydantic.Field(
+        default=None
+    )
+    """
+    The internal customer ID associated with this trace
+    """
+
+    product_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="productId")] = pydantic.Field(
+        default=None
+    )
+    """
+    The product/agent ID associated with this trace (optional)
     """
 
     if IS_PYDANTIC_V2:

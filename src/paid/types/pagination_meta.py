@@ -48,6 +48,32 @@ class PaginationMeta(UniversalBaseModel):
     The endTime filter that was applied (if any)
     """
 
+    external_customer_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="externalCustomerId")
+    ] = pydantic.Field(default=None)
+    """
+    The externalCustomerId filter that was applied (if any)
+    """
+
+    external_product_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="externalProductId")] = (
+        pydantic.Field(default=None)
+    )
+    """
+    The externalProductId filter that was applied (if any)
+    """
+
+    external_agent_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="externalAgentId")] = (
+        pydantic.Field(default=None)
+    )
+    """
+    DEPRECATED: Use externalProductId instead. The externalAgentId filter that was applied (if any)
+    """
+
+    metadata: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    The metadata filter that was applied (if any)
+    """
+
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
     else:

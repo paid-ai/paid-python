@@ -4,33 +4,33 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.agent import Agent
 from ..types.agent_attribute import AgentAttribute
-from .raw_client import AsyncRawAgentsClient, RawAgentsClient
+from ..types.product import Product
+from ..types.product_update_type import ProductUpdateType
+from .raw_client import AsyncRawProductsClient, RawProductsClient
+from .types.product_create_type import ProductCreateType
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
 
 
-class AgentsClient:
+class ProductsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
-        self._raw_client = RawAgentsClient(client_wrapper=client_wrapper)
+        self._raw_client = RawProductsClient(client_wrapper=client_wrapper)
 
     @property
-    def with_raw_response(self) -> RawAgentsClient:
+    def with_raw_response(self) -> RawProductsClient:
         """
         Retrieves a raw implementation of this client that returns raw responses.
 
         Returns
         -------
-        RawAgentsClient
+        RawProductsClient
         """
         return self._raw_client
 
-    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[Agent]:
+    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[Product]:
         """
-        DEPRECATED: Use /products instead. Agents are now products with type='agent'.
-
         Parameters
         ----------
         request_options : typing.Optional[RequestOptions]
@@ -38,7 +38,7 @@ class AgentsClient:
 
         Returns
         -------
-        typing.List[Agent]
+        typing.List[Product]
             Success response
 
         Examples
@@ -48,7 +48,7 @@ class AgentsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.agents.list()
+        client.products.list()
         """
         _response = self._raw_client.list(request_options=request_options)
         return _response.data
@@ -57,33 +57,37 @@ class AgentsClient:
         self,
         *,
         name: str,
-        description: str,
-        agent_code: typing.Optional[str] = OMIT,
+        description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        type: typing.Optional[ProductCreateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
+        product_code: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Agent:
+    ) -> Product:
         """
-        DEPRECATED: Use POST /products instead.
-
         Parameters
         ----------
         name : str
 
-        description : str
-
-        agent_code : typing.Optional[str]
+        description : typing.Optional[str]
 
         external_id : typing.Optional[str]
 
+        type : typing.Optional[ProductCreateType]
+
         active : typing.Optional[bool]
+
+        product_code : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Agent
+        Product
             Success response
 
         Examples
@@ -93,36 +97,37 @@ class AgentsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.agents.create(
-            name="Acme Agent",
-            description="Acme Agent is an AI agent that does things.",
-            external_id="acme-agent",
+        client.products.create(
+            name="Acme Product",
+            description="Acme Product does amazing things.",
+            external_id="acme-product",
+            type="product",
         )
         """
         _response = self._raw_client.create(
             name=name,
             description=description,
-            agent_code=agent_code,
             external_id=external_id,
+            type=type,
             active=active,
+            product_code=product_code,
+            metadata=metadata,
             request_options=request_options,
         )
         return _response.data
 
-    def get(self, agent_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Agent:
+    def get(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Product:
         """
-        DEPRECATED: Use GET /products/{productId} instead.
-
         Parameters
         ----------
-        agent_id : str
+        product_id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Agent
+        Product
             Success response
 
         Examples
@@ -132,31 +137,31 @@ class AgentsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.agents.get(
-            agent_id="agentId",
+        client.products.get(
+            product_id="productId",
         )
         """
-        _response = self._raw_client.get(agent_id, request_options=request_options)
+        _response = self._raw_client.get(product_id, request_options=request_options)
         return _response.data
 
     def update(
         self,
-        agent_id: str,
+        product_id: str,
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
-        agent_code: typing.Optional[str] = OMIT,
-        agent_attributes: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        product_code: typing.Optional[str] = OMIT,
+        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Agent:
+    ) -> Product:
         """
-        DEPRECATED: Use PUT /products/{productId} instead.
-
         Parameters
         ----------
-        agent_id : str
+        product_id : str
 
         name : typing.Optional[str]
 
@@ -164,90 +169,55 @@ class AgentsClient:
 
         external_id : typing.Optional[str]
 
+        type : typing.Optional[ProductUpdateType]
+
         active : typing.Optional[bool]
 
-        agent_code : typing.Optional[str]
+        product_code : typing.Optional[str]
 
-        agent_attributes : typing.Optional[typing.Sequence[AgentAttribute]]
+        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
+            Pricing attributes for this product
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Agent
+        Product
             Success response
 
         Examples
         --------
-        from paid import (
-            AgentAttribute,
-            AgentPricePoint,
-            AgentPricePointTiers,
-            Paid,
-            Pricing,
-        )
+        from paid import Paid
 
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.agents.update(
-            agent_id="agentId",
-            name="Acme Agent (Updated)",
-            agent_attributes=[
-                AgentAttribute(
-                    name="Emails sent signal",
-                    active=True,
-                    pricing=Pricing(
-                        event_name="emails_sent",
-                        taxable=True,
-                        charge_type="usage",
-                        pricing_model="PerUnit",
-                        billing_frequency="monthly",
-                        price_points={
-                            "USD": AgentPricePoint(
-                                tiers=[
-                                    AgentPricePointTiers(
-                                        min_quantity=0.0,
-                                        max_quantity=10.0,
-                                        unit_price=100.0,
-                                    ),
-                                    AgentPricePointTiers(
-                                        min_quantity=11.0,
-                                        max_quantity=100.0,
-                                        unit_price=90.0,
-                                    ),
-                                    AgentPricePointTiers(
-                                        min_quantity=101.0,
-                                        unit_price=80.0,
-                                    ),
-                                ],
-                            )
-                        },
-                    ),
-                )
-            ],
+        client.products.update(
+            product_id="productId",
         )
         """
         _response = self._raw_client.update(
-            agent_id,
+            product_id,
             name=name,
             description=description,
             external_id=external_id,
+            type=type,
             active=active,
-            agent_code=agent_code,
-            agent_attributes=agent_attributes,
+            product_code=product_code,
+            product_attribute=product_attribute,
+            metadata=metadata,
             request_options=request_options,
         )
         return _response.data
 
-    def delete(self, agent_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> None:
+    def delete(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> None:
         """
-        DEPRECATED: Use DELETE /products/{productId} instead.
-
         Parameters
         ----------
-        agent_id : str
+        product_id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -263,17 +233,17 @@ class AgentsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.agents.delete(
-            agent_id="agentId",
+        client.products.delete(
+            product_id="productId",
         )
         """
-        _response = self._raw_client.delete(agent_id, request_options=request_options)
+        _response = self._raw_client.delete(product_id, request_options=request_options)
         return _response.data
 
-    def get_by_external_id(self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Agent:
+    def get_by_external_id(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> Product:
         """
-        DEPRECATED: Use GET /products/external/{externalId} instead.
-
         Parameters
         ----------
         external_id : str
@@ -283,7 +253,7 @@ class AgentsClient:
 
         Returns
         -------
-        Agent
+        Product
             Success response
 
         Examples
@@ -293,7 +263,7 @@ class AgentsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.agents.get_by_external_id(
+        client.products.get_by_external_id(
             external_id="externalId",
         )
         """
@@ -307,14 +277,14 @@ class AgentsClient:
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
-        agent_code: typing.Optional[str] = OMIT,
-        agent_attributes: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        product_code: typing.Optional[str] = OMIT,
+        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Agent:
+    ) -> Product:
         """
-        DEPRECATED: Use PUT /products/external/{externalId} instead.
-
         Parameters
         ----------
         external_id_ : str
@@ -325,48 +295,34 @@ class AgentsClient:
 
         external_id : typing.Optional[str]
 
+        type : typing.Optional[ProductUpdateType]
+
         active : typing.Optional[bool]
 
-        agent_code : typing.Optional[str]
+        product_code : typing.Optional[str]
 
-        agent_attributes : typing.Optional[typing.Sequence[AgentAttribute]]
+        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
+            Pricing attributes for this product
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Agent
+        Product
             Success response
 
         Examples
         --------
-        from paid import AgentAttribute, AgentPricePoint, Paid, Pricing
+        from paid import Paid
 
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.agents.update_by_external_id(
+        client.products.update_by_external_id(
             external_id_="externalId",
-            name="Acme Agent (Updated)",
-            agent_attributes=[
-                AgentAttribute(
-                    name="Emails sent signal",
-                    active=True,
-                    pricing=Pricing(
-                        event_name="emails_sent",
-                        taxable=True,
-                        charge_type="usage",
-                        pricing_model="PerUnit",
-                        billing_frequency="monthly",
-                        price_points={
-                            "USD": AgentPricePoint(
-                                unit_price=150.0,
-                            )
-                        },
-                    ),
-                )
-            ],
         )
         """
         _response = self._raw_client.update_by_external_id(
@@ -374,9 +330,11 @@ class AgentsClient:
             name=name,
             description=description,
             external_id=external_id,
+            type=type,
             active=active,
-            agent_code=agent_code,
-            agent_attributes=agent_attributes,
+            product_code=product_code,
+            product_attribute=product_attribute,
+            metadata=metadata,
             request_options=request_options,
         )
         return _response.data
@@ -385,8 +343,6 @@ class AgentsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> None:
         """
-        DEPRECATED: Use DELETE /products/external/{externalId} instead.
-
         Parameters
         ----------
         external_id : str
@@ -405,7 +361,7 @@ class AgentsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.agents.delete_by_external_id(
+        client.products.delete_by_external_id(
             external_id="externalId",
         )
         """
@@ -413,25 +369,23 @@ class AgentsClient:
         return _response.data
 
 
-class AsyncAgentsClient:
+class AsyncProductsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
-        self._raw_client = AsyncRawAgentsClient(client_wrapper=client_wrapper)
+        self._raw_client = AsyncRawProductsClient(client_wrapper=client_wrapper)
 
     @property
-    def with_raw_response(self) -> AsyncRawAgentsClient:
+    def with_raw_response(self) -> AsyncRawProductsClient:
         """
         Retrieves a raw implementation of this client that returns raw responses.
 
         Returns
         -------
-        AsyncRawAgentsClient
+        AsyncRawProductsClient
         """
         return self._raw_client
 
-    async def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[Agent]:
+    async def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[Product]:
         """
-        DEPRECATED: Use /products instead. Agents are now products with type='agent'.
-
         Parameters
         ----------
         request_options : typing.Optional[RequestOptions]
@@ -439,7 +393,7 @@ class AsyncAgentsClient:
 
         Returns
         -------
-        typing.List[Agent]
+        typing.List[Product]
             Success response
 
         Examples
@@ -454,7 +408,7 @@ class AsyncAgentsClient:
 
 
         async def main() -> None:
-            await client.agents.list()
+            await client.products.list()
 
 
         asyncio.run(main())
@@ -466,33 +420,37 @@ class AsyncAgentsClient:
         self,
         *,
         name: str,
-        description: str,
-        agent_code: typing.Optional[str] = OMIT,
+        description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        type: typing.Optional[ProductCreateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
+        product_code: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Agent:
+    ) -> Product:
         """
-        DEPRECATED: Use POST /products instead.
-
         Parameters
         ----------
         name : str
 
-        description : str
-
-        agent_code : typing.Optional[str]
+        description : typing.Optional[str]
 
         external_id : typing.Optional[str]
 
+        type : typing.Optional[ProductCreateType]
+
         active : typing.Optional[bool]
+
+        product_code : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Agent
+        Product
             Success response
 
         Examples
@@ -507,10 +465,11 @@ class AsyncAgentsClient:
 
 
         async def main() -> None:
-            await client.agents.create(
-                name="Acme Agent",
-                description="Acme Agent is an AI agent that does things.",
-                external_id="acme-agent",
+            await client.products.create(
+                name="Acme Product",
+                description="Acme Product does amazing things.",
+                external_id="acme-product",
+                type="product",
             )
 
 
@@ -519,27 +478,27 @@ class AsyncAgentsClient:
         _response = await self._raw_client.create(
             name=name,
             description=description,
-            agent_code=agent_code,
             external_id=external_id,
+            type=type,
             active=active,
+            product_code=product_code,
+            metadata=metadata,
             request_options=request_options,
         )
         return _response.data
 
-    async def get(self, agent_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Agent:
+    async def get(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Product:
         """
-        DEPRECATED: Use GET /products/{productId} instead.
-
         Parameters
         ----------
-        agent_id : str
+        product_id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Agent
+        Product
             Success response
 
         Examples
@@ -554,34 +513,34 @@ class AsyncAgentsClient:
 
 
         async def main() -> None:
-            await client.agents.get(
-                agent_id="agentId",
+            await client.products.get(
+                product_id="productId",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get(agent_id, request_options=request_options)
+        _response = await self._raw_client.get(product_id, request_options=request_options)
         return _response.data
 
     async def update(
         self,
-        agent_id: str,
+        product_id: str,
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
-        agent_code: typing.Optional[str] = OMIT,
-        agent_attributes: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        product_code: typing.Optional[str] = OMIT,
+        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Agent:
+    ) -> Product:
         """
-        DEPRECATED: Use PUT /products/{productId} instead.
-
         Parameters
         ----------
-        agent_id : str
+        product_id : str
 
         name : typing.Optional[str]
 
@@ -589,31 +548,30 @@ class AsyncAgentsClient:
 
         external_id : typing.Optional[str]
 
+        type : typing.Optional[ProductUpdateType]
+
         active : typing.Optional[bool]
 
-        agent_code : typing.Optional[str]
+        product_code : typing.Optional[str]
 
-        agent_attributes : typing.Optional[typing.Sequence[AgentAttribute]]
+        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
+            Pricing attributes for this product
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Agent
+        Product
             Success response
 
         Examples
         --------
         import asyncio
 
-        from paid import (
-            AgentAttribute,
-            AgentPricePoint,
-            AgentPricePointTiers,
-            AsyncPaid,
-            Pricing,
-        )
+        from paid import AsyncPaid
 
         client = AsyncPaid(
             token="YOUR_TOKEN",
@@ -621,66 +579,32 @@ class AsyncAgentsClient:
 
 
         async def main() -> None:
-            await client.agents.update(
-                agent_id="agentId",
-                name="Acme Agent (Updated)",
-                agent_attributes=[
-                    AgentAttribute(
-                        name="Emails sent signal",
-                        active=True,
-                        pricing=Pricing(
-                            event_name="emails_sent",
-                            taxable=True,
-                            charge_type="usage",
-                            pricing_model="PerUnit",
-                            billing_frequency="monthly",
-                            price_points={
-                                "USD": AgentPricePoint(
-                                    tiers=[
-                                        AgentPricePointTiers(
-                                            min_quantity=0.0,
-                                            max_quantity=10.0,
-                                            unit_price=100.0,
-                                        ),
-                                        AgentPricePointTiers(
-                                            min_quantity=11.0,
-                                            max_quantity=100.0,
-                                            unit_price=90.0,
-                                        ),
-                                        AgentPricePointTiers(
-                                            min_quantity=101.0,
-                                            unit_price=80.0,
-                                        ),
-                                    ],
-                                )
-                            },
-                        ),
-                    )
-                ],
+            await client.products.update(
+                product_id="productId",
             )
 
 
         asyncio.run(main())
         """
         _response = await self._raw_client.update(
-            agent_id,
+            product_id,
             name=name,
             description=description,
             external_id=external_id,
+            type=type,
             active=active,
-            agent_code=agent_code,
-            agent_attributes=agent_attributes,
+            product_code=product_code,
+            product_attribute=product_attribute,
+            metadata=metadata,
             request_options=request_options,
         )
         return _response.data
 
-    async def delete(self, agent_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> None:
+    async def delete(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> None:
         """
-        DEPRECATED: Use DELETE /products/{productId} instead.
-
         Parameters
         ----------
-        agent_id : str
+        product_id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -701,22 +625,20 @@ class AsyncAgentsClient:
 
 
         async def main() -> None:
-            await client.agents.delete(
-                agent_id="agentId",
+            await client.products.delete(
+                product_id="productId",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete(agent_id, request_options=request_options)
+        _response = await self._raw_client.delete(product_id, request_options=request_options)
         return _response.data
 
     async def get_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> Agent:
+    ) -> Product:
         """
-        DEPRECATED: Use GET /products/external/{externalId} instead.
-
         Parameters
         ----------
         external_id : str
@@ -726,7 +648,7 @@ class AsyncAgentsClient:
 
         Returns
         -------
-        Agent
+        Product
             Success response
 
         Examples
@@ -741,7 +663,7 @@ class AsyncAgentsClient:
 
 
         async def main() -> None:
-            await client.agents.get_by_external_id(
+            await client.products.get_by_external_id(
                 external_id="externalId",
             )
 
@@ -758,14 +680,14 @@ class AsyncAgentsClient:
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
-        agent_code: typing.Optional[str] = OMIT,
-        agent_attributes: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        product_code: typing.Optional[str] = OMIT,
+        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Agent:
+    ) -> Product:
         """
-        DEPRECATED: Use PUT /products/external/{externalId} instead.
-
         Parameters
         ----------
         external_id_ : str
@@ -776,25 +698,30 @@ class AsyncAgentsClient:
 
         external_id : typing.Optional[str]
 
+        type : typing.Optional[ProductUpdateType]
+
         active : typing.Optional[bool]
 
-        agent_code : typing.Optional[str]
+        product_code : typing.Optional[str]
 
-        agent_attributes : typing.Optional[typing.Sequence[AgentAttribute]]
+        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
+            Pricing attributes for this product
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Agent
+        Product
             Success response
 
         Examples
         --------
         import asyncio
 
-        from paid import AgentAttribute, AgentPricePoint, AsyncPaid, Pricing
+        from paid import AsyncPaid
 
         client = AsyncPaid(
             token="YOUR_TOKEN",
@@ -802,27 +729,8 @@ class AsyncAgentsClient:
 
 
         async def main() -> None:
-            await client.agents.update_by_external_id(
+            await client.products.update_by_external_id(
                 external_id_="externalId",
-                name="Acme Agent (Updated)",
-                agent_attributes=[
-                    AgentAttribute(
-                        name="Emails sent signal",
-                        active=True,
-                        pricing=Pricing(
-                            event_name="emails_sent",
-                            taxable=True,
-                            charge_type="usage",
-                            pricing_model="PerUnit",
-                            billing_frequency="monthly",
-                            price_points={
-                                "USD": AgentPricePoint(
-                                    unit_price=150.0,
-                                )
-                            },
-                        ),
-                    )
-                ],
             )
 
 
@@ -833,9 +741,11 @@ class AsyncAgentsClient:
             name=name,
             description=description,
             external_id=external_id,
+            type=type,
             active=active,
-            agent_code=agent_code,
-            agent_attributes=agent_attributes,
+            product_code=product_code,
+            product_attribute=product_attribute,
+            metadata=metadata,
             request_options=request_options,
         )
         return _response.data
@@ -844,8 +754,6 @@ class AsyncAgentsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> None:
         """
-        DEPRECATED: Use DELETE /products/external/{externalId} instead.
-
         Parameters
         ----------
         external_id : str
@@ -869,7 +777,7 @@ class AsyncAgentsClient:
 
 
         async def main() -> None:
-            await client.agents.delete_by_external_id(
+            await client.products.delete_by_external_id(
                 external_id="externalId",
             )
 

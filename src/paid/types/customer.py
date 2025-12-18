@@ -16,7 +16,6 @@ class Customer(UniversalBaseModel):
     id: str
     organization_id: typing_extensions.Annotated[str, FieldMetadata(alias="organizationId")]
     name: str
-    email: typing.Optional[str] = None
     external_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="externalId")] = None
     phone: typing.Optional[str] = None
     employee_count: typing_extensions.Annotated[typing.Optional[float], FieldMetadata(alias="employeeCount")] = None
@@ -32,8 +31,10 @@ class Customer(UniversalBaseModel):
     ] = None
     website: typing.Optional[str] = None
     billing_address: typing_extensions.Annotated[typing.Optional[Address], FieldMetadata(alias="billingAddress")] = None
-    vat_number: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="vatNumber")] = None
-    research: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
+    metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = pydantic.Field(default=None)
+    """
+    Flexible JSON field for storing custom metadata about the customer
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

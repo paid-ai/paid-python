@@ -11,6 +11,7 @@ from ..types.creation_source import CreationSource
 from ..types.customer import Customer
 from ..types.entitlement_usage import EntitlementUsage
 from ..types.tax_exempt_status import TaxExemptStatus
+from ..types.usage_summaries_response import UsageSummariesResponse
 from .raw_client import AsyncRawCustomersClient, RawCustomersClient
 
 # this is used as the default value for optional parameters
@@ -60,7 +61,6 @@ class CustomersClient:
         self,
         *,
         name: str,
-        email: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
         employee_count: typing.Optional[float] = OMIT,
@@ -69,14 +69,13 @@ class CustomersClient:
         creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[Address] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
         Parameters
         ----------
         name : str
-
-        email : typing.Optional[str]
 
         external_id : typing.Optional[str]
 
@@ -93,6 +92,9 @@ class CustomersClient:
         website : typing.Optional[str]
 
         billing_address : typing.Optional[Address]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+            Flexible JSON field for storing custom metadata about the customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -116,7 +118,6 @@ class CustomersClient:
         """
         _response = self._raw_client.create(
             name=name,
-            email=email,
             external_id=external_id,
             phone=phone,
             employee_count=employee_count,
@@ -125,6 +126,7 @@ class CustomersClient:
             creation_source=creation_source,
             website=website,
             billing_address=billing_address,
+            metadata=metadata,
             request_options=request_options,
         )
         return _response.data
@@ -162,7 +164,6 @@ class CustomersClient:
         customer_id: str,
         *,
         name: typing.Optional[str] = OMIT,
-        email: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
         employee_count: typing.Optional[float] = OMIT,
@@ -171,7 +172,7 @@ class CustomersClient:
         creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[Address] = OMIT,
-        vat_number: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
@@ -180,8 +181,6 @@ class CustomersClient:
         customer_id : str
 
         name : typing.Optional[str]
-
-        email : typing.Optional[str]
 
         external_id : typing.Optional[str]
 
@@ -199,7 +198,8 @@ class CustomersClient:
 
         billing_address : typing.Optional[Address]
 
-        vat_number : typing.Optional[str]
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+            Flexible JSON field for storing custom metadata about the customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -227,7 +227,6 @@ class CustomersClient:
         _response = self._raw_client.update(
             customer_id,
             name=name,
-            email=email,
             external_id=external_id,
             phone=phone,
             employee_count=employee_count,
@@ -236,7 +235,7 @@ class CustomersClient:
             creation_source=creation_source,
             website=website,
             billing_address=billing_address,
-            vat_number=vat_number,
+            metadata=metadata,
             request_options=request_options,
         )
         return _response.data
@@ -334,7 +333,6 @@ class CustomersClient:
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
-        email: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
         employee_count: typing.Optional[float] = OMIT,
@@ -343,7 +341,7 @@ class CustomersClient:
         creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[Address] = OMIT,
-        vat_number: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
@@ -352,8 +350,6 @@ class CustomersClient:
         external_id_ : str
 
         name : typing.Optional[str]
-
-        email : typing.Optional[str]
 
         external_id : typing.Optional[str]
 
@@ -371,7 +367,8 @@ class CustomersClient:
 
         billing_address : typing.Optional[Address]
 
-        vat_number : typing.Optional[str]
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+            Flexible JSON field for storing custom metadata about the customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -395,7 +392,6 @@ class CustomersClient:
         _response = self._raw_client.update_by_external_id(
             external_id_,
             name=name,
-            email=email,
             external_id=external_id,
             phone=phone,
             employee_count=employee_count,
@@ -404,7 +400,7 @@ class CustomersClient:
             creation_source=creation_source,
             website=website,
             billing_address=billing_address,
-            vat_number=vat_number,
+            metadata=metadata,
             request_options=request_options,
         )
         return _response.data
@@ -505,6 +501,73 @@ class CustomersClient:
         )
         return _response.data
 
+    def get_usage_by_external_id(
+        self,
+        external_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        start_time: typing.Optional[dt.datetime] = None,
+        end_time: typing.Optional[dt.datetime] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> UsageSummariesResponse:
+        """
+        Parameters
+        ----------
+        external_id : str
+            The external ID of the customer
+
+        limit : typing.Optional[int]
+            Maximum number of usage summaries to return (1-1000)
+
+        offset : typing.Optional[int]
+            Number of usage summaries to skip for pagination
+
+        start_time : typing.Optional[dt.datetime]
+            Filter usage summaries starting from this time (ISO 8601 format). Returns summaries that overlap with the time range.
+
+        end_time : typing.Optional[dt.datetime]
+            Filter usage summaries up to this time (ISO 8601 format). Returns summaries that overlap with the time range.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UsageSummariesResponse
+            Success response
+
+        Examples
+        --------
+        import datetime
+
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.get_usage_by_external_id(
+            external_id="externalId",
+            limit=1,
+            offset=1,
+            start_time=datetime.datetime.fromisoformat(
+                "2024-01-15 09:30:00+00:00",
+            ),
+            end_time=datetime.datetime.fromisoformat(
+                "2024-01-15 09:30:00+00:00",
+            ),
+        )
+        """
+        _response = self._raw_client.get_usage_by_external_id(
+            external_id,
+            limit=limit,
+            offset=offset,
+            start_time=start_time,
+            end_time=end_time,
+            request_options=request_options,
+        )
+        return _response.data
+
 
 class AsyncCustomersClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -557,7 +620,6 @@ class AsyncCustomersClient:
         self,
         *,
         name: str,
-        email: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
         employee_count: typing.Optional[float] = OMIT,
@@ -566,14 +628,13 @@ class AsyncCustomersClient:
         creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[Address] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
         Parameters
         ----------
         name : str
-
-        email : typing.Optional[str]
 
         external_id : typing.Optional[str]
 
@@ -590,6 +651,9 @@ class AsyncCustomersClient:
         website : typing.Optional[str]
 
         billing_address : typing.Optional[Address]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+            Flexible JSON field for storing custom metadata about the customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -621,7 +685,6 @@ class AsyncCustomersClient:
         """
         _response = await self._raw_client.create(
             name=name,
-            email=email,
             external_id=external_id,
             phone=phone,
             employee_count=employee_count,
@@ -630,6 +693,7 @@ class AsyncCustomersClient:
             creation_source=creation_source,
             website=website,
             billing_address=billing_address,
+            metadata=metadata,
             request_options=request_options,
         )
         return _response.data
@@ -675,7 +739,6 @@ class AsyncCustomersClient:
         customer_id: str,
         *,
         name: typing.Optional[str] = OMIT,
-        email: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
         employee_count: typing.Optional[float] = OMIT,
@@ -684,7 +747,7 @@ class AsyncCustomersClient:
         creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[Address] = OMIT,
-        vat_number: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
@@ -693,8 +756,6 @@ class AsyncCustomersClient:
         customer_id : str
 
         name : typing.Optional[str]
-
-        email : typing.Optional[str]
 
         external_id : typing.Optional[str]
 
@@ -712,7 +773,8 @@ class AsyncCustomersClient:
 
         billing_address : typing.Optional[Address]
 
-        vat_number : typing.Optional[str]
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+            Flexible JSON field for storing custom metadata about the customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -748,7 +810,6 @@ class AsyncCustomersClient:
         _response = await self._raw_client.update(
             customer_id,
             name=name,
-            email=email,
             external_id=external_id,
             phone=phone,
             employee_count=employee_count,
@@ -757,7 +818,7 @@ class AsyncCustomersClient:
             creation_source=creation_source,
             website=website,
             billing_address=billing_address,
-            vat_number=vat_number,
+            metadata=metadata,
             request_options=request_options,
         )
         return _response.data
@@ -879,7 +940,6 @@ class AsyncCustomersClient:
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
-        email: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
         employee_count: typing.Optional[float] = OMIT,
@@ -888,7 +948,7 @@ class AsyncCustomersClient:
         creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[Address] = OMIT,
-        vat_number: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
@@ -897,8 +957,6 @@ class AsyncCustomersClient:
         external_id_ : str
 
         name : typing.Optional[str]
-
-        email : typing.Optional[str]
 
         external_id : typing.Optional[str]
 
@@ -916,7 +974,8 @@ class AsyncCustomersClient:
 
         billing_address : typing.Optional[Address]
 
-        vat_number : typing.Optional[str]
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+            Flexible JSON field for storing custom metadata about the customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -948,7 +1007,6 @@ class AsyncCustomersClient:
         _response = await self._raw_client.update_by_external_id(
             external_id_,
             name=name,
-            email=email,
             external_id=external_id,
             phone=phone,
             employee_count=employee_count,
@@ -957,7 +1015,7 @@ class AsyncCustomersClient:
             creation_source=creation_source,
             website=website,
             billing_address=billing_address,
-            vat_number=vat_number,
+            metadata=metadata,
             request_options=request_options,
         )
         return _response.data
@@ -1064,6 +1122,80 @@ class AsyncCustomersClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.get_costs_by_external_id(
+            external_id,
+            limit=limit,
+            offset=offset,
+            start_time=start_time,
+            end_time=end_time,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def get_usage_by_external_id(
+        self,
+        external_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        start_time: typing.Optional[dt.datetime] = None,
+        end_time: typing.Optional[dt.datetime] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> UsageSummariesResponse:
+        """
+        Parameters
+        ----------
+        external_id : str
+            The external ID of the customer
+
+        limit : typing.Optional[int]
+            Maximum number of usage summaries to return (1-1000)
+
+        offset : typing.Optional[int]
+            Number of usage summaries to skip for pagination
+
+        start_time : typing.Optional[dt.datetime]
+            Filter usage summaries starting from this time (ISO 8601 format). Returns summaries that overlap with the time range.
+
+        end_time : typing.Optional[dt.datetime]
+            Filter usage summaries up to this time (ISO 8601 format). Returns summaries that overlap with the time range.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        UsageSummariesResponse
+            Success response
+
+        Examples
+        --------
+        import asyncio
+        import datetime
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.get_usage_by_external_id(
+                external_id="externalId",
+                limit=1,
+                offset=1,
+                start_time=datetime.datetime.fromisoformat(
+                    "2024-01-15 09:30:00+00:00",
+                ),
+                end_time=datetime.datetime.fromisoformat(
+                    "2024-01-15 09:30:00+00:00",
+                ),
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_usage_by_external_id(
             external_id,
             limit=limit,
             offset=offset,

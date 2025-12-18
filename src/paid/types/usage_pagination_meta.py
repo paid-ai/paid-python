@@ -6,23 +6,31 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
-from .order_line_attribute_pricing import OrderLineAttributePricing
 
 
-class OrderLineAttributeCreate(UniversalBaseModel):
-    agent_attribute_name: typing_extensions.Annotated[str, FieldMetadata(alias="agentAttributeName")] = pydantic.Field()
+class UsagePaginationMeta(UniversalBaseModel):
     """
-    The name of the agent attribute to override (e.g., "api_call", "call_placed")
-    """
-
-    quantity: typing.Optional[float] = pydantic.Field(default=None)
-    """
-    Quantity for this attribute (defaults to 0)
+    Pagination metadata for usage summaries
     """
 
-    pricing: OrderLineAttributePricing = pydantic.Field()
+    limit: int = pydantic.Field()
     """
-    Custom pricing configuration for this attribute
+    The requested limit
+    """
+
+    offset: int = pydantic.Field()
+    """
+    The requested offset
+    """
+
+    total: int = pydantic.Field()
+    """
+    Total number of usage summaries available
+    """
+
+    has_more: typing_extensions.Annotated[bool, FieldMetadata(alias="hasMore")] = pydantic.Field()
+    """
+    Whether there are more results available
     """
 
     if IS_PYDANTIC_V2:
