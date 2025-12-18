@@ -14,6 +14,9 @@ from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .customers.client import AsyncCustomersClient, CustomersClient
 from .environment import PaidEnvironment
 from .orders.client import AsyncOrdersClient, OrdersClient
+from .plans.client import AsyncPlansClient, PlansClient
+from .products.client import AsyncProductsClient, ProductsClient
+from .traces.client import AsyncTracesClient, TracesClient
 from .tracing.distributed_tracing import (
     generate_tracing_token,
     set_tracing_token,
@@ -42,12 +45,20 @@ class Paid:
 
     environment : PaidEnvironment
         The environment to use for requests from the client. from .environment import PaidEnvironment
+
+
+
         Defaults to PaidEnvironment.PRODUCTION
-    token : typing.Union[str, typing.Callable[[], str]]
+
+
+
+    token : typing.Optional[typing.Union[str, typing.Callable[[], str]]]
     timeout : typing.Optional[float]
         The timeout to be used, in seconds, for requests. By default the timeout is 60 seconds, unless a custom httpx client is used, in which case this default is not enforced.
+
     follow_redirects : typing.Optional[bool]
         Whether the default httpx client follows redirects or not, this is irrelevant if a custom httpx client is passed in.
+
     httpx_client : typing.Optional[httpx.Client]
         The httpx client to use for making requests, a preconfigured client is used by default, however this is useful should you want to pass in any custom httpx configuration.
 
@@ -93,9 +104,12 @@ class Paid:
         )
         self.customers = CustomersClient(client_wrapper=self._client_wrapper)
         self.agents = AgentsClient(client_wrapper=self._client_wrapper)
+        self.products = ProductsClient(client_wrapper=self._client_wrapper)
         self.contacts = ContactsClient(client_wrapper=self._client_wrapper)
         self.orders = OrdersClient(client_wrapper=self._client_wrapper)
+        self.plans = PlansClient(client_wrapper=self._client_wrapper)
         self.usage = UsageClient(client_wrapper=self._client_wrapper)
+        self.traces = TracesClient(client_wrapper=self._client_wrapper)
 
     def initialize_tracing(self, collector_endpoint: str = DEFAULT_COLLECTOR_ENDPOINT) -> None:
         """
@@ -326,8 +340,14 @@ class AsyncPaid:
 
     environment : PaidEnvironment
         The environment to use for requests from the client. from .environment import PaidEnvironment
+
+
+
         Defaults to PaidEnvironment.PRODUCTION
-    token : typing.Union[str, typing.Callable[[], str]]
+
+
+
+    token : typing.Optional[typing.Union[str, typing.Callable[[], str]]]
     timeout : typing.Optional[float]
         The timeout to be used, in seconds, for requests. By default the timeout is 60 seconds, unless a custom httpx client is used, in which case this default is not enforced.
 
@@ -379,9 +399,12 @@ class AsyncPaid:
         )
         self.customers = AsyncCustomersClient(client_wrapper=self._client_wrapper)
         self.agents = AsyncAgentsClient(client_wrapper=self._client_wrapper)
+        self.products = AsyncProductsClient(client_wrapper=self._client_wrapper)
         self.contacts = AsyncContactsClient(client_wrapper=self._client_wrapper)
         self.orders = AsyncOrdersClient(client_wrapper=self._client_wrapper)
+        self.plans = AsyncPlansClient(client_wrapper=self._client_wrapper)
         self.usage = AsyncUsageClient(client_wrapper=self._client_wrapper)
+        self.traces = AsyncTracesClient(client_wrapper=self._client_wrapper)
 
     def initialize_tracing(self, collector_endpoint: str = DEFAULT_COLLECTOR_ENDPOINT) -> None:
         """
