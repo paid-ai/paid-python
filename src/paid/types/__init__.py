@@ -29,6 +29,7 @@ from .order_line_attribute_pricing import OrderLineAttributePricing
 from .order_line_create import OrderLineCreate
 from .pagination_meta import PaginationMeta
 from .plan import Plan
+from .plan_group import PlanGroup
 from .plan_plan_products_item import PlanPlanProductsItem
 from .plan_plan_products_item_plan_product_attribute_item import PlanPlanProductsItemPlanProductAttributeItem
 from .price_point import PricePoint
@@ -79,6 +80,7 @@ __all__ = [
     "OrderLineCreate",
     "PaginationMeta",
     "Plan",
+    "PlanGroup",
     "PlanPlanProductsItem",
     "PlanPlanProductsItemPlanProductAttributeItem",
     "PricePoint",

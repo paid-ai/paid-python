@@ -64,6 +64,7 @@ class RawOrdersClient:
         billing_contact_id: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         end_date: typing.Optional[str] = OMIT,
+        plan_id: typing.Optional[str] = OMIT,
         order_lines: typing.Optional[typing.Sequence[OrderLineCreate]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Order]:
@@ -85,6 +86,9 @@ class RawOrdersClient:
         description : typing.Optional[str]
 
         end_date : typing.Optional[str]
+
+        plan_id : typing.Optional[str]
+            Optional plan ID to associate with this order
 
         order_lines : typing.Optional[typing.Sequence[OrderLineCreate]]
 
@@ -108,6 +112,7 @@ class RawOrdersClient:
                 "startDate": start_date,
                 "endDate": end_date,
                 "currency": currency,
+                "planId": plan_id,
                 "orderLines": convert_and_respect_annotation_metadata(
                     object_=order_lines, annotation=typing.Sequence[OrderLineCreate], direction="write"
                 ),
@@ -279,6 +284,7 @@ class AsyncRawOrdersClient:
         billing_contact_id: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         end_date: typing.Optional[str] = OMIT,
+        plan_id: typing.Optional[str] = OMIT,
         order_lines: typing.Optional[typing.Sequence[OrderLineCreate]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Order]:
@@ -300,6 +306,9 @@ class AsyncRawOrdersClient:
         description : typing.Optional[str]
 
         end_date : typing.Optional[str]
+
+        plan_id : typing.Optional[str]
+            Optional plan ID to associate with this order
 
         order_lines : typing.Optional[typing.Sequence[OrderLineCreate]]
 
@@ -323,6 +332,7 @@ class AsyncRawOrdersClient:
                 "startDate": start_date,
                 "endDate": end_date,
                 "currency": currency,
+                "planId": plan_id,
                 "orderLines": convert_and_respect_annotation_metadata(
                     object_=order_lines, annotation=typing.Sequence[OrderLineCreate], direction="write"
                 ),
