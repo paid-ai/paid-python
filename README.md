@@ -148,7 +148,7 @@ The easiest way to add cost tracking is using the `@paid_tracing` decorator or c
 ```python
 from paid.tracing import paid_tracing
 
-@paid_tracing("<external_customer_id>", external_agent_id="<optional_external_agent_id>")
+@paid_tracing("<external_customer_id>", external_product_id="<optional_external_product_id>")
 def some_agent_workflow():  # your function
     # Your logic - use any AI providers with Paid wrappers or send signals with signal().
     # This function is typically an event processor that should lead to AI calls or events emitted as Paid signals
@@ -162,11 +162,11 @@ You can also use `paid_tracing` as a context manager with `with` statements:
 from paid.tracing import paid_tracing
 
 # Synchronous
-with paid_tracing("customer_123", external_agent_id="agent_456"):
+with paid_tracing("customer_123", external_product_id="product_456"):
     result = workflow()
 
 # Asynchronous
-async with paid_tracing("customer_123", external_agent_id="agent_456"):
+async with paid_tracing("customer_123", external_product_id="product_456"):
     result = await workflow()
 ```
 
@@ -175,7 +175,7 @@ Both approaches:
 - Initialize tracing using your API key you provided to the Paid client, falls back to `PAID_API_KEY` environment variable.
 - Handle both sync and async functions/code blocks
 - Gracefully fall back to normal execution if tracing fails
-- Support the same parameters: `external_customer_id`, `external_agent_id`, `tracing_token`, `store_prompt`, `metadata`
+- Support the same parameters: `external_customer_id`, `external_product_id`, `tracing_token`, `store_prompt`, `metadata`
 
 * Note - if it happens that you're calling `paid_tracing` from non-main thread, then it's advised to initialize from main thread:
 ```python
@@ -214,7 +214,7 @@ openAIClient = PaidOpenAI(OpenAI(
     api_key="<OPENAI_API_KEY>",
 ))
 
-@paid_tracing("your_external_customer_id", "your_external_agent_id")
+@paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 def image_generate():
     response = openAIClient.images.generate(
         model="dall-e-3",
@@ -246,7 +246,7 @@ You can attach custom metadata to your traces by passing a `metadata` dictionary
 
     @paid_tracing(
         "customer_123",
-        "agent_123",
+        external_product_id="product_123",
         metadata={
             "campaign_id": "campaign_456",
             "environment": "production",
@@ -290,7 +290,7 @@ You can attach custom metadata to your traces by passing a `metadata` dictionary
     # Pass metadata to context manager
     with paid_tracing(
         "customer_123",
-        external_agent_id="agent_123",
+        external_product_id="product_123",
         metadata={
             "campaign_id": "campaign_456",
             "environment": "production",
@@ -345,7 +345,7 @@ paid_autoinstrument()  # instruments all available: anthropic, gemini, openai, o
 # Now all OpenAI calls will be automatically traced
 openai_client = OpenAI(api_key="<OPENAI_API_KEY>")
 
-@paid_tracing("your_external_customer_id", "your_external_agent_id")
+@paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 def chat_with_gpt():
     response = openai_client.chat.completions.create(
         model="gpt-4",
@@ -398,7 +398,7 @@ Here's an example of how to use it:
 ```python
 from paid.tracing import paid_tracing, signal
 
-@paid_tracing("your_external_customer_id", "your_external_agent_id")
+@paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 def do_work():
     # ...do some work...
     signal(
@@ -422,7 +422,7 @@ def do_work():
     )
 
 # Use context manager instead
-with paid_tracing("your_external_customer_id", "your_external_agent_id"):
+with paid_tracing("your_external_customer_id", external_product_id="your_external_product_id"):
     do_work()
 ```
 
@@ -437,7 +437,7 @@ This will look something like this:
 ```python
 from paid.tracing import paid_tracing, signal
 
-@paid_tracing("your_external_customer_id", "your_external_agent_id")
+@paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 def do_work():
     # ... your workflow logic
     # ... your AI calls made through Paid wrappers or hooks
@@ -481,7 +481,7 @@ print(f"Tracing token: {token}")
 # Store token for other processes (e.g., in Redis, database, message queue)
 save_to_storage("workflow_123", token)
 
-@paid_tracing("customer_123", tracing_token=token, external_agent_id="agent_123")
+@paid_tracing("customer_123", tracing_token=token, external_product_id="product_123")
 def process_part_1():
     # AI calls here will be traced
     response = openai_client.chat.completions.create(
@@ -496,7 +496,7 @@ process_part_1()
 # Process 2 (different machine/process): Retrieve and use token
 token = load_from_storage("workflow_123")
 
-@paid_tracing("customer_123", tracing_token=token, external_agent_id="agent_123")
+@paid_tracing("customer_123", tracing_token=token, external_product_id="product_123")
 def process_part_2():
     # AI calls here will be linked to the same trace
     response = openai_client.chat.completions.create(
@@ -526,7 +526,7 @@ openai_client = PaidOpenAI(OpenAI(api_key="<OPENAI_API_KEY>"))
 token = generate_tracing_token()
 save_to_storage("workflow_123", token)
 
-with paid_tracing("customer_123", external_agent_id="agent_123", tracing_token=token):
+with paid_tracing("customer_123", external_product_id="product_123", tracing_token=token):
     response = openai_client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": "Analyze data"}]
@@ -536,7 +536,7 @@ with paid_tracing("customer_123", external_agent_id="agent_123", tracing_token=t
 # Process 2: Retrieve and use the same token
 token = load_from_storage("workflow_123")
 
-with paid_tracing("customer_123", external_agent_id="agent_123", tracing_token=token):
+with paid_tracing("customer_123", external_product_id="product_123", tracing_token=token):
     response = openai_client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": "Generate response"}]
@@ -578,7 +578,7 @@ Alternatively the same `costData` payload can be passed to OTLP signaling mechan
 ```python
 from paid.tracing import paid_tracing, signal
 
-@paid_tracing("your_external_customer_id", "your_external_agent_id")
+@paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 def do_work():
     # ...do some work...
     signal(
@@ -632,7 +632,7 @@ Same but via OTEL signaling:
 ```python
 from paid.tracing import paid_tracing, signal
 
-@paid_tracing("your_external_customer_id", "your_external_agent_id")
+@paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 def do_work():
     # ...do some work...
     signal(
@@ -684,7 +684,7 @@ initialize_tracing()
 # Wrap the async OpenAI client
 openai_client = PaidAsyncOpenAI(AsyncOpenAI(api_key="<OPENAI_API_KEY>"))
 
-@paid_tracing("your_external_customer_id", "your_external_agent_id")
+@paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 async def generate_image():
     response = await openai_client.images.generate(
         model="dall-e-3",
@@ -712,7 +712,7 @@ initialize_tracing()
 
 openai_client = PaidAsyncOpenAI(AsyncOpenAI(api_key="<OPENAI_API_KEY>"))
 
-@paid_tracing("your_external_customer_id", "your_external_agent_id")
+@paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 async def do_work():
     # Perform async AI operations
     response = await openai_client.chat.completions.create(

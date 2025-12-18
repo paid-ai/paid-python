@@ -23,8 +23,11 @@ class paid_tracing:
     ----------
     external_customer_id : str
         The external customer ID to associate with the trace.
+    external_product_id : Optional[str], optional
+        The external product ID to associate with the trace, by default None.
     external_agent_id : Optional[str], optional
-        The external agent ID to associate with the trace, by default None.
+        **Deprecated.** Use external_product_id instead. The external agent ID to associate
+        with the trace, by default None.
     tracing_token : Optional[int], optional
         Optional tracing token for distributed tracing, by default None.
     store_prompt : bool, optional
@@ -37,7 +40,7 @@ class paid_tracing:
     Examples
     --------
     As a decorator (sync):
-    >>> @paid_tracing(external_customer_id="customer123", external_agent_id="agent456")
+    >>> @paid_tracing(external_customer_id="customer123", external_product_id="product456")
     ... def my_function(arg1, arg2):
     ...     return arg1 + arg2
 
@@ -47,7 +50,7 @@ class paid_tracing:
     ...     return arg1 + arg2
 
     As a context manager (sync):
-    >>> with paid_tracing(external_customer_id="customer123", external_agent_id="agent456"):
+    >>> with paid_tracing(external_customer_id="customer123", external_product_id="product456"):
     ...     result = expensive_computation()
 
     As a context manager (async):
@@ -64,6 +67,7 @@ class paid_tracing:
         self,
         external_customer_id: Optional[str] = None,
         *,
+        external_product_id: Optional[str] = None,
         external_agent_id: Optional[str] = None,
         tracing_token: Optional[int] = None,
         store_prompt: bool = False,
@@ -71,7 +75,8 @@ class paid_tracing:
         metadata: Optional[Dict[str, Any]] = None,
     ):
         self.external_customer_id = external_customer_id
-        self.external_agent_id = external_agent_id
+        # external_product_id overrides external_agent_id for backwards compatibility
+        self.external_agent_id = external_product_id if external_product_id else external_agent_id
         self.tracing_token = tracing_token
         self.store_prompt = store_prompt
         self.collector_endpoint = collector_endpoint
