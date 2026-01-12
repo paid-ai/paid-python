@@ -2,13 +2,9 @@
 CLAUDE.md
 README.md
 LICENSE
+
 assets/
-src/paid/client.py
 src/paid/tracing/
 src/paid/logger.py
 vendor/
-pyproject.toml
-poetry.lock
-.github/workflows/ci.yml
-.gitignore
 .gitmodules
