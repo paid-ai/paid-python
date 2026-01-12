@@ -2,3 +2,6 @@
 
 # isort: skip_file
 
+from .types import CustomersCheckEntitlementRequestView, CustomersCheckEntitlementResponse
+
+__all__ = ["CustomersCheckEntitlementRequestView", "CustomersCheckEntitlementResponse"]

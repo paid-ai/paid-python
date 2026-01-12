@@ -8,6 +8,7 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .plan_plan_products_item_plan_product_attribute_item import PlanPlanProductsItemPlanProductAttributeItem
+from .product import Product
 
 
 class PlanPlanProductsItem(UniversalBaseModel):
@@ -17,6 +18,11 @@ class PlanPlanProductsItem(UniversalBaseModel):
     product_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="productId")] = None
     created_at: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="createdAt")] = None
     updated_at: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="updatedAt")] = None
+    product: typing.Optional[Product] = pydantic.Field(default=None)
+    """
+    The product associated with this plan product
+    """
+
     plan_product_attribute: typing_extensions.Annotated[
         typing.Optional[typing.List[PlanPlanProductsItemPlanProductAttributeItem]],
         FieldMetadata(alias="planProductAttribute"),

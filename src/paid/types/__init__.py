@@ -10,8 +10,10 @@ from .agent_price_point_tiers import AgentPricePointTiers
 from .agent_update import AgentUpdate
 from .api_error import ApiError
 from .billing_frequency import BillingFrequency
+from .cancel_renewal_response import CancelRenewalResponse
 from .charge_type import ChargeType
 from .contact import Contact
+from .contact_create_for_customer import ContactCreateForCustomer
 from .cost_amount import CostAmount
 from .cost_trace import CostTrace
 from .cost_traces_response import CostTracesResponse
@@ -21,6 +23,8 @@ from .customer import Customer
 from .customer_update import CustomerUpdate
 from .entitlement_usage import EntitlementUsage
 from .error import Error
+from .invoice import Invoice
+from .invoice_status import InvoiceStatus
 from .order import Order
 from .order_line import OrderLine
 from .order_line_attribute import OrderLineAttribute
@@ -28,6 +32,11 @@ from .order_line_attribute_create_one import OrderLineAttributeCreateOne
 from .order_line_attribute_pricing import OrderLineAttributePricing
 from .order_line_create import OrderLineCreate
 from .pagination_meta import PaginationMeta
+from .payment_method import PaymentMethod
+from .payment_method_card import PaymentMethodCard
+from .payment_method_type import PaymentMethodType
+from .payment_method_us_bank_account import PaymentMethodUsBankAccount
+from .payment_method_us_bank_account_account_type import PaymentMethodUsBankAccountAccountType
 from .plan import Plan
 from .plan_group import PlanGroup
 from .plan_plan_products_item import PlanPlanProductsItem
@@ -39,6 +48,9 @@ from .product import Product
 from .product_type import ProductType
 from .product_update import ProductUpdate
 from .product_update_type import ProductUpdateType
+from .proration_attribute_update import ProrationAttributeUpdate
+from .proration_detail import ProrationDetail
+from .proration_upgrade_response import ProrationUpgradeResponse
 from .salutation import Salutation
 from .signal import Signal
 from .signal_v_2 import SignalV2
@@ -61,8 +73,10 @@ __all__ = [
     "AgentUpdate",
     "ApiError",
     "BillingFrequency",
+    "CancelRenewalResponse",
     "ChargeType",
     "Contact",
+    "ContactCreateForCustomer",
     "CostAmount",
     "CostTrace",
     "CostTracesResponse",
@@ -72,6 +86,8 @@ __all__ = [
     "CustomerUpdate",
     "EntitlementUsage",
     "Error",
+    "Invoice",
+    "InvoiceStatus",
     "Order",
     "OrderLine",
     "OrderLineAttribute",
@@ -79,6 +95,11 @@ __all__ = [
     "OrderLineAttributePricing",
     "OrderLineCreate",
     "PaginationMeta",
+    "PaymentMethod",
+    "PaymentMethodCard",
+    "PaymentMethodType",
+    "PaymentMethodUsBankAccount",
+    "PaymentMethodUsBankAccountAccountType",
     "Plan",
     "PlanGroup",
     "PlanPlanProductsItem",
@@ -90,6 +111,9 @@ __all__ = [
     "ProductType",
     "ProductUpdate",
     "ProductUpdateType",
+    "ProrationAttributeUpdate",
+    "ProrationDetail",
+    "ProrationUpgradeResponse",
     "Salutation",
     "Signal",
     "SignalV2",
