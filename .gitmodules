@@ -1,3 +1,0 @@
-[submodule "vendor/patched-instrumentation-openllmetry"]
-	path = vendor/patched-instrumentation-openllmetry
-	url = https://github.com/paid-ai/openllmetry-instrumentation-patch
