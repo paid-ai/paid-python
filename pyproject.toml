@@ -26,8 +26,7 @@ classifiers = [
     "Typing :: Typed"
 ]
 packages = [
-    { include = "paid", from = "src"},
-    { include = "opentelemetry", from = "vendor/patched-instrumentation-openllmetry/packages/opentelemetry-instrumentation-openai" },
+    { include = "paid", from = "src"}
 ]
 
 [project.urls]
@@ -45,7 +44,7 @@ opentelemetry-exporter-otlp-proto-http = ">=1.23.0"
 mutagen = ">=1.47.0"
 python-dotenv = ">=0.15.0"
 opentelemetry-instrumentation-anthropic = ">=0.47.0"
-# opentelemetry-instrumentation-openai is vendored from git a submodule under vendor/patched-instrumentation-openllmetry
+opentelemetry-instrumentation-openai = ">=0.50.0"
 openinference-instrumentation-langchain = ">=0.1.55"
 openinference-instrumentation-openai-agents = ">=1.0.0"
 openinference-instrumentation-bedrock = ">=0.1.0"
@@ -72,15 +71,9 @@ openai = ">=1.12.0"
 [tool.pytest.ini_options]
 testpaths = [ "tests" ]
 asyncio_mode = "auto"
-# TODO(Ata): remove this once the openai instrumentation isn't vendored anymore
-norecursedirs = ["vendor/patched-instrumentation-openllmetry"]
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]
-exclude = [
-    # TODO(Ata): remove this once the openai instrumentation isn't vendored anymore
-    "^vendor/patched-instrumentation-openllmetry/",
-]
 
 [[tool.mypy.overrides]]
 module = [
@@ -94,8 +87,6 @@ module = [
     "agents",
     "agents.*",
     "langchain_core.*",
-    "opentelemetry.instrumentation.openai",  # TODO(Ata): remove this once the openai instrumentation isn't vendored anymore
-    "opentelemetry.instrumentation.openai.*",
 ]
 ignore_missing_imports = true
 ignore_errors = true # remove once openai instrumentor is upstream
