@@ -20,9 +20,10 @@ class BaseClientWrapper:
 
     def get_headers(self) -> typing.Dict[str, str]:
         headers: typing.Dict[str, str] = {
+            "User-Agent": "paid-python/1.0.0-alpha0",
             "X-Fern-Language": "Python",
-            "X-Fern-SDK-Name": "paid",
-            "X-Fern-SDK-Version": "0.6.0",
+            "X-Fern-SDK-Name": "paid-python",
+            "X-Fern-SDK-Version": "1.0.0-alpha0",
         }
         token = self._get_token()
         if token is not None:
