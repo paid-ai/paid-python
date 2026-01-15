@@ -4,11 +4,20 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.agent_attribute import AgentAttribute
-from ..types.product import Product
-from ..types.product_update_type import ProductUpdateType
 from .raw_client import AsyncRawProductsClient, RawProductsClient
-from .types.product_create_type import ProductCreateType
+from .types.products_create_request_type import ProductsCreateRequestType
+from .types.products_create_response import ProductsCreateResponse
+from .types.products_get_by_external_id_response import ProductsGetByExternalIdResponse
+from .types.products_get_response import ProductsGetResponse
+from .types.products_list_response_item import ProductsListResponseItem
+from .types.products_update_by_external_id_request_product_attribute_item import (
+    ProductsUpdateByExternalIdRequestProductAttributeItem,
+)
+from .types.products_update_by_external_id_request_type import ProductsUpdateByExternalIdRequestType
+from .types.products_update_by_external_id_response import ProductsUpdateByExternalIdResponse
+from .types.products_update_request_product_attribute_item import ProductsUpdateRequestProductAttributeItem
+from .types.products_update_request_type import ProductsUpdateRequestType
+from .types.products_update_response import ProductsUpdateResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -29,7 +38,7 @@ class ProductsClient:
         """
         return self._raw_client
 
-    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[Product]:
+    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[ProductsListResponseItem]:
         """
         Parameters
         ----------
@@ -38,8 +47,8 @@ class ProductsClient:
 
         Returns
         -------
-        typing.List[Product]
-            Success response
+        typing.List[ProductsListResponseItem]
+            200
 
         Examples
         --------
@@ -59,12 +68,12 @@ class ProductsClient:
         name: str,
         description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductCreateType] = OMIT,
+        type: typing.Optional[ProductsCreateRequestType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Optional[typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Product:
+    ) -> ProductsCreateResponse:
         """
         Parameters
         ----------
@@ -74,21 +83,21 @@ class ProductsClient:
 
         external_id : typing.Optional[str]
 
-        type : typing.Optional[ProductCreateType]
+        type : typing.Optional[ProductsCreateRequestType]
 
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Optional[typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Product
-            Success response
+        ProductsCreateResponse
+            A product in the Paid system (previously called Agent)
 
         Examples
         --------
@@ -98,10 +107,7 @@ class ProductsClient:
             token="YOUR_TOKEN",
         )
         client.products.create(
-            name="Acme Product",
-            description="Acme Product does amazing things.",
-            external_id="acme-product",
-            type="product",
+            name="name",
         )
         """
         _response = self._raw_client.create(
@@ -116,7 +122,7 @@ class ProductsClient:
         )
         return _response.data
 
-    def get(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Product:
+    def get(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> ProductsGetResponse:
         """
         Parameters
         ----------
@@ -127,8 +133,8 @@ class ProductsClient:
 
         Returns
         -------
-        Product
-            Success response
+        ProductsGetResponse
+            A product in the Paid system (previously called Agent)
 
         Examples
         --------
@@ -151,13 +157,13 @@ class ProductsClient:
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductUpdateType] = OMIT,
+        type: typing.Optional[ProductsUpdateRequestType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
-        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        product_attribute: typing.Optional[typing.Sequence[ProductsUpdateRequestProductAttributeItem]] = OMIT,
+        metadata: typing.Optional[typing.Optional[typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Product:
+    ) -> ProductsUpdateResponse:
         """
         Parameters
         ----------
@@ -169,24 +175,24 @@ class ProductsClient:
 
         external_id : typing.Optional[str]
 
-        type : typing.Optional[ProductUpdateType]
+        type : typing.Optional[ProductsUpdateRequestType]
 
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
 
-        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
+        product_attribute : typing.Optional[typing.Sequence[ProductsUpdateRequestProductAttributeItem]]
             Pricing attributes for this product
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Optional[typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Product
-            Success response
+        ProductsUpdateResponse
+            A product in the Paid system (previously called Agent)
 
         Examples
         --------
@@ -242,7 +248,7 @@ class ProductsClient:
 
     def get_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> Product:
+    ) -> ProductsGetByExternalIdResponse:
         """
         Parameters
         ----------
@@ -253,8 +259,8 @@ class ProductsClient:
 
         Returns
         -------
-        Product
-            Success response
+        ProductsGetByExternalIdResponse
+            A product in the Paid system (previously called Agent)
 
         Examples
         --------
@@ -272,47 +278,49 @@ class ProductsClient:
 
     def update_by_external_id(
         self,
-        external_id_: str,
+        external_id: str,
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductUpdateType] = OMIT,
+        products_update_by_external_id_request_external_id: typing.Optional[str] = OMIT,
+        type: typing.Optional[ProductsUpdateByExternalIdRequestType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
-        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        product_attribute: typing.Optional[
+            typing.Sequence[ProductsUpdateByExternalIdRequestProductAttributeItem]
+        ] = OMIT,
+        metadata: typing.Optional[typing.Optional[typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Product:
+    ) -> ProductsUpdateByExternalIdResponse:
         """
         Parameters
         ----------
-        external_id_ : str
+        external_id : str
 
         name : typing.Optional[str]
 
         description : typing.Optional[str]
 
-        external_id : typing.Optional[str]
+        products_update_by_external_id_request_external_id : typing.Optional[str]
 
-        type : typing.Optional[ProductUpdateType]
+        type : typing.Optional[ProductsUpdateByExternalIdRequestType]
 
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
 
-        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
+        product_attribute : typing.Optional[typing.Sequence[ProductsUpdateByExternalIdRequestProductAttributeItem]]
             Pricing attributes for this product
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Optional[typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Product
-            Success response
+        ProductsUpdateByExternalIdResponse
+            A product in the Paid system (previously called Agent)
 
         Examples
         --------
@@ -322,14 +330,14 @@ class ProductsClient:
             token="YOUR_TOKEN",
         )
         client.products.update_by_external_id(
-            external_id_="externalId",
+            external_id="externalId",
         )
         """
         _response = self._raw_client.update_by_external_id(
-            external_id_,
+            external_id,
             name=name,
             description=description,
-            external_id=external_id,
+            products_update_by_external_id_request_external_id=products_update_by_external_id_request_external_id,
             type=type,
             active=active,
             product_code=product_code,
@@ -384,7 +392,9 @@ class AsyncProductsClient:
         """
         return self._raw_client
 
-    async def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[Product]:
+    async def list(
+        self, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> typing.List[ProductsListResponseItem]:
         """
         Parameters
         ----------
@@ -393,8 +403,8 @@ class AsyncProductsClient:
 
         Returns
         -------
-        typing.List[Product]
-            Success response
+        typing.List[ProductsListResponseItem]
+            200
 
         Examples
         --------
@@ -422,12 +432,12 @@ class AsyncProductsClient:
         name: str,
         description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductCreateType] = OMIT,
+        type: typing.Optional[ProductsCreateRequestType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Optional[typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Product:
+    ) -> ProductsCreateResponse:
         """
         Parameters
         ----------
@@ -437,21 +447,21 @@ class AsyncProductsClient:
 
         external_id : typing.Optional[str]
 
-        type : typing.Optional[ProductCreateType]
+        type : typing.Optional[ProductsCreateRequestType]
 
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Optional[typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Product
-            Success response
+        ProductsCreateResponse
+            A product in the Paid system (previously called Agent)
 
         Examples
         --------
@@ -466,10 +476,7 @@ class AsyncProductsClient:
 
         async def main() -> None:
             await client.products.create(
-                name="Acme Product",
-                description="Acme Product does amazing things.",
-                external_id="acme-product",
-                type="product",
+                name="name",
             )
 
 
@@ -487,7 +494,9 @@ class AsyncProductsClient:
         )
         return _response.data
 
-    async def get(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Product:
+    async def get(
+        self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> ProductsGetResponse:
         """
         Parameters
         ----------
@@ -498,8 +507,8 @@ class AsyncProductsClient:
 
         Returns
         -------
-        Product
-            Success response
+        ProductsGetResponse
+            A product in the Paid system (previously called Agent)
 
         Examples
         --------
@@ -530,13 +539,13 @@ class AsyncProductsClient:
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductUpdateType] = OMIT,
+        type: typing.Optional[ProductsUpdateRequestType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
-        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        product_attribute: typing.Optional[typing.Sequence[ProductsUpdateRequestProductAttributeItem]] = OMIT,
+        metadata: typing.Optional[typing.Optional[typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Product:
+    ) -> ProductsUpdateResponse:
         """
         Parameters
         ----------
@@ -548,24 +557,24 @@ class AsyncProductsClient:
 
         external_id : typing.Optional[str]
 
-        type : typing.Optional[ProductUpdateType]
+        type : typing.Optional[ProductsUpdateRequestType]
 
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
 
-        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
+        product_attribute : typing.Optional[typing.Sequence[ProductsUpdateRequestProductAttributeItem]]
             Pricing attributes for this product
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Optional[typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Product
-            Success response
+        ProductsUpdateResponse
+            A product in the Paid system (previously called Agent)
 
         Examples
         --------
@@ -637,7 +646,7 @@ class AsyncProductsClient:
 
     async def get_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> Product:
+    ) -> ProductsGetByExternalIdResponse:
         """
         Parameters
         ----------
@@ -648,8 +657,8 @@ class AsyncProductsClient:
 
         Returns
         -------
-        Product
-            Success response
+        ProductsGetByExternalIdResponse
+            A product in the Paid system (previously called Agent)
 
         Examples
         --------
@@ -675,47 +684,49 @@ class AsyncProductsClient:
 
     async def update_by_external_id(
         self,
-        external_id_: str,
+        external_id: str,
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductUpdateType] = OMIT,
+        products_update_by_external_id_request_external_id: typing.Optional[str] = OMIT,
+        type: typing.Optional[ProductsUpdateByExternalIdRequestType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
-        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        product_attribute: typing.Optional[
+            typing.Sequence[ProductsUpdateByExternalIdRequestProductAttributeItem]
+        ] = OMIT,
+        metadata: typing.Optional[typing.Optional[typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Product:
+    ) -> ProductsUpdateByExternalIdResponse:
         """
         Parameters
         ----------
-        external_id_ : str
+        external_id : str
 
         name : typing.Optional[str]
 
         description : typing.Optional[str]
 
-        external_id : typing.Optional[str]
+        products_update_by_external_id_request_external_id : typing.Optional[str]
 
-        type : typing.Optional[ProductUpdateType]
+        type : typing.Optional[ProductsUpdateByExternalIdRequestType]
 
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
 
-        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
+        product_attribute : typing.Optional[typing.Sequence[ProductsUpdateByExternalIdRequestProductAttributeItem]]
             Pricing attributes for this product
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Optional[typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Product
-            Success response
+        ProductsUpdateByExternalIdResponse
+            A product in the Paid system (previously called Agent)
 
         Examples
         --------
@@ -730,17 +741,17 @@ class AsyncProductsClient:
 
         async def main() -> None:
             await client.products.update_by_external_id(
-                external_id_="externalId",
+                external_id="externalId",
             )
 
 
         asyncio.run(main())
         """
         _response = await self._raw_client.update_by_external_id(
-            external_id_,
+            external_id,
             name=name,
             description=description,
-            external_id=external_id,
+            products_update_by_external_id_request_external_id=products_update_by_external_id_request_external_id,
             type=type,
             active=active,
             product_code=product_code,
