@@ -6,5 +6,4 @@ LICENSE
 assets/
 src/paid/tracing/
 src/paid/logger.py
-vendor/
-.gitmodules
+.github/workflows/ci.yml
