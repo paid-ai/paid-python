@@ -7,6 +7,7 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.plan import Plan
 from ..types.plan_group import PlanGroup
+from ..types.plan_with_features import PlanWithFeatures
 from ..types.usage_summaries_response import UsageSummariesResponse
 from .raw_client import AsyncRawPlansClient, RawPlansClient
 
@@ -157,6 +158,37 @@ class PlansClient:
         )
         """
         _response = self._raw_client.get_group_by_id(plan_group_id, request_options=request_options)
+        return _response.data
+
+    def get_group_plans(
+        self, plan_group_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> typing.List[PlanWithFeatures]:
+        """
+        Parameters
+        ----------
+        plan_group_id : str
+            The ID of the plan group
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        typing.List[PlanWithFeatures]
+            Success response
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.plans.get_group_plans(
+            plan_group_id="planGroupId",
+        )
+        """
+        _response = self._raw_client.get_group_plans(plan_group_id, request_options=request_options)
         return _response.data
 
 
@@ -329,4 +361,43 @@ class AsyncPlansClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.get_group_by_id(plan_group_id, request_options=request_options)
+        return _response.data
+
+    async def get_group_plans(
+        self, plan_group_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> typing.List[PlanWithFeatures]:
+        """
+        Parameters
+        ----------
+        plan_group_id : str
+            The ID of the plan group
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        typing.List[PlanWithFeatures]
+            Success response
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.plans.get_group_plans(
+                plan_group_id="planGroupId",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_group_plans(plan_group_id, request_options=request_options)
         return _response.data

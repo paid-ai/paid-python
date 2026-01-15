@@ -91,8 +91,8 @@ class UsageClient:
             signals=[
                 SignalV2(
                     event_name="emails_sent",
-                    product_id="63fd642c-569d-44f9-8d67-5cf4944a16cc",
-                    customer_id="7d0b6fce-d82a-433d-8315-c994f8f1d68d",
+                    product_id="prod_abc123def",
+                    customer_id="cus_xyz789ghi",
                 ),
                 SignalV2(
                     event_name="emails_sent",
@@ -101,7 +101,7 @@ class UsageClient:
                 ),
                 SignalV2(
                     event_name="meeting_booked",
-                    product_id="63fd642c-569d-44f9-8d67-5cf4944a16cc",
+                    product_id="prod_abc123def",
                     external_customer_id="acme-inc",
                     data={"meeting_duration": 30, "meeting_type": "demo"},
                 ),
@@ -246,8 +246,8 @@ class AsyncUsageClient:
                 signals=[
                     SignalV2(
                         event_name="emails_sent",
-                        product_id="63fd642c-569d-44f9-8d67-5cf4944a16cc",
-                        customer_id="7d0b6fce-d82a-433d-8315-c994f8f1d68d",
+                        product_id="prod_abc123def",
+                        customer_id="cus_xyz789ghi",
                     ),
                     SignalV2(
                         event_name="emails_sent",
@@ -256,7 +256,7 @@ class AsyncUsageClient:
                     ),
                     SignalV2(
                         event_name="meeting_booked",
-                        product_id="63fd642c-569d-44f9-8d67-5cf4944a16cc",
+                        product_id="prod_abc123def",
                         external_customer_id="acme-inc",
                         data={"meeting_duration": 30, "meeting_type": "demo"},
                     ),

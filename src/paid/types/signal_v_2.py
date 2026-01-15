@@ -8,7 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class SignalV2(UniversalBaseModel):
     """
-    V2 signal schema with clean field names. Use either internal IDs (product_id, customer_id) or external IDs (external_product_id, external_customer_id).
+    V2 signal schema with clean field names. IMPORTANT: Exactly one customer ID field (customer_id OR external_customer_id) and exactly one product ID field (product_id OR external_product_id) must be provided per signal.
     """
 
     event_name: str = pydantic.Field()
@@ -18,22 +18,22 @@ class SignalV2(UniversalBaseModel):
 
     product_id: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Paid's internal product ID. Use either this OR external_product_id.
+    Paid's display ID for the product (e.g., prod_abc123). Cannot be used with external_product_id. Either this or external_product_id is required.
     """
 
     external_product_id: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Your system's product ID. Use either this OR product_id.
+    Your system's product ID. Cannot be used with product_id. Either this or product_id is required.
     """
 
     customer_id: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Paid's internal customer ID. Use either this OR external_customer_id.
+    Paid's display ID for the customer (e.g., cus_xyz789). Cannot be used with external_customer_id. Either this or external_customer_id is required.
     """
 
     external_customer_id: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Your system's customer ID. Use either this OR customer_id.
+    Your system's customer ID. Cannot be used with customer_id. Either this or customer_id is required.
     """
 
     data: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = pydantic.Field(default=None)

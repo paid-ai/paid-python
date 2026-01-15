@@ -6,13 +6,17 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.address import Address
+from ..types.contact_create_for_customer import ContactCreateForCustomer
 from ..types.cost_traces_response import CostTracesResponse
 from ..types.creation_source import CreationSource
 from ..types.customer import Customer
 from ..types.entitlement_usage import EntitlementUsage
+from ..types.payment_method import PaymentMethod
 from ..types.tax_exempt_status import TaxExemptStatus
 from ..types.usage_summaries_response import UsageSummariesResponse
 from .raw_client import AsyncRawCustomersClient, RawCustomersClient
+from .types.customers_check_entitlement_request_view import CustomersCheckEntitlementRequestView
+from .types.customers_check_entitlement_response import CustomersCheckEntitlementResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -70,6 +74,7 @@ class CustomersClient:
         website: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[Address] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        contacts: typing.Optional[typing.Sequence[ContactCreateForCustomer]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
@@ -96,17 +101,20 @@ class CustomersClient:
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
             Flexible JSON field for storing custom metadata about the customer
 
+        contacts : typing.Optional[typing.Sequence[ContactCreateForCustomer]]
+            Array of contacts to create for this customer
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
         Customer
-            Success response
+            Success response - customer already exists with this externalId
 
         Examples
         --------
-        from paid import Paid
+        from paid import ContactCreateForCustomer, Paid
 
         client = Paid(
             token="YOUR_TOKEN",
@@ -114,6 +122,21 @@ class CustomersClient:
         client.customers.create(
             name="Acme, Inc.",
             external_id="acme-inc",
+            contacts=[
+                ContactCreateForCustomer(
+                    salutation="Mr.",
+                    first_name="John",
+                    last_name="Doe",
+                    account_name="Acme, Inc.",
+                    email="john.doe@acme.com",
+                    phone="+1-555-0100",
+                    billing_street="123 Main Street",
+                    billing_city="San Francisco",
+                    billing_state_province="CA",
+                    billing_country="USA",
+                    billing_postal_code="94102",
+                )
+            ],
         )
         """
         _response = self._raw_client.create(
@@ -127,6 +150,7 @@ class CustomersClient:
             website=website,
             billing_address=billing_address,
             metadata=metadata,
+            contacts=contacts,
             request_options=request_options,
         )
         return _response.data
@@ -265,6 +289,52 @@ class CustomersClient:
         )
         """
         _response = self._raw_client.delete(customer_id, request_options=request_options)
+        return _response.data
+
+    def check_entitlement(
+        self,
+        customer_id: str,
+        *,
+        event_name: str,
+        view: typing.Optional[CustomersCheckEntitlementRequestView] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomersCheckEntitlementResponse:
+        """
+        Parameters
+        ----------
+        customer_id : str
+            The customer ID
+
+        event_name : str
+            The name of the usage event to check entitlement for
+
+        view : typing.Optional[CustomersCheckEntitlementRequestView]
+            Filter view - 'all' returns all entitlements regardless of status, 'active_only' returns only currently active entitlements with available credits
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomersCheckEntitlementResponse
+            Success response
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.check_entitlement(
+            customer_id="customerId",
+            event_name="event_name",
+            view="all",
+        )
+        """
+        _response = self._raw_client.check_entitlement(
+            customer_id, event_name=event_name, view=view, request_options=request_options
+        )
         return _response.data
 
     def get_entitlements(
@@ -568,6 +638,134 @@ class CustomersClient:
         )
         return _response.data
 
+    def list_payment_methods(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> typing.List[PaymentMethod]:
+        """
+        Retrieves all payment methods associated with a customer identified by their external ID.
+
+        Parameters
+        ----------
+        external_id : str
+            The external ID of the customer
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        typing.List[PaymentMethod]
+            Success response
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.list_payment_methods(
+            external_id="externalId",
+        )
+        """
+        _response = self._raw_client.list_payment_methods(external_id, request_options=request_options)
+        return _response.data
+
+    def create_payment_method(
+        self,
+        external_id: str,
+        *,
+        confirmation_token: str,
+        return_url: str,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> PaymentMethod:
+        """
+        Creates a new payment method for a customer using a Stripe confirmation token.
+
+        Parameters
+        ----------
+        external_id : str
+            The external ID of the customer
+
+        confirmation_token : str
+            Stripe confirmation token for the payment method
+
+        return_url : str
+            URL to redirect to after payment method setup
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+            Optional metadata to attach to the payment method
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        PaymentMethod
+            Payment method created successfully
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.create_payment_method(
+            external_id="externalId",
+            confirmation_token="ctoken_1234567890",
+            return_url="https://example.com/payment-method-added",
+            metadata={"source": "api"},
+        )
+        """
+        _response = self._raw_client.create_payment_method(
+            external_id,
+            confirmation_token=confirmation_token,
+            return_url=return_url,
+            metadata=metadata,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def delete_payment_method(
+        self, external_id: str, payment_method_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> None:
+        """
+        Deletes a specific payment method from a customer's account.
+
+        Parameters
+        ----------
+        external_id : str
+            The external ID of the customer
+
+        payment_method_id : str
+            The ID of the payment method to delete
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.delete_payment_method(
+            external_id="externalId",
+            payment_method_id="paymentMethodId",
+        )
+        """
+        _response = self._raw_client.delete_payment_method(
+            external_id, payment_method_id, request_options=request_options
+        )
+        return _response.data
+
 
 class AsyncCustomersClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -629,6 +827,7 @@ class AsyncCustomersClient:
         website: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[Address] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        contacts: typing.Optional[typing.Sequence[ContactCreateForCustomer]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
@@ -655,19 +854,22 @@ class AsyncCustomersClient:
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
             Flexible JSON field for storing custom metadata about the customer
 
+        contacts : typing.Optional[typing.Sequence[ContactCreateForCustomer]]
+            Array of contacts to create for this customer
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
         Customer
-            Success response
+            Success response - customer already exists with this externalId
 
         Examples
         --------
         import asyncio
 
-        from paid import AsyncPaid
+        from paid import AsyncPaid, ContactCreateForCustomer
 
         client = AsyncPaid(
             token="YOUR_TOKEN",
@@ -678,6 +880,21 @@ class AsyncCustomersClient:
             await client.customers.create(
                 name="Acme, Inc.",
                 external_id="acme-inc",
+                contacts=[
+                    ContactCreateForCustomer(
+                        salutation="Mr.",
+                        first_name="John",
+                        last_name="Doe",
+                        account_name="Acme, Inc.",
+                        email="john.doe@acme.com",
+                        phone="+1-555-0100",
+                        billing_street="123 Main Street",
+                        billing_city="San Francisco",
+                        billing_state_province="CA",
+                        billing_country="USA",
+                        billing_postal_code="94102",
+                    )
+                ],
             )
 
 
@@ -694,6 +911,7 @@ class AsyncCustomersClient:
             website=website,
             billing_address=billing_address,
             metadata=metadata,
+            contacts=contacts,
             request_options=request_options,
         )
         return _response.data
@@ -856,6 +1074,60 @@ class AsyncCustomersClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.delete(customer_id, request_options=request_options)
+        return _response.data
+
+    async def check_entitlement(
+        self,
+        customer_id: str,
+        *,
+        event_name: str,
+        view: typing.Optional[CustomersCheckEntitlementRequestView] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomersCheckEntitlementResponse:
+        """
+        Parameters
+        ----------
+        customer_id : str
+            The customer ID
+
+        event_name : str
+            The name of the usage event to check entitlement for
+
+        view : typing.Optional[CustomersCheckEntitlementRequestView]
+            Filter view - 'all' returns all entitlements regardless of status, 'active_only' returns only currently active entitlements with available credits
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomersCheckEntitlementResponse
+            Success response
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.check_entitlement(
+                customer_id="customerId",
+                event_name="event_name",
+                view="all",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.check_entitlement(
+            customer_id, event_name=event_name, view=view, request_options=request_options
+        )
         return _response.data
 
     async def get_entitlements(
@@ -1202,5 +1474,157 @@ class AsyncCustomersClient:
             start_time=start_time,
             end_time=end_time,
             request_options=request_options,
+        )
+        return _response.data
+
+    async def list_payment_methods(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> typing.List[PaymentMethod]:
+        """
+        Retrieves all payment methods associated with a customer identified by their external ID.
+
+        Parameters
+        ----------
+        external_id : str
+            The external ID of the customer
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        typing.List[PaymentMethod]
+            Success response
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.list_payment_methods(
+                external_id="externalId",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list_payment_methods(external_id, request_options=request_options)
+        return _response.data
+
+    async def create_payment_method(
+        self,
+        external_id: str,
+        *,
+        confirmation_token: str,
+        return_url: str,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> PaymentMethod:
+        """
+        Creates a new payment method for a customer using a Stripe confirmation token.
+
+        Parameters
+        ----------
+        external_id : str
+            The external ID of the customer
+
+        confirmation_token : str
+            Stripe confirmation token for the payment method
+
+        return_url : str
+            URL to redirect to after payment method setup
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+            Optional metadata to attach to the payment method
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        PaymentMethod
+            Payment method created successfully
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.create_payment_method(
+                external_id="externalId",
+                confirmation_token="ctoken_1234567890",
+                return_url="https://example.com/payment-method-added",
+                metadata={"source": "api"},
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.create_payment_method(
+            external_id,
+            confirmation_token=confirmation_token,
+            return_url=return_url,
+            metadata=metadata,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def delete_payment_method(
+        self, external_id: str, payment_method_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> None:
+        """
+        Deletes a specific payment method from a customer's account.
+
+        Parameters
+        ----------
+        external_id : str
+            The external ID of the customer
+
+        payment_method_id : str
+            The ID of the payment method to delete
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        None
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.delete_payment_method(
+                external_id="externalId",
+                payment_method_id="paymentMethodId",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.delete_payment_method(
+            external_id, payment_method_id, request_options=request_options
         )
         return _response.data
