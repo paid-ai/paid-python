@@ -6,7 +6,6 @@ from json.decoder import JSONDecodeError
 
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
-from ..core.datetime_utils import serialize_datetime
 from ..core.http_response import AsyncHttpResponse, HttpResponse
 from ..core.jsonable_encoder import jsonable_encoder
 from ..core.pydantic_utilities import parse_obj_as
@@ -14,19 +13,26 @@ from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
 from ..errors.forbidden_error import ForbiddenError
+from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
-from ..types.address import Address
-from ..types.contact_create_for_customer import ContactCreateForCustomer
-from ..types.cost_traces_response import CostTracesResponse
-from ..types.creation_source import CreationSource
-from ..types.customer import Customer
-from ..types.entitlement_usage import EntitlementUsage
-from ..types.error import Error
-from ..types.payment_method import PaymentMethod
-from ..types.tax_exempt_status import TaxExemptStatus
-from ..types.usage_summaries_response import UsageSummariesResponse
-from .types.customers_check_entitlement_request_view import CustomersCheckEntitlementRequestView
-from .types.customers_check_entitlement_response import CustomersCheckEntitlementResponse
+from .types.delete_customers_external_external_id_response import DeleteCustomersExternalExternalIdResponse
+from .types.delete_customers_id_response import DeleteCustomersIdResponse
+from .types.get_customers_external_external_id_response import GetCustomersExternalExternalIdResponse
+from .types.get_customers_id_response import GetCustomersIdResponse
+from .types.get_customers_response import GetCustomersResponse
+from .types.post_customers_request_billing_address import PostCustomersRequestBillingAddress
+from .types.post_customers_request_creation_state import PostCustomersRequestCreationState
+from .types.post_customers_response import PostCustomersResponse
+from .types.put_customers_external_external_id_request_billing_address import (
+    PutCustomersExternalExternalIdRequestBillingAddress,
+)
+from .types.put_customers_external_external_id_request_creation_state import (
+    PutCustomersExternalExternalIdRequestCreationState,
+)
+from .types.put_customers_external_external_id_response import PutCustomersExternalExternalIdResponse
+from .types.put_customers_id_request_billing_address import PutCustomersIdRequestBillingAddress
+from .types.put_customers_id_request_creation_state import PutCustomersIdRequestCreationState
+from .types.put_customers_id_response import PutCustomersIdResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -36,231 +42,152 @@ class RawCustomersClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[typing.List[Customer]]:
+    def list_customers(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[GetCustomersResponse]:
         """
+        Get a list of customers for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[typing.List[Customer]]
-            Success response
+        HttpResponse[GetCustomersResponse]
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
-            "customers",
+            "customers/",
             method="GET",
+            params={
+                "limit": limit,
+                "offset": offset,
+            },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[Customer],
+                    GetCustomersResponse,
                     parse_obj_as(
-                        type_=typing.List[Customer],  # type: ignore
+                        type_=GetCustomersResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create(
+    def create_a_new_customer(
         self,
         *,
         name: str,
-        external_id: typing.Optional[str] = OMIT,
+        legal_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
-        employee_count: typing.Optional[float] = OMIT,
-        annual_revenue: typing.Optional[float] = OMIT,
-        tax_exempt_status: typing.Optional[TaxExemptStatus] = OMIT,
-        creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[Address] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[PostCustomersRequestBillingAddress] = OMIT,
+        creation_state: typing.Optional[PostCustomersRequestCreationState] = OMIT,
+        vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
-        contacts: typing.Optional[typing.Sequence[ContactCreateForCustomer]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Customer]:
+    ) -> HttpResponse[PostCustomersResponse]:
         """
+        Creates a new customer for the organization
+
         Parameters
         ----------
         name : str
 
-        external_id : typing.Optional[str]
+        legal_name : typing.Optional[str]
+
+        email : typing.Optional[str]
 
         phone : typing.Optional[str]
 
-        employee_count : typing.Optional[float]
-
-        annual_revenue : typing.Optional[float]
-
-        tax_exempt_status : typing.Optional[TaxExemptStatus]
-
-        creation_source : typing.Optional[CreationSource]
-
         website : typing.Optional[str]
 
-        billing_address : typing.Optional[Address]
+        external_id : typing.Optional[str]
+
+        billing_address : typing.Optional[PostCustomersRequestBillingAddress]
+
+        creation_state : typing.Optional[PostCustomersRequestCreationState]
+
+        vat_number : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Flexible JSON field for storing custom metadata about the customer
-
-        contacts : typing.Optional[typing.Sequence[ContactCreateForCustomer]]
-            Array of contacts to create for this customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[Customer]
-            Success response - customer already exists with this externalId
+        HttpResponse[PostCustomersResponse]
+            201
         """
         _response = self._client_wrapper.httpx_client.request(
-            "customers",
+            "customers/",
             method="POST",
             json={
                 "name": name,
-                "externalId": external_id,
+                "legalName": legal_name,
+                "email": email,
                 "phone": phone,
-                "employeeCount": employee_count,
-                "annualRevenue": annual_revenue,
-                "taxExemptStatus": tax_exempt_status,
-                "creationSource": creation_source,
                 "website": website,
-                "billingAddress": convert_and_respect_annotation_metadata(
-                    object_=billing_address, annotation=Address, direction="write"
-                ),
-                "metadata": metadata,
-                "contacts": convert_and_respect_annotation_metadata(
-                    object_=contacts, annotation=typing.Sequence[ContactCreateForCustomer], direction="write"
-                ),
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    Customer,
-                    parse_obj_as(
-                        type_=Customer,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def get(
-        self, customer_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[Customer]:
-        """
-        Parameters
-        ----------
-        customer_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[Customer]
-            Success response
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"customers/{jsonable_encoder(customer_id)}",
-            method="GET",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    Customer,
-                    parse_obj_as(
-                        type_=Customer,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def update(
-        self,
-        customer_id: str,
-        *,
-        name: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        phone: typing.Optional[str] = OMIT,
-        employee_count: typing.Optional[float] = OMIT,
-        annual_revenue: typing.Optional[float] = OMIT,
-        tax_exempt_status: typing.Optional[TaxExemptStatus] = OMIT,
-        creation_source: typing.Optional[CreationSource] = OMIT,
-        website: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[Address] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Customer]:
-        """
-        Parameters
-        ----------
-        customer_id : str
-
-        name : typing.Optional[str]
-
-        external_id : typing.Optional[str]
-
-        phone : typing.Optional[str]
-
-        employee_count : typing.Optional[float]
-
-        annual_revenue : typing.Optional[float]
-
-        tax_exempt_status : typing.Optional[TaxExemptStatus]
-
-        creation_source : typing.Optional[CreationSource]
-
-        website : typing.Optional[str]
-
-        billing_address : typing.Optional[Address]
-
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Flexible JSON field for storing custom metadata about the customer
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[Customer]
-            Customer updated successfully
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"customers/{jsonable_encoder(customer_id)}",
-            method="PUT",
-            json={
-                "name": name,
                 "externalId": external_id,
-                "phone": phone,
-                "employeeCount": employee_count,
-                "annualRevenue": annual_revenue,
-                "taxExemptStatus": tax_exempt_status,
-                "creationSource": creation_source,
-                "website": website,
                 "billingAddress": convert_and_respect_annotation_metadata(
-                    object_=billing_address, annotation=Address, direction="write"
+                    object_=billing_address,
+                    annotation=typing.Optional[PostCustomersRequestBillingAddress],
+                    direction="write",
                 ),
+                "creationState": creation_state,
+                "vatNumber": vat_number,
                 "metadata": metadata,
             },
             headers={
@@ -272,89 +199,9 @@ class RawCustomersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Customer,
+                    PostCustomersResponse,
                     parse_obj_as(
-                        type_=Customer,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def delete(
-        self, customer_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[None]:
-        """
-        Parameters
-        ----------
-        customer_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[None]
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"customers/{jsonable_encoder(customer_id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return HttpResponse(response=_response, data=None)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def check_entitlement(
-        self,
-        customer_id: str,
-        *,
-        event_name: str,
-        view: typing.Optional[CustomersCheckEntitlementRequestView] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[CustomersCheckEntitlementResponse]:
-        """
-        Parameters
-        ----------
-        customer_id : str
-            The customer ID
-
-        event_name : str
-            The name of the usage event to check entitlement for
-
-        view : typing.Optional[CustomersCheckEntitlementRequestView]
-            Filter view - 'all' returns all entitlements regardless of status, 'active_only' returns only currently active entitlements with available credits
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[CustomersCheckEntitlementResponse]
-            Success response
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"customers/{jsonable_encoder(customer_id)}/entitlement",
-            method="GET",
-            params={
-                "event_name": event_name,
-                "view": view,
-            },
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    CustomersCheckEntitlementResponse,
-                    parse_obj_as(
-                        type_=CustomersCheckEntitlementResponse,  # type: ignore
+                        type_=PostCustomersResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -363,20 +210,31 @@ class RawCustomersClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        typing.Optional[typing.Any],
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
                 )
-            if _response.status_code == 404:
-                raise NotFoundError(
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        typing.Optional[typing.Any],
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -386,34 +244,35 @@ class RawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_entitlements(
-        self, customer_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[typing.List[EntitlementUsage]]:
+    def get_customer(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[GetCustomersIdResponse]:
         """
+        Get a customer by its ID
+
         Parameters
         ----------
-        customer_id : str
-            The customer ID
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[typing.List[EntitlementUsage]]
-            Success response
+        HttpResponse[GetCustomersIdResponse]
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"customers/{jsonable_encoder(customer_id)}/credit-bundles",
+            f"customers/{jsonable_encoder(id)}",
             method="GET",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[EntitlementUsage],
+                    GetCustomersIdResponse,
                     parse_obj_as(
-                        type_=typing.List[EntitlementUsage],  # type: ignore
+                        type_=GetCustomersIdResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -422,9 +281,31 @@ class RawCustomersClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        typing.Optional[typing.Any],
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -434,10 +315,222 @@ class RawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_by_external_id(
-        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[Customer]:
+    def update_customer(
+        self,
+        id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        legal_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
+        phone: typing.Optional[str] = OMIT,
+        website: typing.Optional[str] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[PutCustomersIdRequestBillingAddress] = OMIT,
+        creation_state: typing.Optional[PutCustomersIdRequestCreationState] = OMIT,
+        churn_date: typing.Optional[dt.datetime] = OMIT,
+        vat_number: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[PutCustomersIdResponse]:
         """
+        Update a customer by its ID
+
+        Parameters
+        ----------
+        id : str
+
+        name : typing.Optional[str]
+
+        legal_name : typing.Optional[str]
+
+        email : typing.Optional[str]
+
+        phone : typing.Optional[str]
+
+        website : typing.Optional[str]
+
+        external_id : typing.Optional[str]
+
+        billing_address : typing.Optional[PutCustomersIdRequestBillingAddress]
+
+        creation_state : typing.Optional[PutCustomersIdRequestCreationState]
+
+        churn_date : typing.Optional[dt.datetime]
+
+        vat_number : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[PutCustomersIdResponse]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"customers/{jsonable_encoder(id)}",
+            method="PUT",
+            json={
+                "name": name,
+                "legalName": legal_name,
+                "email": email,
+                "phone": phone,
+                "website": website,
+                "externalId": external_id,
+                "billingAddress": convert_and_respect_annotation_metadata(
+                    object_=billing_address,
+                    annotation=typing.Optional[PutCustomersIdRequestBillingAddress],
+                    direction="write",
+                ),
+                "creationState": creation_state,
+                "churnDate": churn_date,
+                "vatNumber": vat_number,
+                "metadata": metadata,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    PutCustomersIdResponse,
+                    parse_obj_as(
+                        type_=PutCustomersIdResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def delete_customer(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[DeleteCustomersIdResponse]:
+        """
+        Delete a customer by its ID
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[DeleteCustomersIdResponse]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"customers/{jsonable_encoder(id)}",
+            method="DELETE",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    DeleteCustomersIdResponse,
+                    parse_obj_as(
+                        type_=DeleteCustomersIdResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def get_customer_by_external_id(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[GetCustomersExternalExternalIdResponse]:
+        """
+        Get a customer by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -447,8 +540,8 @@ class RawCustomersClient:
 
         Returns
         -------
-        HttpResponse[Customer]
-            Success response
+        HttpResponse[GetCustomersExternalExternalIdResponse]
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
             f"customers/external/{jsonable_encoder(external_id)}",
@@ -458,83 +551,123 @@ class RawCustomersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Customer,
+                    GetCustomersExternalExternalIdResponse,
                     parse_obj_as(
-                        type_=Customer,  # type: ignore
+                        type_=GetCustomersExternalExternalIdResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_by_external_id(
+    def update_customer_by_external_id(
         self,
-        external_id_: str,
+        external_id: str,
         *,
         name: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
+        legal_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
-        employee_count: typing.Optional[float] = OMIT,
-        annual_revenue: typing.Optional[float] = OMIT,
-        tax_exempt_status: typing.Optional[TaxExemptStatus] = OMIT,
-        creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[Address] = OMIT,
+        put_customers_external_external_id_request_external_id: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[PutCustomersExternalExternalIdRequestBillingAddress] = OMIT,
+        creation_state: typing.Optional[PutCustomersExternalExternalIdRequestCreationState] = OMIT,
+        churn_date: typing.Optional[dt.datetime] = OMIT,
+        vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Customer]:
+    ) -> HttpResponse[PutCustomersExternalExternalIdResponse]:
         """
+        Update a customer by its externalId
+
         Parameters
         ----------
-        external_id_ : str
+        external_id : str
 
         name : typing.Optional[str]
 
-        external_id : typing.Optional[str]
+        legal_name : typing.Optional[str]
+
+        email : typing.Optional[str]
 
         phone : typing.Optional[str]
 
-        employee_count : typing.Optional[float]
-
-        annual_revenue : typing.Optional[float]
-
-        tax_exempt_status : typing.Optional[TaxExemptStatus]
-
-        creation_source : typing.Optional[CreationSource]
-
         website : typing.Optional[str]
 
-        billing_address : typing.Optional[Address]
+        put_customers_external_external_id_request_external_id : typing.Optional[str]
+
+        billing_address : typing.Optional[PutCustomersExternalExternalIdRequestBillingAddress]
+
+        creation_state : typing.Optional[PutCustomersExternalExternalIdRequestCreationState]
+
+        churn_date : typing.Optional[dt.datetime]
+
+        vat_number : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Flexible JSON field for storing custom metadata about the customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[Customer]
-            Success response
+        HttpResponse[PutCustomersExternalExternalIdResponse]
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"customers/external/{jsonable_encoder(external_id_)}",
+            f"customers/external/{jsonable_encoder(external_id)}",
             method="PUT",
             json={
                 "name": name,
-                "externalId": external_id,
+                "legalName": legal_name,
+                "email": email,
                 "phone": phone,
-                "employeeCount": employee_count,
-                "annualRevenue": annual_revenue,
-                "taxExemptStatus": tax_exempt_status,
-                "creationSource": creation_source,
                 "website": website,
+                "externalId": put_customers_external_external_id_request_external_id,
                 "billingAddress": convert_and_respect_annotation_metadata(
-                    object_=billing_address, annotation=Address, direction="write"
+                    object_=billing_address,
+                    annotation=typing.Optional[PutCustomersExternalExternalIdRequestBillingAddress],
+                    direction="write",
                 ),
+                "creationState": creation_state,
+                "churnDate": churn_date,
+                "vatNumber": vat_number,
                 "metadata": metadata,
             },
             headers={
@@ -546,22 +679,68 @@ class RawCustomersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Customer,
+                    PutCustomersExternalExternalIdResponse,
                     parse_obj_as(
-                        type_=Customer,  # type: ignore
+                        type_=PutCustomersExternalExternalIdResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_by_external_id(
+    def delete_customer_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[None]:
+    ) -> HttpResponse[DeleteCustomersExternalExternalIdResponse]:
         """
+        Delete a customer by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -571,7 +750,8 @@ class RawCustomersClient:
 
         Returns
         -------
-        HttpResponse[None]
+        HttpResponse[DeleteCustomersExternalExternalIdResponse]
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
             f"customers/external/{jsonable_encoder(external_id)}",
@@ -580,232 +760,10 @@ class RawCustomersClient:
         )
         try:
             if 200 <= _response.status_code < 300:
-                return HttpResponse(response=_response, data=None)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def get_costs_by_external_id(
-        self,
-        external_id: str,
-        *,
-        limit: typing.Optional[int] = None,
-        offset: typing.Optional[int] = None,
-        start_time: typing.Optional[dt.datetime] = None,
-        end_time: typing.Optional[dt.datetime] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[CostTracesResponse]:
-        """
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        limit : typing.Optional[int]
-            Maximum number of traces to return (1-1000)
-
-        offset : typing.Optional[int]
-            Number of traces to skip for pagination
-
-        start_time : typing.Optional[dt.datetime]
-            Filter traces starting from this time (ISO 8601 format)
-
-        end_time : typing.Optional[dt.datetime]
-            Filter traces up to this time (ISO 8601 format)
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[CostTracesResponse]
-            Success response
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"customers/external/{jsonable_encoder(external_id)}/costs",
-            method="GET",
-            params={
-                "limit": limit,
-                "offset": offset,
-                "startTime": serialize_datetime(start_time) if start_time is not None else None,
-                "endTime": serialize_datetime(end_time) if end_time is not None else None,
-            },
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    CostTracesResponse,
+                    DeleteCustomersExternalExternalIdResponse,
                     parse_obj_as(
-                        type_=CostTracesResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def get_usage_by_external_id(
-        self,
-        external_id: str,
-        *,
-        limit: typing.Optional[int] = None,
-        offset: typing.Optional[int] = None,
-        start_time: typing.Optional[dt.datetime] = None,
-        end_time: typing.Optional[dt.datetime] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[UsageSummariesResponse]:
-        """
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        limit : typing.Optional[int]
-            Maximum number of usage summaries to return (1-1000)
-
-        offset : typing.Optional[int]
-            Number of usage summaries to skip for pagination
-
-        start_time : typing.Optional[dt.datetime]
-            Filter usage summaries starting from this time (ISO 8601 format). Returns summaries that overlap with the time range.
-
-        end_time : typing.Optional[dt.datetime]
-            Filter usage summaries up to this time (ISO 8601 format). Returns summaries that overlap with the time range.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[UsageSummariesResponse]
-            Success response
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"customers/external/{jsonable_encoder(external_id)}/usage",
-            method="GET",
-            params={
-                "limit": limit,
-                "offset": offset,
-                "startTime": serialize_datetime(start_time) if start_time is not None else None,
-                "endTime": serialize_datetime(end_time) if end_time is not None else None,
-            },
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    UsageSummariesResponse,
-                    parse_obj_as(
-                        type_=UsageSummariesResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def list_payment_methods(
-        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[typing.List[PaymentMethod]]:
-        """
-        Retrieves all payment methods associated with a customer identified by their external ID.
-
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[typing.List[PaymentMethod]]
-            Success response
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"customers/external/{jsonable_encoder(external_id)}/payment-methods",
-            method="GET",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    typing.List[PaymentMethod],
-                    parse_obj_as(
-                        type_=typing.List[PaymentMethod],  # type: ignore
+                        type_=DeleteCustomersExternalExternalIdResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -814,9 +772,9 @@ class RawCustomersClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        typing.Optional[typing.Any],
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -825,161 +783,20 @@ class RawCustomersClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        typing.Optional[typing.Any],
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
                 )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def create_payment_method(
-        self,
-        external_id: str,
-        *,
-        confirmation_token: str,
-        return_url: str,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[PaymentMethod]:
-        """
-        Creates a new payment method for a customer using a Stripe confirmation token.
-
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        confirmation_token : str
-            Stripe confirmation token for the payment method
-
-        return_url : str
-            URL to redirect to after payment method setup
-
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Optional metadata to attach to the payment method
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[PaymentMethod]
-            Payment method created successfully
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"customers/external/{jsonable_encoder(external_id)}/payment-methods",
-            method="POST",
-            json={
-                "confirmationToken": confirmation_token,
-                "returnUrl": return_url,
-                "metadata": metadata,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    PaymentMethod,
-                    parse_obj_as(
-                        type_=PaymentMethod,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
+            if _response.status_code == 500:
+                raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        typing.Optional[typing.Any],
                         parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def delete_payment_method(
-        self, external_id: str, payment_method_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[None]:
-        """
-        Deletes a specific payment method from a customer's account.
-
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        payment_method_id : str
-            The ID of the payment method to delete
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[None]
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"customers/external/{jsonable_encoder(external_id)}/payment-methods/{jsonable_encoder(payment_method_id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return HttpResponse(response=_response, data=None)
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -994,233 +811,152 @@ class AsyncRawCustomersClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list(
-        self, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[typing.List[Customer]]:
+    async def list_customers(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[GetCustomersResponse]:
         """
+        Get a list of customers for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[typing.List[Customer]]
-            Success response
+        AsyncHttpResponse[GetCustomersResponse]
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "customers",
+            "customers/",
             method="GET",
+            params={
+                "limit": limit,
+                "offset": offset,
+            },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[Customer],
+                    GetCustomersResponse,
                     parse_obj_as(
-                        type_=typing.List[Customer],  # type: ignore
+                        type_=GetCustomersResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create(
+    async def create_a_new_customer(
         self,
         *,
         name: str,
-        external_id: typing.Optional[str] = OMIT,
+        legal_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
-        employee_count: typing.Optional[float] = OMIT,
-        annual_revenue: typing.Optional[float] = OMIT,
-        tax_exempt_status: typing.Optional[TaxExemptStatus] = OMIT,
-        creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[Address] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[PostCustomersRequestBillingAddress] = OMIT,
+        creation_state: typing.Optional[PostCustomersRequestCreationState] = OMIT,
+        vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
-        contacts: typing.Optional[typing.Sequence[ContactCreateForCustomer]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Customer]:
+    ) -> AsyncHttpResponse[PostCustomersResponse]:
         """
+        Creates a new customer for the organization
+
         Parameters
         ----------
         name : str
 
-        external_id : typing.Optional[str]
+        legal_name : typing.Optional[str]
+
+        email : typing.Optional[str]
 
         phone : typing.Optional[str]
 
-        employee_count : typing.Optional[float]
-
-        annual_revenue : typing.Optional[float]
-
-        tax_exempt_status : typing.Optional[TaxExemptStatus]
-
-        creation_source : typing.Optional[CreationSource]
-
         website : typing.Optional[str]
 
-        billing_address : typing.Optional[Address]
+        external_id : typing.Optional[str]
+
+        billing_address : typing.Optional[PostCustomersRequestBillingAddress]
+
+        creation_state : typing.Optional[PostCustomersRequestCreationState]
+
+        vat_number : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Flexible JSON field for storing custom metadata about the customer
-
-        contacts : typing.Optional[typing.Sequence[ContactCreateForCustomer]]
-            Array of contacts to create for this customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[Customer]
-            Success response - customer already exists with this externalId
+        AsyncHttpResponse[PostCustomersResponse]
+            201
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "customers",
+            "customers/",
             method="POST",
             json={
                 "name": name,
-                "externalId": external_id,
+                "legalName": legal_name,
+                "email": email,
                 "phone": phone,
-                "employeeCount": employee_count,
-                "annualRevenue": annual_revenue,
-                "taxExemptStatus": tax_exempt_status,
-                "creationSource": creation_source,
                 "website": website,
-                "billingAddress": convert_and_respect_annotation_metadata(
-                    object_=billing_address, annotation=Address, direction="write"
-                ),
-                "metadata": metadata,
-                "contacts": convert_and_respect_annotation_metadata(
-                    object_=contacts, annotation=typing.Sequence[ContactCreateForCustomer], direction="write"
-                ),
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    Customer,
-                    parse_obj_as(
-                        type_=Customer,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def get(
-        self, customer_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[Customer]:
-        """
-        Parameters
-        ----------
-        customer_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[Customer]
-            Success response
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"customers/{jsonable_encoder(customer_id)}",
-            method="GET",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    Customer,
-                    parse_obj_as(
-                        type_=Customer,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def update(
-        self,
-        customer_id: str,
-        *,
-        name: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        phone: typing.Optional[str] = OMIT,
-        employee_count: typing.Optional[float] = OMIT,
-        annual_revenue: typing.Optional[float] = OMIT,
-        tax_exempt_status: typing.Optional[TaxExemptStatus] = OMIT,
-        creation_source: typing.Optional[CreationSource] = OMIT,
-        website: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[Address] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Customer]:
-        """
-        Parameters
-        ----------
-        customer_id : str
-
-        name : typing.Optional[str]
-
-        external_id : typing.Optional[str]
-
-        phone : typing.Optional[str]
-
-        employee_count : typing.Optional[float]
-
-        annual_revenue : typing.Optional[float]
-
-        tax_exempt_status : typing.Optional[TaxExemptStatus]
-
-        creation_source : typing.Optional[CreationSource]
-
-        website : typing.Optional[str]
-
-        billing_address : typing.Optional[Address]
-
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Flexible JSON field for storing custom metadata about the customer
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[Customer]
-            Customer updated successfully
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"customers/{jsonable_encoder(customer_id)}",
-            method="PUT",
-            json={
-                "name": name,
                 "externalId": external_id,
-                "phone": phone,
-                "employeeCount": employee_count,
-                "annualRevenue": annual_revenue,
-                "taxExemptStatus": tax_exempt_status,
-                "creationSource": creation_source,
-                "website": website,
                 "billingAddress": convert_and_respect_annotation_metadata(
-                    object_=billing_address, annotation=Address, direction="write"
+                    object_=billing_address,
+                    annotation=typing.Optional[PostCustomersRequestBillingAddress],
+                    direction="write",
                 ),
+                "creationState": creation_state,
+                "vatNumber": vat_number,
                 "metadata": metadata,
             },
             headers={
@@ -1232,89 +968,9 @@ class AsyncRawCustomersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Customer,
+                    PostCustomersResponse,
                     parse_obj_as(
-                        type_=Customer,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def delete(
-        self, customer_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[None]:
-        """
-        Parameters
-        ----------
-        customer_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[None]
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"customers/{jsonable_encoder(customer_id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return AsyncHttpResponse(response=_response, data=None)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def check_entitlement(
-        self,
-        customer_id: str,
-        *,
-        event_name: str,
-        view: typing.Optional[CustomersCheckEntitlementRequestView] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[CustomersCheckEntitlementResponse]:
-        """
-        Parameters
-        ----------
-        customer_id : str
-            The customer ID
-
-        event_name : str
-            The name of the usage event to check entitlement for
-
-        view : typing.Optional[CustomersCheckEntitlementRequestView]
-            Filter view - 'all' returns all entitlements regardless of status, 'active_only' returns only currently active entitlements with available credits
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[CustomersCheckEntitlementResponse]
-            Success response
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"customers/{jsonable_encoder(customer_id)}/entitlement",
-            method="GET",
-            params={
-                "event_name": event_name,
-                "view": view,
-            },
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    CustomersCheckEntitlementResponse,
-                    parse_obj_as(
-                        type_=CustomersCheckEntitlementResponse,  # type: ignore
+                        type_=PostCustomersResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1323,20 +979,31 @@ class AsyncRawCustomersClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        typing.Optional[typing.Any],
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
                 )
-            if _response.status_code == 404:
-                raise NotFoundError(
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        typing.Optional[typing.Any],
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1346,34 +1013,35 @@ class AsyncRawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_entitlements(
-        self, customer_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[typing.List[EntitlementUsage]]:
+    async def get_customer(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[GetCustomersIdResponse]:
         """
+        Get a customer by its ID
+
         Parameters
         ----------
-        customer_id : str
-            The customer ID
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[typing.List[EntitlementUsage]]
-            Success response
+        AsyncHttpResponse[GetCustomersIdResponse]
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"customers/{jsonable_encoder(customer_id)}/credit-bundles",
+            f"customers/{jsonable_encoder(id)}",
             method="GET",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[EntitlementUsage],
+                    GetCustomersIdResponse,
                     parse_obj_as(
-                        type_=typing.List[EntitlementUsage],  # type: ignore
+                        type_=GetCustomersIdResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1382,9 +1050,31 @@ class AsyncRawCustomersClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        typing.Optional[typing.Any],
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1394,10 +1084,222 @@ class AsyncRawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_by_external_id(
-        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[Customer]:
+    async def update_customer(
+        self,
+        id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        legal_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
+        phone: typing.Optional[str] = OMIT,
+        website: typing.Optional[str] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[PutCustomersIdRequestBillingAddress] = OMIT,
+        creation_state: typing.Optional[PutCustomersIdRequestCreationState] = OMIT,
+        churn_date: typing.Optional[dt.datetime] = OMIT,
+        vat_number: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[PutCustomersIdResponse]:
         """
+        Update a customer by its ID
+
+        Parameters
+        ----------
+        id : str
+
+        name : typing.Optional[str]
+
+        legal_name : typing.Optional[str]
+
+        email : typing.Optional[str]
+
+        phone : typing.Optional[str]
+
+        website : typing.Optional[str]
+
+        external_id : typing.Optional[str]
+
+        billing_address : typing.Optional[PutCustomersIdRequestBillingAddress]
+
+        creation_state : typing.Optional[PutCustomersIdRequestCreationState]
+
+        churn_date : typing.Optional[dt.datetime]
+
+        vat_number : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[PutCustomersIdResponse]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"customers/{jsonable_encoder(id)}",
+            method="PUT",
+            json={
+                "name": name,
+                "legalName": legal_name,
+                "email": email,
+                "phone": phone,
+                "website": website,
+                "externalId": external_id,
+                "billingAddress": convert_and_respect_annotation_metadata(
+                    object_=billing_address,
+                    annotation=typing.Optional[PutCustomersIdRequestBillingAddress],
+                    direction="write",
+                ),
+                "creationState": creation_state,
+                "churnDate": churn_date,
+                "vatNumber": vat_number,
+                "metadata": metadata,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    PutCustomersIdResponse,
+                    parse_obj_as(
+                        type_=PutCustomersIdResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def delete_customer(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[DeleteCustomersIdResponse]:
+        """
+        Delete a customer by its ID
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[DeleteCustomersIdResponse]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"customers/{jsonable_encoder(id)}",
+            method="DELETE",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    DeleteCustomersIdResponse,
+                    parse_obj_as(
+                        type_=DeleteCustomersIdResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def get_customer_by_external_id(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[GetCustomersExternalExternalIdResponse]:
+        """
+        Get a customer by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -1407,8 +1309,8 @@ class AsyncRawCustomersClient:
 
         Returns
         -------
-        AsyncHttpResponse[Customer]
-            Success response
+        AsyncHttpResponse[GetCustomersExternalExternalIdResponse]
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"customers/external/{jsonable_encoder(external_id)}",
@@ -1418,83 +1320,123 @@ class AsyncRawCustomersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Customer,
+                    GetCustomersExternalExternalIdResponse,
                     parse_obj_as(
-                        type_=Customer,  # type: ignore
+                        type_=GetCustomersExternalExternalIdResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_by_external_id(
+    async def update_customer_by_external_id(
         self,
-        external_id_: str,
+        external_id: str,
         *,
         name: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
+        legal_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
-        employee_count: typing.Optional[float] = OMIT,
-        annual_revenue: typing.Optional[float] = OMIT,
-        tax_exempt_status: typing.Optional[TaxExemptStatus] = OMIT,
-        creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[Address] = OMIT,
+        put_customers_external_external_id_request_external_id: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[PutCustomersExternalExternalIdRequestBillingAddress] = OMIT,
+        creation_state: typing.Optional[PutCustomersExternalExternalIdRequestCreationState] = OMIT,
+        churn_date: typing.Optional[dt.datetime] = OMIT,
+        vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Customer]:
+    ) -> AsyncHttpResponse[PutCustomersExternalExternalIdResponse]:
         """
+        Update a customer by its externalId
+
         Parameters
         ----------
-        external_id_ : str
+        external_id : str
 
         name : typing.Optional[str]
 
-        external_id : typing.Optional[str]
+        legal_name : typing.Optional[str]
+
+        email : typing.Optional[str]
 
         phone : typing.Optional[str]
 
-        employee_count : typing.Optional[float]
-
-        annual_revenue : typing.Optional[float]
-
-        tax_exempt_status : typing.Optional[TaxExemptStatus]
-
-        creation_source : typing.Optional[CreationSource]
-
         website : typing.Optional[str]
 
-        billing_address : typing.Optional[Address]
+        put_customers_external_external_id_request_external_id : typing.Optional[str]
+
+        billing_address : typing.Optional[PutCustomersExternalExternalIdRequestBillingAddress]
+
+        creation_state : typing.Optional[PutCustomersExternalExternalIdRequestCreationState]
+
+        churn_date : typing.Optional[dt.datetime]
+
+        vat_number : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Flexible JSON field for storing custom metadata about the customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[Customer]
-            Success response
+        AsyncHttpResponse[PutCustomersExternalExternalIdResponse]
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"customers/external/{jsonable_encoder(external_id_)}",
+            f"customers/external/{jsonable_encoder(external_id)}",
             method="PUT",
             json={
                 "name": name,
-                "externalId": external_id,
+                "legalName": legal_name,
+                "email": email,
                 "phone": phone,
-                "employeeCount": employee_count,
-                "annualRevenue": annual_revenue,
-                "taxExemptStatus": tax_exempt_status,
-                "creationSource": creation_source,
                 "website": website,
+                "externalId": put_customers_external_external_id_request_external_id,
                 "billingAddress": convert_and_respect_annotation_metadata(
-                    object_=billing_address, annotation=Address, direction="write"
+                    object_=billing_address,
+                    annotation=typing.Optional[PutCustomersExternalExternalIdRequestBillingAddress],
+                    direction="write",
                 ),
+                "creationState": creation_state,
+                "churnDate": churn_date,
+                "vatNumber": vat_number,
                 "metadata": metadata,
             },
             headers={
@@ -1506,22 +1448,68 @@ class AsyncRawCustomersClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Customer,
+                    PutCustomersExternalExternalIdResponse,
                     parse_obj_as(
-                        type_=Customer,  # type: ignore
+                        type_=PutCustomersExternalExternalIdResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Optional[typing.Any],
+                        parse_obj_as(
+                            type_=typing.Optional[typing.Any],  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_by_external_id(
+    async def delete_customer_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[None]:
+    ) -> AsyncHttpResponse[DeleteCustomersExternalExternalIdResponse]:
         """
+        Delete a customer by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -1531,7 +1519,8 @@ class AsyncRawCustomersClient:
 
         Returns
         -------
-        AsyncHttpResponse[None]
+        AsyncHttpResponse[DeleteCustomersExternalExternalIdResponse]
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"customers/external/{jsonable_encoder(external_id)}",
@@ -1540,232 +1529,10 @@ class AsyncRawCustomersClient:
         )
         try:
             if 200 <= _response.status_code < 300:
-                return AsyncHttpResponse(response=_response, data=None)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def get_costs_by_external_id(
-        self,
-        external_id: str,
-        *,
-        limit: typing.Optional[int] = None,
-        offset: typing.Optional[int] = None,
-        start_time: typing.Optional[dt.datetime] = None,
-        end_time: typing.Optional[dt.datetime] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[CostTracesResponse]:
-        """
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        limit : typing.Optional[int]
-            Maximum number of traces to return (1-1000)
-
-        offset : typing.Optional[int]
-            Number of traces to skip for pagination
-
-        start_time : typing.Optional[dt.datetime]
-            Filter traces starting from this time (ISO 8601 format)
-
-        end_time : typing.Optional[dt.datetime]
-            Filter traces up to this time (ISO 8601 format)
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[CostTracesResponse]
-            Success response
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"customers/external/{jsonable_encoder(external_id)}/costs",
-            method="GET",
-            params={
-                "limit": limit,
-                "offset": offset,
-                "startTime": serialize_datetime(start_time) if start_time is not None else None,
-                "endTime": serialize_datetime(end_time) if end_time is not None else None,
-            },
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    CostTracesResponse,
+                    DeleteCustomersExternalExternalIdResponse,
                     parse_obj_as(
-                        type_=CostTracesResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def get_usage_by_external_id(
-        self,
-        external_id: str,
-        *,
-        limit: typing.Optional[int] = None,
-        offset: typing.Optional[int] = None,
-        start_time: typing.Optional[dt.datetime] = None,
-        end_time: typing.Optional[dt.datetime] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[UsageSummariesResponse]:
-        """
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        limit : typing.Optional[int]
-            Maximum number of usage summaries to return (1-1000)
-
-        offset : typing.Optional[int]
-            Number of usage summaries to skip for pagination
-
-        start_time : typing.Optional[dt.datetime]
-            Filter usage summaries starting from this time (ISO 8601 format). Returns summaries that overlap with the time range.
-
-        end_time : typing.Optional[dt.datetime]
-            Filter usage summaries up to this time (ISO 8601 format). Returns summaries that overlap with the time range.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[UsageSummariesResponse]
-            Success response
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"customers/external/{jsonable_encoder(external_id)}/usage",
-            method="GET",
-            params={
-                "limit": limit,
-                "offset": offset,
-                "startTime": serialize_datetime(start_time) if start_time is not None else None,
-                "endTime": serialize_datetime(end_time) if end_time is not None else None,
-            },
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    UsageSummariesResponse,
-                    parse_obj_as(
-                        type_=UsageSummariesResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def list_payment_methods(
-        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[typing.List[PaymentMethod]]:
-        """
-        Retrieves all payment methods associated with a customer identified by their external ID.
-
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[typing.List[PaymentMethod]]
-            Success response
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"customers/external/{jsonable_encoder(external_id)}/payment-methods",
-            method="GET",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    typing.List[PaymentMethod],
-                    parse_obj_as(
-                        type_=typing.List[PaymentMethod],  # type: ignore
+                        type_=DeleteCustomersExternalExternalIdResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1774,9 +1541,9 @@ class AsyncRawCustomersClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        typing.Optional[typing.Any],
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1785,161 +1552,20 @@ class AsyncRawCustomersClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        typing.Optional[typing.Any],
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
                 )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def create_payment_method(
-        self,
-        external_id: str,
-        *,
-        confirmation_token: str,
-        return_url: str,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[PaymentMethod]:
-        """
-        Creates a new payment method for a customer using a Stripe confirmation token.
-
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        confirmation_token : str
-            Stripe confirmation token for the payment method
-
-        return_url : str
-            URL to redirect to after payment method setup
-
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Optional metadata to attach to the payment method
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[PaymentMethod]
-            Payment method created successfully
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"customers/external/{jsonable_encoder(external_id)}/payment-methods",
-            method="POST",
-            json={
-                "confirmationToken": confirmation_token,
-                "returnUrl": return_url,
-                "metadata": metadata,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    PaymentMethod,
-                    parse_obj_as(
-                        type_=PaymentMethod,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
+            if _response.status_code == 500:
+                raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        typing.Optional[typing.Any],
                         parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def delete_payment_method(
-        self, external_id: str, payment_method_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[None]:
-        """
-        Deletes a specific payment method from a customer's account.
-
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        payment_method_id : str
-            The ID of the payment method to delete
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[None]
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"customers/external/{jsonable_encoder(external_id)}/payment-methods/{jsonable_encoder(payment_method_id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return AsyncHttpResponse(response=_response, data=None)
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=typing.Optional[typing.Any],  # type: ignore
                             object_=_response.json(),
                         ),
                     ),

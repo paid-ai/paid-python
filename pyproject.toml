@@ -1,9 +1,9 @@
 [project]
-name = "paid-python"
+name = "paid"
 
 [tool.poetry]
-name = "paid-python"
-version = "1.0.0-alpha0"
+name = "paid"
+version = "0.0.0"
 description = ""
 readme = "README.md"
 authors = []

@@ -1,3 +1,3 @@
 from importlib import metadata
 
-__version__ = metadata.version("paid-python")
+__version__ = metadata.version("paid")

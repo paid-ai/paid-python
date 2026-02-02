@@ -2,6 +2,24 @@
 
 # isort: skip_file
 
-from .types import ProductCreateType
+from .types import (
+    GetProductsExternalExternalIdResponse,
+    GetProductsIdResponse,
+    GetProductsResponse,
+    GetProductsResponseDataItem,
+    GetProductsResponsePagination,
+    PostProductsResponse,
+    PutProductsExternalExternalIdResponse,
+    PutProductsIdResponse,
+)
 
-__all__ = ["ProductCreateType"]
+__all__ = [
+    "GetProductsExternalExternalIdResponse",
+    "GetProductsIdResponse",
+    "GetProductsResponse",
+    "GetProductsResponseDataItem",
+    "GetProductsResponsePagination",
+    "PostProductsResponse",
+    "PutProductsExternalExternalIdResponse",
+    "PutProductsIdResponse",
+]

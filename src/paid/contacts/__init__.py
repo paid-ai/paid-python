@@ -2,3 +2,46 @@
 
 # isort: skip_file
 
+from .types import (
+    DeleteContactsExternalExternalIdResponse,
+    DeleteContactsIdResponse,
+    GetContactsExternalExternalIdResponse,
+    GetContactsExternalExternalIdResponseBillingAddress,
+    GetContactsIdResponse,
+    GetContactsIdResponseBillingAddress,
+    GetContactsResponse,
+    GetContactsResponseDataItem,
+    GetContactsResponseDataItemBillingAddress,
+    GetContactsResponsePagination,
+    PostContactsRequestBillingAddress,
+    PostContactsResponse,
+    PostContactsResponseBillingAddress,
+    PutContactsExternalExternalIdRequestBillingAddress,
+    PutContactsExternalExternalIdResponse,
+    PutContactsExternalExternalIdResponseBillingAddress,
+    PutContactsIdRequestBillingAddress,
+    PutContactsIdResponse,
+    PutContactsIdResponseBillingAddress,
+)
+
+__all__ = [
+    "DeleteContactsExternalExternalIdResponse",
+    "DeleteContactsIdResponse",
+    "GetContactsExternalExternalIdResponse",
+    "GetContactsExternalExternalIdResponseBillingAddress",
+    "GetContactsIdResponse",
+    "GetContactsIdResponseBillingAddress",
+    "GetContactsResponse",
+    "GetContactsResponseDataItem",
+    "GetContactsResponseDataItemBillingAddress",
+    "GetContactsResponsePagination",
+    "PostContactsRequestBillingAddress",
+    "PostContactsResponse",
+    "PostContactsResponseBillingAddress",
+    "PutContactsExternalExternalIdRequestBillingAddress",
+    "PutContactsExternalExternalIdResponse",
+    "PutContactsExternalExternalIdResponseBillingAddress",
+    "PutContactsIdRequestBillingAddress",
+    "PutContactsIdResponse",
+    "PutContactsIdResponseBillingAddress",
+]

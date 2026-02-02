@@ -4,9 +4,20 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.contact import Contact
-from ..types.salutation import Salutation
 from .raw_client import AsyncRawContactsClient, RawContactsClient
+from .types.delete_contacts_external_external_id_response import DeleteContactsExternalExternalIdResponse
+from .types.delete_contacts_id_response import DeleteContactsIdResponse
+from .types.get_contacts_external_external_id_response import GetContactsExternalExternalIdResponse
+from .types.get_contacts_id_response import GetContactsIdResponse
+from .types.get_contacts_response import GetContactsResponse
+from .types.post_contacts_request_billing_address import PostContactsRequestBillingAddress
+from .types.post_contacts_response import PostContactsResponse
+from .types.put_contacts_external_external_id_request_billing_address import (
+    PutContactsExternalExternalIdRequestBillingAddress,
+)
+from .types.put_contacts_external_external_id_response import PutContactsExternalExternalIdResponse
+from .types.put_contacts_id_request_billing_address import PutContactsIdRequestBillingAddress
+from .types.put_contacts_id_response import PutContactsIdResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -27,17 +38,29 @@ class ContactsClient:
         """
         return self._raw_client
 
-    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[Contact]:
+    def list_contacts(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> GetContactsResponse:
         """
+        Get a list of contacts for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        typing.List[Contact]
-            Success response
+        GetContactsResponse
+            200
 
         Examples
         --------
@@ -46,33 +69,29 @@ class ContactsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.contacts.list()
+        client.contacts.list_contacts()
         """
-        _response = self._raw_client.list(request_options=request_options)
+        _response = self._raw_client.list_contacts(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    def create(
+    def create_a_new_contact(
         self,
         *,
-        salutation: Salutation,
+        customer_id: str,
         first_name: str,
         last_name: str,
         email: str,
-        external_id: typing.Optional[str] = OMIT,
-        customer_id: typing.Optional[str] = OMIT,
-        customer_external_id: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
-        billing_street: typing.Optional[str] = OMIT,
-        billing_city: typing.Optional[str] = OMIT,
-        billing_state_province: typing.Optional[str] = OMIT,
-        billing_country: typing.Optional[str] = OMIT,
-        billing_postal_code: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[PostContactsRequestBillingAddress] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Contact:
+    ) -> PostContactsResponse:
         """
+        Creates a new contact for the organization
+
         Parameters
         ----------
-        salutation : Salutation
+        customer_id : str
 
         first_name : str
 
@@ -80,31 +99,19 @@ class ContactsClient:
 
         email : str
 
-        external_id : typing.Optional[str]
-
-        customer_id : typing.Optional[str]
-
-        customer_external_id : typing.Optional[str]
-
         phone : typing.Optional[str]
 
-        billing_street : typing.Optional[str]
+        billing_address : typing.Optional[PostContactsRequestBillingAddress]
 
-        billing_city : typing.Optional[str]
-
-        billing_state_province : typing.Optional[str]
-
-        billing_country : typing.Optional[str]
-
-        billing_postal_code : typing.Optional[str]
+        external_id : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Contact
-            Success response
+        PostContactsResponse
+            201
 
         Examples
         --------
@@ -113,45 +120,40 @@ class ContactsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.contacts.create(
-            customer_external_id="acme-inc",
-            salutation="Mr.",
-            first_name="John",
-            last_name="Doe",
-            email="john.doe@example.com",
+        client.contacts.create_a_new_contact(
+            customer_id="customerId",
+            first_name="firstName",
+            last_name="lastName",
+            email="email",
         )
         """
-        _response = self._raw_client.create(
-            salutation=salutation,
+        _response = self._raw_client.create_a_new_contact(
+            customer_id=customer_id,
             first_name=first_name,
             last_name=last_name,
             email=email,
-            external_id=external_id,
-            customer_id=customer_id,
-            customer_external_id=customer_external_id,
             phone=phone,
-            billing_street=billing_street,
-            billing_city=billing_city,
-            billing_state_province=billing_state_province,
-            billing_country=billing_country,
-            billing_postal_code=billing_postal_code,
+            billing_address=billing_address,
+            external_id=external_id,
             request_options=request_options,
         )
         return _response.data
 
-    def get(self, contact_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Contact:
+    def get_contact(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GetContactsIdResponse:
         """
+        Get a contact by its ID
+
         Parameters
         ----------
-        contact_id : str
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Contact
-            Success response
+        GetContactsIdResponse
+            200
 
         Examples
         --------
@@ -160,25 +162,54 @@ class ContactsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.contacts.get(
-            contact_id="contactId",
+        client.contacts.get_contact(
+            id="id",
         )
         """
-        _response = self._raw_client.get(contact_id, request_options=request_options)
+        _response = self._raw_client.get_contact(id, request_options=request_options)
         return _response.data
 
-    def delete(self, contact_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> None:
+    def update_contact(
+        self,
+        id: str,
+        *,
+        customer_id: typing.Optional[str] = OMIT,
+        first_name: typing.Optional[str] = OMIT,
+        last_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
+        phone: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[PutContactsIdRequestBillingAddress] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> PutContactsIdResponse:
         """
+        Update a contact by its ID
+
         Parameters
         ----------
-        contact_id : str
+        id : str
+
+        customer_id : typing.Optional[str]
+
+        first_name : typing.Optional[str]
+
+        last_name : typing.Optional[str]
+
+        email : typing.Optional[str]
+
+        phone : typing.Optional[str]
+
+        billing_address : typing.Optional[PutContactsIdRequestBillingAddress]
+
+        external_id : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        None
+        PutContactsIdResponse
+            200
 
         Examples
         --------
@@ -187,17 +218,61 @@ class ContactsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.contacts.delete(
-            contact_id="contactId",
+        client.contacts.update_contact(
+            id="id",
         )
         """
-        _response = self._raw_client.delete(contact_id, request_options=request_options)
+        _response = self._raw_client.update_contact(
+            id,
+            customer_id=customer_id,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone=phone,
+            billing_address=billing_address,
+            external_id=external_id,
+            request_options=request_options,
+        )
         return _response.data
 
-    def get_by_external_id(
+    def delete_contact(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> DeleteContactsIdResponse:
+        """
+        Delete a contact by its ID
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DeleteContactsIdResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.contacts.delete_contact(
+            id="id",
+        )
+        """
+        _response = self._raw_client.delete_contact(id, request_options=request_options)
+        return _response.data
+
+    def get_contact_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> Contact:
+    ) -> GetContactsExternalExternalIdResponse:
         """
+        Get a contact by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -207,8 +282,8 @@ class ContactsClient:
 
         Returns
         -------
-        Contact
-            Success response
+        GetContactsExternalExternalIdResponse
+            200
 
         Examples
         --------
@@ -217,17 +292,85 @@ class ContactsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.contacts.get_by_external_id(
+        client.contacts.get_contact_by_external_id(
             external_id="externalId",
         )
         """
-        _response = self._raw_client.get_by_external_id(external_id, request_options=request_options)
+        _response = self._raw_client.get_contact_by_external_id(external_id, request_options=request_options)
         return _response.data
 
-    def delete_by_external_id(
-        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> None:
+    def update_contact_by_external_id(
+        self,
+        external_id: str,
+        *,
+        customer_id: typing.Optional[str] = OMIT,
+        first_name: typing.Optional[str] = OMIT,
+        last_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
+        phone: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[PutContactsExternalExternalIdRequestBillingAddress] = OMIT,
+        put_contacts_external_external_id_request_external_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> PutContactsExternalExternalIdResponse:
         """
+        Update a contact by its externalId
+
+        Parameters
+        ----------
+        external_id : str
+
+        customer_id : typing.Optional[str]
+
+        first_name : typing.Optional[str]
+
+        last_name : typing.Optional[str]
+
+        email : typing.Optional[str]
+
+        phone : typing.Optional[str]
+
+        billing_address : typing.Optional[PutContactsExternalExternalIdRequestBillingAddress]
+
+        put_contacts_external_external_id_request_external_id : typing.Optional[str]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        PutContactsExternalExternalIdResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.contacts.update_contact_by_external_id(
+            external_id="externalId",
+        )
+        """
+        _response = self._raw_client.update_contact_by_external_id(
+            external_id,
+            customer_id=customer_id,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone=phone,
+            billing_address=billing_address,
+            put_contacts_external_external_id_request_external_id=put_contacts_external_external_id_request_external_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def delete_contact_by_external_id(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> DeleteContactsExternalExternalIdResponse:
+        """
+        Delete a contact by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -237,7 +380,8 @@ class ContactsClient:
 
         Returns
         -------
-        None
+        DeleteContactsExternalExternalIdResponse
+            200
 
         Examples
         --------
@@ -246,11 +390,11 @@ class ContactsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.contacts.delete_by_external_id(
+        client.contacts.delete_contact_by_external_id(
             external_id="externalId",
         )
         """
-        _response = self._raw_client.delete_by_external_id(external_id, request_options=request_options)
+        _response = self._raw_client.delete_contact_by_external_id(external_id, request_options=request_options)
         return _response.data
 
 
@@ -269,17 +413,29 @@ class AsyncContactsClient:
         """
         return self._raw_client
 
-    async def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[Contact]:
+    async def list_contacts(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> GetContactsResponse:
         """
+        Get a list of contacts for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        typing.List[Contact]
-            Success response
+        GetContactsResponse
+            200
 
         Examples
         --------
@@ -293,36 +449,32 @@ class AsyncContactsClient:
 
 
         async def main() -> None:
-            await client.contacts.list()
+            await client.contacts.list_contacts()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list(request_options=request_options)
+        _response = await self._raw_client.list_contacts(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    async def create(
+    async def create_a_new_contact(
         self,
         *,
-        salutation: Salutation,
+        customer_id: str,
         first_name: str,
         last_name: str,
         email: str,
-        external_id: typing.Optional[str] = OMIT,
-        customer_id: typing.Optional[str] = OMIT,
-        customer_external_id: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
-        billing_street: typing.Optional[str] = OMIT,
-        billing_city: typing.Optional[str] = OMIT,
-        billing_state_province: typing.Optional[str] = OMIT,
-        billing_country: typing.Optional[str] = OMIT,
-        billing_postal_code: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[PostContactsRequestBillingAddress] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Contact:
+    ) -> PostContactsResponse:
         """
+        Creates a new contact for the organization
+
         Parameters
         ----------
-        salutation : Salutation
+        customer_id : str
 
         first_name : str
 
@@ -330,31 +482,19 @@ class AsyncContactsClient:
 
         email : str
 
-        external_id : typing.Optional[str]
-
-        customer_id : typing.Optional[str]
-
-        customer_external_id : typing.Optional[str]
-
         phone : typing.Optional[str]
 
-        billing_street : typing.Optional[str]
+        billing_address : typing.Optional[PostContactsRequestBillingAddress]
 
-        billing_city : typing.Optional[str]
-
-        billing_state_province : typing.Optional[str]
-
-        billing_country : typing.Optional[str]
-
-        billing_postal_code : typing.Optional[str]
+        external_id : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Contact
-            Success response
+        PostContactsResponse
+            201
 
         Examples
         --------
@@ -368,48 +508,45 @@ class AsyncContactsClient:
 
 
         async def main() -> None:
-            await client.contacts.create(
-                customer_external_id="acme-inc",
-                salutation="Mr.",
-                first_name="John",
-                last_name="Doe",
-                email="john.doe@example.com",
+            await client.contacts.create_a_new_contact(
+                customer_id="customerId",
+                first_name="firstName",
+                last_name="lastName",
+                email="email",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create(
-            salutation=salutation,
+        _response = await self._raw_client.create_a_new_contact(
+            customer_id=customer_id,
             first_name=first_name,
             last_name=last_name,
             email=email,
-            external_id=external_id,
-            customer_id=customer_id,
-            customer_external_id=customer_external_id,
             phone=phone,
-            billing_street=billing_street,
-            billing_city=billing_city,
-            billing_state_province=billing_state_province,
-            billing_country=billing_country,
-            billing_postal_code=billing_postal_code,
+            billing_address=billing_address,
+            external_id=external_id,
             request_options=request_options,
         )
         return _response.data
 
-    async def get(self, contact_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Contact:
+    async def get_contact(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> GetContactsIdResponse:
         """
+        Get a contact by its ID
+
         Parameters
         ----------
-        contact_id : str
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Contact
-            Success response
+        GetContactsIdResponse
+            200
 
         Examples
         --------
@@ -423,28 +560,57 @@ class AsyncContactsClient:
 
 
         async def main() -> None:
-            await client.contacts.get(
-                contact_id="contactId",
+            await client.contacts.get_contact(
+                id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get(contact_id, request_options=request_options)
+        _response = await self._raw_client.get_contact(id, request_options=request_options)
         return _response.data
 
-    async def delete(self, contact_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> None:
+    async def update_contact(
+        self,
+        id: str,
+        *,
+        customer_id: typing.Optional[str] = OMIT,
+        first_name: typing.Optional[str] = OMIT,
+        last_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
+        phone: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[PutContactsIdRequestBillingAddress] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> PutContactsIdResponse:
         """
+        Update a contact by its ID
+
         Parameters
         ----------
-        contact_id : str
+        id : str
+
+        customer_id : typing.Optional[str]
+
+        first_name : typing.Optional[str]
+
+        last_name : typing.Optional[str]
+
+        email : typing.Optional[str]
+
+        phone : typing.Optional[str]
+
+        billing_address : typing.Optional[PutContactsIdRequestBillingAddress]
+
+        external_id : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        None
+        PutContactsIdResponse
+            200
 
         Examples
         --------
@@ -458,20 +624,72 @@ class AsyncContactsClient:
 
 
         async def main() -> None:
-            await client.contacts.delete(
-                contact_id="contactId",
+            await client.contacts.update_contact(
+                id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete(contact_id, request_options=request_options)
+        _response = await self._raw_client.update_contact(
+            id,
+            customer_id=customer_id,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone=phone,
+            billing_address=billing_address,
+            external_id=external_id,
+            request_options=request_options,
+        )
         return _response.data
 
-    async def get_by_external_id(
+    async def delete_contact(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> DeleteContactsIdResponse:
+        """
+        Delete a contact by its ID
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DeleteContactsIdResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.contacts.delete_contact(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.delete_contact(id, request_options=request_options)
+        return _response.data
+
+    async def get_contact_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> Contact:
+    ) -> GetContactsExternalExternalIdResponse:
         """
+        Get a contact by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -481,8 +699,8 @@ class AsyncContactsClient:
 
         Returns
         -------
-        Contact
-            Success response
+        GetContactsExternalExternalIdResponse
+            200
 
         Examples
         --------
@@ -496,20 +714,96 @@ class AsyncContactsClient:
 
 
         async def main() -> None:
-            await client.contacts.get_by_external_id(
+            await client.contacts.get_contact_by_external_id(
                 external_id="externalId",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_by_external_id(external_id, request_options=request_options)
+        _response = await self._raw_client.get_contact_by_external_id(external_id, request_options=request_options)
         return _response.data
 
-    async def delete_by_external_id(
-        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> None:
+    async def update_contact_by_external_id(
+        self,
+        external_id: str,
+        *,
+        customer_id: typing.Optional[str] = OMIT,
+        first_name: typing.Optional[str] = OMIT,
+        last_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
+        phone: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[PutContactsExternalExternalIdRequestBillingAddress] = OMIT,
+        put_contacts_external_external_id_request_external_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> PutContactsExternalExternalIdResponse:
         """
+        Update a contact by its externalId
+
+        Parameters
+        ----------
+        external_id : str
+
+        customer_id : typing.Optional[str]
+
+        first_name : typing.Optional[str]
+
+        last_name : typing.Optional[str]
+
+        email : typing.Optional[str]
+
+        phone : typing.Optional[str]
+
+        billing_address : typing.Optional[PutContactsExternalExternalIdRequestBillingAddress]
+
+        put_contacts_external_external_id_request_external_id : typing.Optional[str]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        PutContactsExternalExternalIdResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.contacts.update_contact_by_external_id(
+                external_id="externalId",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.update_contact_by_external_id(
+            external_id,
+            customer_id=customer_id,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone=phone,
+            billing_address=billing_address,
+            put_contacts_external_external_id_request_external_id=put_contacts_external_external_id_request_external_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def delete_contact_by_external_id(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> DeleteContactsExternalExternalIdResponse:
+        """
+        Delete a contact by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -519,7 +813,8 @@ class AsyncContactsClient:
 
         Returns
         -------
-        None
+        DeleteContactsExternalExternalIdResponse
+            200
 
         Examples
         --------
@@ -533,12 +828,12 @@ class AsyncContactsClient:
 
 
         async def main() -> None:
-            await client.contacts.delete_by_external_id(
+            await client.contacts.delete_contact_by_external_id(
                 external_id="externalId",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_by_external_id(external_id, request_options=request_options)
+        _response = await self._raw_client.delete_contact_by_external_id(external_id, request_options=request_options)
         return _response.data
