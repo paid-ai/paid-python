@@ -2,4 +2,6 @@
 
 import typing
 
-InvoiceStatus = typing.Union[typing.Literal["draft", "open", "paid", "void", "uncollectible"], typing.Any]
+InvoiceStatus = typing.Union[
+    typing.Literal["building", "draft", "pending", "posted", "voided", "canceled", "error"], typing.Any
+]

@@ -5,18 +5,12 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.address import Address
-from ..types.contact_create_for_customer import ContactCreateForCustomer
-from ..types.cost_traces_response import CostTracesResponse
-from ..types.creation_source import CreationSource
 from ..types.customer import Customer
-from ..types.entitlement_usage import EntitlementUsage
-from ..types.payment_method import PaymentMethod
-from ..types.tax_exempt_status import TaxExemptStatus
-from ..types.usage_summaries_response import UsageSummariesResponse
+from ..types.customer_billing_address import CustomerBillingAddress
+from ..types.customer_creation_state import CustomerCreationState
+from ..types.customer_list_response import CustomerListResponse
+from ..types.empty_response import EmptyResponse
 from .raw_client import AsyncRawCustomersClient, RawCustomersClient
-from .types.customers_check_entitlement_request_view import CustomersCheckEntitlementRequestView
-from .types.customers_check_entitlement_response import CustomersCheckEntitlementResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -37,17 +31,29 @@ class CustomersClient:
         """
         return self._raw_client
 
-    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[Customer]:
+    def list_customers(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerListResponse:
         """
+        Get a list of customers for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        typing.List[Customer]
-            Success response
+        CustomerListResponse
+            200
 
         Examples
         --------
@@ -56,53 +62,50 @@ class CustomersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.customers.list()
+        client.customers.list_customers()
         """
-        _response = self._raw_client.list(request_options=request_options)
+        _response = self._raw_client.list_customers(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    def create(
+    def create_a_new_customer(
         self,
         *,
         name: str,
-        external_id: typing.Optional[str] = OMIT,
+        legal_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
-        employee_count: typing.Optional[float] = OMIT,
-        annual_revenue: typing.Optional[float] = OMIT,
-        tax_exempt_status: typing.Optional[TaxExemptStatus] = OMIT,
-        creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[Address] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        creation_state: typing.Optional[CustomerCreationState] = OMIT,
+        vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
-        contacts: typing.Optional[typing.Sequence[ContactCreateForCustomer]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
+        Creates a new customer for the organization
+
         Parameters
         ----------
         name : str
 
-        external_id : typing.Optional[str]
+        legal_name : typing.Optional[str]
+
+        email : typing.Optional[str]
 
         phone : typing.Optional[str]
 
-        employee_count : typing.Optional[float]
-
-        annual_revenue : typing.Optional[float]
-
-        tax_exempt_status : typing.Optional[TaxExemptStatus]
-
-        creation_source : typing.Optional[CreationSource]
-
         website : typing.Optional[str]
 
-        billing_address : typing.Optional[Address]
+        external_id : typing.Optional[str]
+
+        billing_address : typing.Optional[CustomerBillingAddress]
+
+        creation_state : typing.Optional[CustomerCreationState]
+
+        vat_number : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Flexible JSON field for storing custom metadata about the customer
-
-        contacts : typing.Optional[typing.Sequence[ContactCreateForCustomer]]
-            Array of contacts to create for this customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -110,64 +113,7 @@ class CustomersClient:
         Returns
         -------
         Customer
-            Success response - customer already exists with this externalId
-
-        Examples
-        --------
-        from paid import ContactCreateForCustomer, Paid
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.customers.create(
-            name="Acme, Inc.",
-            external_id="acme-inc",
-            contacts=[
-                ContactCreateForCustomer(
-                    salutation="Mr.",
-                    first_name="John",
-                    last_name="Doe",
-                    account_name="Acme, Inc.",
-                    email="john.doe@acme.com",
-                    phone="+1-555-0100",
-                    billing_street="123 Main Street",
-                    billing_city="San Francisco",
-                    billing_state_province="CA",
-                    billing_country="USA",
-                    billing_postal_code="94102",
-                )
-            ],
-        )
-        """
-        _response = self._raw_client.create(
-            name=name,
-            external_id=external_id,
-            phone=phone,
-            employee_count=employee_count,
-            annual_revenue=annual_revenue,
-            tax_exempt_status=tax_exempt_status,
-            creation_source=creation_source,
-            website=website,
-            billing_address=billing_address,
-            metadata=metadata,
-            contacts=contacts,
-            request_options=request_options,
-        )
-        return _response.data
-
-    def get(self, customer_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Customer:
-        """
-        Parameters
-        ----------
-        customer_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        Customer
-            Success response
+            201
 
         Examples
         --------
@@ -176,54 +122,100 @@ class CustomersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.customers.get(
-            customer_id="customerId",
+        client.customers.create_a_new_customer(
+            name="name",
         )
         """
-        _response = self._raw_client.get(customer_id, request_options=request_options)
+        _response = self._raw_client.create_a_new_customer(
+            name=name,
+            legal_name=legal_name,
+            email=email,
+            phone=phone,
+            website=website,
+            external_id=external_id,
+            billing_address=billing_address,
+            creation_state=creation_state,
+            vat_number=vat_number,
+            metadata=metadata,
+            request_options=request_options,
+        )
         return _response.data
 
-    def update(
+    def get_customer(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Customer:
+        """
+        Get a customer by its ID
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Customer
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.get_customer(
+            id="id",
+        )
+        """
+        _response = self._raw_client.get_customer(id, request_options=request_options)
+        return _response.data
+
+    def update_customer(
         self,
-        customer_id: str,
+        id: str,
         *,
         name: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
+        legal_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
-        employee_count: typing.Optional[float] = OMIT,
-        annual_revenue: typing.Optional[float] = OMIT,
-        tax_exempt_status: typing.Optional[TaxExemptStatus] = OMIT,
-        creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[Address] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        creation_state: typing.Optional[CustomerCreationState] = OMIT,
+        churn_date: typing.Optional[dt.datetime] = OMIT,
+        vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
+        Update a customer by its ID
+
         Parameters
         ----------
-        customer_id : str
+        id : str
 
         name : typing.Optional[str]
 
-        external_id : typing.Optional[str]
+        legal_name : typing.Optional[str]
+
+        email : typing.Optional[str]
 
         phone : typing.Optional[str]
 
-        employee_count : typing.Optional[float]
-
-        annual_revenue : typing.Optional[float]
-
-        tax_exempt_status : typing.Optional[TaxExemptStatus]
-
-        creation_source : typing.Optional[CreationSource]
-
         website : typing.Optional[str]
 
-        billing_address : typing.Optional[Address]
+        external_id : typing.Optional[str]
+
+        billing_address : typing.Optional[CustomerBillingAddress]
+
+        creation_state : typing.Optional[CustomerCreationState]
+
+        churn_date : typing.Optional[dt.datetime]
+
+        vat_number : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Flexible JSON field for storing custom metadata about the customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -231,7 +223,7 @@ class CustomersClient:
         Returns
         -------
         Customer
-            Customer updated successfully
+            200
 
         Examples
         --------
@@ -240,42 +232,42 @@ class CustomersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.customers.update(
-            customer_id="customerId",
-            name="Acme, Inc. (Updated)",
-            phone="123-456-7890",
-            employee_count=101.0,
-            annual_revenue=1000001.0,
+        client.customers.update_customer(
+            id="id",
         )
         """
-        _response = self._raw_client.update(
-            customer_id,
+        _response = self._raw_client.update_customer(
+            id,
             name=name,
-            external_id=external_id,
+            legal_name=legal_name,
+            email=email,
             phone=phone,
-            employee_count=employee_count,
-            annual_revenue=annual_revenue,
-            tax_exempt_status=tax_exempt_status,
-            creation_source=creation_source,
             website=website,
+            external_id=external_id,
             billing_address=billing_address,
+            creation_state=creation_state,
+            churn_date=churn_date,
+            vat_number=vat_number,
             metadata=metadata,
             request_options=request_options,
         )
         return _response.data
 
-    def delete(self, customer_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> None:
+    def delete_customer(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> EmptyResponse:
         """
+        Delete a customer by its ID
+
         Parameters
         ----------
-        customer_id : str
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        None
+        EmptyResponse
+            200
 
         Examples
         --------
@@ -284,94 +276,19 @@ class CustomersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.customers.delete(
-            customer_id="customerId",
+        client.customers.delete_customer(
+            id="id",
         )
         """
-        _response = self._raw_client.delete(customer_id, request_options=request_options)
+        _response = self._raw_client.delete_customer(id, request_options=request_options)
         return _response.data
 
-    def check_entitlement(
-        self,
-        customer_id: str,
-        *,
-        event_name: str,
-        view: typing.Optional[CustomersCheckEntitlementRequestView] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> CustomersCheckEntitlementResponse:
-        """
-        Parameters
-        ----------
-        customer_id : str
-            The customer ID
-
-        event_name : str
-            The name of the usage event to check entitlement for
-
-        view : typing.Optional[CustomersCheckEntitlementRequestView]
-            Filter view - 'all' returns all entitlements regardless of status, 'active_only' returns only currently active entitlements with available credits
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        CustomersCheckEntitlementResponse
-            Success response
-
-        Examples
-        --------
-        from paid import Paid
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.customers.check_entitlement(
-            customer_id="customerId",
-            event_name="event_name",
-            view="all",
-        )
-        """
-        _response = self._raw_client.check_entitlement(
-            customer_id, event_name=event_name, view=view, request_options=request_options
-        )
-        return _response.data
-
-    def get_entitlements(
-        self, customer_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> typing.List[EntitlementUsage]:
-        """
-        Parameters
-        ----------
-        customer_id : str
-            The customer ID
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        typing.List[EntitlementUsage]
-            Success response
-
-        Examples
-        --------
-        from paid import Paid
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.customers.get_entitlements(
-            customer_id="customerId",
-        )
-        """
-        _response = self._raw_client.get_entitlements(customer_id, request_options=request_options)
-        return _response.data
-
-    def get_by_external_id(
+    def get_customer_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Customer:
         """
+        Get a customer by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -382,7 +299,7 @@ class CustomersClient:
         Returns
         -------
         Customer
-            Success response
+            200
 
         Examples
         --------
@@ -391,54 +308,58 @@ class CustomersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.customers.get_by_external_id(
+        client.customers.get_customer_by_external_id(
             external_id="externalId",
         )
         """
-        _response = self._raw_client.get_by_external_id(external_id, request_options=request_options)
+        _response = self._raw_client.get_customer_by_external_id(external_id, request_options=request_options)
         return _response.data
 
-    def update_by_external_id(
+    def update_customer_by_external_id(
         self,
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
+        legal_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
-        employee_count: typing.Optional[float] = OMIT,
-        annual_revenue: typing.Optional[float] = OMIT,
-        tax_exempt_status: typing.Optional[TaxExemptStatus] = OMIT,
-        creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[Address] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        creation_state: typing.Optional[CustomerCreationState] = OMIT,
+        churn_date: typing.Optional[dt.datetime] = OMIT,
+        vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
+        Update a customer by its externalId
+
         Parameters
         ----------
         external_id_ : str
 
         name : typing.Optional[str]
 
-        external_id : typing.Optional[str]
+        legal_name : typing.Optional[str]
+
+        email : typing.Optional[str]
 
         phone : typing.Optional[str]
 
-        employee_count : typing.Optional[float]
-
-        annual_revenue : typing.Optional[float]
-
-        tax_exempt_status : typing.Optional[TaxExemptStatus]
-
-        creation_source : typing.Optional[CreationSource]
-
         website : typing.Optional[str]
 
-        billing_address : typing.Optional[Address]
+        external_id : typing.Optional[str]
+
+        billing_address : typing.Optional[CustomerBillingAddress]
+
+        creation_state : typing.Optional[CustomerCreationState]
+
+        churn_date : typing.Optional[dt.datetime]
+
+        vat_number : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Flexible JSON field for storing custom metadata about the customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -446,7 +367,7 @@ class CustomersClient:
         Returns
         -------
         Customer
-            Success response
+            200
 
         Examples
         --------
@@ -455,30 +376,33 @@ class CustomersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.customers.update_by_external_id(
+        client.customers.update_customer_by_external_id(
             external_id_="externalId",
         )
         """
-        _response = self._raw_client.update_by_external_id(
+        _response = self._raw_client.update_customer_by_external_id(
             external_id_,
             name=name,
-            external_id=external_id,
+            legal_name=legal_name,
+            email=email,
             phone=phone,
-            employee_count=employee_count,
-            annual_revenue=annual_revenue,
-            tax_exempt_status=tax_exempt_status,
-            creation_source=creation_source,
             website=website,
+            external_id=external_id,
             billing_address=billing_address,
+            creation_state=creation_state,
+            churn_date=churn_date,
+            vat_number=vat_number,
             metadata=metadata,
             request_options=request_options,
         )
         return _response.data
 
-    def delete_by_external_id(
+    def delete_customer_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> None:
+    ) -> EmptyResponse:
         """
+        Delete a customer by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -488,7 +412,8 @@ class CustomersClient:
 
         Returns
         -------
-        None
+        EmptyResponse
+            200
 
         Examples
         --------
@@ -497,273 +422,11 @@ class CustomersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.customers.delete_by_external_id(
+        client.customers.delete_customer_by_external_id(
             external_id="externalId",
         )
         """
-        _response = self._raw_client.delete_by_external_id(external_id, request_options=request_options)
-        return _response.data
-
-    def get_costs_by_external_id(
-        self,
-        external_id: str,
-        *,
-        limit: typing.Optional[int] = None,
-        offset: typing.Optional[int] = None,
-        start_time: typing.Optional[dt.datetime] = None,
-        end_time: typing.Optional[dt.datetime] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> CostTracesResponse:
-        """
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        limit : typing.Optional[int]
-            Maximum number of traces to return (1-1000)
-
-        offset : typing.Optional[int]
-            Number of traces to skip for pagination
-
-        start_time : typing.Optional[dt.datetime]
-            Filter traces starting from this time (ISO 8601 format)
-
-        end_time : typing.Optional[dt.datetime]
-            Filter traces up to this time (ISO 8601 format)
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        CostTracesResponse
-            Success response
-
-        Examples
-        --------
-        import datetime
-
-        from paid import Paid
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.customers.get_costs_by_external_id(
-            external_id="externalId",
-            limit=1,
-            offset=1,
-            start_time=datetime.datetime.fromisoformat(
-                "2024-01-15 09:30:00+00:00",
-            ),
-            end_time=datetime.datetime.fromisoformat(
-                "2024-01-15 09:30:00+00:00",
-            ),
-        )
-        """
-        _response = self._raw_client.get_costs_by_external_id(
-            external_id,
-            limit=limit,
-            offset=offset,
-            start_time=start_time,
-            end_time=end_time,
-            request_options=request_options,
-        )
-        return _response.data
-
-    def get_usage_by_external_id(
-        self,
-        external_id: str,
-        *,
-        limit: typing.Optional[int] = None,
-        offset: typing.Optional[int] = None,
-        start_time: typing.Optional[dt.datetime] = None,
-        end_time: typing.Optional[dt.datetime] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> UsageSummariesResponse:
-        """
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        limit : typing.Optional[int]
-            Maximum number of usage summaries to return (1-1000)
-
-        offset : typing.Optional[int]
-            Number of usage summaries to skip for pagination
-
-        start_time : typing.Optional[dt.datetime]
-            Filter usage summaries starting from this time (ISO 8601 format). Returns summaries that overlap with the time range.
-
-        end_time : typing.Optional[dt.datetime]
-            Filter usage summaries up to this time (ISO 8601 format). Returns summaries that overlap with the time range.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        UsageSummariesResponse
-            Success response
-
-        Examples
-        --------
-        import datetime
-
-        from paid import Paid
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.customers.get_usage_by_external_id(
-            external_id="externalId",
-            limit=1,
-            offset=1,
-            start_time=datetime.datetime.fromisoformat(
-                "2024-01-15 09:30:00+00:00",
-            ),
-            end_time=datetime.datetime.fromisoformat(
-                "2024-01-15 09:30:00+00:00",
-            ),
-        )
-        """
-        _response = self._raw_client.get_usage_by_external_id(
-            external_id,
-            limit=limit,
-            offset=offset,
-            start_time=start_time,
-            end_time=end_time,
-            request_options=request_options,
-        )
-        return _response.data
-
-    def list_payment_methods(
-        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> typing.List[PaymentMethod]:
-        """
-        Retrieves all payment methods associated with a customer identified by their external ID.
-
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        typing.List[PaymentMethod]
-            Success response
-
-        Examples
-        --------
-        from paid import Paid
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.customers.list_payment_methods(
-            external_id="externalId",
-        )
-        """
-        _response = self._raw_client.list_payment_methods(external_id, request_options=request_options)
-        return _response.data
-
-    def create_payment_method(
-        self,
-        external_id: str,
-        *,
-        confirmation_token: str,
-        return_url: str,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> PaymentMethod:
-        """
-        Creates a new payment method for a customer using a Stripe confirmation token.
-
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        confirmation_token : str
-            Stripe confirmation token for the payment method
-
-        return_url : str
-            URL to redirect to after payment method setup
-
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Optional metadata to attach to the payment method
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        PaymentMethod
-            Payment method created successfully
-
-        Examples
-        --------
-        from paid import Paid
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.customers.create_payment_method(
-            external_id="externalId",
-            confirmation_token="ctoken_1234567890",
-            return_url="https://example.com/payment-method-added",
-            metadata={"source": "api"},
-        )
-        """
-        _response = self._raw_client.create_payment_method(
-            external_id,
-            confirmation_token=confirmation_token,
-            return_url=return_url,
-            metadata=metadata,
-            request_options=request_options,
-        )
-        return _response.data
-
-    def delete_payment_method(
-        self, external_id: str, payment_method_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> None:
-        """
-        Deletes a specific payment method from a customer's account.
-
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        payment_method_id : str
-            The ID of the payment method to delete
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        from paid import Paid
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.customers.delete_payment_method(
-            external_id="externalId",
-            payment_method_id="paymentMethodId",
-        )
-        """
-        _response = self._raw_client.delete_payment_method(
-            external_id, payment_method_id, request_options=request_options
-        )
+        _response = self._raw_client.delete_customer_by_external_id(external_id, request_options=request_options)
         return _response.data
 
 
@@ -782,17 +445,29 @@ class AsyncCustomersClient:
         """
         return self._raw_client
 
-    async def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[Customer]:
+    async def list_customers(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerListResponse:
         """
+        Get a list of customers for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        typing.List[Customer]
-            Success response
+        CustomerListResponse
+            200
 
         Examples
         --------
@@ -806,56 +481,53 @@ class AsyncCustomersClient:
 
 
         async def main() -> None:
-            await client.customers.list()
+            await client.customers.list_customers()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list(request_options=request_options)
+        _response = await self._raw_client.list_customers(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    async def create(
+    async def create_a_new_customer(
         self,
         *,
         name: str,
-        external_id: typing.Optional[str] = OMIT,
+        legal_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
-        employee_count: typing.Optional[float] = OMIT,
-        annual_revenue: typing.Optional[float] = OMIT,
-        tax_exempt_status: typing.Optional[TaxExemptStatus] = OMIT,
-        creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[Address] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        creation_state: typing.Optional[CustomerCreationState] = OMIT,
+        vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
-        contacts: typing.Optional[typing.Sequence[ContactCreateForCustomer]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
+        Creates a new customer for the organization
+
         Parameters
         ----------
         name : str
 
-        external_id : typing.Optional[str]
+        legal_name : typing.Optional[str]
+
+        email : typing.Optional[str]
 
         phone : typing.Optional[str]
 
-        employee_count : typing.Optional[float]
-
-        annual_revenue : typing.Optional[float]
-
-        tax_exempt_status : typing.Optional[TaxExemptStatus]
-
-        creation_source : typing.Optional[CreationSource]
-
         website : typing.Optional[str]
 
-        billing_address : typing.Optional[Address]
+        external_id : typing.Optional[str]
+
+        billing_address : typing.Optional[CustomerBillingAddress]
+
+        creation_state : typing.Optional[CustomerCreationState]
+
+        vat_number : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Flexible JSON field for storing custom metadata about the customer
-
-        contacts : typing.Optional[typing.Sequence[ContactCreateForCustomer]]
-            Array of contacts to create for this customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -863,72 +535,7 @@ class AsyncCustomersClient:
         Returns
         -------
         Customer
-            Success response - customer already exists with this externalId
-
-        Examples
-        --------
-        import asyncio
-
-        from paid import AsyncPaid, ContactCreateForCustomer
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.customers.create(
-                name="Acme, Inc.",
-                external_id="acme-inc",
-                contacts=[
-                    ContactCreateForCustomer(
-                        salutation="Mr.",
-                        first_name="John",
-                        last_name="Doe",
-                        account_name="Acme, Inc.",
-                        email="john.doe@acme.com",
-                        phone="+1-555-0100",
-                        billing_street="123 Main Street",
-                        billing_city="San Francisco",
-                        billing_state_province="CA",
-                        billing_country="USA",
-                        billing_postal_code="94102",
-                    )
-                ],
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.create(
-            name=name,
-            external_id=external_id,
-            phone=phone,
-            employee_count=employee_count,
-            annual_revenue=annual_revenue,
-            tax_exempt_status=tax_exempt_status,
-            creation_source=creation_source,
-            website=website,
-            billing_address=billing_address,
-            metadata=metadata,
-            contacts=contacts,
-            request_options=request_options,
-        )
-        return _response.data
-
-    async def get(self, customer_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Customer:
-        """
-        Parameters
-        ----------
-        customer_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        Customer
-            Success response
+            201
 
         Examples
         --------
@@ -942,57 +549,111 @@ class AsyncCustomersClient:
 
 
         async def main() -> None:
-            await client.customers.get(
-                customer_id="customerId",
+            await client.customers.create_a_new_customer(
+                name="name",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get(customer_id, request_options=request_options)
+        _response = await self._raw_client.create_a_new_customer(
+            name=name,
+            legal_name=legal_name,
+            email=email,
+            phone=phone,
+            website=website,
+            external_id=external_id,
+            billing_address=billing_address,
+            creation_state=creation_state,
+            vat_number=vat_number,
+            metadata=metadata,
+            request_options=request_options,
+        )
         return _response.data
 
-    async def update(
+    async def get_customer(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Customer:
+        """
+        Get a customer by its ID
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Customer
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.get_customer(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_customer(id, request_options=request_options)
+        return _response.data
+
+    async def update_customer(
         self,
-        customer_id: str,
+        id: str,
         *,
         name: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
+        legal_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
-        employee_count: typing.Optional[float] = OMIT,
-        annual_revenue: typing.Optional[float] = OMIT,
-        tax_exempt_status: typing.Optional[TaxExemptStatus] = OMIT,
-        creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[Address] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        creation_state: typing.Optional[CustomerCreationState] = OMIT,
+        churn_date: typing.Optional[dt.datetime] = OMIT,
+        vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
+        Update a customer by its ID
+
         Parameters
         ----------
-        customer_id : str
+        id : str
 
         name : typing.Optional[str]
 
-        external_id : typing.Optional[str]
+        legal_name : typing.Optional[str]
+
+        email : typing.Optional[str]
 
         phone : typing.Optional[str]
 
-        employee_count : typing.Optional[float]
-
-        annual_revenue : typing.Optional[float]
-
-        tax_exempt_status : typing.Optional[TaxExemptStatus]
-
-        creation_source : typing.Optional[CreationSource]
-
         website : typing.Optional[str]
 
-        billing_address : typing.Optional[Address]
+        external_id : typing.Optional[str]
+
+        billing_address : typing.Optional[CustomerBillingAddress]
+
+        creation_state : typing.Optional[CustomerCreationState]
+
+        churn_date : typing.Optional[dt.datetime]
+
+        vat_number : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Flexible JSON field for storing custom metadata about the customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1000,7 +661,7 @@ class AsyncCustomersClient:
         Returns
         -------
         Customer
-            Customer updated successfully
+            200
 
         Examples
         --------
@@ -1014,45 +675,47 @@ class AsyncCustomersClient:
 
 
         async def main() -> None:
-            await client.customers.update(
-                customer_id="customerId",
-                name="Acme, Inc. (Updated)",
-                phone="123-456-7890",
-                employee_count=101.0,
-                annual_revenue=1000001.0,
+            await client.customers.update_customer(
+                id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update(
-            customer_id,
+        _response = await self._raw_client.update_customer(
+            id,
             name=name,
-            external_id=external_id,
+            legal_name=legal_name,
+            email=email,
             phone=phone,
-            employee_count=employee_count,
-            annual_revenue=annual_revenue,
-            tax_exempt_status=tax_exempt_status,
-            creation_source=creation_source,
             website=website,
+            external_id=external_id,
             billing_address=billing_address,
+            creation_state=creation_state,
+            churn_date=churn_date,
+            vat_number=vat_number,
             metadata=metadata,
             request_options=request_options,
         )
         return _response.data
 
-    async def delete(self, customer_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> None:
+    async def delete_customer(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> EmptyResponse:
         """
+        Delete a customer by its ID
+
         Parameters
         ----------
-        customer_id : str
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        None
+        EmptyResponse
+            200
 
         Examples
         --------
@@ -1066,113 +729,22 @@ class AsyncCustomersClient:
 
 
         async def main() -> None:
-            await client.customers.delete(
-                customer_id="customerId",
+            await client.customers.delete_customer(
+                id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete(customer_id, request_options=request_options)
+        _response = await self._raw_client.delete_customer(id, request_options=request_options)
         return _response.data
 
-    async def check_entitlement(
-        self,
-        customer_id: str,
-        *,
-        event_name: str,
-        view: typing.Optional[CustomersCheckEntitlementRequestView] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> CustomersCheckEntitlementResponse:
-        """
-        Parameters
-        ----------
-        customer_id : str
-            The customer ID
-
-        event_name : str
-            The name of the usage event to check entitlement for
-
-        view : typing.Optional[CustomersCheckEntitlementRequestView]
-            Filter view - 'all' returns all entitlements regardless of status, 'active_only' returns only currently active entitlements with available credits
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        CustomersCheckEntitlementResponse
-            Success response
-
-        Examples
-        --------
-        import asyncio
-
-        from paid import AsyncPaid
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.customers.check_entitlement(
-                customer_id="customerId",
-                event_name="event_name",
-                view="all",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.check_entitlement(
-            customer_id, event_name=event_name, view=view, request_options=request_options
-        )
-        return _response.data
-
-    async def get_entitlements(
-        self, customer_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> typing.List[EntitlementUsage]:
-        """
-        Parameters
-        ----------
-        customer_id : str
-            The customer ID
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        typing.List[EntitlementUsage]
-            Success response
-
-        Examples
-        --------
-        import asyncio
-
-        from paid import AsyncPaid
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.customers.get_entitlements(
-                customer_id="customerId",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.get_entitlements(customer_id, request_options=request_options)
-        return _response.data
-
-    async def get_by_external_id(
+    async def get_customer_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Customer:
         """
+        Get a customer by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -1183,7 +755,7 @@ class AsyncCustomersClient:
         Returns
         -------
         Customer
-            Success response
+            200
 
         Examples
         --------
@@ -1197,57 +769,61 @@ class AsyncCustomersClient:
 
 
         async def main() -> None:
-            await client.customers.get_by_external_id(
+            await client.customers.get_customer_by_external_id(
                 external_id="externalId",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_by_external_id(external_id, request_options=request_options)
+        _response = await self._raw_client.get_customer_by_external_id(external_id, request_options=request_options)
         return _response.data
 
-    async def update_by_external_id(
+    async def update_customer_by_external_id(
         self,
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
+        legal_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
-        employee_count: typing.Optional[float] = OMIT,
-        annual_revenue: typing.Optional[float] = OMIT,
-        tax_exempt_status: typing.Optional[TaxExemptStatus] = OMIT,
-        creation_source: typing.Optional[CreationSource] = OMIT,
         website: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[Address] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        creation_state: typing.Optional[CustomerCreationState] = OMIT,
+        churn_date: typing.Optional[dt.datetime] = OMIT,
+        vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
+        Update a customer by its externalId
+
         Parameters
         ----------
         external_id_ : str
 
         name : typing.Optional[str]
 
-        external_id : typing.Optional[str]
+        legal_name : typing.Optional[str]
+
+        email : typing.Optional[str]
 
         phone : typing.Optional[str]
 
-        employee_count : typing.Optional[float]
-
-        annual_revenue : typing.Optional[float]
-
-        tax_exempt_status : typing.Optional[TaxExemptStatus]
-
-        creation_source : typing.Optional[CreationSource]
-
         website : typing.Optional[str]
 
-        billing_address : typing.Optional[Address]
+        external_id : typing.Optional[str]
+
+        billing_address : typing.Optional[CustomerBillingAddress]
+
+        creation_state : typing.Optional[CustomerCreationState]
+
+        churn_date : typing.Optional[dt.datetime]
+
+        vat_number : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Flexible JSON field for storing custom metadata about the customer
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1255,7 +831,7 @@ class AsyncCustomersClient:
         Returns
         -------
         Customer
-            Success response
+            200
 
         Examples
         --------
@@ -1269,33 +845,36 @@ class AsyncCustomersClient:
 
 
         async def main() -> None:
-            await client.customers.update_by_external_id(
+            await client.customers.update_customer_by_external_id(
                 external_id_="externalId",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_by_external_id(
+        _response = await self._raw_client.update_customer_by_external_id(
             external_id_,
             name=name,
-            external_id=external_id,
+            legal_name=legal_name,
+            email=email,
             phone=phone,
-            employee_count=employee_count,
-            annual_revenue=annual_revenue,
-            tax_exempt_status=tax_exempt_status,
-            creation_source=creation_source,
             website=website,
+            external_id=external_id,
             billing_address=billing_address,
+            creation_state=creation_state,
+            churn_date=churn_date,
+            vat_number=vat_number,
             metadata=metadata,
             request_options=request_options,
         )
         return _response.data
 
-    async def delete_by_external_id(
+    async def delete_customer_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> None:
+    ) -> EmptyResponse:
         """
+        Delete a customer by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -1305,7 +884,8 @@ class AsyncCustomersClient:
 
         Returns
         -------
-        None
+        EmptyResponse
+            200
 
         Examples
         --------
@@ -1319,312 +899,12 @@ class AsyncCustomersClient:
 
 
         async def main() -> None:
-            await client.customers.delete_by_external_id(
+            await client.customers.delete_customer_by_external_id(
                 external_id="externalId",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_by_external_id(external_id, request_options=request_options)
-        return _response.data
-
-    async def get_costs_by_external_id(
-        self,
-        external_id: str,
-        *,
-        limit: typing.Optional[int] = None,
-        offset: typing.Optional[int] = None,
-        start_time: typing.Optional[dt.datetime] = None,
-        end_time: typing.Optional[dt.datetime] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> CostTracesResponse:
-        """
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        limit : typing.Optional[int]
-            Maximum number of traces to return (1-1000)
-
-        offset : typing.Optional[int]
-            Number of traces to skip for pagination
-
-        start_time : typing.Optional[dt.datetime]
-            Filter traces starting from this time (ISO 8601 format)
-
-        end_time : typing.Optional[dt.datetime]
-            Filter traces up to this time (ISO 8601 format)
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        CostTracesResponse
-            Success response
-
-        Examples
-        --------
-        import asyncio
-        import datetime
-
-        from paid import AsyncPaid
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.customers.get_costs_by_external_id(
-                external_id="externalId",
-                limit=1,
-                offset=1,
-                start_time=datetime.datetime.fromisoformat(
-                    "2024-01-15 09:30:00+00:00",
-                ),
-                end_time=datetime.datetime.fromisoformat(
-                    "2024-01-15 09:30:00+00:00",
-                ),
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.get_costs_by_external_id(
-            external_id,
-            limit=limit,
-            offset=offset,
-            start_time=start_time,
-            end_time=end_time,
-            request_options=request_options,
-        )
-        return _response.data
-
-    async def get_usage_by_external_id(
-        self,
-        external_id: str,
-        *,
-        limit: typing.Optional[int] = None,
-        offset: typing.Optional[int] = None,
-        start_time: typing.Optional[dt.datetime] = None,
-        end_time: typing.Optional[dt.datetime] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> UsageSummariesResponse:
-        """
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        limit : typing.Optional[int]
-            Maximum number of usage summaries to return (1-1000)
-
-        offset : typing.Optional[int]
-            Number of usage summaries to skip for pagination
-
-        start_time : typing.Optional[dt.datetime]
-            Filter usage summaries starting from this time (ISO 8601 format). Returns summaries that overlap with the time range.
-
-        end_time : typing.Optional[dt.datetime]
-            Filter usage summaries up to this time (ISO 8601 format). Returns summaries that overlap with the time range.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        UsageSummariesResponse
-            Success response
-
-        Examples
-        --------
-        import asyncio
-        import datetime
-
-        from paid import AsyncPaid
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.customers.get_usage_by_external_id(
-                external_id="externalId",
-                limit=1,
-                offset=1,
-                start_time=datetime.datetime.fromisoformat(
-                    "2024-01-15 09:30:00+00:00",
-                ),
-                end_time=datetime.datetime.fromisoformat(
-                    "2024-01-15 09:30:00+00:00",
-                ),
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.get_usage_by_external_id(
-            external_id,
-            limit=limit,
-            offset=offset,
-            start_time=start_time,
-            end_time=end_time,
-            request_options=request_options,
-        )
-        return _response.data
-
-    async def list_payment_methods(
-        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> typing.List[PaymentMethod]:
-        """
-        Retrieves all payment methods associated with a customer identified by their external ID.
-
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        typing.List[PaymentMethod]
-            Success response
-
-        Examples
-        --------
-        import asyncio
-
-        from paid import AsyncPaid
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.customers.list_payment_methods(
-                external_id="externalId",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.list_payment_methods(external_id, request_options=request_options)
-        return _response.data
-
-    async def create_payment_method(
-        self,
-        external_id: str,
-        *,
-        confirmation_token: str,
-        return_url: str,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> PaymentMethod:
-        """
-        Creates a new payment method for a customer using a Stripe confirmation token.
-
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        confirmation_token : str
-            Stripe confirmation token for the payment method
-
-        return_url : str
-            URL to redirect to after payment method setup
-
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
-            Optional metadata to attach to the payment method
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        PaymentMethod
-            Payment method created successfully
-
-        Examples
-        --------
-        import asyncio
-
-        from paid import AsyncPaid
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.customers.create_payment_method(
-                external_id="externalId",
-                confirmation_token="ctoken_1234567890",
-                return_url="https://example.com/payment-method-added",
-                metadata={"source": "api"},
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.create_payment_method(
-            external_id,
-            confirmation_token=confirmation_token,
-            return_url=return_url,
-            metadata=metadata,
-            request_options=request_options,
-        )
-        return _response.data
-
-    async def delete_payment_method(
-        self, external_id: str, payment_method_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> None:
-        """
-        Deletes a specific payment method from a customer's account.
-
-        Parameters
-        ----------
-        external_id : str
-            The external ID of the customer
-
-        payment_method_id : str
-            The ID of the payment method to delete
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        import asyncio
-
-        from paid import AsyncPaid
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.customers.delete_payment_method(
-                external_id="externalId",
-                payment_method_id="paymentMethodId",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.delete_payment_method(
-            external_id, payment_method_id, request_options=request_options
-        )
+        _response = await self._raw_client.delete_customer_by_external_id(external_id, request_options=request_options)
         return _response.data

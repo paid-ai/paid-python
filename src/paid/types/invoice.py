@@ -7,63 +7,45 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
-from .customer import Customer
+from .invoice_payment_status import InvoicePaymentStatus
+from .invoice_source import InvoiceSource
 from .invoice_status import InvoiceStatus
+from .invoice_tax_status import InvoiceTaxStatus
 
 
 class Invoice(UniversalBaseModel):
-    """
-    An invoice for an order
-    """
-
-    id: typing.Optional[str] = None
-    display_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="displayId")] = pydantic.Field(
-        default=None
-    )
-    """
-    Human-readable invoice number
-    """
-
-    organization_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="organizationId")] = None
-    customer_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="customerId")] = None
+    id: str
+    display_number: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="displayNumber")] = None
     order_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="orderId")] = None
-    status: typing.Optional[InvoiceStatus] = None
-    currency: typing.Optional[str] = None
-    subtotal: typing.Optional[float] = pydantic.Field(default=None)
-    """
-    Total before tax (in smallest currency unit)
-    """
-
-    tax: typing.Optional[float] = pydantic.Field(default=None)
-    """
-    Tax amount (in smallest currency unit)
-    """
-
-    total: typing.Optional[float] = pydantic.Field(default=None)
-    """
-    Total amount including tax (in smallest currency unit)
-    """
-
-    amount_paid: typing_extensions.Annotated[typing.Optional[float], FieldMetadata(alias="amountPaid")] = (
-        pydantic.Field(default=None)
-    )
-    """
-    Amount already paid (in smallest currency unit)
-    """
-
-    amount_due: typing_extensions.Annotated[typing.Optional[float], FieldMetadata(alias="amountDue")] = pydantic.Field(
-        default=None
-    )
-    """
-    Amount still due (in smallest currency unit)
-    """
-
+    customer_id: typing_extensions.Annotated[str, FieldMetadata(alias="customerId")]
+    status: InvoiceStatus
+    payment_status: typing_extensions.Annotated[InvoicePaymentStatus, FieldMetadata(alias="paymentStatus")]
+    source: InvoiceSource
+    start_date: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="startDate")]
+    end_date: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="endDate")] = None
+    issue_date: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="issueDate")]
+    posted_date: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="postedDate")] = None
     due_date: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="dueDate")] = None
-    paid_at: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="paidAt")] = None
-    voided_at: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="voidedAt")] = None
-    created_at: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="createdAt")] = None
-    updated_at: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="updatedAt")] = None
-    customer: typing.Optional[Customer] = None
+    currency: str
+    tax_amount: typing_extensions.Annotated[float, FieldMetadata(alias="taxAmount")]
+    tax_rate: typing_extensions.Annotated[float, FieldMetadata(alias="taxRate")]
+    tax_status: typing_extensions.Annotated[InvoiceTaxStatus, FieldMetadata(alias="taxStatus")]
+    invoice_total_excluding_tax: typing_extensions.Annotated[float, FieldMetadata(alias="invoiceTotalExcludingTax")]
+    invoice_total: typing_extensions.Annotated[float, FieldMetadata(alias="invoiceTotal")]
+    amount_due: typing_extensions.Annotated[float, FieldMetadata(alias="amountDue")]
+    amount_paid: typing_extensions.Annotated[float, FieldMetadata(alias="amountPaid")]
+    amount_remaining: typing_extensions.Annotated[float, FieldMetadata(alias="amountRemaining")]
+    credit_notes_total: typing_extensions.Annotated[float, FieldMetadata(alias="creditNotesTotal")]
+    metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
+    created_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="createdAt")]
+    updated_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="updatedAt")]
+    payment_link: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="paymentLink")] = None
+    dispute_link: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="disputeLink")] = None
+    public_url_token: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="publicUrlToken")] = None
+    tax_exempt: typing_extensions.Annotated[bool, FieldMetadata(alias="taxExempt")]
+    billing_contact_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="billingContactId")] = (
+        None
+    )
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

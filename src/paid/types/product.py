@@ -7,44 +7,19 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
-from .agent_attribute import AgentAttribute
-from .product_type import ProductType
 
 
 class Product(UniversalBaseModel):
-    """
-    A product in the Paid system (previously called Agent)
-    """
-
     id: str
-    external_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="externalId")] = None
-    display_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="displayId")] = pydantic.Field(
-        default=None
-    )
-    """
-    Human-readable display ID
-    """
-
-    organization_id: typing_extensions.Annotated[str, FieldMetadata(alias="organizationId")]
     name: str
     description: typing.Optional[str] = None
-    type: ProductType = pydantic.Field()
-    """
-    The type of product
-    """
-
+    created_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="createdAt")]
+    updated_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="updatedAt")]
     active: bool
     product_code: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="productCode")] = None
-    product_attribute: typing_extensions.Annotated[
-        typing.Optional[typing.List[AgentAttribute]], FieldMetadata(alias="ProductAttribute")
-    ] = pydantic.Field(default=None)
-    """
-    Pricing attributes for this product
-    """
-
+    external_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="externalId")] = None
+    archived_at: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="archivedAt")] = None
     metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
-    created_at: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="createdAt")] = None
-    updated_at: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="updatedAt")] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

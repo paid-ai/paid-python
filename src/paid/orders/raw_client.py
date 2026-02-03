@@ -13,14 +13,15 @@ from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
 from ..errors.forbidden_error import ForbiddenError
+from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
-from ..types.cancel_renewal_response import CancelRenewalResponse
-from ..types.error import Error
-from ..types.invoice import Invoice
+from ..types.empty_response import EmptyResponse
+from ..types.error_response import ErrorResponse
 from ..types.order import Order
-from ..types.order_line_create import OrderLineCreate
-from ..types.proration_attribute_update import ProrationAttributeUpdate
-from ..types.proration_upgrade_response import ProrationUpgradeResponse
+from ..types.order_creation_state import OrderCreationState
+from ..types.order_lines_response import OrderLinesResponse
+from ..types.order_list_response import OrderListResponse
+from ..types.overage_override import OverageOverride
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -30,76 +31,138 @@ class RawOrdersClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[typing.List[Order]]:
+    def list_orders(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[OrderListResponse]:
         """
+        Get a list of orders for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[typing.List[Order]]
-            Success response
+        HttpResponse[OrderListResponse]
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
-            "orders",
+            "orders/",
             method="GET",
+            params={
+                "limit": limit,
+                "offset": offset,
+            },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[Order],
+                    OrderListResponse,
                     parse_obj_as(
-                        type_=typing.List[Order],  # type: ignore
+                        type_=OrderListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create(
+    def create_a_new_order(
         self,
         *,
-        name: str,
-        start_date: str,
-        currency: str,
-        customer_id: typing.Optional[str] = OMIT,
-        customer_external_id: typing.Optional[str] = OMIT,
+        customer_id: str,
+        billing_customer_id: typing.Optional[str] = OMIT,
         billing_contact_id: typing.Optional[str] = OMIT,
-        description: typing.Optional[str] = OMIT,
-        end_date: typing.Optional[str] = OMIT,
-        plan_id: typing.Optional[str] = OMIT,
-        order_lines: typing.Optional[typing.Sequence[OrderLineCreate]] = OMIT,
+        billing_contact_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        name: typing.Optional[str] = OMIT,
+        start_date: typing.Optional[dt.datetime] = OMIT,
+        end_date: typing.Optional[dt.datetime] = OMIT,
+        subscription_terms: typing.Optional[int] = OMIT,
+        creation_state: typing.Optional[OrderCreationState] = OMIT,
+        billing_anchor: typing.Optional[float] = OMIT,
+        payment_terms: typing.Optional[str] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        overage_overrides: typing.Optional[typing.Sequence[OverageOverride]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Order]:
         """
+        Creates a new order for the organization
+
         Parameters
         ----------
-        name : str
+        customer_id : str
 
-        start_date : str
-
-        currency : str
-
-        customer_id : typing.Optional[str]
-
-        customer_external_id : typing.Optional[str]
+        billing_customer_id : typing.Optional[str]
 
         billing_contact_id : typing.Optional[str]
 
-        description : typing.Optional[str]
+        billing_contact_ids : typing.Optional[typing.Sequence[str]]
 
-        end_date : typing.Optional[str]
+        name : typing.Optional[str]
 
-        plan_id : typing.Optional[str]
-            Optional plan ID to associate with this order
+        start_date : typing.Optional[dt.datetime]
 
-        order_lines : typing.Optional[typing.Sequence[OrderLineCreate]]
+        end_date : typing.Optional[dt.datetime]
+
+        subscription_terms : typing.Optional[int]
+
+        creation_state : typing.Optional[OrderCreationState]
+
+        billing_anchor : typing.Optional[float]
+
+        payment_terms : typing.Optional[str]
+
+        external_id : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+
+        overage_overrides : typing.Optional[typing.Sequence[OverageOverride]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -107,23 +170,27 @@ class RawOrdersClient:
         Returns
         -------
         HttpResponse[Order]
-            Success response
+            201
         """
         _response = self._client_wrapper.httpx_client.request(
-            "orders",
+            "orders/",
             method="POST",
             json={
                 "customerId": customer_id,
-                "customerExternalId": customer_external_id,
+                "billingCustomerId": billing_customer_id,
                 "billingContactId": billing_contact_id,
+                "billingContactIds": billing_contact_ids,
                 "name": name,
-                "description": description,
                 "startDate": start_date,
                 "endDate": end_date,
-                "currency": currency,
-                "planId": plan_id,
-                "orderLines": convert_and_respect_annotation_metadata(
-                    object_=order_lines, annotation=typing.Sequence[OrderLineCreate], direction="write"
+                "subscriptionTerms": subscription_terms,
+                "creationState": creation_state,
+                "billingAnchor": billing_anchor,
+                "paymentTerms": payment_terms,
+                "externalId": external_id,
+                "metadata": metadata,
+                "overageOverrides": convert_and_respect_annotation_metadata(
+                    object_=overage_overrides, annotation=typing.Sequence[OverageOverride], direction="write"
                 ),
             },
             headers={
@@ -142,16 +209,51 @@ class RawOrdersClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get(self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[Order]:
+    def get_order(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[Order]:
         """
+        Get an order by its ID
+
         Parameters
         ----------
-        order_id : str
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -159,10 +261,10 @@ class RawOrdersClient:
         Returns
         -------
         HttpResponse[Order]
-            Success response
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"orders/{jsonable_encoder(order_id)}",
+            f"orders/{jsonable_encoder(id)}",
             method="GET",
             request_options=request_options,
         )
@@ -176,144 +278,223 @@ class RawOrdersClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete(self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[None]:
+    def update_order(
+        self,
+        id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        start_date: typing.Optional[dt.datetime] = OMIT,
+        end_date: typing.Optional[dt.datetime] = OMIT,
+        subscription_terms: typing.Optional[int] = OMIT,
+        creation_state: typing.Optional[OrderCreationState] = OMIT,
+        billing_anchor: typing.Optional[float] = OMIT,
+        payment_terms: typing.Optional[str] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        billing_customer_id: typing.Optional[str] = OMIT,
+        billing_contact_id: typing.Optional[str] = OMIT,
+        billing_contact_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[Order]:
         """
+        Update an order by its ID
+
         Parameters
         ----------
-        order_id : str
+        id : str
+
+        name : typing.Optional[str]
+
+        start_date : typing.Optional[dt.datetime]
+
+        end_date : typing.Optional[dt.datetime]
+
+        subscription_terms : typing.Optional[int]
+
+        creation_state : typing.Optional[OrderCreationState]
+
+        billing_anchor : typing.Optional[float]
+
+        payment_terms : typing.Optional[str]
+
+        external_id : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+
+        billing_customer_id : typing.Optional[str]
+
+        billing_contact_id : typing.Optional[str]
+
+        billing_contact_ids : typing.Optional[typing.Sequence[str]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[None]
+        HttpResponse[Order]
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"orders/{jsonable_encoder(order_id)}",
+            f"orders/{jsonable_encoder(id)}",
+            method="PUT",
+            json={
+                "name": name,
+                "startDate": start_date,
+                "endDate": end_date,
+                "subscriptionTerms": subscription_terms,
+                "creationState": creation_state,
+                "billingAnchor": billing_anchor,
+                "paymentTerms": payment_terms,
+                "externalId": external_id,
+                "metadata": metadata,
+                "billingCustomerId": billing_customer_id,
+                "billingContactId": billing_contact_id,
+                "billingContactIds": billing_contact_ids,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    Order,
+                    parse_obj_as(
+                        type_=Order,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def delete_order(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[EmptyResponse]:
+        """
+        Delete an order by its ID
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[EmptyResponse]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"orders/{jsonable_encoder(id)}",
             method="DELETE",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
-                return HttpResponse(response=_response, data=None)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def activate(
-        self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[Order]:
-        """
-        Parameters
-        ----------
-        order_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[Order]
-            Success response
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"orders/{jsonable_encoder(order_id)}/activate",
-            method="POST",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Order,
+                    EmptyResponse,
                     parse_obj_as(
-                        type_=Order,  # type: ignore
+                        type_=EmptyResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def activate_and_pay(
-        self,
-        order_id: str,
-        *,
-        confirmation_token: str,
-        return_url: str,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Order]:
-        """
-        Activates the order and processes the initial payment using the provided Stripe confirmation token.
-
-        Parameters
-        ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
-
-        confirmation_token : str
-            Stripe confirmation token for the payment method
-
-        return_url : str
-            URL to redirect to after payment processing
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[Order]
-            Order activated and payment processed successfully
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"orders/{jsonable_encoder(order_id)}/activate-and-pay",
-            method="POST",
-            json={
-                "confirmationToken": confirmation_token,
-                "returnUrl": return_url,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    Order,
-                    parse_obj_as(
-                        type_=Order,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -322,9 +503,20 @@ class RawOrdersClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -334,227 +526,48 @@ class RawOrdersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def cancel_renewal(
+    def get_order_lines(
         self,
-        order_id: str,
+        id: str,
         *,
-        order_version: int,
-        cancel_from_date: dt.datetime,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[CancelRenewalResponse]:
+    ) -> HttpResponse[OrderLinesResponse]:
         """
-        Schedules the cancellation of an order's renewal from a specified date. The order will remain active until the cancellation date.
+        Get the order lines for an order by its ID
 
         Parameters
         ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
+        id : str
 
-        order_version : int
-            The current version of the order (for optimistic locking)
+        limit : typing.Optional[int]
 
-        cancel_from_date : dt.datetime
-            The date from which the renewal should be cancelled (ISO 8601 format)
+        offset : typing.Optional[int]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[CancelRenewalResponse]
-            Order renewal cancelled successfully
+        HttpResponse[OrderLinesResponse]
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"orders/{jsonable_encoder(order_id)}/cancel",
-            method="POST",
-            json={
-                "orderVersion": order_version,
-                "cancelFromDate": cancel_from_date,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    CancelRenewalResponse,
-                    parse_obj_as(
-                        type_=CancelRenewalResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def schedule_plan_change(
-        self,
-        order_id: str,
-        *,
-        order_version: int,
-        effective_date: dt.datetime,
-        updated_order_line_attributes: typing.Sequence[ProrationAttributeUpdate],
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[ProrationUpgradeResponse]:
-        """
-        Schedules a plan upgrade or downgrade for an order with automatic proration calculation. Credits are applied for the unused portion of the current billing period.
-
-        Parameters
-        ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
-
-        order_version : int
-            The current version of the order (for optimistic locking)
-
-        effective_date : dt.datetime
-            The date when the plan change should take effect (ISO 8601 format)
-
-        updated_order_line_attributes : typing.Sequence[ProrationAttributeUpdate]
-            The list of order line attributes to update
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[ProrationUpgradeResponse]
-            Plan change scheduled successfully
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"orders/{jsonable_encoder(order_id)}/schedule-plan-change",
-            method="POST",
-            json={
-                "orderVersion": order_version,
-                "effectiveDate": effective_date,
-                "updatedOrderLineAttributes": convert_and_respect_annotation_metadata(
-                    object_=updated_order_line_attributes,
-                    annotation=typing.Sequence[ProrationAttributeUpdate],
-                    direction="write",
-                ),
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    ProrationUpgradeResponse,
-                    parse_obj_as(
-                        type_=ProrationUpgradeResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def get_invoices(
-        self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[typing.List[Invoice]]:
-        """
-        Retrieves all invoices associated with a specific order.
-
-        Parameters
-        ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[typing.List[Invoice]]
-            Success response
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"orders/{jsonable_encoder(order_id)}/invoices",
+            f"orders/{jsonable_encoder(id)}/lines",
             method="GET",
+            params={
+                "limit": limit,
+                "offset": offset,
+            },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[Invoice],
+                    OrderLinesResponse,
                     parse_obj_as(
-                        type_=typing.List[Invoice],  # type: ignore
+                        type_=OrderLinesResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -563,9 +576,9 @@ class RawOrdersClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -574,9 +587,20 @@ class RawOrdersClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -591,78 +615,138 @@ class AsyncRawOrdersClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list(
-        self, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[typing.List[Order]]:
+    async def list_orders(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[OrderListResponse]:
         """
+        Get a list of orders for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[typing.List[Order]]
-            Success response
+        AsyncHttpResponse[OrderListResponse]
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "orders",
+            "orders/",
             method="GET",
+            params={
+                "limit": limit,
+                "offset": offset,
+            },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[Order],
+                    OrderListResponse,
                     parse_obj_as(
-                        type_=typing.List[Order],  # type: ignore
+                        type_=OrderListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create(
+    async def create_a_new_order(
         self,
         *,
-        name: str,
-        start_date: str,
-        currency: str,
-        customer_id: typing.Optional[str] = OMIT,
-        customer_external_id: typing.Optional[str] = OMIT,
+        customer_id: str,
+        billing_customer_id: typing.Optional[str] = OMIT,
         billing_contact_id: typing.Optional[str] = OMIT,
-        description: typing.Optional[str] = OMIT,
-        end_date: typing.Optional[str] = OMIT,
-        plan_id: typing.Optional[str] = OMIT,
-        order_lines: typing.Optional[typing.Sequence[OrderLineCreate]] = OMIT,
+        billing_contact_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        name: typing.Optional[str] = OMIT,
+        start_date: typing.Optional[dt.datetime] = OMIT,
+        end_date: typing.Optional[dt.datetime] = OMIT,
+        subscription_terms: typing.Optional[int] = OMIT,
+        creation_state: typing.Optional[OrderCreationState] = OMIT,
+        billing_anchor: typing.Optional[float] = OMIT,
+        payment_terms: typing.Optional[str] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        overage_overrides: typing.Optional[typing.Sequence[OverageOverride]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Order]:
         """
+        Creates a new order for the organization
+
         Parameters
         ----------
-        name : str
+        customer_id : str
 
-        start_date : str
-
-        currency : str
-
-        customer_id : typing.Optional[str]
-
-        customer_external_id : typing.Optional[str]
+        billing_customer_id : typing.Optional[str]
 
         billing_contact_id : typing.Optional[str]
 
-        description : typing.Optional[str]
+        billing_contact_ids : typing.Optional[typing.Sequence[str]]
 
-        end_date : typing.Optional[str]
+        name : typing.Optional[str]
 
-        plan_id : typing.Optional[str]
-            Optional plan ID to associate with this order
+        start_date : typing.Optional[dt.datetime]
 
-        order_lines : typing.Optional[typing.Sequence[OrderLineCreate]]
+        end_date : typing.Optional[dt.datetime]
+
+        subscription_terms : typing.Optional[int]
+
+        creation_state : typing.Optional[OrderCreationState]
+
+        billing_anchor : typing.Optional[float]
+
+        payment_terms : typing.Optional[str]
+
+        external_id : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+
+        overage_overrides : typing.Optional[typing.Sequence[OverageOverride]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -670,23 +754,27 @@ class AsyncRawOrdersClient:
         Returns
         -------
         AsyncHttpResponse[Order]
-            Success response
+            201
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "orders",
+            "orders/",
             method="POST",
             json={
                 "customerId": customer_id,
-                "customerExternalId": customer_external_id,
+                "billingCustomerId": billing_customer_id,
                 "billingContactId": billing_contact_id,
+                "billingContactIds": billing_contact_ids,
                 "name": name,
-                "description": description,
                 "startDate": start_date,
                 "endDate": end_date,
-                "currency": currency,
-                "planId": plan_id,
-                "orderLines": convert_and_respect_annotation_metadata(
-                    object_=order_lines, annotation=typing.Sequence[OrderLineCreate], direction="write"
+                "subscriptionTerms": subscription_terms,
+                "creationState": creation_state,
+                "billingAnchor": billing_anchor,
+                "paymentTerms": payment_terms,
+                "externalId": external_id,
+                "metadata": metadata,
+                "overageOverrides": convert_and_respect_annotation_metadata(
+                    object_=overage_overrides, annotation=typing.Sequence[OverageOverride], direction="write"
                 ),
             },
             headers={
@@ -705,18 +793,53 @@ class AsyncRawOrdersClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get(
-        self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    async def get_order(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Order]:
         """
+        Get an order by its ID
+
         Parameters
         ----------
-        order_id : str
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -724,10 +847,10 @@ class AsyncRawOrdersClient:
         Returns
         -------
         AsyncHttpResponse[Order]
-            Success response
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"orders/{jsonable_encoder(order_id)}",
+            f"orders/{jsonable_encoder(id)}",
             method="GET",
             request_options=request_options,
         )
@@ -741,146 +864,223 @@ class AsyncRawOrdersClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete(
-        self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[None]:
+    async def update_order(
+        self,
+        id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        start_date: typing.Optional[dt.datetime] = OMIT,
+        end_date: typing.Optional[dt.datetime] = OMIT,
+        subscription_terms: typing.Optional[int] = OMIT,
+        creation_state: typing.Optional[OrderCreationState] = OMIT,
+        billing_anchor: typing.Optional[float] = OMIT,
+        payment_terms: typing.Optional[str] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        billing_customer_id: typing.Optional[str] = OMIT,
+        billing_contact_id: typing.Optional[str] = OMIT,
+        billing_contact_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[Order]:
         """
+        Update an order by its ID
+
         Parameters
         ----------
-        order_id : str
+        id : str
+
+        name : typing.Optional[str]
+
+        start_date : typing.Optional[dt.datetime]
+
+        end_date : typing.Optional[dt.datetime]
+
+        subscription_terms : typing.Optional[int]
+
+        creation_state : typing.Optional[OrderCreationState]
+
+        billing_anchor : typing.Optional[float]
+
+        payment_terms : typing.Optional[str]
+
+        external_id : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+
+        billing_customer_id : typing.Optional[str]
+
+        billing_contact_id : typing.Optional[str]
+
+        billing_contact_ids : typing.Optional[typing.Sequence[str]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[None]
+        AsyncHttpResponse[Order]
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"orders/{jsonable_encoder(order_id)}",
+            f"orders/{jsonable_encoder(id)}",
+            method="PUT",
+            json={
+                "name": name,
+                "startDate": start_date,
+                "endDate": end_date,
+                "subscriptionTerms": subscription_terms,
+                "creationState": creation_state,
+                "billingAnchor": billing_anchor,
+                "paymentTerms": payment_terms,
+                "externalId": external_id,
+                "metadata": metadata,
+                "billingCustomerId": billing_customer_id,
+                "billingContactId": billing_contact_id,
+                "billingContactIds": billing_contact_ids,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    Order,
+                    parse_obj_as(
+                        type_=Order,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def delete_order(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[EmptyResponse]:
+        """
+        Delete an order by its ID
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[EmptyResponse]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"orders/{jsonable_encoder(id)}",
             method="DELETE",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
-                return AsyncHttpResponse(response=_response, data=None)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def activate(
-        self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[Order]:
-        """
-        Parameters
-        ----------
-        order_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[Order]
-            Success response
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"orders/{jsonable_encoder(order_id)}/activate",
-            method="POST",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Order,
+                    EmptyResponse,
                     parse_obj_as(
-                        type_=Order,  # type: ignore
+                        type_=EmptyResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def activate_and_pay(
-        self,
-        order_id: str,
-        *,
-        confirmation_token: str,
-        return_url: str,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Order]:
-        """
-        Activates the order and processes the initial payment using the provided Stripe confirmation token.
-
-        Parameters
-        ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
-
-        confirmation_token : str
-            Stripe confirmation token for the payment method
-
-        return_url : str
-            URL to redirect to after payment processing
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[Order]
-            Order activated and payment processed successfully
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"orders/{jsonable_encoder(order_id)}/activate-and-pay",
-            method="POST",
-            json={
-                "confirmationToken": confirmation_token,
-                "returnUrl": return_url,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    Order,
-                    parse_obj_as(
-                        type_=Order,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -889,9 +1089,20 @@ class AsyncRawOrdersClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -901,227 +1112,48 @@ class AsyncRawOrdersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def cancel_renewal(
+    async def get_order_lines(
         self,
-        order_id: str,
+        id: str,
         *,
-        order_version: int,
-        cancel_from_date: dt.datetime,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[CancelRenewalResponse]:
+    ) -> AsyncHttpResponse[OrderLinesResponse]:
         """
-        Schedules the cancellation of an order's renewal from a specified date. The order will remain active until the cancellation date.
+        Get the order lines for an order by its ID
 
         Parameters
         ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
+        id : str
 
-        order_version : int
-            The current version of the order (for optimistic locking)
+        limit : typing.Optional[int]
 
-        cancel_from_date : dt.datetime
-            The date from which the renewal should be cancelled (ISO 8601 format)
+        offset : typing.Optional[int]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[CancelRenewalResponse]
-            Order renewal cancelled successfully
+        AsyncHttpResponse[OrderLinesResponse]
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"orders/{jsonable_encoder(order_id)}/cancel",
-            method="POST",
-            json={
-                "orderVersion": order_version,
-                "cancelFromDate": cancel_from_date,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    CancelRenewalResponse,
-                    parse_obj_as(
-                        type_=CancelRenewalResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def schedule_plan_change(
-        self,
-        order_id: str,
-        *,
-        order_version: int,
-        effective_date: dt.datetime,
-        updated_order_line_attributes: typing.Sequence[ProrationAttributeUpdate],
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[ProrationUpgradeResponse]:
-        """
-        Schedules a plan upgrade or downgrade for an order with automatic proration calculation. Credits are applied for the unused portion of the current billing period.
-
-        Parameters
-        ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
-
-        order_version : int
-            The current version of the order (for optimistic locking)
-
-        effective_date : dt.datetime
-            The date when the plan change should take effect (ISO 8601 format)
-
-        updated_order_line_attributes : typing.Sequence[ProrationAttributeUpdate]
-            The list of order line attributes to update
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[ProrationUpgradeResponse]
-            Plan change scheduled successfully
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"orders/{jsonable_encoder(order_id)}/schedule-plan-change",
-            method="POST",
-            json={
-                "orderVersion": order_version,
-                "effectiveDate": effective_date,
-                "updatedOrderLineAttributes": convert_and_respect_annotation_metadata(
-                    object_=updated_order_line_attributes,
-                    annotation=typing.Sequence[ProrationAttributeUpdate],
-                    direction="write",
-                ),
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    ProrationUpgradeResponse,
-                    parse_obj_as(
-                        type_=ProrationUpgradeResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        Error,
-                        parse_obj_as(
-                            type_=Error,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def get_invoices(
-        self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[typing.List[Invoice]]:
-        """
-        Retrieves all invoices associated with a specific order.
-
-        Parameters
-        ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[typing.List[Invoice]]
-            Success response
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"orders/{jsonable_encoder(order_id)}/invoices",
+            f"orders/{jsonable_encoder(id)}/lines",
             method="GET",
+            params={
+                "limit": limit,
+                "offset": offset,
+            },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[Invoice],
+                    OrderLinesResponse,
                     parse_obj_as(
-                        type_=typing.List[Invoice],  # type: ignore
+                        type_=OrderLinesResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1130,9 +1162,9 @@ class AsyncRawOrdersClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1141,9 +1173,20 @@ class AsyncRawOrdersClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        Error,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=Error,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),

@@ -6,16 +6,15 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
-from .order_line_attribute_pricing import OrderLineAttributePricing
 
 
 class OrderLineAttribute(UniversalBaseModel):
-    agent_attribute_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="agentAttributeId")] = (
-        None
-    )
-    quantity: typing.Optional[float] = None
-    currency: typing.Optional[str] = None
-    pricing: typing.Optional[OrderLineAttributePricing] = None
+    id: str
+    product_attribute_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="productAttributeId")
+    ] = None
+    quantity: int
+    currency: str
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

@@ -2,6 +2,3 @@
 
 # isort: skip_file
 
-from . import lines
-
-__all__ = ["lines"]

@@ -5,13 +5,12 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.cancel_renewal_response import CancelRenewalResponse
-from ..types.invoice import Invoice
+from ..types.empty_response import EmptyResponse
 from ..types.order import Order
-from ..types.order_line_create import OrderLineCreate
-from ..types.proration_attribute_update import ProrationAttributeUpdate
-from ..types.proration_upgrade_response import ProrationUpgradeResponse
-from .lines.client import AsyncLinesClient, LinesClient
+from ..types.order_creation_state import OrderCreationState
+from ..types.order_lines_response import OrderLinesResponse
+from ..types.order_list_response import OrderListResponse
+from ..types.overage_override import OverageOverride
 from .raw_client import AsyncRawOrdersClient, RawOrdersClient
 
 # this is used as the default value for optional parameters
@@ -21,7 +20,6 @@ OMIT = typing.cast(typing.Any, ...)
 class OrdersClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._raw_client = RawOrdersClient(client_wrapper=client_wrapper)
-        self.lines = LinesClient(client_wrapper=client_wrapper)
 
     @property
     def with_raw_response(self) -> RawOrdersClient:
@@ -34,17 +32,29 @@ class OrdersClient:
         """
         return self._raw_client
 
-    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[Order]:
+    def list_orders(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> OrderListResponse:
         """
+        Get a list of orders for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        typing.List[Order]
-            Success response
+        OrderListResponse
+            200
 
         Examples
         --------
@@ -53,49 +63,62 @@ class OrdersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.orders.list()
+        client.orders.list_orders()
         """
-        _response = self._raw_client.list(request_options=request_options)
+        _response = self._raw_client.list_orders(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    def create(
+    def create_a_new_order(
         self,
         *,
-        name: str,
-        start_date: str,
-        currency: str,
-        customer_id: typing.Optional[str] = OMIT,
-        customer_external_id: typing.Optional[str] = OMIT,
+        customer_id: str,
+        billing_customer_id: typing.Optional[str] = OMIT,
         billing_contact_id: typing.Optional[str] = OMIT,
-        description: typing.Optional[str] = OMIT,
-        end_date: typing.Optional[str] = OMIT,
-        plan_id: typing.Optional[str] = OMIT,
-        order_lines: typing.Optional[typing.Sequence[OrderLineCreate]] = OMIT,
+        billing_contact_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        name: typing.Optional[str] = OMIT,
+        start_date: typing.Optional[dt.datetime] = OMIT,
+        end_date: typing.Optional[dt.datetime] = OMIT,
+        subscription_terms: typing.Optional[int] = OMIT,
+        creation_state: typing.Optional[OrderCreationState] = OMIT,
+        billing_anchor: typing.Optional[float] = OMIT,
+        payment_terms: typing.Optional[str] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        overage_overrides: typing.Optional[typing.Sequence[OverageOverride]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
+        Creates a new order for the organization
+
         Parameters
         ----------
-        name : str
+        customer_id : str
 
-        start_date : str
-
-        currency : str
-
-        customer_id : typing.Optional[str]
-
-        customer_external_id : typing.Optional[str]
+        billing_customer_id : typing.Optional[str]
 
         billing_contact_id : typing.Optional[str]
 
-        description : typing.Optional[str]
+        billing_contact_ids : typing.Optional[typing.Sequence[str]]
 
-        end_date : typing.Optional[str]
+        name : typing.Optional[str]
 
-        plan_id : typing.Optional[str]
-            Optional plan ID to associate with this order
+        start_date : typing.Optional[dt.datetime]
 
-        order_lines : typing.Optional[typing.Sequence[OrderLineCreate]]
+        end_date : typing.Optional[dt.datetime]
+
+        subscription_terms : typing.Optional[int]
+
+        creation_state : typing.Optional[OrderCreationState]
+
+        billing_anchor : typing.Optional[float]
+
+        payment_terms : typing.Optional[str]
+
+        external_id : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+
+        overage_overrides : typing.Optional[typing.Sequence[OverageOverride]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -103,7 +126,7 @@ class OrdersClient:
         Returns
         -------
         Order
-            Success response
+            201
 
         Examples
         --------
@@ -112,35 +135,36 @@ class OrdersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.orders.create(
-            customer_external_id="acme-inc",
-            name="Acme Order",
-            description="Acme Order is an order for Acme, Inc.",
-            start_date="2025-01-01",
-            end_date="2026-01-01",
-            currency="USD",
+        client.orders.create_a_new_order(
+            customer_id="customerId",
         )
         """
-        _response = self._raw_client.create(
+        _response = self._raw_client.create_a_new_order(
+            customer_id=customer_id,
+            billing_customer_id=billing_customer_id,
+            billing_contact_id=billing_contact_id,
+            billing_contact_ids=billing_contact_ids,
             name=name,
             start_date=start_date,
-            currency=currency,
-            customer_id=customer_id,
-            customer_external_id=customer_external_id,
-            billing_contact_id=billing_contact_id,
-            description=description,
             end_date=end_date,
-            plan_id=plan_id,
-            order_lines=order_lines,
+            subscription_terms=subscription_terms,
+            creation_state=creation_state,
+            billing_anchor=billing_anchor,
+            payment_terms=payment_terms,
+            external_id=external_id,
+            metadata=metadata,
+            overage_overrides=overage_overrides,
             request_options=request_options,
         )
         return _response.data
 
-    def get(self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Order:
+    def get_order(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Order:
         """
+        Get an order by its ID
+
         Parameters
         ----------
-        order_id : str
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -148,7 +172,7 @@ class OrdersClient:
         Returns
         -------
         Order
-            Success response
+            200
 
         Examples
         --------
@@ -157,89 +181,61 @@ class OrdersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.orders.get(
-            order_id="orderId",
+        client.orders.get_order(
+            id="id",
         )
         """
-        _response = self._raw_client.get(order_id, request_options=request_options)
+        _response = self._raw_client.get_order(id, request_options=request_options)
         return _response.data
 
-    def delete(self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> None:
-        """
-        Parameters
-        ----------
-        order_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        from paid import Paid
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.orders.delete(
-            order_id="orderId",
-        )
-        """
-        _response = self._raw_client.delete(order_id, request_options=request_options)
-        return _response.data
-
-    def activate(self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Order:
-        """
-        Parameters
-        ----------
-        order_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        Order
-            Success response
-
-        Examples
-        --------
-        from paid import Paid
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.orders.activate(
-            order_id="orderId",
-        )
-        """
-        _response = self._raw_client.activate(order_id, request_options=request_options)
-        return _response.data
-
-    def activate_and_pay(
+    def update_order(
         self,
-        order_id: str,
+        id: str,
         *,
-        confirmation_token: str,
-        return_url: str,
+        name: typing.Optional[str] = OMIT,
+        start_date: typing.Optional[dt.datetime] = OMIT,
+        end_date: typing.Optional[dt.datetime] = OMIT,
+        subscription_terms: typing.Optional[int] = OMIT,
+        creation_state: typing.Optional[OrderCreationState] = OMIT,
+        billing_anchor: typing.Optional[float] = OMIT,
+        payment_terms: typing.Optional[str] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        billing_customer_id: typing.Optional[str] = OMIT,
+        billing_contact_id: typing.Optional[str] = OMIT,
+        billing_contact_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
-        Activates the order and processes the initial payment using the provided Stripe confirmation token.
+        Update an order by its ID
 
         Parameters
         ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
+        id : str
 
-        confirmation_token : str
-            Stripe confirmation token for the payment method
+        name : typing.Optional[str]
 
-        return_url : str
-            URL to redirect to after payment processing
+        start_date : typing.Optional[dt.datetime]
+
+        end_date : typing.Optional[dt.datetime]
+
+        subscription_terms : typing.Optional[int]
+
+        creation_state : typing.Optional[OrderCreationState]
+
+        billing_anchor : typing.Optional[float]
+
+        payment_terms : typing.Optional[str]
+
+        external_id : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+
+        billing_customer_id : typing.Optional[str]
+
+        billing_contact_id : typing.Optional[str]
+
+        billing_contact_ids : typing.Optional[typing.Sequence[str]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -247,7 +243,7 @@ class OrdersClient:
         Returns
         -------
         Order
-            Order activated and payment processed successfully
+            200
 
         Examples
         --------
@@ -256,154 +252,43 @@ class OrdersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.orders.activate_and_pay(
-            order_id="orderId",
-            confirmation_token="ctoken_1234567890",
-            return_url="https://example.com/payment-complete",
+        client.orders.update_order(
+            id="id",
         )
         """
-        _response = self._raw_client.activate_and_pay(
-            order_id, confirmation_token=confirmation_token, return_url=return_url, request_options=request_options
-        )
-        return _response.data
-
-    def cancel_renewal(
-        self,
-        order_id: str,
-        *,
-        order_version: int,
-        cancel_from_date: dt.datetime,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> CancelRenewalResponse:
-        """
-        Schedules the cancellation of an order's renewal from a specified date. The order will remain active until the cancellation date.
-
-        Parameters
-        ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
-
-        order_version : int
-            The current version of the order (for optimistic locking)
-
-        cancel_from_date : dt.datetime
-            The date from which the renewal should be cancelled (ISO 8601 format)
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        CancelRenewalResponse
-            Order renewal cancelled successfully
-
-        Examples
-        --------
-        import datetime
-
-        from paid import Paid
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.orders.cancel_renewal(
-            order_id="orderId",
-            order_version=1,
-            cancel_from_date=datetime.datetime.fromisoformat(
-                "2025-12-31 00:00:00+00:00",
-            ),
-        )
-        """
-        _response = self._raw_client.cancel_renewal(
-            order_id, order_version=order_version, cancel_from_date=cancel_from_date, request_options=request_options
-        )
-        return _response.data
-
-    def schedule_plan_change(
-        self,
-        order_id: str,
-        *,
-        order_version: int,
-        effective_date: dt.datetime,
-        updated_order_line_attributes: typing.Sequence[ProrationAttributeUpdate],
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ProrationUpgradeResponse:
-        """
-        Schedules a plan upgrade or downgrade for an order with automatic proration calculation. Credits are applied for the unused portion of the current billing period.
-
-        Parameters
-        ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
-
-        order_version : int
-            The current version of the order (for optimistic locking)
-
-        effective_date : dt.datetime
-            The date when the plan change should take effect (ISO 8601 format)
-
-        updated_order_line_attributes : typing.Sequence[ProrationAttributeUpdate]
-            The list of order line attributes to update
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        ProrationUpgradeResponse
-            Plan change scheduled successfully
-
-        Examples
-        --------
-        import datetime
-
-        from paid import Paid, ProrationAttributeUpdate
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.orders.schedule_plan_change(
-            order_id="orderId",
-            order_version=1,
-            effective_date=datetime.datetime.fromisoformat(
-                "2025-02-01 00:00:00+00:00",
-            ),
-            updated_order_line_attributes=[
-                ProrationAttributeUpdate(
-                    order_line_attribute_id="a1b2c3d4-5678-90ab-cdef-1234567890ab",
-                    new_pricing={"unitPrice": 200, "currency": "USD"},
-                    new_quantity=10.0,
-                )
-            ],
-        )
-        """
-        _response = self._raw_client.schedule_plan_change(
-            order_id,
-            order_version=order_version,
-            effective_date=effective_date,
-            updated_order_line_attributes=updated_order_line_attributes,
+        _response = self._raw_client.update_order(
+            id,
+            name=name,
+            start_date=start_date,
+            end_date=end_date,
+            subscription_terms=subscription_terms,
+            creation_state=creation_state,
+            billing_anchor=billing_anchor,
+            payment_terms=payment_terms,
+            external_id=external_id,
+            metadata=metadata,
+            billing_customer_id=billing_customer_id,
+            billing_contact_id=billing_contact_id,
+            billing_contact_ids=billing_contact_ids,
             request_options=request_options,
         )
         return _response.data
 
-    def get_invoices(
-        self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> typing.List[Invoice]:
+    def delete_order(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> EmptyResponse:
         """
-        Retrieves all invoices associated with a specific order.
+        Delete an order by its ID
 
         Parameters
         ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        typing.List[Invoice]
-            Success response
+        EmptyResponse
+            200
 
         Examples
         --------
@@ -412,18 +297,58 @@ class OrdersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.orders.get_invoices(
-            order_id="orderId",
+        client.orders.delete_order(
+            id="id",
         )
         """
-        _response = self._raw_client.get_invoices(order_id, request_options=request_options)
+        _response = self._raw_client.delete_order(id, request_options=request_options)
+        return _response.data
+
+    def get_order_lines(
+        self,
+        id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> OrderLinesResponse:
+        """
+        Get the order lines for an order by its ID
+
+        Parameters
+        ----------
+        id : str
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        OrderLinesResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.orders.get_order_lines(
+            id="id",
+        )
+        """
+        _response = self._raw_client.get_order_lines(id, limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
 
 class AsyncOrdersClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._raw_client = AsyncRawOrdersClient(client_wrapper=client_wrapper)
-        self.lines = AsyncLinesClient(client_wrapper=client_wrapper)
 
     @property
     def with_raw_response(self) -> AsyncRawOrdersClient:
@@ -436,17 +361,29 @@ class AsyncOrdersClient:
         """
         return self._raw_client
 
-    async def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[Order]:
+    async def list_orders(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> OrderListResponse:
         """
+        Get a list of orders for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        typing.List[Order]
-            Success response
+        OrderListResponse
+            200
 
         Examples
         --------
@@ -460,52 +397,65 @@ class AsyncOrdersClient:
 
 
         async def main() -> None:
-            await client.orders.list()
+            await client.orders.list_orders()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list(request_options=request_options)
+        _response = await self._raw_client.list_orders(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    async def create(
+    async def create_a_new_order(
         self,
         *,
-        name: str,
-        start_date: str,
-        currency: str,
-        customer_id: typing.Optional[str] = OMIT,
-        customer_external_id: typing.Optional[str] = OMIT,
+        customer_id: str,
+        billing_customer_id: typing.Optional[str] = OMIT,
         billing_contact_id: typing.Optional[str] = OMIT,
-        description: typing.Optional[str] = OMIT,
-        end_date: typing.Optional[str] = OMIT,
-        plan_id: typing.Optional[str] = OMIT,
-        order_lines: typing.Optional[typing.Sequence[OrderLineCreate]] = OMIT,
+        billing_contact_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        name: typing.Optional[str] = OMIT,
+        start_date: typing.Optional[dt.datetime] = OMIT,
+        end_date: typing.Optional[dt.datetime] = OMIT,
+        subscription_terms: typing.Optional[int] = OMIT,
+        creation_state: typing.Optional[OrderCreationState] = OMIT,
+        billing_anchor: typing.Optional[float] = OMIT,
+        payment_terms: typing.Optional[str] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        overage_overrides: typing.Optional[typing.Sequence[OverageOverride]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
+        Creates a new order for the organization
+
         Parameters
         ----------
-        name : str
+        customer_id : str
 
-        start_date : str
-
-        currency : str
-
-        customer_id : typing.Optional[str]
-
-        customer_external_id : typing.Optional[str]
+        billing_customer_id : typing.Optional[str]
 
         billing_contact_id : typing.Optional[str]
 
-        description : typing.Optional[str]
+        billing_contact_ids : typing.Optional[typing.Sequence[str]]
 
-        end_date : typing.Optional[str]
+        name : typing.Optional[str]
 
-        plan_id : typing.Optional[str]
-            Optional plan ID to associate with this order
+        start_date : typing.Optional[dt.datetime]
 
-        order_lines : typing.Optional[typing.Sequence[OrderLineCreate]]
+        end_date : typing.Optional[dt.datetime]
+
+        subscription_terms : typing.Optional[int]
+
+        creation_state : typing.Optional[OrderCreationState]
+
+        billing_anchor : typing.Optional[float]
+
+        payment_terms : typing.Optional[str]
+
+        external_id : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+
+        overage_overrides : typing.Optional[typing.Sequence[OverageOverride]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -513,7 +463,7 @@ class AsyncOrdersClient:
         Returns
         -------
         Order
-            Success response
+            201
 
         Examples
         --------
@@ -527,38 +477,39 @@ class AsyncOrdersClient:
 
 
         async def main() -> None:
-            await client.orders.create(
-                customer_external_id="acme-inc",
-                name="Acme Order",
-                description="Acme Order is an order for Acme, Inc.",
-                start_date="2025-01-01",
-                end_date="2026-01-01",
-                currency="USD",
+            await client.orders.create_a_new_order(
+                customer_id="customerId",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create(
+        _response = await self._raw_client.create_a_new_order(
+            customer_id=customer_id,
+            billing_customer_id=billing_customer_id,
+            billing_contact_id=billing_contact_id,
+            billing_contact_ids=billing_contact_ids,
             name=name,
             start_date=start_date,
-            currency=currency,
-            customer_id=customer_id,
-            customer_external_id=customer_external_id,
-            billing_contact_id=billing_contact_id,
-            description=description,
             end_date=end_date,
-            plan_id=plan_id,
-            order_lines=order_lines,
+            subscription_terms=subscription_terms,
+            creation_state=creation_state,
+            billing_anchor=billing_anchor,
+            payment_terms=payment_terms,
+            external_id=external_id,
+            metadata=metadata,
+            overage_overrides=overage_overrides,
             request_options=request_options,
         )
         return _response.data
 
-    async def get(self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Order:
+    async def get_order(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Order:
         """
+        Get an order by its ID
+
         Parameters
         ----------
-        order_id : str
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -566,7 +517,7 @@ class AsyncOrdersClient:
         Returns
         -------
         Order
-            Success response
+            200
 
         Examples
         --------
@@ -580,108 +531,64 @@ class AsyncOrdersClient:
 
 
         async def main() -> None:
-            await client.orders.get(
-                order_id="orderId",
+            await client.orders.get_order(
+                id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get(order_id, request_options=request_options)
+        _response = await self._raw_client.get_order(id, request_options=request_options)
         return _response.data
 
-    async def delete(self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> None:
-        """
-        Parameters
-        ----------
-        order_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        import asyncio
-
-        from paid import AsyncPaid
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.orders.delete(
-                order_id="orderId",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.delete(order_id, request_options=request_options)
-        return _response.data
-
-    async def activate(self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Order:
-        """
-        Parameters
-        ----------
-        order_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        Order
-            Success response
-
-        Examples
-        --------
-        import asyncio
-
-        from paid import AsyncPaid
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.orders.activate(
-                order_id="orderId",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.activate(order_id, request_options=request_options)
-        return _response.data
-
-    async def activate_and_pay(
+    async def update_order(
         self,
-        order_id: str,
+        id: str,
         *,
-        confirmation_token: str,
-        return_url: str,
+        name: typing.Optional[str] = OMIT,
+        start_date: typing.Optional[dt.datetime] = OMIT,
+        end_date: typing.Optional[dt.datetime] = OMIT,
+        subscription_terms: typing.Optional[int] = OMIT,
+        creation_state: typing.Optional[OrderCreationState] = OMIT,
+        billing_anchor: typing.Optional[float] = OMIT,
+        payment_terms: typing.Optional[str] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        billing_customer_id: typing.Optional[str] = OMIT,
+        billing_contact_id: typing.Optional[str] = OMIT,
+        billing_contact_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
-        Activates the order and processes the initial payment using the provided Stripe confirmation token.
+        Update an order by its ID
 
         Parameters
         ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
+        id : str
 
-        confirmation_token : str
-            Stripe confirmation token for the payment method
+        name : typing.Optional[str]
 
-        return_url : str
-            URL to redirect to after payment processing
+        start_date : typing.Optional[dt.datetime]
+
+        end_date : typing.Optional[dt.datetime]
+
+        subscription_terms : typing.Optional[int]
+
+        creation_state : typing.Optional[OrderCreationState]
+
+        billing_anchor : typing.Optional[float]
+
+        payment_terms : typing.Optional[str]
+
+        external_id : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+
+        billing_customer_id : typing.Optional[str]
+
+        billing_contact_id : typing.Optional[str]
+
+        billing_contact_ids : typing.Optional[typing.Sequence[str]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -689,7 +596,7 @@ class AsyncOrdersClient:
         Returns
         -------
         Order
-            Order activated and payment processed successfully
+            200
 
         Examples
         --------
@@ -703,171 +610,46 @@ class AsyncOrdersClient:
 
 
         async def main() -> None:
-            await client.orders.activate_and_pay(
-                order_id="orderId",
-                confirmation_token="ctoken_1234567890",
-                return_url="https://example.com/payment-complete",
+            await client.orders.update_order(
+                id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.activate_and_pay(
-            order_id, confirmation_token=confirmation_token, return_url=return_url, request_options=request_options
-        )
-        return _response.data
-
-    async def cancel_renewal(
-        self,
-        order_id: str,
-        *,
-        order_version: int,
-        cancel_from_date: dt.datetime,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> CancelRenewalResponse:
-        """
-        Schedules the cancellation of an order's renewal from a specified date. The order will remain active until the cancellation date.
-
-        Parameters
-        ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
-
-        order_version : int
-            The current version of the order (for optimistic locking)
-
-        cancel_from_date : dt.datetime
-            The date from which the renewal should be cancelled (ISO 8601 format)
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        CancelRenewalResponse
-            Order renewal cancelled successfully
-
-        Examples
-        --------
-        import asyncio
-        import datetime
-
-        from paid import AsyncPaid
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.orders.cancel_renewal(
-                order_id="orderId",
-                order_version=1,
-                cancel_from_date=datetime.datetime.fromisoformat(
-                    "2025-12-31 00:00:00+00:00",
-                ),
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.cancel_renewal(
-            order_id, order_version=order_version, cancel_from_date=cancel_from_date, request_options=request_options
-        )
-        return _response.data
-
-    async def schedule_plan_change(
-        self,
-        order_id: str,
-        *,
-        order_version: int,
-        effective_date: dt.datetime,
-        updated_order_line_attributes: typing.Sequence[ProrationAttributeUpdate],
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ProrationUpgradeResponse:
-        """
-        Schedules a plan upgrade or downgrade for an order with automatic proration calculation. Credits are applied for the unused portion of the current billing period.
-
-        Parameters
-        ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
-
-        order_version : int
-            The current version of the order (for optimistic locking)
-
-        effective_date : dt.datetime
-            The date when the plan change should take effect (ISO 8601 format)
-
-        updated_order_line_attributes : typing.Sequence[ProrationAttributeUpdate]
-            The list of order line attributes to update
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        ProrationUpgradeResponse
-            Plan change scheduled successfully
-
-        Examples
-        --------
-        import asyncio
-        import datetime
-
-        from paid import AsyncPaid, ProrationAttributeUpdate
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.orders.schedule_plan_change(
-                order_id="orderId",
-                order_version=1,
-                effective_date=datetime.datetime.fromisoformat(
-                    "2025-02-01 00:00:00+00:00",
-                ),
-                updated_order_line_attributes=[
-                    ProrationAttributeUpdate(
-                        order_line_attribute_id="a1b2c3d4-5678-90ab-cdef-1234567890ab",
-                        new_pricing={"unitPrice": 200, "currency": "USD"},
-                        new_quantity=10.0,
-                    )
-                ],
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.schedule_plan_change(
-            order_id,
-            order_version=order_version,
-            effective_date=effective_date,
-            updated_order_line_attributes=updated_order_line_attributes,
+        _response = await self._raw_client.update_order(
+            id,
+            name=name,
+            start_date=start_date,
+            end_date=end_date,
+            subscription_terms=subscription_terms,
+            creation_state=creation_state,
+            billing_anchor=billing_anchor,
+            payment_terms=payment_terms,
+            external_id=external_id,
+            metadata=metadata,
+            billing_customer_id=billing_customer_id,
+            billing_contact_id=billing_contact_id,
+            billing_contact_ids=billing_contact_ids,
             request_options=request_options,
         )
         return _response.data
 
-    async def get_invoices(
-        self, order_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> typing.List[Invoice]:
+    async def delete_order(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> EmptyResponse:
         """
-        Retrieves all invoices associated with a specific order.
+        Delete an order by its ID
 
         Parameters
         ----------
-        order_id : str
-            The order ID (can be internal ID or display ID)
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        typing.List[Invoice]
-            Success response
+        EmptyResponse
+            200
 
         Examples
         --------
@@ -881,12 +663,63 @@ class AsyncOrdersClient:
 
 
         async def main() -> None:
-            await client.orders.get_invoices(
-                order_id="orderId",
+            await client.orders.delete_order(
+                id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_invoices(order_id, request_options=request_options)
+        _response = await self._raw_client.delete_order(id, request_options=request_options)
+        return _response.data
+
+    async def get_order_lines(
+        self,
+        id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> OrderLinesResponse:
+        """
+        Get the order lines for an order by its ID
+
+        Parameters
+        ----------
+        id : str
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        OrderLinesResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.orders.get_order_lines(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_order_lines(
+            id, limit=limit, offset=offset, request_options=request_options
+        )
         return _response.data
