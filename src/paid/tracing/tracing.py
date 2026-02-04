@@ -3,6 +3,7 @@ import asyncio
 import atexit
 import os
 import signal
+from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, Dict, Optional, Tuple, TypeVar, Union
 
 import dotenv
@@ -24,6 +25,22 @@ DEFAULT_COLLECTOR_ENDPOINT = (
 )
 
 T = TypeVar("T")
+
+
+@dataclass
+class PydanticProcessorSettings:
+    """Settings for Pydantic AI span processing."""
+
+    track_usage: bool = True
+    """If False, filters out usage and cost attributes from spans. Default is True."""
+
+
+@dataclass
+class ProcessorSettings:
+    """Configuration for span processors."""
+
+    pydantic: Optional[PydanticProcessorSettings] = None
+    """Settings for Pydantic AI span processing. If provided, enables Pydantic-specific filtering."""
 
 
 class _TokenStore:
@@ -88,6 +105,8 @@ class PaidSpanProcessor(SpanProcessor):
         "gen_ai.completion",
         "gen_ai.request.messages",
         "gen_ai.response.messages",
+        "gen_ai.input.messages",
+        "gen_ai.output.messages",
         "llm.output_message",
         "llm.input_message",
         "llm.invocation_parameters",
@@ -95,6 +114,8 @@ class PaidSpanProcessor(SpanProcessor):
         "langchain.prompt",
         "output.value",
         "input.value",
+        "model_request_parameters",
+        "logfire.json_schema",
     }
 
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
@@ -168,6 +189,58 @@ class PaidSpanProcessor(SpanProcessor):
         return True
 
 
+class PydanticSpanProcessor(SpanProcessor):
+    """
+    Span processor that filters usage and cost attributes from Pydantic AI spans.
+    """
+
+    USAGE_ATTRIBUTES_SUBSTRINGS = {
+        "gen_ai.usage",
+        "operation.cost",
+        "usage",
+        "cost",
+    }
+
+    def __init__(self, track_usage: bool = True):
+        """
+        Initialize the Pydantic span processor.
+
+        Args:
+            track_usage: If False, filters out usage and cost attributes from spans.
+                        Default is True (include usage/cost data).
+        """
+        self.track_usage = track_usage
+
+    def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
+        """Called when a span is started. No action needed - PaidSpanProcessor handles this."""
+        pass
+
+    def on_end(self, span: ReadableSpan) -> None:
+        """Filter out usage/cost data if track_usage is False."""
+        if self.track_usage:
+            return
+
+        original_attributes = span.attributes
+        if not original_attributes:
+            return
+
+        filtered_attrs = {
+            k: v
+            for k, v in original_attributes.items()
+            if not any(substr in k for substr in self.USAGE_ATTRIBUTES_SUBSTRINGS)
+        }
+        # This works because the exporter reads attributes during serialization
+        object.__setattr__(span, "_attributes", filtered_attrs)
+
+    def shutdown(self) -> None:
+        """Called when the processor is shut down. No action needed."""
+        pass
+
+    def force_flush(self, timeout_millis: int = 30000) -> bool:
+        """Called to force flush. Always returns True since there's nothing to flush."""
+        return True
+
+
 def setup_graceful_termination(paid_tracer_provider: TracerProvider):
     def flush_traces():
         try:
@@ -204,13 +277,31 @@ def setup_graceful_termination(paid_tracer_provider: TracerProvider):
         )
 
 
-def initialize_tracing(api_key: Optional[str] = None, collector_endpoint: Optional[str] = DEFAULT_COLLECTOR_ENDPOINT):
+def initialize_tracing(
+    api_key: Optional[str] = None,
+    collector_endpoint: Optional[str] = DEFAULT_COLLECTOR_ENDPOINT,
+    processor_settings: Optional[ProcessorSettings] = None,
+):
     """
     Initialize OpenTelemetry with OTLP exporter for Paid backend.
 
     Args:
         api_key: The API key for authentication. If not provided, will try to get from PAID_API_KEY environment variable.
         collector_endpoint: The OTLP collector endpoint URL.
+        processor_settings: Optional configuration for span processors (e.g., Pydantic AI settings).
+
+    Example:
+        # Basic initialization
+        initialize_tracing()
+
+        # With Pydantic AI settings to filter usage/cost data
+        from paid.tracing import initialize_tracing, ProcessorSettings, PydanticProcessorSettings
+
+        initialize_tracing(
+            processor_settings=ProcessorSettings(
+                pydantic=PydanticProcessorSettings(track_usage=False)
+            )
+        )
     """
     global paid_tracer_provider
 
@@ -244,6 +335,12 @@ def initialize_tracing(api_key: Optional[str] = None, collector_endpoint: Option
 
         # Add span processor to prefix span names and add customer/agent ID attributes
         paid_tracer_provider.add_span_processor(PaidSpanProcessor())
+
+        # Add Pydantic span processor if settings provided
+        if processor_settings and processor_settings.pydantic:
+            paid_tracer_provider.add_span_processor(
+                PydanticSpanProcessor(track_usage=processor_settings.pydantic.track_usage)
+            )
 
         # Set up OTLP exporter
         otlp_exporter = OTLPSpanExporter(

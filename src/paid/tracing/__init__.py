@@ -7,7 +7,12 @@ from .distributed_tracing import (
     unset_tracing_token,
 )
 from .signal import signal
-from .tracing import get_paid_tracer_provider, initialize_tracing
+from .tracing import (
+    get_paid_tracer_provider,
+    initialize_tracing,
+    ProcessorSettings,
+    PydanticProcessorSettings,
+)
 
 __all__ = [
     "generate_tracing_token",
@@ -15,6 +20,8 @@ __all__ = [
     "paid_tracing",
     "initialize_tracing",
     "get_paid_tracer_provider",
+    "ProcessorSettings",
+    "PydanticProcessorSettings",
     "set_tracing_token",
     "unset_tracing_token",
     "signal",
