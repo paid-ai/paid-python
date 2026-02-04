@@ -37,21 +37,21 @@ def signal(event_name: str, enable_cost_tracing: bool = False, data: typing.Opti
 
         from paid.tracing import paid_tracing, signal
 
-        @paid_tracing(external_customer_id="cust_123", external_agent_id="agent_456")
+        @paid_tracing(external_customer_id="cust_123", external_product_id="product_456")
         def process_order(order_id):
             # ... do work ...
             signal("order_processed", data={"order_id": order_id})
 
     Signal with cost tracking:
 
-        @paid_tracing(external_customer_id="cust_123", external_agent_id="agent_456")
+        @paid_tracing(external_customer_id="cust_123", external_product_id="product_456")
         def call_ai_api():
             # ... call AI provider ...
             signal("ai_api_call_complete", enable_cost_tracing=True)
 
     Using context manager:
 
-        with paid_tracing(external_customer_id="cust_123", external_agent_id="agent_456"):
+        with paid_tracing(external_customer_id="cust_123", external_product_id="product_456"):
             # ... do work ...
             signal("milestone_reached", data={"step": "validation_complete"})
     """

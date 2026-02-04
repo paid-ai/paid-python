@@ -25,9 +25,6 @@ class paid_tracing:
         The external customer ID to associate with the trace.
     external_product_id : Optional[str], optional
         The external product ID to associate with the trace, by default None.
-    external_agent_id : Optional[str], optional
-        **Deprecated.** Use external_product_id instead. The external agent ID to associate
-        with the trace, by default None.
     tracing_token : Optional[int], optional
         Optional tracing token for distributed tracing, by default None.
     store_prompt : bool, optional
@@ -68,15 +65,14 @@ class paid_tracing:
         external_customer_id: Optional[str] = None,
         *,
         external_product_id: Optional[str] = None,
-        external_agent_id: Optional[str] = None,
         tracing_token: Optional[int] = None,
         store_prompt: bool = False,
         collector_endpoint: Optional[str] = tracing.DEFAULT_COLLECTOR_ENDPOINT,
         metadata: Optional[Dict[str, Any]] = None,
     ):
         self.external_customer_id = external_customer_id
-        # external_product_id overrides external_agent_id for backwards compatibility
-        self.external_agent_id = external_product_id if external_product_id else external_agent_id
+        # Map external_product_id to external_agent_id for internal context
+        self.external_agent_id = external_product_id
         self.tracing_token = tracing_token
         self.store_prompt = store_prompt
         self.collector_endpoint = collector_endpoint

@@ -18,42 +18,48 @@ try:
     from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
 
     ANTHROPIC_AVAILABLE = True
-except ImportError:
+except Exception:
+    logger.debug("Anthropic instrumentation library not available, skipping instrumentation")
     ANTHROPIC_AVAILABLE = False
 
 try:
     from opentelemetry.instrumentation.openai import OpenAIInstrumentor
 
     OPENAI_AVAILABLE = True
-except ImportError:
+except Exception:
+    logger.debug("OpenAI instrumentation library not available, skipping instrumentation")
     OPENAI_AVAILABLE = False
 
 try:
     from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
 
     OPENAI_AGENTS_AVAILABLE = True
-except ImportError:
+except Exception:
+    logger.debug("OpenAI Agents instrumentation library not available, skipping instrumentation")
     OPENAI_AGENTS_AVAILABLE = False
 
 try:
     from openinference.instrumentation.bedrock import BedrockInstrumentor
 
     BEDROCK_AVAILABLE = True
-except ImportError:
+except Exception:
+    logger.debug("Bedrock instrumentation library not available, skipping instrumentation")
     BEDROCK_AVAILABLE = False
 
 try:
     from openinference.instrumentation.langchain import LangChainInstrumentor
 
     LANGCHAIN_AVAILABLE = True
-except ImportError:
+except Exception:
+    logger.debug("LangChain instrumentation library not available, skipping instrumentation")
     LANGCHAIN_AVAILABLE = False
 
 try:
     from openinference.instrumentation.google_genai import GoogleGenAIInstrumentor
 
     GOOGLE_GENAI_AVAILABLE = True
-except ImportError:
+except Exception:
+    logger.debug("Google GenAI instrumentation library not available, skipping instrumentation")
     GOOGLE_GENAI_AVAILABLE = False
 
 

@@ -9,8 +9,16 @@ from ..core.http_response import AsyncHttpResponse, HttpResponse
 from ..core.jsonable_encoder import jsonable_encoder
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
+from ..core.serialization import convert_and_respect_annotation_metadata
+from ..errors.bad_request_error import BadRequestError
+from ..errors.forbidden_error import ForbiddenError
+from ..errors.internal_server_error import InternalServerError
+from ..errors.not_found_error import NotFoundError
 from ..types.contact import Contact
-from ..types.salutation import Salutation
+from ..types.contact_billing_address import ContactBillingAddress
+from ..types.contact_list_response import ContactListResponse
+from ..types.empty_response import EmptyResponse
+from ..types.error_response import ErrorResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -20,60 +28,105 @@ class RawContactsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[typing.List[Contact]]:
+    def list_contacts(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[ContactListResponse]:
         """
+        Get a list of contacts for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[typing.List[Contact]]
-            Success response
+        HttpResponse[ContactListResponse]
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
-            "contacts",
+            "contacts/",
             method="GET",
+            params={
+                "limit": limit,
+                "offset": offset,
+            },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[Contact],
+                    ContactListResponse,
                     parse_obj_as(
-                        type_=typing.List[Contact],  # type: ignore
+                        type_=ContactListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create(
+    def create_a_new_contact(
         self,
         *,
-        salutation: Salutation,
+        customer_id: str,
         first_name: str,
         last_name: str,
         email: str,
-        external_id: typing.Optional[str] = OMIT,
-        customer_id: typing.Optional[str] = OMIT,
-        customer_external_id: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
-        billing_street: typing.Optional[str] = OMIT,
-        billing_city: typing.Optional[str] = OMIT,
-        billing_state_province: typing.Optional[str] = OMIT,
-        billing_country: typing.Optional[str] = OMIT,
-        billing_postal_code: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[ContactBillingAddress] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Contact]:
         """
+        Creates a new contact for the organization
+
         Parameters
         ----------
-        salutation : Salutation
+        customer_id : str
 
         first_name : str
 
@@ -81,23 +134,11 @@ class RawContactsClient:
 
         email : str
 
-        external_id : typing.Optional[str]
-
-        customer_id : typing.Optional[str]
-
-        customer_external_id : typing.Optional[str]
-
         phone : typing.Optional[str]
 
-        billing_street : typing.Optional[str]
+        billing_address : typing.Optional[ContactBillingAddress]
 
-        billing_city : typing.Optional[str]
-
-        billing_state_province : typing.Optional[str]
-
-        billing_country : typing.Optional[str]
-
-        billing_postal_code : typing.Optional[str]
+        external_id : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -105,25 +146,21 @@ class RawContactsClient:
         Returns
         -------
         HttpResponse[Contact]
-            Success response
+            201
         """
         _response = self._client_wrapper.httpx_client.request(
-            "contacts",
+            "contacts/",
             method="POST",
             json={
-                "externalId": external_id,
                 "customerId": customer_id,
-                "customerExternalId": customer_external_id,
-                "salutation": salutation,
                 "firstName": first_name,
                 "lastName": last_name,
                 "email": email,
                 "phone": phone,
-                "billingStreet": billing_street,
-                "billingCity": billing_city,
-                "billingStateProvince": billing_state_province,
-                "billingCountry": billing_country,
-                "billingPostalCode": billing_postal_code,
+                "billingAddress": convert_and_respect_annotation_metadata(
+                    object_=billing_address, annotation=typing.Optional[ContactBillingAddress], direction="write"
+                ),
+                "externalId": external_id,
             },
             headers={
                 "content-type": "application/json",
@@ -141,16 +178,51 @@ class RawContactsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get(self, contact_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[Contact]:
+    def get_contact(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[Contact]:
         """
+        Get a contact by its ID
+
         Parameters
         ----------
-        contact_id : str
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -158,10 +230,10 @@ class RawContactsClient:
         Returns
         -------
         HttpResponse[Contact]
-            Success response
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"contacts/{jsonable_encoder(contact_id)}",
+            f"contacts/{jsonable_encoder(id)}",
             method="GET",
             request_options=request_options,
         )
@@ -175,41 +247,242 @@ class RawContactsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete(self, contact_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[None]:
+    def update_contact(
+        self,
+        id: str,
+        *,
+        customer_id: typing.Optional[str] = OMIT,
+        first_name: typing.Optional[str] = OMIT,
+        last_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
+        phone: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[ContactBillingAddress] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[Contact]:
         """
+        Update a contact by its ID
+
         Parameters
         ----------
-        contact_id : str
+        id : str
+
+        customer_id : typing.Optional[str]
+
+        first_name : typing.Optional[str]
+
+        last_name : typing.Optional[str]
+
+        email : typing.Optional[str]
+
+        phone : typing.Optional[str]
+
+        billing_address : typing.Optional[ContactBillingAddress]
+
+        external_id : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[None]
+        HttpResponse[Contact]
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"contacts/{jsonable_encoder(contact_id)}",
-            method="DELETE",
+            f"contacts/{jsonable_encoder(id)}",
+            method="PUT",
+            json={
+                "customerId": customer_id,
+                "firstName": first_name,
+                "lastName": last_name,
+                "email": email,
+                "phone": phone,
+                "billingAddress": convert_and_respect_annotation_metadata(
+                    object_=billing_address, annotation=typing.Optional[ContactBillingAddress], direction="write"
+                ),
+                "externalId": external_id,
+            },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
+            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
-                return HttpResponse(response=_response, data=None)
+                _data = typing.cast(
+                    Contact,
+                    parse_obj_as(
+                        type_=Contact,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_by_external_id(
+    def delete_contact(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[EmptyResponse]:
+        """
+        Delete a contact by its ID
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[EmptyResponse]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"contacts/{jsonable_encoder(id)}",
+            method="DELETE",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    EmptyResponse,
+                    parse_obj_as(
+                        type_=EmptyResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def get_contact_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[Contact]:
         """
+        Get a contact by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -220,7 +493,7 @@ class RawContactsClient:
         Returns
         -------
         HttpResponse[Contact]
-            Success response
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
             f"contacts/external/{jsonable_encoder(external_id)}",
@@ -237,15 +510,171 @@ class RawContactsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_by_external_id(
-        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[None]:
+    def update_contact_by_external_id(
+        self,
+        external_id_: str,
+        *,
+        customer_id: typing.Optional[str] = OMIT,
+        first_name: typing.Optional[str] = OMIT,
+        last_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
+        phone: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[ContactBillingAddress] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[Contact]:
         """
+        Update a contact by its externalId
+
+        Parameters
+        ----------
+        external_id_ : str
+
+        customer_id : typing.Optional[str]
+
+        first_name : typing.Optional[str]
+
+        last_name : typing.Optional[str]
+
+        email : typing.Optional[str]
+
+        phone : typing.Optional[str]
+
+        billing_address : typing.Optional[ContactBillingAddress]
+
+        external_id : typing.Optional[str]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[Contact]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"contacts/external/{jsonable_encoder(external_id_)}",
+            method="PUT",
+            json={
+                "customerId": customer_id,
+                "firstName": first_name,
+                "lastName": last_name,
+                "email": email,
+                "phone": phone,
+                "billingAddress": convert_and_respect_annotation_metadata(
+                    object_=billing_address, annotation=typing.Optional[ContactBillingAddress], direction="write"
+                ),
+                "externalId": external_id,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    Contact,
+                    parse_obj_as(
+                        type_=Contact,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def delete_contact_by_external_id(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[EmptyResponse]:
+        """
+        Delete a contact by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -255,7 +684,8 @@ class RawContactsClient:
 
         Returns
         -------
-        HttpResponse[None]
+        HttpResponse[EmptyResponse]
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
             f"contacts/external/{jsonable_encoder(external_id)}",
@@ -264,7 +694,47 @@ class RawContactsClient:
         )
         try:
             if 200 <= _response.status_code < 300:
-                return HttpResponse(response=_response, data=None)
+                _data = typing.cast(
+                    EmptyResponse,
+                    parse_obj_as(
+                        type_=EmptyResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
@@ -275,62 +745,105 @@ class AsyncRawContactsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list(
-        self, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[typing.List[Contact]]:
+    async def list_contacts(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[ContactListResponse]:
         """
+        Get a list of contacts for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[typing.List[Contact]]
-            Success response
+        AsyncHttpResponse[ContactListResponse]
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "contacts",
+            "contacts/",
             method="GET",
+            params={
+                "limit": limit,
+                "offset": offset,
+            },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[Contact],
+                    ContactListResponse,
                     parse_obj_as(
-                        type_=typing.List[Contact],  # type: ignore
+                        type_=ContactListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create(
+    async def create_a_new_contact(
         self,
         *,
-        salutation: Salutation,
+        customer_id: str,
         first_name: str,
         last_name: str,
         email: str,
-        external_id: typing.Optional[str] = OMIT,
-        customer_id: typing.Optional[str] = OMIT,
-        customer_external_id: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
-        billing_street: typing.Optional[str] = OMIT,
-        billing_city: typing.Optional[str] = OMIT,
-        billing_state_province: typing.Optional[str] = OMIT,
-        billing_country: typing.Optional[str] = OMIT,
-        billing_postal_code: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[ContactBillingAddress] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Contact]:
         """
+        Creates a new contact for the organization
+
         Parameters
         ----------
-        salutation : Salutation
+        customer_id : str
 
         first_name : str
 
@@ -338,23 +851,11 @@ class AsyncRawContactsClient:
 
         email : str
 
-        external_id : typing.Optional[str]
-
-        customer_id : typing.Optional[str]
-
-        customer_external_id : typing.Optional[str]
-
         phone : typing.Optional[str]
 
-        billing_street : typing.Optional[str]
+        billing_address : typing.Optional[ContactBillingAddress]
 
-        billing_city : typing.Optional[str]
-
-        billing_state_province : typing.Optional[str]
-
-        billing_country : typing.Optional[str]
-
-        billing_postal_code : typing.Optional[str]
+        external_id : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -362,25 +863,21 @@ class AsyncRawContactsClient:
         Returns
         -------
         AsyncHttpResponse[Contact]
-            Success response
+            201
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "contacts",
+            "contacts/",
             method="POST",
             json={
-                "externalId": external_id,
                 "customerId": customer_id,
-                "customerExternalId": customer_external_id,
-                "salutation": salutation,
                 "firstName": first_name,
                 "lastName": last_name,
                 "email": email,
                 "phone": phone,
-                "billingStreet": billing_street,
-                "billingCity": billing_city,
-                "billingStateProvince": billing_state_province,
-                "billingCountry": billing_country,
-                "billingPostalCode": billing_postal_code,
+                "billingAddress": convert_and_respect_annotation_metadata(
+                    object_=billing_address, annotation=typing.Optional[ContactBillingAddress], direction="write"
+                ),
+                "externalId": external_id,
             },
             headers={
                 "content-type": "application/json",
@@ -398,18 +895,53 @@ class AsyncRawContactsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get(
-        self, contact_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    async def get_contact(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Contact]:
         """
+        Get a contact by its ID
+
         Parameters
         ----------
-        contact_id : str
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -417,10 +949,10 @@ class AsyncRawContactsClient:
         Returns
         -------
         AsyncHttpResponse[Contact]
-            Success response
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"contacts/{jsonable_encoder(contact_id)}",
+            f"contacts/{jsonable_encoder(id)}",
             method="GET",
             request_options=request_options,
         )
@@ -434,43 +966,242 @@ class AsyncRawContactsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete(
-        self, contact_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[None]:
+    async def update_contact(
+        self,
+        id: str,
+        *,
+        customer_id: typing.Optional[str] = OMIT,
+        first_name: typing.Optional[str] = OMIT,
+        last_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
+        phone: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[ContactBillingAddress] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[Contact]:
         """
+        Update a contact by its ID
+
         Parameters
         ----------
-        contact_id : str
+        id : str
+
+        customer_id : typing.Optional[str]
+
+        first_name : typing.Optional[str]
+
+        last_name : typing.Optional[str]
+
+        email : typing.Optional[str]
+
+        phone : typing.Optional[str]
+
+        billing_address : typing.Optional[ContactBillingAddress]
+
+        external_id : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[None]
+        AsyncHttpResponse[Contact]
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"contacts/{jsonable_encoder(contact_id)}",
-            method="DELETE",
+            f"contacts/{jsonable_encoder(id)}",
+            method="PUT",
+            json={
+                "customerId": customer_id,
+                "firstName": first_name,
+                "lastName": last_name,
+                "email": email,
+                "phone": phone,
+                "billingAddress": convert_and_respect_annotation_metadata(
+                    object_=billing_address, annotation=typing.Optional[ContactBillingAddress], direction="write"
+                ),
+                "externalId": external_id,
+            },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
+            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
-                return AsyncHttpResponse(response=_response, data=None)
+                _data = typing.cast(
+                    Contact,
+                    parse_obj_as(
+                        type_=Contact,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_by_external_id(
+    async def delete_contact(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[EmptyResponse]:
+        """
+        Delete a contact by its ID
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[EmptyResponse]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"contacts/{jsonable_encoder(id)}",
+            method="DELETE",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    EmptyResponse,
+                    parse_obj_as(
+                        type_=EmptyResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def get_contact_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Contact]:
         """
+        Get a contact by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -481,7 +1212,7 @@ class AsyncRawContactsClient:
         Returns
         -------
         AsyncHttpResponse[Contact]
-            Success response
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"contacts/external/{jsonable_encoder(external_id)}",
@@ -498,15 +1229,171 @@ class AsyncRawContactsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_by_external_id(
-        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[None]:
+    async def update_contact_by_external_id(
+        self,
+        external_id_: str,
+        *,
+        customer_id: typing.Optional[str] = OMIT,
+        first_name: typing.Optional[str] = OMIT,
+        last_name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
+        phone: typing.Optional[str] = OMIT,
+        billing_address: typing.Optional[ContactBillingAddress] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[Contact]:
         """
+        Update a contact by its externalId
+
+        Parameters
+        ----------
+        external_id_ : str
+
+        customer_id : typing.Optional[str]
+
+        first_name : typing.Optional[str]
+
+        last_name : typing.Optional[str]
+
+        email : typing.Optional[str]
+
+        phone : typing.Optional[str]
+
+        billing_address : typing.Optional[ContactBillingAddress]
+
+        external_id : typing.Optional[str]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[Contact]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"contacts/external/{jsonable_encoder(external_id_)}",
+            method="PUT",
+            json={
+                "customerId": customer_id,
+                "firstName": first_name,
+                "lastName": last_name,
+                "email": email,
+                "phone": phone,
+                "billingAddress": convert_and_respect_annotation_metadata(
+                    object_=billing_address, annotation=typing.Optional[ContactBillingAddress], direction="write"
+                ),
+                "externalId": external_id,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    Contact,
+                    parse_obj_as(
+                        type_=Contact,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def delete_contact_by_external_id(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[EmptyResponse]:
+        """
+        Delete a contact by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -516,7 +1403,8 @@ class AsyncRawContactsClient:
 
         Returns
         -------
-        AsyncHttpResponse[None]
+        AsyncHttpResponse[EmptyResponse]
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"contacts/external/{jsonable_encoder(external_id)}",
@@ -525,7 +1413,47 @@ class AsyncRawContactsClient:
         )
         try:
             if 200 <= _response.status_code < 300:
-                return AsyncHttpResponse(response=_response, data=None)
+                _data = typing.cast(
+                    EmptyResponse,
+                    parse_obj_as(
+                        type_=EmptyResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)

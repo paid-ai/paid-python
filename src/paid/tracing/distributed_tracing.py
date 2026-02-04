@@ -35,7 +35,7 @@ def generate_tracing_token() -> int:
             token = load_from_database("task_123")
             set_tracing_token(token)
 
-            @paid_tracing(external_customer_id="cust_123", external_agent_id="agent_456")
+            @paid_tracing(external_customer_id="cust_123", external_product_id="product_456")
             def process_task():
                 # This trace is now linked to the same token
                 pass
@@ -56,7 +56,7 @@ def set_tracing_token(token: int):
     Instead of:
         token = load_from_storage("workflow_123")
         set_tracing_token(token)
-        @paid_tracing(external_customer_id="cust_123", external_agent_id="agent_456")
+        @paid_tracing(external_customer_id="cust_123", external_product_id="product_456")
         def process_workflow():
             ...
         unset_tracing_token()
@@ -66,7 +66,7 @@ def set_tracing_token(token: int):
 
         @paid_tracing(
             external_customer_id="cust_123",
-            external_agent_id="agent_456",
+            external_product_id="product_456",
             tracing_token=token
         )
         def process_workflow():

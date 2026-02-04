@@ -4,11 +4,9 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.agent_attribute import AgentAttribute
 from ..types.product import Product
-from ..types.product_update_type import ProductUpdateType
+from ..types.product_list_response import ProductListResponse
 from .raw_client import AsyncRawProductsClient, RawProductsClient
-from .types.product_create_type import ProductCreateType
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -29,17 +27,29 @@ class ProductsClient:
         """
         return self._raw_client
 
-    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[Product]:
+    def list_products(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ProductListResponse:
         """
+        Get a list of products for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        typing.List[Product]
-            Success response
+        ProductListResponse
+            200
 
         Examples
         --------
@@ -48,37 +58,36 @@ class ProductsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.products.list()
+        client.products.list_products()
         """
-        _response = self._raw_client.list(request_options=request_options)
+        _response = self._raw_client.list_products(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    def create(
+    def create_a_new_product(
         self,
         *,
         name: str,
         description: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductCreateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
+        Creates a new product for the organization
+
         Parameters
         ----------
         name : str
 
         description : typing.Optional[str]
 
-        external_id : typing.Optional[str]
-
-        type : typing.Optional[ProductCreateType]
-
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
+
+        external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
@@ -88,7 +97,7 @@ class ProductsClient:
         Returns
         -------
         Product
-            Success response
+            201
 
         Examples
         --------
@@ -97,30 +106,28 @@ class ProductsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.products.create(
-            name="Acme Product",
-            description="Acme Product does amazing things.",
-            external_id="acme-product",
-            type="product",
+        client.products.create_a_new_product(
+            name="name",
         )
         """
-        _response = self._raw_client.create(
+        _response = self._raw_client.create_a_new_product(
             name=name,
             description=description,
-            external_id=external_id,
-            type=type,
             active=active,
             product_code=product_code,
+            external_id=external_id,
             metadata=metadata,
             request_options=request_options,
         )
         return _response.data
 
-    def get(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Product:
+    def get_product(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Product:
         """
+        Get a product by its ID
+
         Parameters
         ----------
-        product_id : str
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -128,7 +135,7 @@ class ProductsClient:
         Returns
         -------
         Product
-            Success response
+            200
 
         Examples
         --------
@@ -137,46 +144,41 @@ class ProductsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.products.get(
-            product_id="productId",
+        client.products.get_product(
+            id="id",
         )
         """
-        _response = self._raw_client.get(product_id, request_options=request_options)
+        _response = self._raw_client.get_product(id, request_options=request_options)
         return _response.data
 
-    def update(
+    def update_product(
         self,
-        product_id: str,
+        id: str,
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
-        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
+        Update a product by its ID
+
         Parameters
         ----------
-        product_id : str
+        id : str
 
         name : typing.Optional[str]
 
         description : typing.Optional[str]
 
-        external_id : typing.Optional[str]
-
-        type : typing.Optional[ProductUpdateType]
-
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
 
-        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
-            Pricing attributes for this product
+        external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
@@ -186,7 +188,7 @@ class ProductsClient:
         Returns
         -------
         Product
-            Success response
+            200
 
         Examples
         --------
@@ -195,55 +197,28 @@ class ProductsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.products.update(
-            product_id="productId",
+        client.products.update_product(
+            id="id",
         )
         """
-        _response = self._raw_client.update(
-            product_id,
+        _response = self._raw_client.update_product(
+            id,
             name=name,
             description=description,
-            external_id=external_id,
-            type=type,
             active=active,
             product_code=product_code,
-            product_attribute=product_attribute,
+            external_id=external_id,
             metadata=metadata,
             request_options=request_options,
         )
         return _response.data
 
-    def delete(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> None:
-        """
-        Parameters
-        ----------
-        product_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        from paid import Paid
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.products.delete(
-            product_id="productId",
-        )
-        """
-        _response = self._raw_client.delete(product_id, request_options=request_options)
-        return _response.data
-
-    def get_by_external_id(
+    def get_product_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Product:
         """
+        Get a product by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -254,7 +229,7 @@ class ProductsClient:
         Returns
         -------
         Product
-            Success response
+            200
 
         Examples
         --------
@@ -263,28 +238,28 @@ class ProductsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.products.get_by_external_id(
+        client.products.get_product_by_external_id(
             external_id="externalId",
         )
         """
-        _response = self._raw_client.get_by_external_id(external_id, request_options=request_options)
+        _response = self._raw_client.get_product_by_external_id(external_id, request_options=request_options)
         return _response.data
 
-    def update_by_external_id(
+    def update_product_by_external_id(
         self,
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
-        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
+        Update a product by its externalId
+
         Parameters
         ----------
         external_id_ : str
@@ -293,16 +268,11 @@ class ProductsClient:
 
         description : typing.Optional[str]
 
-        external_id : typing.Optional[str]
-
-        type : typing.Optional[ProductUpdateType]
-
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
 
-        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
-            Pricing attributes for this product
+        external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
@@ -312,7 +282,7 @@ class ProductsClient:
         Returns
         -------
         Product
-            Success response
+            200
 
         Examples
         --------
@@ -321,51 +291,20 @@ class ProductsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.products.update_by_external_id(
+        client.products.update_product_by_external_id(
             external_id_="externalId",
         )
         """
-        _response = self._raw_client.update_by_external_id(
+        _response = self._raw_client.update_product_by_external_id(
             external_id_,
             name=name,
             description=description,
-            external_id=external_id,
-            type=type,
             active=active,
             product_code=product_code,
-            product_attribute=product_attribute,
+            external_id=external_id,
             metadata=metadata,
             request_options=request_options,
         )
-        return _response.data
-
-    def delete_by_external_id(
-        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> None:
-        """
-        Parameters
-        ----------
-        external_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        from paid import Paid
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.products.delete_by_external_id(
-            external_id="externalId",
-        )
-        """
-        _response = self._raw_client.delete_by_external_id(external_id, request_options=request_options)
         return _response.data
 
 
@@ -384,17 +323,29 @@ class AsyncProductsClient:
         """
         return self._raw_client
 
-    async def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> typing.List[Product]:
+    async def list_products(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ProductListResponse:
         """
+        Get a list of products for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        typing.List[Product]
-            Success response
+        ProductListResponse
+            200
 
         Examples
         --------
@@ -408,40 +359,39 @@ class AsyncProductsClient:
 
 
         async def main() -> None:
-            await client.products.list()
+            await client.products.list_products()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list(request_options=request_options)
+        _response = await self._raw_client.list_products(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    async def create(
+    async def create_a_new_product(
         self,
         *,
         name: str,
         description: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductCreateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
+        Creates a new product for the organization
+
         Parameters
         ----------
         name : str
 
         description : typing.Optional[str]
 
-        external_id : typing.Optional[str]
-
-        type : typing.Optional[ProductCreateType]
-
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
+
+        external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
@@ -451,7 +401,7 @@ class AsyncProductsClient:
         Returns
         -------
         Product
-            Success response
+            201
 
         Examples
         --------
@@ -465,33 +415,31 @@ class AsyncProductsClient:
 
 
         async def main() -> None:
-            await client.products.create(
-                name="Acme Product",
-                description="Acme Product does amazing things.",
-                external_id="acme-product",
-                type="product",
+            await client.products.create_a_new_product(
+                name="name",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create(
+        _response = await self._raw_client.create_a_new_product(
             name=name,
             description=description,
-            external_id=external_id,
-            type=type,
             active=active,
             product_code=product_code,
+            external_id=external_id,
             metadata=metadata,
             request_options=request_options,
         )
         return _response.data
 
-    async def get(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Product:
+    async def get_product(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Product:
         """
+        Get a product by its ID
+
         Parameters
         ----------
-        product_id : str
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -499,7 +447,7 @@ class AsyncProductsClient:
         Returns
         -------
         Product
-            Success response
+            200
 
         Examples
         --------
@@ -513,49 +461,44 @@ class AsyncProductsClient:
 
 
         async def main() -> None:
-            await client.products.get(
-                product_id="productId",
+            await client.products.get_product(
+                id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get(product_id, request_options=request_options)
+        _response = await self._raw_client.get_product(id, request_options=request_options)
         return _response.data
 
-    async def update(
+    async def update_product(
         self,
-        product_id: str,
+        id: str,
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
-        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
+        Update a product by its ID
+
         Parameters
         ----------
-        product_id : str
+        id : str
 
         name : typing.Optional[str]
 
         description : typing.Optional[str]
 
-        external_id : typing.Optional[str]
-
-        type : typing.Optional[ProductUpdateType]
-
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
 
-        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
-            Pricing attributes for this product
+        external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
@@ -565,7 +508,7 @@ class AsyncProductsClient:
         Returns
         -------
         Product
-            Success response
+            200
 
         Examples
         --------
@@ -579,66 +522,31 @@ class AsyncProductsClient:
 
 
         async def main() -> None:
-            await client.products.update(
-                product_id="productId",
+            await client.products.update_product(
+                id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update(
-            product_id,
+        _response = await self._raw_client.update_product(
+            id,
             name=name,
             description=description,
-            external_id=external_id,
-            type=type,
             active=active,
             product_code=product_code,
-            product_attribute=product_attribute,
+            external_id=external_id,
             metadata=metadata,
             request_options=request_options,
         )
         return _response.data
 
-    async def delete(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> None:
-        """
-        Parameters
-        ----------
-        product_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        import asyncio
-
-        from paid import AsyncPaid
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.products.delete(
-                product_id="productId",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.delete(product_id, request_options=request_options)
-        return _response.data
-
-    async def get_by_external_id(
+    async def get_product_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Product:
         """
+        Get a product by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -649,7 +557,7 @@ class AsyncProductsClient:
         Returns
         -------
         Product
-            Success response
+            200
 
         Examples
         --------
@@ -663,31 +571,31 @@ class AsyncProductsClient:
 
 
         async def main() -> None:
-            await client.products.get_by_external_id(
+            await client.products.get_product_by_external_id(
                 external_id="externalId",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_by_external_id(external_id, request_options=request_options)
+        _response = await self._raw_client.get_product_by_external_id(external_id, request_options=request_options)
         return _response.data
 
-    async def update_by_external_id(
+    async def update_product_by_external_id(
         self,
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
-        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
+        Update a product by its externalId
+
         Parameters
         ----------
         external_id_ : str
@@ -696,16 +604,11 @@ class AsyncProductsClient:
 
         description : typing.Optional[str]
 
-        external_id : typing.Optional[str]
-
-        type : typing.Optional[ProductUpdateType]
-
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
 
-        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
-            Pricing attributes for this product
+        external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
@@ -715,7 +618,7 @@ class AsyncProductsClient:
         Returns
         -------
         Product
-            Success response
+            200
 
         Examples
         --------
@@ -729,60 +632,21 @@ class AsyncProductsClient:
 
 
         async def main() -> None:
-            await client.products.update_by_external_id(
+            await client.products.update_product_by_external_id(
                 external_id_="externalId",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_by_external_id(
+        _response = await self._raw_client.update_product_by_external_id(
             external_id_,
             name=name,
             description=description,
-            external_id=external_id,
-            type=type,
             active=active,
             product_code=product_code,
-            product_attribute=product_attribute,
+            external_id=external_id,
             metadata=metadata,
             request_options=request_options,
         )
-        return _response.data
-
-    async def delete_by_external_id(
-        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> None:
-        """
-        Parameters
-        ----------
-        external_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        None
-
-        Examples
-        --------
-        import asyncio
-
-        from paid import AsyncPaid
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.products.delete_by_external_id(
-                external_id="externalId",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.delete_by_external_id(external_id, request_options=request_options)
         return _response.data

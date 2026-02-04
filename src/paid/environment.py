@@ -4,4 +4,4 @@ import enum
 
 
 class PaidEnvironment(enum.Enum):
-    PRODUCTION = "https://api.agentpaid.io/api/v1"
+    DEFAULT = "https://api.agentpaid.io/api/v2"

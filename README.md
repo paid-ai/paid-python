@@ -41,7 +41,7 @@ from paid import Paid
 
 client = Paid(token="API_KEY")
 
-client.customers.create(
+client.customers.create_a_new_customer(
     name="name"
 )
 ```
@@ -52,7 +52,7 @@ The SDK provides Python classes for all request and response types. These are au
 
 ```python
 # Example of creating a customer
-response = client.customers.create(
+response = client.customers.create_a_new_customer(
     name="John Doe",
 )
 
@@ -66,13 +66,21 @@ print(response.email)
 When the API returns a non-success status code (4xx or 5xx response), the SDK will raise an appropriate error.
 
 ```python
+from paid import BadRequestError, NotFoundError
+from paid.core.api_error import ApiError
+
 try:
-    client.customers.create(...)
-except paid.Error as e:
-    print(e.status_code)
-    print(e.message)
+    client.customers.create_a_new_customer(name="John Doe")
+except BadRequestError as e:
+    print(e.status_code)  # 400
+    print(e.body)         # ErrorResponse with error details
+except NotFoundError as e:
+    print(e.status_code)  # 404
     print(e.body)
-    print(e.raw_response)
+except ApiError as e:
+    # Catch-all for other API errors
+    print(e.status_code)
+    print(e.body)
 ```
 
 ## Logging
@@ -117,6 +125,7 @@ export PAID_ENABLED=false
 ```
 
 This is useful for:
+
 - Development/testing environments where tracing isn't needed
 - Temporarily disabling tracing without modifying code
 - Feature flagging in different deployment environments
@@ -178,11 +187,13 @@ Both approaches:
 - Support the same parameters: `external_customer_id`, `external_product_id`, `tracing_token`, `store_prompt`, `metadata`
 
 * Note - if it happens that you're calling `paid_tracing` from non-main thread, then it's advised to initialize from main thread:
+
 ```python
 from paid.tracing import initialize_tracing
 initialize_tracing()
 ```
-* `initialize_tracing` also accepts optional arguments like OTEL collector endpoint and api key if you want to reroute your tracing somewhere else :)
+
+- `initialize_tracing` also accepts optional arguments like OTEL collector endpoint and api key if you want to reroute your tracing somewhere else :)
 
 ### Using the Paid wrappers
 
@@ -265,6 +276,7 @@ You can attach custom metadata to your traces by passing a `metadata` dictionary
 
     process_event(incoming_event)
     ```
+
   </Tab>
 
   <Tab title="Python - Context Manager">
@@ -299,6 +311,7 @@ You can attach custom metadata to your traces by passing a `metadata` dictionary
     ):
         process_event(incoming_event)
     ```
+
   </Tab>
 
   <Tab title="Node.js">
@@ -735,6 +748,7 @@ await do_work()
 ### Paid OTEL Tracer Provider
 
 If you would like to use the Paid OTEL tracer provider:
+
 ```python
 from paid.tracing import get_paid_tracer_provider
 paid_tracer_provider = get_paid_tracer_provider()

@@ -3,45 +3,19 @@
 import typing
 
 import pydantic
+import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.serialization import FieldMetadata
+from .attribution import Attribution
+from .customer_attribution import CustomerAttribution
 
 
 class Signal(UniversalBaseModel):
-    """
-    DEPRECATED: Use SignalV2 instead for cleaner field names.
-    """
-
-    event_name: typing.Optional[str] = None
-    agent_id: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    DEPRECATED: Use product_id in SignalV2 instead.
-    """
-
-    external_agent_id: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    DEPRECATED: Use external_product_id in SignalV2 instead.
-    """
-
-    customer_id: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    DEPRECATED: The external customer id. Use `external_customer_id` or `internal_customer_id` instead.
-    """
-
+    event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName")]
+    customer: CustomerAttribution
+    attribution: typing.Optional[Attribution] = None
     data: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
-    idempotency_key: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    A unique key to ensure idempotent signal processing
-    """
-
-    internal_customer_id: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    DEPRECATED: Use customer_id in SignalV2 instead. This was Paid's internal customer ID.
-    """
-
-    external_customer_id: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    Your system's customer ID
-    """
+    idempotency_key: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="idempotencyKey")] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
