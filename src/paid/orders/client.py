@@ -67,7 +67,7 @@ class OrdersClient:
         _response = self._raw_client.list_orders(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    def create_a_new_order(
+    def create_order(
         self,
         *,
         customer_id: str,
@@ -128,11 +128,11 @@ class OrdersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.orders.create_a_new_order(
+        client.orders.create_order(
             customer_id="customerId",
         )
         """
-        _response = self._raw_client.create_a_new_order(
+        _response = self._raw_client.create_order(
             customer_id=customer_id,
             billing_customer_id=billing_customer_id,
             billing_contact_ids=billing_contact_ids,
@@ -149,9 +149,9 @@ class OrdersClient:
         )
         return _response.data
 
-    def get_order(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Order:
+    def get_order_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Order:
         """
-        Get an order by its ID
+        Get an order by ID
 
         Parameters
         ----------
@@ -172,14 +172,14 @@ class OrdersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.orders.get_order(
+        client.orders.get_order_by_id(
             id="id",
         )
         """
-        _response = self._raw_client.get_order(id, request_options=request_options)
+        _response = self._raw_client.get_order_by_id(id, request_options=request_options)
         return _response.data
 
-    def update_order(
+    def update_order_by_id(
         self,
         id: str,
         *,
@@ -197,7 +197,7 @@ class OrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
-        Update an order by its ID
+        Update an order by ID
 
         Parameters
         ----------
@@ -240,11 +240,11 @@ class OrdersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.orders.update_order(
+        client.orders.update_order_by_id(
             id="id",
         )
         """
-        _response = self._raw_client.update_order(
+        _response = self._raw_client.update_order_by_id(
             id,
             name=name,
             start_date=start_date,
@@ -261,9 +261,9 @@ class OrdersClient:
         )
         return _response.data
 
-    def delete_order(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> EmptyResponse:
+    def delete_order_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> EmptyResponse:
         """
-        Delete an order by its ID
+        Delete an order by ID
 
         Parameters
         ----------
@@ -284,11 +284,11 @@ class OrdersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.orders.delete_order(
+        client.orders.delete_order_by_id(
             id="id",
         )
         """
-        _response = self._raw_client.delete_order(id, request_options=request_options)
+        _response = self._raw_client.delete_order_by_id(id, request_options=request_options)
         return _response.data
 
     def get_order_lines(
@@ -300,7 +300,7 @@ class OrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> OrderLinesResponse:
         """
-        Get the order lines for an order by its ID
+        Get the order lines for an order by ID
 
         Parameters
         ----------
@@ -392,7 +392,7 @@ class AsyncOrdersClient:
         _response = await self._raw_client.list_orders(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    async def create_a_new_order(
+    async def create_order(
         self,
         *,
         customer_id: str,
@@ -458,14 +458,14 @@ class AsyncOrdersClient:
 
 
         async def main() -> None:
-            await client.orders.create_a_new_order(
+            await client.orders.create_order(
                 customer_id="customerId",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_new_order(
+        _response = await self._raw_client.create_order(
             customer_id=customer_id,
             billing_customer_id=billing_customer_id,
             billing_contact_ids=billing_contact_ids,
@@ -482,9 +482,9 @@ class AsyncOrdersClient:
         )
         return _response.data
 
-    async def get_order(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Order:
+    async def get_order_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Order:
         """
-        Get an order by its ID
+        Get an order by ID
 
         Parameters
         ----------
@@ -510,17 +510,17 @@ class AsyncOrdersClient:
 
 
         async def main() -> None:
-            await client.orders.get_order(
+            await client.orders.get_order_by_id(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_order(id, request_options=request_options)
+        _response = await self._raw_client.get_order_by_id(id, request_options=request_options)
         return _response.data
 
-    async def update_order(
+    async def update_order_by_id(
         self,
         id: str,
         *,
@@ -538,7 +538,7 @@ class AsyncOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
-        Update an order by its ID
+        Update an order by ID
 
         Parameters
         ----------
@@ -586,14 +586,14 @@ class AsyncOrdersClient:
 
 
         async def main() -> None:
-            await client.orders.update_order(
+            await client.orders.update_order_by_id(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_order(
+        _response = await self._raw_client.update_order_by_id(
             id,
             name=name,
             start_date=start_date,
@@ -610,9 +610,11 @@ class AsyncOrdersClient:
         )
         return _response.data
 
-    async def delete_order(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> EmptyResponse:
+    async def delete_order_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> EmptyResponse:
         """
-        Delete an order by its ID
+        Delete an order by ID
 
         Parameters
         ----------
@@ -638,14 +640,14 @@ class AsyncOrdersClient:
 
 
         async def main() -> None:
-            await client.orders.delete_order(
+            await client.orders.delete_order_by_id(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_order(id, request_options=request_options)
+        _response = await self._raw_client.delete_order_by_id(id, request_options=request_options)
         return _response.data
 
     async def get_order_lines(
@@ -657,7 +659,7 @@ class AsyncOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> OrderLinesResponse:
         """
-        Get the order lines for an order by its ID
+        Get the order lines for an order by ID
 
         Parameters
         ----------

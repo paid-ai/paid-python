@@ -24,7 +24,7 @@ class RawSignalsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def create_signals_in_bulk(
+    def create_signals(
         self, *, signals: typing.Sequence[Signal], request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[BulkSignalsResponse]:
         """
@@ -109,7 +109,7 @@ class AsyncRawSignalsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def create_signals_in_bulk(
+    async def create_signals(
         self, *, signals: typing.Sequence[Signal], request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[BulkSignalsResponse]:
         """

@@ -63,7 +63,7 @@ class ProductsClient:
         _response = self._raw_client.list_products(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    def create_a_new_product(
+    def create_product(
         self,
         *,
         name: str,
@@ -106,11 +106,11 @@ class ProductsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.products.create_a_new_product(
+        client.products.create_product(
             name="name",
         )
         """
-        _response = self._raw_client.create_a_new_product(
+        _response = self._raw_client.create_product(
             name=name,
             description=description,
             active=active,
@@ -121,9 +121,9 @@ class ProductsClient:
         )
         return _response.data
 
-    def get_product(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Product:
+    def get_product_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Product:
         """
-        Get a product by its ID
+        Get a product by ID
 
         Parameters
         ----------
@@ -144,14 +144,14 @@ class ProductsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.products.get_product(
+        client.products.get_product_by_id(
             id="id",
         )
         """
-        _response = self._raw_client.get_product(id, request_options=request_options)
+        _response = self._raw_client.get_product_by_id(id, request_options=request_options)
         return _response.data
 
-    def update_product(
+    def update_product_by_id(
         self,
         id: str,
         *,
@@ -164,7 +164,7 @@ class ProductsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
-        Update a product by its ID
+        Update a product by ID
 
         Parameters
         ----------
@@ -197,11 +197,11 @@ class ProductsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.products.update_product(
+        client.products.update_product_by_id(
             id="id",
         )
         """
-        _response = self._raw_client.update_product(
+        _response = self._raw_client.update_product_by_id(
             id,
             name=name,
             description=description,
@@ -217,7 +217,7 @@ class ProductsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Product:
         """
-        Get a product by its externalId
+        Get a product by external ID
 
         Parameters
         ----------
@@ -258,7 +258,7 @@ class ProductsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
-        Update a product by its externalId
+        Update a product by external ID
 
         Parameters
         ----------
@@ -367,7 +367,7 @@ class AsyncProductsClient:
         _response = await self._raw_client.list_products(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    async def create_a_new_product(
+    async def create_product(
         self,
         *,
         name: str,
@@ -415,14 +415,14 @@ class AsyncProductsClient:
 
 
         async def main() -> None:
-            await client.products.create_a_new_product(
+            await client.products.create_product(
                 name="name",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_new_product(
+        _response = await self._raw_client.create_product(
             name=name,
             description=description,
             active=active,
@@ -433,9 +433,9 @@ class AsyncProductsClient:
         )
         return _response.data
 
-    async def get_product(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Product:
+    async def get_product_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Product:
         """
-        Get a product by its ID
+        Get a product by ID
 
         Parameters
         ----------
@@ -461,17 +461,17 @@ class AsyncProductsClient:
 
 
         async def main() -> None:
-            await client.products.get_product(
+            await client.products.get_product_by_id(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_product(id, request_options=request_options)
+        _response = await self._raw_client.get_product_by_id(id, request_options=request_options)
         return _response.data
 
-    async def update_product(
+    async def update_product_by_id(
         self,
         id: str,
         *,
@@ -484,7 +484,7 @@ class AsyncProductsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
-        Update a product by its ID
+        Update a product by ID
 
         Parameters
         ----------
@@ -522,14 +522,14 @@ class AsyncProductsClient:
 
 
         async def main() -> None:
-            await client.products.update_product(
+            await client.products.update_product_by_id(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_product(
+        _response = await self._raw_client.update_product_by_id(
             id,
             name=name,
             description=description,
@@ -545,7 +545,7 @@ class AsyncProductsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Product:
         """
-        Get a product by its externalId
+        Get a product by external ID
 
         Parameters
         ----------
@@ -594,7 +594,7 @@ class AsyncProductsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
-        Update a product by its externalId
+        Update a product by external ID
 
         Parameters
         ----------

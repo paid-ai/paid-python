@@ -107,9 +107,11 @@ class RawInvoicesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_invoice(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[Invoice]:
+    def get_invoice_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[Invoice]:
         """
-        Get an invoice by its ID
+        Get an invoice by ID
 
         Parameters
         ----------
@@ -176,7 +178,7 @@ class RawInvoicesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_invoice(
+    def update_invoice_by_id(
         self,
         id: str,
         *,
@@ -184,7 +186,7 @@ class RawInvoicesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Invoice]:
         """
-        Update an invoice by its ID (limited fields)
+        Update an invoice by ID
 
         Parameters
         ----------
@@ -280,7 +282,7 @@ class RawInvoicesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[InvoiceLinesResponse]:
         """
-        Get the invoice lines for an invoice by its ID
+        Get the invoice lines for an invoice by ID
 
         Parameters
         ----------
@@ -441,11 +443,11 @@ class AsyncRawInvoicesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_invoice(
+    async def get_invoice_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Invoice]:
         """
-        Get an invoice by its ID
+        Get an invoice by ID
 
         Parameters
         ----------
@@ -512,7 +514,7 @@ class AsyncRawInvoicesClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_invoice(
+    async def update_invoice_by_id(
         self,
         id: str,
         *,
@@ -520,7 +522,7 @@ class AsyncRawInvoicesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Invoice]:
         """
-        Update an invoice by its ID (limited fields)
+        Update an invoice by ID
 
         Parameters
         ----------
@@ -616,7 +618,7 @@ class AsyncRawInvoicesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[InvoiceLinesResponse]:
         """
-        Get the invoice lines for an invoice by its ID
+        Get the invoice lines for an invoice by ID
 
         Parameters
         ----------
