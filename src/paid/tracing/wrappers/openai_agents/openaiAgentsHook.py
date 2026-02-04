@@ -36,7 +36,7 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
             user_hooks: Optional user-provided RunHooks to combine with Paid tracking
 
         Usage:
-            @paid_tracing("<ext_customer_id>", "<ext_agent_id>")
+            @paid_tracing("<ext_customer_id>", external_product_id="<ext_product_id>")
             def run_agent():
                 hook = PaidAgentsHook()
                 return Runner.run_streamed(agent, input, hooks=hook)
