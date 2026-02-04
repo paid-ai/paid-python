@@ -65,7 +65,7 @@ class ContactsClient:
         _response = self._raw_client.list_contacts(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    def create_a_new_contact(
+    def create_contact(
         self,
         *,
         customer_id: str,
@@ -111,14 +111,14 @@ class ContactsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.contacts.create_a_new_contact(
+        client.contacts.create_contact(
             customer_id="customerId",
             first_name="firstName",
             last_name="lastName",
             email="email",
         )
         """
-        _response = self._raw_client.create_a_new_contact(
+        _response = self._raw_client.create_contact(
             customer_id=customer_id,
             first_name=first_name,
             last_name=last_name,
@@ -130,7 +130,7 @@ class ContactsClient:
         )
         return _response.data
 
-    def get_contact(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Contact:
+    def get_contact_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Contact:
         """
         Get a contact by its ID
 
@@ -153,14 +153,14 @@ class ContactsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.contacts.get_contact(
+        client.contacts.get_contact_by_id(
             id="id",
         )
         """
-        _response = self._raw_client.get_contact(id, request_options=request_options)
+        _response = self._raw_client.get_contact_by_id(id, request_options=request_options)
         return _response.data
 
-    def update_contact(
+    def update_contact_by_id(
         self,
         id: str,
         *,
@@ -209,11 +209,11 @@ class ContactsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.contacts.update_contact(
+        client.contacts.update_contact_by_id(
             id="id",
         )
         """
-        _response = self._raw_client.update_contact(
+        _response = self._raw_client.update_contact_by_id(
             id,
             customer_id=customer_id,
             first_name=first_name,
@@ -226,7 +226,9 @@ class ContactsClient:
         )
         return _response.data
 
-    def delete_contact(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> EmptyResponse:
+    def delete_contact_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> EmptyResponse:
         """
         Delete a contact by its ID
 
@@ -249,18 +251,18 @@ class ContactsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.contacts.delete_contact(
+        client.contacts.delete_contact_by_id(
             id="id",
         )
         """
-        _response = self._raw_client.delete_contact(id, request_options=request_options)
+        _response = self._raw_client.delete_contact_by_id(id, request_options=request_options)
         return _response.data
 
     def get_contact_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Contact:
         """
-        Get a contact by its externalId
+        Get a contact by its external ID
 
         Parameters
         ----------
@@ -302,7 +304,7 @@ class ContactsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
-        Update a contact by its externalId
+        Update a contact by its external ID
 
         Parameters
         ----------
@@ -358,7 +360,7 @@ class ContactsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a contact by its externalId
+        Delete a contact by its external ID
 
         Parameters
         ----------
@@ -446,7 +448,7 @@ class AsyncContactsClient:
         _response = await self._raw_client.list_contacts(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    async def create_a_new_contact(
+    async def create_contact(
         self,
         *,
         customer_id: str,
@@ -497,7 +499,7 @@ class AsyncContactsClient:
 
 
         async def main() -> None:
-            await client.contacts.create_a_new_contact(
+            await client.contacts.create_contact(
                 customer_id="customerId",
                 first_name="firstName",
                 last_name="lastName",
@@ -507,7 +509,7 @@ class AsyncContactsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_new_contact(
+        _response = await self._raw_client.create_contact(
             customer_id=customer_id,
             first_name=first_name,
             last_name=last_name,
@@ -519,7 +521,7 @@ class AsyncContactsClient:
         )
         return _response.data
 
-    async def get_contact(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Contact:
+    async def get_contact_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Contact:
         """
         Get a contact by its ID
 
@@ -547,17 +549,17 @@ class AsyncContactsClient:
 
 
         async def main() -> None:
-            await client.contacts.get_contact(
+            await client.contacts.get_contact_by_id(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_contact(id, request_options=request_options)
+        _response = await self._raw_client.get_contact_by_id(id, request_options=request_options)
         return _response.data
 
-    async def update_contact(
+    async def update_contact_by_id(
         self,
         id: str,
         *,
@@ -611,14 +613,14 @@ class AsyncContactsClient:
 
 
         async def main() -> None:
-            await client.contacts.update_contact(
+            await client.contacts.update_contact_by_id(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_contact(
+        _response = await self._raw_client.update_contact_by_id(
             id,
             customer_id=customer_id,
             first_name=first_name,
@@ -631,7 +633,7 @@ class AsyncContactsClient:
         )
         return _response.data
 
-    async def delete_contact(
+    async def delete_contact_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
@@ -661,21 +663,21 @@ class AsyncContactsClient:
 
 
         async def main() -> None:
-            await client.contacts.delete_contact(
+            await client.contacts.delete_contact_by_id(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_contact(id, request_options=request_options)
+        _response = await self._raw_client.delete_contact_by_id(id, request_options=request_options)
         return _response.data
 
     async def get_contact_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Contact:
         """
-        Get a contact by its externalId
+        Get a contact by its external ID
 
         Parameters
         ----------
@@ -725,7 +727,7 @@ class AsyncContactsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
-        Update a contact by its externalId
+        Update a contact by its external ID
 
         Parameters
         ----------
@@ -789,7 +791,7 @@ class AsyncContactsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a contact by its externalId
+        Delete a contact by its external ID
 
         Parameters
         ----------

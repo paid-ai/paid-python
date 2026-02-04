@@ -67,7 +67,7 @@ class CustomersClient:
         _response = self._raw_client.list_customers(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    def create_a_new_customer(
+    def create_customer(
         self,
         *,
         name: str,
@@ -122,11 +122,11 @@ class CustomersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.customers.create_a_new_customer(
+        client.customers.create_customer(
             name="name",
         )
         """
-        _response = self._raw_client.create_a_new_customer(
+        _response = self._raw_client.create_customer(
             name=name,
             legal_name=legal_name,
             email=email,
@@ -141,9 +141,9 @@ class CustomersClient:
         )
         return _response.data
 
-    def get_customer(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Customer:
+    def get_customer_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Customer:
         """
-        Get a customer by its ID
+        Get a customer by ID
 
         Parameters
         ----------
@@ -164,14 +164,14 @@ class CustomersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.customers.get_customer(
+        client.customers.get_customer_by_id(
             id="id",
         )
         """
-        _response = self._raw_client.get_customer(id, request_options=request_options)
+        _response = self._raw_client.get_customer_by_id(id, request_options=request_options)
         return _response.data
 
-    def update_customer(
+    def update_customer_by_id(
         self,
         id: str,
         *,
@@ -189,7 +189,7 @@ class CustomersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
-        Update a customer by its ID
+        Update a customer by ID
 
         Parameters
         ----------
@@ -232,11 +232,11 @@ class CustomersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.customers.update_customer(
+        client.customers.update_customer_by_id(
             id="id",
         )
         """
-        _response = self._raw_client.update_customer(
+        _response = self._raw_client.update_customer_by_id(
             id,
             name=name,
             legal_name=legal_name,
@@ -253,9 +253,11 @@ class CustomersClient:
         )
         return _response.data
 
-    def delete_customer(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> EmptyResponse:
+    def delete_customer_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> EmptyResponse:
         """
-        Delete a customer by its ID
+        Delete a customer by ID
 
         Parameters
         ----------
@@ -276,18 +278,18 @@ class CustomersClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.customers.delete_customer(
+        client.customers.delete_customer_by_id(
             id="id",
         )
         """
-        _response = self._raw_client.delete_customer(id, request_options=request_options)
+        _response = self._raw_client.delete_customer_by_id(id, request_options=request_options)
         return _response.data
 
     def get_customer_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Customer:
         """
-        Get a customer by its externalId
+        Get a customer by external ID
 
         Parameters
         ----------
@@ -333,7 +335,7 @@ class CustomersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
-        Update a customer by its externalId
+        Update a customer by external ID
 
         Parameters
         ----------
@@ -401,7 +403,7 @@ class CustomersClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a customer by its externalId
+        Delete a customer by external ID
 
         Parameters
         ----------
@@ -489,7 +491,7 @@ class AsyncCustomersClient:
         _response = await self._raw_client.list_customers(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    async def create_a_new_customer(
+    async def create_customer(
         self,
         *,
         name: str,
@@ -549,14 +551,14 @@ class AsyncCustomersClient:
 
 
         async def main() -> None:
-            await client.customers.create_a_new_customer(
+            await client.customers.create_customer(
                 name="name",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_a_new_customer(
+        _response = await self._raw_client.create_customer(
             name=name,
             legal_name=legal_name,
             email=email,
@@ -571,9 +573,9 @@ class AsyncCustomersClient:
         )
         return _response.data
 
-    async def get_customer(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Customer:
+    async def get_customer_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Customer:
         """
-        Get a customer by its ID
+        Get a customer by ID
 
         Parameters
         ----------
@@ -599,17 +601,17 @@ class AsyncCustomersClient:
 
 
         async def main() -> None:
-            await client.customers.get_customer(
+            await client.customers.get_customer_by_id(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_customer(id, request_options=request_options)
+        _response = await self._raw_client.get_customer_by_id(id, request_options=request_options)
         return _response.data
 
-    async def update_customer(
+    async def update_customer_by_id(
         self,
         id: str,
         *,
@@ -627,7 +629,7 @@ class AsyncCustomersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
-        Update a customer by its ID
+        Update a customer by ID
 
         Parameters
         ----------
@@ -675,14 +677,14 @@ class AsyncCustomersClient:
 
 
         async def main() -> None:
-            await client.customers.update_customer(
+            await client.customers.update_customer_by_id(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_customer(
+        _response = await self._raw_client.update_customer_by_id(
             id,
             name=name,
             legal_name=legal_name,
@@ -699,11 +701,11 @@ class AsyncCustomersClient:
         )
         return _response.data
 
-    async def delete_customer(
+    async def delete_customer_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a customer by its ID
+        Delete a customer by ID
 
         Parameters
         ----------
@@ -729,21 +731,21 @@ class AsyncCustomersClient:
 
 
         async def main() -> None:
-            await client.customers.delete_customer(
+            await client.customers.delete_customer_by_id(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.delete_customer(id, request_options=request_options)
+        _response = await self._raw_client.delete_customer_by_id(id, request_options=request_options)
         return _response.data
 
     async def get_customer_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Customer:
         """
-        Get a customer by its externalId
+        Get a customer by external ID
 
         Parameters
         ----------
@@ -797,7 +799,7 @@ class AsyncCustomersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
-        Update a customer by its externalId
+        Update a customer by external ID
 
         Parameters
         ----------
@@ -873,7 +875,7 @@ class AsyncCustomersClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a customer by its externalId
+        Delete a customer by external ID
 
         Parameters
         ----------

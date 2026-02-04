@@ -110,7 +110,7 @@ class RawOrdersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_a_new_order(
+    def create_order(
         self,
         *,
         customer_id: str,
@@ -235,9 +235,11 @@ class RawOrdersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_order(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[Order]:
+    def get_order_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[Order]:
         """
-        Get an order by its ID
+        Get an order by ID
 
         Parameters
         ----------
@@ -304,7 +306,7 @@ class RawOrdersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_order(
+    def update_order_by_id(
         self,
         id: str,
         *,
@@ -322,7 +324,7 @@ class RawOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Order]:
         """
-        Update an order by its ID
+        Update an order by ID
 
         Parameters
         ----------
@@ -439,11 +441,11 @@ class RawOrdersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_order(
+    def delete_order_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[EmptyResponse]:
         """
-        Delete an order by its ID
+        Delete an order by ID
 
         Parameters
         ----------
@@ -519,7 +521,7 @@ class RawOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[OrderLinesResponse]:
         """
-        Get the order lines for an order by its ID
+        Get the order lines for an order by ID
 
         Parameters
         ----------
@@ -680,7 +682,7 @@ class AsyncRawOrdersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_a_new_order(
+    async def create_order(
         self,
         *,
         customer_id: str,
@@ -805,11 +807,11 @@ class AsyncRawOrdersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_order(
+    async def get_order_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Order]:
         """
-        Get an order by its ID
+        Get an order by ID
 
         Parameters
         ----------
@@ -876,7 +878,7 @@ class AsyncRawOrdersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_order(
+    async def update_order_by_id(
         self,
         id: str,
         *,
@@ -894,7 +896,7 @@ class AsyncRawOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Order]:
         """
-        Update an order by its ID
+        Update an order by ID
 
         Parameters
         ----------
@@ -1011,11 +1013,11 @@ class AsyncRawOrdersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_order(
+    async def delete_order_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[EmptyResponse]:
         """
-        Delete an order by its ID
+        Delete an order by ID
 
         Parameters
         ----------
@@ -1091,7 +1093,7 @@ class AsyncRawOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[OrderLinesResponse]:
         """
-        Get the order lines for an order by its ID
+        Get the order lines for an order by ID
 
         Parameters
         ----------
