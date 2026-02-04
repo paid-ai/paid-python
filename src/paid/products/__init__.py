@@ -2,6 +2,3 @@
 
 # isort: skip_file
 
-from .types import ProductCreateType
-
-__all__ = ["ProductCreateType"]

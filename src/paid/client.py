@@ -3,16 +3,14 @@
 import typing
 
 import httpx
-from .agents.client import AgentsClient, AsyncAgentsClient
 from .contacts.client import AsyncContactsClient, ContactsClient
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .customers.client import AsyncCustomersClient, CustomersClient
 from .environment import PaidEnvironment
+from .invoices.client import AsyncInvoicesClient, InvoicesClient
 from .orders.client import AsyncOrdersClient, OrdersClient
-from .plans.client import AsyncPlansClient, PlansClient
 from .products.client import AsyncProductsClient, ProductsClient
-from .traces.client import AsyncTracesClient, TracesClient
-from .usage.client import AsyncUsageClient, UsageClient
+from .signals.client import AsyncSignalsClient, SignalsClient
 
 
 class Paid:
@@ -29,11 +27,11 @@ class Paid:
 
 
 
-        Defaults to PaidEnvironment.PRODUCTION
+        Defaults to PaidEnvironment.DEFAULT
 
 
 
-    token : typing.Optional[typing.Union[str, typing.Callable[[], str]]]
+    token : typing.Union[str, typing.Callable[[], str]]
     timeout : typing.Optional[float]
         The timeout to be used, in seconds, for requests. By default the timeout is 60 seconds, unless a custom httpx client is used, in which case this default is not enforced.
 
@@ -56,8 +54,8 @@ class Paid:
         self,
         *,
         base_url: typing.Optional[str] = None,
-        environment: PaidEnvironment = PaidEnvironment.PRODUCTION,
-        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
+        environment: PaidEnvironment = PaidEnvironment.DEFAULT,
+        token: typing.Union[str, typing.Callable[[], str]],
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
         httpx_client: typing.Optional[httpx.Client] = None,
@@ -75,14 +73,12 @@ class Paid:
             else httpx.Client(timeout=_defaulted_timeout),
             timeout=_defaulted_timeout,
         )
-        self.customers = CustomersClient(client_wrapper=self._client_wrapper)
-        self.agents = AgentsClient(client_wrapper=self._client_wrapper)
         self.products = ProductsClient(client_wrapper=self._client_wrapper)
+        self.customers = CustomersClient(client_wrapper=self._client_wrapper)
         self.contacts = ContactsClient(client_wrapper=self._client_wrapper)
         self.orders = OrdersClient(client_wrapper=self._client_wrapper)
-        self.plans = PlansClient(client_wrapper=self._client_wrapper)
-        self.usage = UsageClient(client_wrapper=self._client_wrapper)
-        self.traces = TracesClient(client_wrapper=self._client_wrapper)
+        self.invoices = InvoicesClient(client_wrapper=self._client_wrapper)
+        self.signals = SignalsClient(client_wrapper=self._client_wrapper)
 
 
 class AsyncPaid:
@@ -99,11 +95,11 @@ class AsyncPaid:
 
 
 
-        Defaults to PaidEnvironment.PRODUCTION
+        Defaults to PaidEnvironment.DEFAULT
 
 
 
-    token : typing.Optional[typing.Union[str, typing.Callable[[], str]]]
+    token : typing.Union[str, typing.Callable[[], str]]
     timeout : typing.Optional[float]
         The timeout to be used, in seconds, for requests. By default the timeout is 60 seconds, unless a custom httpx client is used, in which case this default is not enforced.
 
@@ -126,8 +122,8 @@ class AsyncPaid:
         self,
         *,
         base_url: typing.Optional[str] = None,
-        environment: PaidEnvironment = PaidEnvironment.PRODUCTION,
-        token: typing.Optional[typing.Union[str, typing.Callable[[], str]]] = None,
+        environment: PaidEnvironment = PaidEnvironment.DEFAULT,
+        token: typing.Union[str, typing.Callable[[], str]],
         timeout: typing.Optional[float] = None,
         follow_redirects: typing.Optional[bool] = True,
         httpx_client: typing.Optional[httpx.AsyncClient] = None,
@@ -145,14 +141,12 @@ class AsyncPaid:
             else httpx.AsyncClient(timeout=_defaulted_timeout),
             timeout=_defaulted_timeout,
         )
-        self.customers = AsyncCustomersClient(client_wrapper=self._client_wrapper)
-        self.agents = AsyncAgentsClient(client_wrapper=self._client_wrapper)
         self.products = AsyncProductsClient(client_wrapper=self._client_wrapper)
+        self.customers = AsyncCustomersClient(client_wrapper=self._client_wrapper)
         self.contacts = AsyncContactsClient(client_wrapper=self._client_wrapper)
         self.orders = AsyncOrdersClient(client_wrapper=self._client_wrapper)
-        self.plans = AsyncPlansClient(client_wrapper=self._client_wrapper)
-        self.usage = AsyncUsageClient(client_wrapper=self._client_wrapper)
-        self.traces = AsyncTracesClient(client_wrapper=self._client_wrapper)
+        self.invoices = AsyncInvoicesClient(client_wrapper=self._client_wrapper)
+        self.signals = AsyncSignalsClient(client_wrapper=self._client_wrapper)
 
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidEnvironment) -> str:

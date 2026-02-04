@@ -9,11 +9,13 @@ from ..core.http_response import AsyncHttpResponse, HttpResponse
 from ..core.jsonable_encoder import jsonable_encoder
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
-from ..core.serialization import convert_and_respect_annotation_metadata
-from ..types.agent_attribute import AgentAttribute
+from ..errors.bad_request_error import BadRequestError
+from ..errors.forbidden_error import ForbiddenError
+from ..errors.internal_server_error import InternalServerError
+from ..errors.not_found_error import NotFoundError
+from ..types.error_response import ErrorResponse
 from ..types.product import Product
-from ..types.product_update_type import ProductUpdateType
-from .types.product_create_type import ProductCreateType
+from ..types.product_list_response import ProductListResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -23,64 +25,112 @@ class RawProductsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list(self, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[typing.List[Product]]:
+    def list_products(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[ProductListResponse]:
         """
+        Get a list of products for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[typing.List[Product]]
-            Success response
+        HttpResponse[ProductListResponse]
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
-            "products",
+            "products/",
             method="GET",
+            params={
+                "limit": limit,
+                "offset": offset,
+            },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[Product],
+                    ProductListResponse,
                     parse_obj_as(
-                        type_=typing.List[Product],  # type: ignore
+                        type_=ProductListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create(
+    def create_a_new_product(
         self,
         *,
         name: str,
         description: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductCreateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Product]:
         """
+        Creates a new product for the organization
+
         Parameters
         ----------
         name : str
 
         description : typing.Optional[str]
 
-        external_id : typing.Optional[str]
-
-        type : typing.Optional[ProductCreateType]
-
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
+
+        external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
@@ -90,18 +140,17 @@ class RawProductsClient:
         Returns
         -------
         HttpResponse[Product]
-            Success response
+            201
         """
         _response = self._client_wrapper.httpx_client.request(
-            "products",
+            "products/",
             method="POST",
             json={
                 "name": name,
                 "description": description,
-                "externalId": external_id,
-                "type": type,
                 "active": active,
                 "productCode": product_code,
+                "externalId": external_id,
                 "metadata": metadata,
             },
             headers={
@@ -120,16 +169,51 @@ class RawProductsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[Product]:
+    def get_product(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[Product]:
         """
+        Get a product by its ID
+
         Parameters
         ----------
-        product_id : str
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -137,10 +221,10 @@ class RawProductsClient:
         Returns
         -------
         HttpResponse[Product]
-            Success response
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"products/{jsonable_encoder(product_id)}",
+            f"products/{jsonable_encoder(id)}",
             method="GET",
             request_options=request_options,
         )
@@ -154,44 +238,72 @@ class RawProductsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update(
+    def update_product(
         self,
-        product_id: str,
+        id: str,
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
-        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Product]:
         """
+        Update a product by its ID
+
         Parameters
         ----------
-        product_id : str
+        id : str
 
         name : typing.Optional[str]
 
         description : typing.Optional[str]
 
-        external_id : typing.Optional[str]
-
-        type : typing.Optional[ProductUpdateType]
-
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
 
-        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
-            Pricing attributes for this product
+        external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
@@ -201,21 +313,17 @@ class RawProductsClient:
         Returns
         -------
         HttpResponse[Product]
-            Success response
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"products/{jsonable_encoder(product_id)}",
+            f"products/{jsonable_encoder(id)}",
             method="PUT",
             json={
                 "name": name,
                 "description": description,
-                "externalId": external_id,
-                "type": type,
                 "active": active,
                 "productCode": product_code,
-                "ProductAttribute": convert_and_respect_annotation_metadata(
-                    object_=product_attribute, annotation=typing.Sequence[AgentAttribute], direction="write"
-                ),
+                "externalId": external_id,
                 "metadata": metadata,
             },
             headers={
@@ -234,41 +342,61 @@ class RawProductsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete(self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[None]:
-        """
-        Parameters
-        ----------
-        product_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[None]
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"products/{jsonable_encoder(product_id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return HttpResponse(response=_response, data=None)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def get_by_external_id(
+    def get_product_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[Product]:
         """
+        Get a product by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -279,7 +407,7 @@ class RawProductsClient:
         Returns
         -------
         HttpResponse[Product]
-            Success response
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
             f"products/external/{jsonable_encoder(external_id)}",
@@ -296,26 +424,59 @@ class RawProductsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_by_external_id(
+    def update_product_by_external_id(
         self,
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
-        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Product]:
         """
+        Update a product by its externalId
+
         Parameters
         ----------
         external_id_ : str
@@ -324,16 +485,11 @@ class RawProductsClient:
 
         description : typing.Optional[str]
 
-        external_id : typing.Optional[str]
-
-        type : typing.Optional[ProductUpdateType]
-
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
 
-        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
-            Pricing attributes for this product
+        external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
@@ -343,7 +499,7 @@ class RawProductsClient:
         Returns
         -------
         HttpResponse[Product]
-            Success response
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
             f"products/external/{jsonable_encoder(external_id_)}",
@@ -351,13 +507,9 @@ class RawProductsClient:
             json={
                 "name": name,
                 "description": description,
-                "externalId": external_id,
-                "type": type,
                 "active": active,
                 "productCode": product_code,
-                "ProductAttribute": convert_and_respect_annotation_metadata(
-                    object_=product_attribute, annotation=typing.Sequence[AgentAttribute], direction="write"
-                ),
+                "externalId": external_id,
                 "metadata": metadata,
             },
             headers={
@@ -376,34 +528,50 @@ class RawProductsClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def delete_by_external_id(
-        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[None]:
-        """
-        Parameters
-        ----------
-        external_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[None]
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"products/external/{jsonable_encoder(external_id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return HttpResponse(response=_response, data=None)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
@@ -414,66 +582,112 @@ class AsyncRawProductsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list(
-        self, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[typing.List[Product]]:
+    async def list_products(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[ProductListResponse]:
         """
+        Get a list of products for the organization
+
         Parameters
         ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[typing.List[Product]]
-            Success response
+        AsyncHttpResponse[ProductListResponse]
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "products",
+            "products/",
             method="GET",
+            params={
+                "limit": limit,
+                "offset": offset,
+            },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    typing.List[Product],
+                    ProductListResponse,
                     parse_obj_as(
-                        type_=typing.List[Product],  # type: ignore
+                        type_=ProductListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create(
+    async def create_a_new_product(
         self,
         *,
         name: str,
         description: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductCreateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Product]:
         """
+        Creates a new product for the organization
+
         Parameters
         ----------
         name : str
 
         description : typing.Optional[str]
 
-        external_id : typing.Optional[str]
-
-        type : typing.Optional[ProductCreateType]
-
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
+
+        external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
@@ -483,18 +697,17 @@ class AsyncRawProductsClient:
         Returns
         -------
         AsyncHttpResponse[Product]
-            Success response
+            201
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "products",
+            "products/",
             method="POST",
             json={
                 "name": name,
                 "description": description,
-                "externalId": external_id,
-                "type": type,
                 "active": active,
                 "productCode": product_code,
+                "externalId": external_id,
                 "metadata": metadata,
             },
             headers={
@@ -513,18 +726,53 @@ class AsyncRawProductsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get(
-        self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    async def get_product(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Product]:
         """
+        Get a product by its ID
+
         Parameters
         ----------
-        product_id : str
+        id : str
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -532,10 +780,10 @@ class AsyncRawProductsClient:
         Returns
         -------
         AsyncHttpResponse[Product]
-            Success response
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"products/{jsonable_encoder(product_id)}",
+            f"products/{jsonable_encoder(id)}",
             method="GET",
             request_options=request_options,
         )
@@ -549,44 +797,72 @@ class AsyncRawProductsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update(
+    async def update_product(
         self,
-        product_id: str,
+        id: str,
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
-        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Product]:
         """
+        Update a product by its ID
+
         Parameters
         ----------
-        product_id : str
+        id : str
 
         name : typing.Optional[str]
 
         description : typing.Optional[str]
 
-        external_id : typing.Optional[str]
-
-        type : typing.Optional[ProductUpdateType]
-
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
 
-        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
-            Pricing attributes for this product
+        external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
@@ -596,21 +872,17 @@ class AsyncRawProductsClient:
         Returns
         -------
         AsyncHttpResponse[Product]
-            Success response
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"products/{jsonable_encoder(product_id)}",
+            f"products/{jsonable_encoder(id)}",
             method="PUT",
             json={
                 "name": name,
                 "description": description,
-                "externalId": external_id,
-                "type": type,
                 "active": active,
                 "productCode": product_code,
-                "ProductAttribute": convert_and_respect_annotation_metadata(
-                    object_=product_attribute, annotation=typing.Sequence[AgentAttribute], direction="write"
-                ),
+                "externalId": external_id,
                 "metadata": metadata,
             },
             headers={
@@ -629,43 +901,61 @@ class AsyncRawProductsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete(
-        self, product_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[None]:
-        """
-        Parameters
-        ----------
-        product_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[None]
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"products/{jsonable_encoder(product_id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return AsyncHttpResponse(response=_response, data=None)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def get_by_external_id(
+    async def get_product_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Product]:
         """
+        Get a product by its externalId
+
         Parameters
         ----------
         external_id : str
@@ -676,7 +966,7 @@ class AsyncRawProductsClient:
         Returns
         -------
         AsyncHttpResponse[Product]
-            Success response
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"products/external/{jsonable_encoder(external_id)}",
@@ -693,26 +983,59 @@ class AsyncRawProductsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_by_external_id(
+    async def update_product_by_external_id(
         self,
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
-        external_id: typing.Optional[str] = OMIT,
-        type: typing.Optional[ProductUpdateType] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
-        product_attribute: typing.Optional[typing.Sequence[AgentAttribute]] = OMIT,
+        external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Product]:
         """
+        Update a product by its externalId
+
         Parameters
         ----------
         external_id_ : str
@@ -721,16 +1044,11 @@ class AsyncRawProductsClient:
 
         description : typing.Optional[str]
 
-        external_id : typing.Optional[str]
-
-        type : typing.Optional[ProductUpdateType]
-
         active : typing.Optional[bool]
 
         product_code : typing.Optional[str]
 
-        product_attribute : typing.Optional[typing.Sequence[AgentAttribute]]
-            Pricing attributes for this product
+        external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
 
@@ -740,7 +1058,7 @@ class AsyncRawProductsClient:
         Returns
         -------
         AsyncHttpResponse[Product]
-            Success response
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"products/external/{jsonable_encoder(external_id_)}",
@@ -748,13 +1066,9 @@ class AsyncRawProductsClient:
             json={
                 "name": name,
                 "description": description,
-                "externalId": external_id,
-                "type": type,
                 "active": active,
                 "productCode": product_code,
-                "ProductAttribute": convert_and_respect_annotation_metadata(
-                    object_=product_attribute, annotation=typing.Sequence[AgentAttribute], direction="write"
-                ),
+                "externalId": external_id,
                 "metadata": metadata,
             },
             headers={
@@ -773,34 +1087,50 @@ class AsyncRawProductsClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def delete_by_external_id(
-        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[None]:
-        """
-        Parameters
-        ----------
-        external_id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[None]
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"products/external/{jsonable_encoder(external_id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                return AsyncHttpResponse(response=_response, data=None)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
