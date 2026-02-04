@@ -11,23 +11,22 @@ from .customer_billing_address import CustomerBillingAddress
 from .customer_creation_state import CustomerCreationState
 
 
-class Customer(UniversalBaseModel):
-    id: str
-    name: str
+class UpdateCustomerRequest(UniversalBaseModel):
+    name: typing.Optional[str] = None
     legal_name: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="legalName")] = None
-    email: str
-    phone: str
-    website: str
+    email: typing.Optional[str] = None
+    phone: typing.Optional[str] = None
+    website: typing.Optional[str] = None
     external_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="externalId")] = None
     billing_address: typing_extensions.Annotated[
         typing.Optional[CustomerBillingAddress], FieldMetadata(alias="billingAddress")
     ] = None
-    creation_state: typing_extensions.Annotated[CustomerCreationState, FieldMetadata(alias="creationState")]
+    creation_state: typing_extensions.Annotated[
+        typing.Optional[CustomerCreationState], FieldMetadata(alias="creationState")
+    ] = None
     churn_date: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="churnDate")] = None
     vat_number: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="vatNumber")] = None
     metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
-    created_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="createdAt")]
-    updated_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="updatedAt")]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
