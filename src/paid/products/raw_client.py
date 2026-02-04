@@ -106,7 +106,7 @@ class RawProductsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_a_new_product(
+    def create_product(
         self,
         *,
         name: str,
@@ -207,9 +207,11 @@ class RawProductsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_product(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[Product]:
+    def get_product_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[Product]:
         """
-        Get a product by its ID
+        Get a product by ID
 
         Parameters
         ----------
@@ -276,7 +278,7 @@ class RawProductsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_product(
+    def update_product_by_id(
         self,
         id: str,
         *,
@@ -289,7 +291,7 @@ class RawProductsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Product]:
         """
-        Update a product by its ID
+        Update a product by ID
 
         Parameters
         ----------
@@ -395,7 +397,7 @@ class RawProductsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[Product]:
         """
-        Get a product by its externalId
+        Get a product by external ID
 
         Parameters
         ----------
@@ -475,7 +477,7 @@ class RawProductsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Product]:
         """
-        Update a product by its externalId
+        Update a product by external ID
 
         Parameters
         ----------
@@ -663,7 +665,7 @@ class AsyncRawProductsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_a_new_product(
+    async def create_product(
         self,
         *,
         name: str,
@@ -764,11 +766,11 @@ class AsyncRawProductsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_product(
+    async def get_product_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Product]:
         """
-        Get a product by its ID
+        Get a product by ID
 
         Parameters
         ----------
@@ -835,7 +837,7 @@ class AsyncRawProductsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_product(
+    async def update_product_by_id(
         self,
         id: str,
         *,
@@ -848,7 +850,7 @@ class AsyncRawProductsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Product]:
         """
-        Update a product by its ID
+        Update a product by ID
 
         Parameters
         ----------
@@ -954,7 +956,7 @@ class AsyncRawProductsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Product]:
         """
-        Get a product by its externalId
+        Get a product by external ID
 
         Parameters
         ----------
@@ -1034,7 +1036,7 @@ class AsyncRawProductsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Product]:
         """
-        Update a product by its externalId
+        Update a product by external ID
 
         Parameters
         ----------

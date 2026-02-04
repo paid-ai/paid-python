@@ -111,7 +111,7 @@ class RawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_a_new_customer(
+    def create_customer(
         self,
         *,
         name: str,
@@ -230,11 +230,11 @@ class RawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_customer(
+    def get_customer_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[Customer]:
         """
-        Get a customer by its ID
+        Get a customer by ID
 
         Parameters
         ----------
@@ -301,7 +301,7 @@ class RawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_customer(
+    def update_customer_by_id(
         self,
         id: str,
         *,
@@ -319,7 +319,7 @@ class RawCustomersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Customer]:
         """
-        Update a customer by its ID
+        Update a customer by ID
 
         Parameters
         ----------
@@ -438,11 +438,11 @@ class RawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_customer(
+    def delete_customer_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[EmptyResponse]:
         """
-        Delete a customer by its ID
+        Delete a customer by ID
 
         Parameters
         ----------
@@ -513,7 +513,7 @@ class RawCustomersClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[Customer]:
         """
-        Get a customer by its externalId
+        Get a customer by external ID
 
         Parameters
         ----------
@@ -598,7 +598,7 @@ class RawCustomersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Customer]:
         """
-        Update a customer by its externalId
+        Update a customer by external ID
 
         Parameters
         ----------
@@ -721,7 +721,7 @@ class RawCustomersClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[EmptyResponse]:
         """
-        Delete a customer by its externalId
+        Delete a customer by external ID
 
         Parameters
         ----------
@@ -874,7 +874,7 @@ class AsyncRawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_a_new_customer(
+    async def create_customer(
         self,
         *,
         name: str,
@@ -993,11 +993,11 @@ class AsyncRawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_customer(
+    async def get_customer_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Customer]:
         """
-        Get a customer by its ID
+        Get a customer by ID
 
         Parameters
         ----------
@@ -1064,7 +1064,7 @@ class AsyncRawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_customer(
+    async def update_customer_by_id(
         self,
         id: str,
         *,
@@ -1082,7 +1082,7 @@ class AsyncRawCustomersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Customer]:
         """
-        Update a customer by its ID
+        Update a customer by ID
 
         Parameters
         ----------
@@ -1201,11 +1201,11 @@ class AsyncRawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_customer(
+    async def delete_customer_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[EmptyResponse]:
         """
-        Delete a customer by its ID
+        Delete a customer by ID
 
         Parameters
         ----------
@@ -1276,7 +1276,7 @@ class AsyncRawCustomersClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Customer]:
         """
-        Get a customer by its externalId
+        Get a customer by external ID
 
         Parameters
         ----------
@@ -1361,7 +1361,7 @@ class AsyncRawCustomersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Customer]:
         """
-        Update a customer by its externalId
+        Update a customer by external ID
 
         Parameters
         ----------
@@ -1484,7 +1484,7 @@ class AsyncRawCustomersClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[EmptyResponse]:
         """
-        Delete a customer by its externalId
+        Delete a customer by external ID
 
         Parameters
         ----------
