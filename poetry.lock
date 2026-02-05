@@ -1690,13 +1690,13 @@ files = [
 
 [[package]]
 name = "openai"
-version = "2.16.0"
+version = "2.17.0"
 description = "The official Python library for the openai API"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "openai-2.16.0-py3-none-any.whl", hash = "sha256:5f46643a8f42899a84e80c38838135d7038e7718333ce61396994f887b09a59b"},
-    {file = "openai-2.16.0.tar.gz", hash = "sha256:42eaa22ca0d8ded4367a77374104d7a2feafee5bd60a107c3c11b5243a11cd12"},
+    {file = "openai-2.17.0-py3-none-any.whl", hash = "sha256:4f393fd886ca35e113aac7ff239bcd578b81d8f104f5aedc7d3693eb2af1d338"},
+    {file = "openai-2.17.0.tar.gz", hash = "sha256:47224b74bd20f30c6b0a6a329505243cb2f26d5cf84d9f8d0825ff8b35e9c999"},
 ]
 
 [package.dependencies]
@@ -1862,6 +1862,29 @@ test = ["langchain (==0.3.15)", "langchain-community (==0.3.15)", "langchain-cor
 type-check = ["langchain-core (==0.3.9)"]
 
 [[package]]
+name = "openinference-instrumentation-openai"
+version = "0.1.41"
+description = "OpenInference OpenAI Instrumentation"
+optional = false
+python-versions = "<3.14,>=3.9"
+files = [
+    {file = "openinference_instrumentation_openai-0.1.41-py3-none-any.whl", hash = "sha256:6fad453446835e51333b660882eacababbf1052689ca53cba444a7d97fa2e910"},
+    {file = "openinference_instrumentation_openai-0.1.41.tar.gz", hash = "sha256:ef4db680986a613b1639720f9beaa315c9e388c20bc985dbbbdf0f4df007c6e9"},
+]
+
+[package.dependencies]
+openinference-instrumentation = ">=0.1.27"
+openinference-semantic-conventions = ">=0.1.25"
+opentelemetry-api = "*"
+opentelemetry-instrumentation = "*"
+opentelemetry-semantic-conventions = "*"
+typing-extensions = "*"
+wrapt = "*"
+
+[package.extras]
+instruments = ["openai (>=1.99.9)"]
+
+[[package]]
 name = "openinference-instrumentation-openai-agents"
 version = "1.4.0"
 description = "OpenInference OpenAI Agents Instrumentation"
@@ -1974,23 +1997,6 @@ python-versions = "<4,>=3.9"
 files = [
     {file = "opentelemetry_instrumentation_anthropic-0.50.1-py3-none-any.whl", hash = "sha256:d5c12497c01a10ba34412805cb6d970fbdb5fc5d2f73f95ac387df99d2c9e813"},
     {file = "opentelemetry_instrumentation_anthropic-0.50.1.tar.gz", hash = "sha256:d2c1a589d48bc056eb8424204a2a8b219854629278f851e9e7d4d18b8b788203"},
-]
-
-[package.dependencies]
-opentelemetry-api = ">=1.38.0,<2.0.0"
-opentelemetry-instrumentation = ">=0.59b0"
-opentelemetry-semantic-conventions = ">=0.59b0"
-opentelemetry-semantic-conventions-ai = ">=0.4.13,<0.5.0"
-
-[[package]]
-name = "opentelemetry-instrumentation-openai"
-version = "0.50.1"
-description = "OpenTelemetry OpenAI instrumentation"
-optional = false
-python-versions = "<4,>=3.9"
-files = [
-    {file = "opentelemetry_instrumentation_openai-0.50.1-py3-none-any.whl", hash = "sha256:ea0ca70f09f1bcfd6a188d5122327386386dcc9b85fbf7187dd34e38d32c126d"},
-    {file = "opentelemetry_instrumentation_openai-0.50.1.tar.gz", hash = "sha256:43eea552ca80cc31f0197fac3458b53c4dbc2cff8f80aa9aa9d3fe899dba9190"},
 ]
 
 [package.dependencies]
@@ -3741,4 +3747,4 @@ cffi = ["cffi (>=1.17,<2.0)", "cffi (>=2.0.0b)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.14"
-content-hash = "139f8b742df7c4fd0933fd3c1bbd6245b5db84a0e57a0d266cfeceebbccba1bd"
+content-hash = "939817e0dee5f078181fd4089c9580119c9d734875e69d8f16f901f7a337c7fc"

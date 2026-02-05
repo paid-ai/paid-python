@@ -23,7 +23,7 @@ except Exception:
     ANTHROPIC_AVAILABLE = False
 
 try:
-    from opentelemetry.instrumentation.openai import OpenAIInstrumentor
+    from openinference.instrumentation.openai import OpenAIInstrumentor
 
     OPENAI_AVAILABLE = True
 except Exception:
