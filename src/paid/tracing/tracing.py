@@ -16,6 +16,7 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor, TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.trace import NonRecordingSpan, NoOpTracerProvider, SpanContext, Status, StatusCode, TraceFlags
+from opentelemetry.util.types import Attributes
 
 from paid.logger import logger
 
@@ -41,6 +42,86 @@ class ProcessorSettings:
 
     pydantic: Optional[PydanticProcessorSettings] = None
     """Settings for Pydantic AI span processing. If provided, enables Pydantic-specific filtering."""
+
+
+# Scope name constants for library-specific tracers
+PYDANTIC_SCOPE_NAME = "paid.pydantic"
+
+
+class _PydanticSettingsRegistry:
+    """Registry for Pydantic tracer settings, keyed by scope name."""
+
+    _settings: Dict[str, PydanticProcessorSettings] = {}
+
+    @classmethod
+    def register(cls, scope_name: str, settings: PydanticProcessorSettings) -> None:
+        """Register settings for a scope."""
+        cls._settings[scope_name] = settings
+
+    @classmethod
+    def get(cls, scope_name: str) -> Optional[PydanticProcessorSettings]:
+        """Get settings for a scope, or None if not registered."""
+        return cls._settings.get(scope_name)
+
+    @classmethod
+    def has_scope(cls, scope_name: str) -> bool:
+        """Check if a scope is registered."""
+        return scope_name in cls._settings
+
+
+class PydanticTracerProvider:
+    """
+    A TracerProvider wrapper for Pydantic AI that registers settings when get_tracer() is called.
+
+    This allows Pydantic AI's InstrumentationSettings to receive a "TracerProvider-like" object
+    that will register the appropriate settings for any scope name Pydantic AI uses internally.
+
+    Spans created through tracers from this provider will have the PydanticSpanProcessor
+    applied with the configured settings.
+    """
+
+    def __init__(self, settings: PydanticProcessorSettings):
+        """
+        Initialize the Pydantic tracer provider wrapper.
+
+        Args:
+            settings: The settings to apply to spans created through this provider.
+        """
+        self._settings = settings
+
+    def get_tracer(
+        self,
+        instrumenting_module_name: str,
+        instrumenting_library_version: Optional[str] = None,
+        schema_url: Optional[str] = None,
+        attributes: Optional[Attributes] = None,
+    ) -> trace.Tracer:
+        """
+        Get a tracer that will have Pydantic span processing applied.
+
+        Registers the settings for the given scope name, then delegates to
+        the real Paid tracer provider.
+
+        Args:
+            instrumenting_module_name: The name of the instrumenting module (scope name).
+            instrumenting_library_version: Optional version of the instrumenting library.
+            schema_url: Optional schema URL for the instrumentation.
+            attributes: Optional attributes for the instrumentation.
+
+        Returns:
+            A tracer from the Paid tracer provider with settings registered for this scope.
+        """
+        global paid_tracer_provider
+
+        # Register settings for this scope so PydanticSpanProcessor can find them
+        _PydanticSettingsRegistry.register(instrumenting_module_name, self._settings)
+
+        return paid_tracer_provider.get_tracer(
+            instrumenting_module_name,
+            instrumenting_library_version,
+            schema_url,
+            attributes,
+        )
 
 
 class _TokenStore:
@@ -192,6 +273,9 @@ class PaidSpanProcessor(SpanProcessor):
 class PydanticSpanProcessor(SpanProcessor):
     """
     Span processor that filters usage and cost attributes from Pydantic AI spans.
+
+    Only processes spans from tracers with registered Pydantic settings (via get_paid_tracer_pydantic).
+    Settings are looked up from the _PydanticSettingsRegistry by instrumentation scope name.
     """
 
     USAGE_ATTRIBUTES_SUBSTRINGS = {
@@ -201,23 +285,20 @@ class PydanticSpanProcessor(SpanProcessor):
         "cost",
     }
 
-    def __init__(self, track_usage: bool = True):
-        """
-        Initialize the Pydantic span processor.
-
-        Args:
-            track_usage: If False, filters out usage and cost attributes from spans.
-                        Default is True (include usage/cost data).
-        """
-        self.track_usage = track_usage
-
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
         """Called when a span is started. No action needed - PaidSpanProcessor handles this."""
         pass
 
     def on_end(self, span: ReadableSpan) -> None:
-        """Filter out usage/cost data if track_usage is False."""
-        if self.track_usage:
+        """Filter out usage/cost data based on settings for this span's scope."""
+        # Only process spans from registered pydantic scopes
+        scope_name = span.instrumentation_scope.name if span.instrumentation_scope else None
+        if not scope_name or not _PydanticSettingsRegistry.has_scope(scope_name):
+            return
+
+        settings = _PydanticSettingsRegistry.get(scope_name)
+        if settings is None or settings.track_usage:
+            # No filtering needed - keep usage/cost data
             return
 
         original_attributes = span.attributes
@@ -288,20 +369,12 @@ def initialize_tracing(
     Args:
         api_key: The API key for authentication. If not provided, will try to get from PAID_API_KEY environment variable.
         collector_endpoint: The OTLP collector endpoint URL.
-        processor_settings: Optional configuration for span processors (e.g., Pydantic AI settings).
+        processor_settings: Optional configuration for span processors (deprecated for Pydantic - use get_paid_tracer_pydantic instead).
 
     Example:
         # Basic initialization
         initialize_tracing()
 
-        # With Pydantic AI settings to filter usage/cost data
-        from paid.tracing import initialize_tracing, ProcessorSettings, PydanticProcessorSettings
-
-        initialize_tracing(
-            processor_settings=ProcessorSettings(
-                pydantic=PydanticProcessorSettings(track_usage=False)
-            )
-        )
     """
     global paid_tracer_provider
 
@@ -336,11 +409,12 @@ def initialize_tracing(
         # Add span processor to prefix span names and add customer/agent ID attributes
         paid_tracer_provider.add_span_processor(PaidSpanProcessor())
 
-        # Add Pydantic span processor if settings provided
+        # Add Pydantic span processor - it self-filters by scope using the settings registry
+        paid_tracer_provider.add_span_processor(PydanticSpanProcessor())
+
+        # Legacy support: if processor_settings.pydantic is provided, register it for the default scope
         if processor_settings and processor_settings.pydantic:
-            paid_tracer_provider.add_span_processor(
-                PydanticSpanProcessor(track_usage=processor_settings.pydantic.track_usage)
-            )
+            _PydanticSettingsRegistry.register(PYDANTIC_SCOPE_NAME, processor_settings.pydantic)
 
         # Set up OTLP exporter
         otlp_exporter = OTLPSpanExporter(
@@ -377,6 +451,48 @@ def get_paid_tracer() -> trace.Tracer:
     """
     global paid_tracer_provider
     return paid_tracer_provider.get_tracer("paid.python")
+
+
+
+def get_paid_tracer_provider_pydantic(
+    settings: Optional[PydanticProcessorSettings] = None,
+) -> PydanticTracerProvider:
+    """
+    Get a TracerProvider for Pydantic AI with custom processing settings.
+
+    This is designed to work with Pydantic AI's InstrumentationSettings, which expects
+    a TracerProvider. The returned provider registers settings when
+    get_tracer() is called, so spans from any scope name Pydantic AI uses internally
+    will have the PydanticSpanProcessor applied.
+
+    Spans created through this provider share the same trace context as other Paid tracers,
+    so they will be properly linked within traces.
+
+    Args:
+        settings: Optional settings for Pydantic span processing.
+                  If not provided, defaults to PydanticProcessorSettings() (track_usage=True).
+
+    Returns:
+        A TracerProvider configured for Pydantic AI with the specified settings.
+
+    Example:
+        from pydantic_ai.models.instrumented import InstrumentationSettings
+        from paid.tracing import get_paid_tracer_provider_pydantic, PydanticProcessorSettings
+
+        # Get a provider that tracks usage (default)
+        instrumentation = InstrumentationSettings(
+            tracer_provider=get_paid_tracer_provider_pydantic(),
+        )
+
+        # Get a provider that filters out usage/cost data
+        instrumentation = InstrumentationSettings(
+            tracer_provider=get_paid_tracer_provider_pydantic(
+                PydanticProcessorSettings(track_usage=False)
+            ),
+        )
+    """
+    effective_settings = settings if settings is not None else PydanticProcessorSettings()
+    return PydanticTracerProvider(effective_settings)
 
 
 def trace_sync_(
