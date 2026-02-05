@@ -3,7 +3,7 @@ name = "paid-python"
 
 [tool.poetry]
 name = "paid-python"
-version = "1.0.0-alpha2"
+version = "1.0.0-alpha3"
 description = ""
 readme = "README.md"
 authors = []
@@ -62,8 +62,6 @@ anthropic = ">=0.57.0"
 google-genai = ">=1.19.0"
 instructor = ">=1.0.0"
 langchain-core = ">=0.1.0"
-llama-index-core = ">=0.13.0"
-llama-index-llms-openai = ">=0.5.0"
 mistralai = ">=1.9.0"
 openai = ">=1.12.0"
 openai-agents = ">=0.2.0"

@@ -31,10 +31,6 @@ def __getattr__(name):
         from .gemini.geminiWrapper import PaidGemini
 
         return PaidGemini
-    elif name == "PaidLlamaIndexOpenAI":
-        from .llamaindex.llamaIndexWrapper import PaidLlamaIndexOpenAI
-
-        return PaidLlamaIndexOpenAI
     elif name == "PaidLangChainCallback":
         from .langchain.paidLangChainCallback import PaidLangChainCallback
 

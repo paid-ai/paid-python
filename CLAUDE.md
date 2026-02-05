@@ -85,7 +85,6 @@ Each wrapper intercepts AI provider calls and creates OTEL spans with cost data:
 - **mistral/** - Wraps Mistral client
 - **gemini/** - Wraps Google Gemini client
 - **bedrock/** - Wraps AWS Bedrock client
-- **llamaindex/** - Wraps LlamaIndex operations
 - **langchain/** - Callback handler for LangChain
 - **openai_agents/** - Hook for OpenAI Agents SDK
 - **utils.py** - Shared utilities (e.g., `get_audio_duration()` for audio file cost calculation using mutagen)
