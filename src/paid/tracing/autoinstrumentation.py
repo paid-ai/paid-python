@@ -62,6 +62,13 @@ except Exception:
     logger.debug("Google GenAI instrumentation library not available, skipping instrumentation")
     GOOGLE_GENAI_AVAILABLE = False
 
+try:
+    from openinference.instrumentation.instructor import InstructorInstrumentor
+
+    INSTRUCTOR_AVAILABLE = True
+except Exception:
+    logger.debug("Instructor instrumentation library not available, skipping instrumentation")
+    INSTRUCTOR_AVAILABLE = False
 
 # Track which instrumentors have been initialized
 _initialized_instrumentors: List[str] = []
@@ -83,6 +90,7 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
                   - "bedrock": AWS Bedrock
                   - "langchain": LangChain library
                   - "google-genai": Google GenAI library
+                  - "instructor": Instructor library
                   If None, all supported libraries that are installed will be instrumented.
 
     Note:
@@ -112,7 +120,7 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
 
     # Default to all supported libraries if none specified
     if libraries is None:
-        libraries = ["anthropic", "openai", "openai-agents", "bedrock", "langchain", "google-genai"]
+        libraries = ["anthropic", "openai", "openai-agents", "bedrock", "langchain", "google-genai", "instructor"]
 
     for library in libraries:
         if library in _initialized_instrumentors:
@@ -131,9 +139,11 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
             _instrument_langchain()
         elif library == "google-genai":
             _instrument_google_genai()
+        elif library == "instructor":
+            _instrument_instructor()
         else:
             logger.warning(
-                f"Unknown library '{library}' - supported libraries: anthropic, gemini, openai, openai-agents, bedrock, langchain"
+                f"Unknown library '{library}' - supported libraries: anthropic, openai, openai-agents, bedrock, langchain, google-genai, instructor"
             )
 
     logger.info(f"Auto-instrumentation enabled for: {', '.join(_initialized_instrumentors)}")
@@ -225,3 +235,16 @@ def _instrument_google_genai() -> None:
     GoogleGenAIInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
     _initialized_instrumentors.append("google-genai")
     logger.info("Google GenAI auto-instrumentation enabled")
+
+
+def _instrument_instructor() -> None:
+    """
+    Instrument the Instructor library using openinference-instrumentation-instructor.
+    """
+    if not INSTRUCTOR_AVAILABLE:
+        logger.warning("Instructor library not available, skipping instrumentation")
+        return
+
+    InstructorInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
+    _initialized_instrumentors.append("instructor")
+    logger.info("Instructor auto-instrumentation enabled")
