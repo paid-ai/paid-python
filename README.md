@@ -41,7 +41,7 @@ from paid import Paid
 
 client = Paid(token="API_KEY")
 
-client.customers.create_a_new_customer(
+client.customers.create_customer(
     name="name"
 )
 ```
@@ -52,7 +52,7 @@ The SDK provides Python classes for all request and response types. These are au
 
 ```python
 # Example of creating a customer
-response = client.customers.create_a_new_customer(
+response = client.customers.create_customer(
     name="John Doe",
 )
 
@@ -70,7 +70,7 @@ from paid import BadRequestError, NotFoundError
 from paid.core.api_error import ApiError
 
 try:
-    client.customers.create_a_new_customer(name="John Doe")
+    client.customers.create_customer(name="John Doe")
 except BadRequestError as e:
     print(e.status_code)  # 400
     print(e.body)         # ErrorResponse with error details
@@ -353,7 +353,7 @@ from openai import OpenAI
 client = Paid(token="PAID_API_KEY")
 initialize_tracing()
 
-paid_autoinstrument()  # instruments all available: anthropic, gemini, openai, openai-agents, bedrock, langchain
+paid_autoinstrument()  # instruments all available: anthropic, gemini, openai, openai-agents, bedrock, langchain, instructor
 
 # Now all OpenAI calls will be automatically traced
 openai_client = OpenAI(api_key="<OPENAI_API_KEY>")
@@ -380,6 +380,7 @@ openai             - OpenAI Python SDK
 openai-agents      - OpenAI Agents SDK
 bedrock            - AWS Bedrock (boto3)
 langchain          - LangChain framework
+instructor         - Instructor
 ```
 
 #### Selective Instrumentation
@@ -563,17 +564,17 @@ If you would prefer to not use Paid to track your costs automatically but you wa
 then you can use manual cost tracking mechanism. Just attach the cost information in the following format to a signal payload:
 
 ```python
-from paid import Paid, Signal
+from paid import Paid, Signal, CustomerByExternalId, ProductByExternalId
 
 client = Paid(token="<PAID_API_KEY>")
 
 signal = Signal(
     event_name="<your_signal_name>",
-    agent_id="<your_agent_id>",
-    external_customer_id="<your_external_customer_id>",
-    data = {
+    customer=CustomerByExternalId(external_customer_id="<your_external_customer_id>"),
+    attribution=ProductByExternalId(external_product_id="<your_external_product_id>"),
+    data={
         "costData": {
-            "vendor": "<any_vendor_name>", # can be anything, traces are grouped by vendors in the UI
+            "vendor": "<any_vendor_name>",  # can be anything, traces are grouped by vendors in the UI
             "cost": {
                 "amount": 0.002,
                 "currency": "USD"
@@ -583,7 +584,7 @@ signal = Signal(
     }
 )
 
-client.usage.record_bulk(signals=[signal])
+client.signals.create_signals(signals=[signal])
 ```
 
 Alternatively the same `costData` payload can be passed to OTLP signaling mechanism:
@@ -616,17 +617,17 @@ do_work()
 If you would prefer to send us raw usage manually (without wrappers) and have us compute the cost, you can attach usage data in the following format:
 
 ```python
-from paid import Paid, Signal
+from paid import Paid, Signal, CustomerByExternalId, ProductByExternalId
 
 client = Paid(token="<PAID_API_KEY>")
 
 signal = Signal(
     event_name="<your_signal_name>",
-    agent_id="<your_agent_id>",
-    external_customer_id="<your_external_customer_id>",
-    data = {
+    customer=CustomerByExternalId(external_customer_id="<your_external_customer_id>"),
+    attribution=ProductByExternalId(external_product_id="<your_external_product_id>"),
+    data={
         "costData": {
-            "vendor": "<any_vendor_name>", # can be anything, traces are grouped by vendors in the UI
+            "vendor": "<any_vendor_name>",  # can be anything, traces are grouped by vendors in the UI
             "attributes": {
                 "gen_ai.response.model": "gpt-4.1-mini",
                 "gen_ai.usage.input_tokens": 100,
@@ -637,7 +638,7 @@ signal = Signal(
     }
 )
 
-client.usage.record_bulk(signals=[signal])
+client.signals.create_signals(signals=[signal])
 ```
 
 Same but via OTEL signaling:
@@ -680,7 +681,7 @@ from paid import AsyncPaid
 client = AsyncPaid(token="API_KEY")
 
 # Async API calls
-customer = await client.customers.create(name="John Doe")
+customer = await client.customers.create_customer(name="John Doe")
 ```
 
 ### Async Cost Tracking with Decorator
