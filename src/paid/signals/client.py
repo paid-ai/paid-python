@@ -27,7 +27,7 @@ class SignalsClient:
         """
         return self._raw_client
 
-    def create_signals_in_bulk(
+    def create_signals(
         self, *, signals: typing.Sequence[Signal], request_options: typing.Optional[RequestOptions] = None
     ) -> BulkSignalsResponse:
         """
@@ -52,7 +52,7 @@ class SignalsClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.signals.create_signals_in_bulk(
+        client.signals.create_signals(
             signals=[
                 Signal(
                     event_name="eventName",
@@ -63,7 +63,7 @@ class SignalsClient:
             ],
         )
         """
-        _response = self._raw_client.create_signals_in_bulk(signals=signals, request_options=request_options)
+        _response = self._raw_client.create_signals(signals=signals, request_options=request_options)
         return _response.data
 
 
@@ -82,7 +82,7 @@ class AsyncSignalsClient:
         """
         return self._raw_client
 
-    async def create_signals_in_bulk(
+    async def create_signals(
         self, *, signals: typing.Sequence[Signal], request_options: typing.Optional[RequestOptions] = None
     ) -> BulkSignalsResponse:
         """
@@ -112,7 +112,7 @@ class AsyncSignalsClient:
 
 
         async def main() -> None:
-            await client.signals.create_signals_in_bulk(
+            await client.signals.create_signals(
                 signals=[
                     Signal(
                         event_name="eventName",
@@ -126,5 +126,5 @@ class AsyncSignalsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_signals_in_bulk(signals=signals, request_options=request_options)
+        _response = await self._raw_client.create_signals(signals=signals, request_options=request_options)
         return _response.data

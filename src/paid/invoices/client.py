@@ -64,9 +64,9 @@ class InvoicesClient:
         _response = self._raw_client.list_invoices(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    def get_invoice(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Invoice:
+    def get_invoice_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Invoice:
         """
-        Get an invoice by its ID
+        Get an invoice by ID
 
         Parameters
         ----------
@@ -87,14 +87,14 @@ class InvoicesClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.invoices.get_invoice(
+        client.invoices.get_invoice_by_id(
             id="id",
         )
         """
-        _response = self._raw_client.get_invoice(id, request_options=request_options)
+        _response = self._raw_client.get_invoice_by_id(id, request_options=request_options)
         return _response.data
 
-    def update_invoice(
+    def update_invoice_by_id(
         self,
         id: str,
         *,
@@ -102,7 +102,7 @@ class InvoicesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Invoice:
         """
-        Update an invoice by its ID (limited fields)
+        Update an invoice by ID
 
         Parameters
         ----------
@@ -125,11 +125,11 @@ class InvoicesClient:
         client = Paid(
             token="YOUR_TOKEN",
         )
-        client.invoices.update_invoice(
+        client.invoices.update_invoice_by_id(
             id="id",
         )
         """
-        _response = self._raw_client.update_invoice(id, metadata=metadata, request_options=request_options)
+        _response = self._raw_client.update_invoice_by_id(id, metadata=metadata, request_options=request_options)
         return _response.data
 
     def get_invoice_lines(
@@ -141,7 +141,7 @@ class InvoicesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> InvoiceLinesResponse:
         """
-        Get the invoice lines for an invoice by its ID
+        Get the invoice lines for an invoice by ID
 
         Parameters
         ----------
@@ -233,9 +233,9 @@ class AsyncInvoicesClient:
         _response = await self._raw_client.list_invoices(limit=limit, offset=offset, request_options=request_options)
         return _response.data
 
-    async def get_invoice(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Invoice:
+    async def get_invoice_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Invoice:
         """
-        Get an invoice by its ID
+        Get an invoice by ID
 
         Parameters
         ----------
@@ -261,17 +261,17 @@ class AsyncInvoicesClient:
 
 
         async def main() -> None:
-            await client.invoices.get_invoice(
+            await client.invoices.get_invoice_by_id(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_invoice(id, request_options=request_options)
+        _response = await self._raw_client.get_invoice_by_id(id, request_options=request_options)
         return _response.data
 
-    async def update_invoice(
+    async def update_invoice_by_id(
         self,
         id: str,
         *,
@@ -279,7 +279,7 @@ class AsyncInvoicesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Invoice:
         """
-        Update an invoice by its ID (limited fields)
+        Update an invoice by ID
 
         Parameters
         ----------
@@ -307,14 +307,14 @@ class AsyncInvoicesClient:
 
 
         async def main() -> None:
-            await client.invoices.update_invoice(
+            await client.invoices.update_invoice_by_id(
                 id="id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.update_invoice(id, metadata=metadata, request_options=request_options)
+        _response = await self._raw_client.update_invoice_by_id(id, metadata=metadata, request_options=request_options)
         return _response.data
 
     async def get_invoice_lines(
@@ -326,7 +326,7 @@ class AsyncInvoicesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> InvoiceLinesResponse:
         """
-        Get the invoice lines for an invoice by its ID
+        Get the invoice lines for an invoice by ID
 
         Parameters
         ----------

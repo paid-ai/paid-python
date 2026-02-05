@@ -109,7 +109,7 @@ class RawContactsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_a_new_contact(
+    def create_contact(
         self,
         *,
         customer_id: str,
@@ -216,7 +216,9 @@ class RawContactsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_contact(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[Contact]:
+    def get_contact_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[Contact]:
         """
         Get a contact by its ID
 
@@ -285,7 +287,7 @@ class RawContactsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def update_contact(
+    def update_contact_by_id(
         self,
         id: str,
         *,
@@ -406,7 +408,7 @@ class RawContactsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete_contact(
+    def delete_contact_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[EmptyResponse]:
         """
@@ -481,7 +483,7 @@ class RawContactsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[Contact]:
         """
-        Get a contact by its externalId
+        Get a contact by its external ID
 
         Parameters
         ----------
@@ -562,7 +564,7 @@ class RawContactsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Contact]:
         """
-        Update a contact by its externalId
+        Update a contact by its external ID
 
         Parameters
         ----------
@@ -673,7 +675,7 @@ class RawContactsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[EmptyResponse]:
         """
-        Delete a contact by its externalId
+        Delete a contact by its external ID
 
         Parameters
         ----------
@@ -826,7 +828,7 @@ class AsyncRawContactsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_a_new_contact(
+    async def create_contact(
         self,
         *,
         customer_id: str,
@@ -933,7 +935,7 @@ class AsyncRawContactsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_contact(
+    async def get_contact_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Contact]:
         """
@@ -1004,7 +1006,7 @@ class AsyncRawContactsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def update_contact(
+    async def update_contact_by_id(
         self,
         id: str,
         *,
@@ -1125,7 +1127,7 @@ class AsyncRawContactsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def delete_contact(
+    async def delete_contact_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[EmptyResponse]:
         """
@@ -1200,7 +1202,7 @@ class AsyncRawContactsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Contact]:
         """
-        Get a contact by its externalId
+        Get a contact by its external ID
 
         Parameters
         ----------
@@ -1281,7 +1283,7 @@ class AsyncRawContactsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Contact]:
         """
-        Update a contact by its externalId
+        Update a contact by its external ID
 
         Parameters
         ----------
@@ -1392,7 +1394,7 @@ class AsyncRawContactsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[EmptyResponse]:
         """
-        Delete a contact by its externalId
+        Delete a contact by its external ID
 
         Parameters
         ----------
