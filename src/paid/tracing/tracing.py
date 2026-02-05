@@ -245,6 +245,10 @@ class PaidSpanProcessor(SpanProcessor):
 
     def on_end(self, span: ReadableSpan) -> None:
         """Filter out prompt and response contents unless explicitly asked to store"""
+        if span.name and not span.name.startswith(self.SPAN_NAME_PREFIX):
+            # Note: ReadableSpan is immutable, need to use internal attribute
+            object.__setattr__(span, "_name", f"{self.SPAN_NAME_PREFIX}{span.name}")
+            
         store_prompt = ContextData.get_context_key("store_prompt")
         if store_prompt:
             return
