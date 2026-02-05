@@ -534,11 +534,19 @@ def trace_sync_(
     args = args or ()
     kwargs = kwargs or {}
 
-    # Set context variables for access by nested spans
-    ContextData.set_context_key("external_customer_id", external_customer_id)
-    ContextData.set_context_key("external_agent_id", external_agent_id)
-    ContextData.set_context_key("store_prompt", store_prompt)
-    ContextData.set_context_key("user_metadata", metadata)
+    # Only override context variables if explicitly provided
+    if external_customer_id is not None:
+        ContextData.set_context_key("external_customer_id", external_customer_id)
+    if external_agent_id is not None:
+        ContextData.set_context_key("external_agent_id", external_agent_id)
+    # Only override store_prompt if explicitly set to True
+    if store_prompt:
+        ContextData.set_context_key("store_prompt", True)
+    # Merge metadata with existing instead of replacing
+    if metadata is not None:
+        existing_metadata = ContextData.get_context_key("user_metadata") or {}
+        merged_metadata = {**existing_metadata, **metadata}
+        ContextData.set_context_key("user_metadata", merged_metadata)
 
     # If user set trace context manually
     override_trace_id = tracing_token
@@ -605,11 +613,19 @@ async def trace_async_(
     args = args or ()
     kwargs = kwargs or {}
 
-    # Set context variables for access by nested spans
-    ContextData.set_context_key("external_customer_id", external_customer_id)
-    ContextData.set_context_key("external_agent_id", external_agent_id)
-    ContextData.set_context_key("store_prompt", store_prompt)
-    ContextData.set_context_key("user_metadata", metadata)
+    # Only override context variables if explicitly provided
+    if external_customer_id is not None:
+        ContextData.set_context_key("external_customer_id", external_customer_id)
+    if external_agent_id is not None:
+        ContextData.set_context_key("external_agent_id", external_agent_id)
+    # Only override store_prompt if explicitly set to True
+    if store_prompt:
+        ContextData.set_context_key("store_prompt", True)
+    # Merge metadata with existing instead of replacing
+    if metadata is not None:
+        existing_metadata = ContextData.get_context_key("user_metadata") or {}
+        merged_metadata = {**existing_metadata, **metadata}
+        ContextData.set_context_key("user_metadata", merged_metadata)
 
     # If user set trace context manually
     override_trace_id = tracing_token

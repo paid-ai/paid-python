@@ -86,11 +86,19 @@ class paid_tracing:
     def _setup_context(self) -> Optional[Context]:
         """Set up context variables and return OTEL context if needed."""
 
-        # Set context variables
-        ContextData.set_context_key("external_customer_id", self.external_customer_id)
-        ContextData.set_context_key("external_agent_id", self.external_agent_id)
-        ContextData.set_context_key("store_prompt", self.store_prompt)
-        ContextData.set_context_key("user_metadata", self.metadata)
+        # Only override context variables if explicitly provided
+        if self.external_customer_id is not None:
+            ContextData.set_context_key("external_customer_id", self.external_customer_id)
+        if self.external_agent_id is not None:
+            ContextData.set_context_key("external_agent_id", self.external_agent_id)
+        # Only override store_prompt if explicitly set to True
+        if self.store_prompt:
+            ContextData.set_context_key("store_prompt", True)
+        # Merge metadata with existing instead of replacing
+        if self.metadata is not None:
+            existing_metadata = ContextData.get_context_key("user_metadata") or {}
+            merged_metadata = {**existing_metadata, **self.metadata}
+            ContextData.set_context_key("user_metadata", merged_metadata)
 
         # Handle distributed tracing token
         override_trace_id = self.tracing_token
