@@ -205,7 +205,6 @@ openai
 openai-agents (as a hook)
 anthropic
 langchain (as a hook)
-llamaindex
 bedrock (boto3)
 mistral
 gemini (google-genai)
