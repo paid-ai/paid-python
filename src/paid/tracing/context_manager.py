@@ -115,7 +115,8 @@ class paid_tracing:
             ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
             token_source = "explicit" if self.tracing_token else "context-inherited"
             logger.debug("[paid:distributed] _setup_context: trace_id=%s (source=%s)",
-                         format(override_trace_id, '032x'), token_source)
+                         format(override_trace_id, '032x') if isinstance(override_trace_id, int) else str(override_trace_id),
+                         token_source)
         else:
             logger.debug("[paid:distributed] _setup_context: no override trace_id, using auto-generated")
 
@@ -145,7 +146,8 @@ class paid_tracing:
         logger.debug("[paid:ctx] _enter_ctx: creating parent_span for customer_id=%s", self.external_customer_id)
         self.span_ctx = tracer.start_as_current_span("parent_span", context=ctx)
         self.span = self.span_ctx.__enter__()
-        logger.debug("[paid:ctx] _enter_ctx: span created, trace_id=%s", format(self.span.get_span_context().trace_id, '032x'))
+        logger.debug("[paid:ctx] _enter_ctx: span created, trace_id=%s",
+                     format(self.span.get_span_context().trace_id, '032x') if isinstance(self.span.get_span_context().trace_id, int) else str(self.span.get_span_context().trace_id))
         return self
 
     def _exit_ctx(self, exc_type, exc_val, exc_tb):
@@ -171,7 +173,7 @@ class paid_tracing:
     # Decorator functionality
     def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
         """Use as a decorator."""
-        logger.debug("[paid:ctx] __call__: wrapping fn=%s (async=%s)", func.__name__, asyncio.iscoroutinefunction(func))
+        logger.debug("[paid:ctx] __call__: wrapping fn=%s (async=%s)", getattr(func, '__name__', repr(func)), asyncio.iscoroutinefunction(func))
         if asyncio.iscoroutinefunction(func):
 
             @functools.wraps(func)

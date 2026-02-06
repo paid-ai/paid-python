@@ -52,7 +52,7 @@ class ContextData:
         reset_token = cls._context[key].set(value)
         reset_tokens = cls._get_or_create_reset_tokens()
         reset_tokens[key] = reset_token
-        logger.debug("[paid:ctx] set_context_key: %s=%s", key, value)
+        logger.debug("[paid:ctx] set_context_key: %s (type=%s)", key, type(value).__name__)
 
     @classmethod
     def unset_context_key(cls, key: str) -> None:
