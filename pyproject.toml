@@ -3,7 +3,7 @@ name = "paid-python"
 
 [tool.poetry]
 name = "paid-python"
-version = "1.0.0"
+version = "1.0.1"
 description = ""
 readme = "README.md"
 authors = []
@@ -49,7 +49,6 @@ opentelemetry-instrumentation-anthropic = ">=0.47.0"
 opentelemetry-sdk = ">=1.23.0"
 pydantic = ">= 1.9.2"
 pydantic-core = "^2.18.2"
-python-dotenv = ">=0.15.0"
 typing_extensions = ">= 4.0.0"
 
 [tool.poetry.group.dev.dependencies]

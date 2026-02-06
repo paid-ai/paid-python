@@ -181,13 +181,13 @@ files = [
 
 [[package]]
 name = "anthropic"
-version = "0.77.1"
+version = "0.78.0"
 description = "The official Python library for the anthropic API"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "anthropic-0.77.1-py3-none-any.whl", hash = "sha256:76fd6f2ab36033a5294d58182a5f712dab9573c3a54413a275ecdf29e727c1e0"},
-    {file = "anthropic-0.77.1.tar.gz", hash = "sha256:a19d78ff6fff9e05d211e3a936051cd5b9462f0eac043d2d45b2372f455d11cd"},
+    {file = "anthropic-0.78.0-py3-none-any.whl", hash = "sha256:2a9887d2e99d1b0f9fe08857a1e9fe5d2d4030455dbf9ac65aab052e2efaeac4"},
+    {file = "anthropic-0.78.0.tar.gz", hash = "sha256:55fd978ab9b049c61857463f4c4e9e092b24f892519c6d8078cee1713d8af06e"},
 ]
 
 [package.dependencies]
@@ -1815,13 +1815,13 @@ test = ["google-genai (>=1.8.0)", "opentelemetry-sdk"]
 
 [[package]]
 name = "openinference-instrumentation-instructor"
-version = "0.1.12"
+version = "0.1.13"
 description = "OpenInference Instructor Instrumentation"
 optional = false
 python-versions = "<3.14,>=3.9"
 files = [
-    {file = "openinference_instrumentation_instructor-0.1.12-py3-none-any.whl", hash = "sha256:7a8cadab5c3df657cee25ba473080a2693474dcdc7a593cf65a32e5eaa86ae0c"},
-    {file = "openinference_instrumentation_instructor-0.1.12.tar.gz", hash = "sha256:51b28c797bfbe96eaefd4eb0017b45ced9ea6df3c0deb28d0cdf8064560356ba"},
+    {file = "openinference_instrumentation_instructor-0.1.13-py3-none-any.whl", hash = "sha256:065d4585e74b852e2a92ce66ab20b91cb50ccd49b7969050d2a4aabfa9b978b6"},
+    {file = "openinference_instrumentation_instructor-0.1.13.tar.gz", hash = "sha256:2a2a8053d047381c8de0144aed19e71b6874e355129ae3111e159152c16780b4"},
 ]
 
 [package.dependencies]
@@ -3747,4 +3747,4 @@ cffi = ["cffi (>=1.17,<2.0)", "cffi (>=2.0.0b)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.14"
-content-hash = "939817e0dee5f078181fd4089c9580119c9d734875e69d8f16f901f7a337c7fc"
+content-hash = "0b977b8dab1c82047146f9f0bcdd2323761e16ba5b428004ddedde7f420bbb9f"
