@@ -52,6 +52,7 @@ class ContextData:
         reset_token = cls._context[key].set(value)
         reset_tokens = cls._get_or_create_reset_tokens()
         reset_tokens[key] = reset_token
+        logger.debug("[paid:ctx] set_context_key: %s=%s", key, value)
 
     @classmethod
     def unset_context_key(cls, key: str) -> None:
@@ -59,6 +60,7 @@ class ContextData:
         if key not in cls._context:
             logger.warning(f"Invalid context key: {key}")
             return
+        logger.debug("[paid:ctx] unset_context_key: %s", key)
         reset_tokens = cls._reset_tokens.get()
         if reset_tokens:
             _ = cls._context[key].set(None)
@@ -69,6 +71,7 @@ class ContextData:
     def reset_context(cls) -> None:
         reset_tokens = cls._reset_tokens.get()
         if reset_tokens:
+            logger.debug("[paid:ctx] reset_context: resetting keys=%s", list(reset_tokens.keys()))
             for key, reset_token in reset_tokens.items():
                 cls._context[key].reset(reset_token)
             reset_tokens.clear()

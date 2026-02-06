@@ -80,7 +80,14 @@ class paid_tracing:
         self.span: Optional[Span] = None
         self.span_ctx: Optional[Any] = None  # Context manager for the span
 
+        logger.debug(
+            "[paid:ctx] paid_tracing.__init__: customer_id=%s, product_id=%s, tracing_token=%s, store_prompt=%s",
+            external_customer_id, external_product_id,
+            "present" if tracing_token else "none", store_prompt,
+        )
+
         if not get_token():
+            logger.debug("[paid:ctx] paid_tracing.__init__: token not set, auto-initializing tracing")
             initialize_tracing(None, self.collector_endpoint)
 
     def _setup_context(self) -> Optional[Context]:
@@ -106,6 +113,11 @@ class paid_tracing:
                 trace_flags=TraceFlags(TraceFlags.SAMPLED),
             )
             ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
+            token_source = "explicit" if self.tracing_token else "context-inherited"
+            logger.debug("[paid:distributed] _setup_context: trace_id=%s (source=%s)",
+                         format(override_trace_id, '032x'), token_source)
+        else:
+            logger.debug("[paid:distributed] _setup_context: no override trace_id, using auto-generated")
 
         return ctx
 
@@ -130,9 +142,10 @@ class paid_tracing:
     def _enter_ctx(self):
         ctx = self._setup_context()
         tracer = get_paid_tracer()
-        logger.info(f"Creating span for external_customer_id: {self.external_customer_id}")
+        logger.debug("[paid:ctx] _enter_ctx: creating parent_span for customer_id=%s", self.external_customer_id)
         self.span_ctx = tracer.start_as_current_span("parent_span", context=ctx)
         self.span = self.span_ctx.__enter__()
+        logger.debug("[paid:ctx] _enter_ctx: span created, trace_id=%s", format(self.span.get_span_context().trace_id, '032x'))
         return self
 
     def _exit_ctx(self, exc_type, exc_val, exc_tb):
@@ -141,9 +154,10 @@ class paid_tracing:
             if self.span and self.span_ctx:
                 if exc_type is not None:
                     self.span.set_status(Status(StatusCode.ERROR, str(exc_val)))
+                    logger.debug("[paid:ctx] _exit_ctx: span ended with ERROR: %s", exc_val)
                 else:
                     self.span.set_status(Status(StatusCode.OK))
-                    logger.info("Context block executed successfully")
+                    logger.debug("[paid:ctx] _exit_ctx: span ended with OK")
 
                 self.span_ctx.__exit__(exc_type, exc_val, exc_tb)
                 self.span_ctx = None
@@ -157,6 +171,7 @@ class paid_tracing:
     # Decorator functionality
     def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
         """Use as a decorator."""
+        logger.debug("[paid:ctx] __call__: wrapping fn=%s (async=%s)", func.__name__, asyncio.iscoroutinefunction(func))
         if asyncio.iscoroutinefunction(func):
 
             @functools.wraps(func)
