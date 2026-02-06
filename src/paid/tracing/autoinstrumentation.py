@@ -118,9 +118,15 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
         logger.info("Tracing not initialized, initializing automatically")
         initialize_tracing()
 
+    logger.debug(
+        "[paid:autoinstrument] tracer_provider type=%s, requested libraries=%s",
+        type(tracing.paid_tracer_provider).__name__, libraries,
+    )
+
     # Default to all supported libraries if none specified
     if libraries is None:
         libraries = ["anthropic", "openai", "openai-agents", "bedrock", "langchain", "google-genai", "instructor"]
+        logger.debug("[paid:autoinstrument] No libraries specified, defaulting to all: %s", libraries)
 
     for library in libraries:
         if library in _initialized_instrumentors:
@@ -157,6 +163,8 @@ def _instrument_anthropic() -> None:
         logger.warning("Anthropic library not available, skipping instrumentation")
         return
 
+    logger.debug("[paid:autoinstrument] Instrumenting anthropic with AnthropicInstrumentor, provider=%s",
+                 type(tracing.paid_tracer_provider).__name__)
     # Instrument Anthropic with Paid's tracer provider
     AnthropicInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
 
@@ -172,6 +180,8 @@ def _instrument_openai() -> None:
         logger.warning("OpenAI library not available, skipping instrumentation")
         return
 
+    logger.debug("[paid:autoinstrument] Instrumenting openai with OpenAIInstrumentor, provider=%s",
+                 type(tracing.paid_tracer_provider).__name__)
     # Instrument OpenAI with Paid's tracer provider
     OpenAIInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
 
@@ -187,6 +197,8 @@ def _instrument_openai_agents() -> None:
         logger.warning("OpenAI Agents library not available, skipping instrumentation")
         return
 
+    logger.debug("[paid:autoinstrument] Instrumenting openai-agents with OpenAIAgentsInstrumentor, provider=%s",
+                 type(tracing.paid_tracer_provider).__name__)
     # Instrument OpenAI Agents with Paid's tracer provider
     OpenAIAgentsInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
 
@@ -202,6 +214,8 @@ def _instrument_bedrock() -> None:
         logger.warning("Bedrock instrumentation library not available, skipping instrumentation")
         return
 
+    logger.debug("[paid:autoinstrument] Instrumenting bedrock with BedrockInstrumentor, provider=%s",
+                 type(tracing.paid_tracer_provider).__name__)
     # Instrument Bedrock with Paid's tracer provider
     BedrockInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
 
@@ -217,6 +231,8 @@ def _instrument_langchain() -> None:
         logger.warning("LangChain instrumentation library not available, skipping instrumentation")
         return
 
+    logger.debug("[paid:autoinstrument] Instrumenting langchain with LangChainInstrumentor, provider=%s",
+                 type(tracing.paid_tracer_provider).__name__)
     # Instrument LangChain with Paid's tracer provider
     LangChainInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
 
@@ -232,6 +248,8 @@ def _instrument_google_genai() -> None:
         logger.warning("Google GenAI instrumentation library not available, skipping instrumentation")
         return
 
+    logger.debug("[paid:autoinstrument] Instrumenting google-genai with GoogleGenAIInstrumentor, provider=%s",
+                 type(tracing.paid_tracer_provider).__name__)
     GoogleGenAIInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
     _initialized_instrumentors.append("google-genai")
     logger.info("Google GenAI auto-instrumentation enabled")
@@ -245,6 +263,8 @@ def _instrument_instructor() -> None:
         logger.warning("Instructor library not available, skipping instrumentation")
         return
 
+    logger.debug("[paid:autoinstrument] Instrumenting instructor with InstructorInstrumentor, provider=%s",
+                 type(tracing.paid_tracer_provider).__name__)
     InstructorInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
     _initialized_instrumentors.append("instructor")
     logger.info("Instructor auto-instrumentation enabled")

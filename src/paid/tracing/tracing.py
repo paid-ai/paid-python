@@ -206,7 +206,7 @@ class PaidSpanProcessor(SpanProcessor):
             # Langchain instrumentation creates spans, that are created by other instrumentations (ex. OpenAI, Anthropic).
             # Not all spans need filtering (ex. ChatGoogleGenerativeAI), so first test actual telemetry before adding filters.
             # TODO: maybe consider a dropping sampler for such spans instead of raising an exception?
-            logger.debug(f"Dropping Langchain span: {span.name}")
+            logger.debug("[paid:span] Dropping duplicate LangChain span: %s", span.name)
             raise Exception(f"Dropping Langchain span: {span.name}")
 
         # Prefix the span name
@@ -221,6 +221,11 @@ class PaidSpanProcessor(SpanProcessor):
         agent_id = ContextData.get_context_key("external_agent_id")
         if agent_id:
             span.set_attribute("external_agent_id", agent_id)
+
+        logger.debug(
+            "[paid:span] on_start: name=%s, customer_id=%s, agent_id=%s",
+            span.name, customer_id, agent_id,
+        )
 
         metadata = ContextData.get_context_key("user_metadata")
         if metadata:
@@ -240,6 +245,7 @@ class PaidSpanProcessor(SpanProcessor):
             # Add all flattened metadata attributes to the span
             for key, value in metadata_attributes.items():
                 span.set_attribute(f"metadata.{key}", value)
+            logger.debug("[paid:span] on_start: attached metadata keys=%s", list(metadata_attributes.keys()))
 
     def on_end(self, span: ReadableSpan) -> None:
         if span.name and not span.name.startswith(self.SPAN_NAME_PREFIX):
@@ -249,6 +255,7 @@ class PaidSpanProcessor(SpanProcessor):
         """Filter out prompt and response contents unless explicitly asked to store"""
         store_prompt = ContextData.get_context_key("store_prompt")
         if store_prompt:
+            logger.debug("[paid:span] on_end: name=%s, store_prompt=True, keeping all attributes", span.name)
             return
 
         original_attributes = span.attributes
@@ -260,6 +267,12 @@ class PaidSpanProcessor(SpanProcessor):
                 for k, v in original_attributes.items()
                 if not any(substr in k for substr in self.PROMPT_ATTRIBUTES_SUBSTRINGS)
             }
+            filtered_count = len(original_attributes) - len(filtered_attrs)
+            if filtered_count > 0:
+                logger.debug(
+                    "[paid:span] on_end: name=%s, filtered %d prompt attribute(s)",
+                    span.name, filtered_count,
+                )
             # This works because the exporter reads attributes during serialization
             object.__setattr__(span, "_attributes", filtered_attrs)
 
@@ -301,6 +314,7 @@ class PydanticSpanProcessor(SpanProcessor):
         settings = _PydanticSettingsRegistry.get(scope_name)
         if settings is None or settings.track_usage:
             # No filtering needed - keep usage/cost data
+            logger.debug("[paid:span] PydanticSpanProcessor on_end: scope=%s, track_usage=True, keeping usage data", scope_name)
             return
 
         original_attributes = span.attributes
@@ -312,6 +326,11 @@ class PydanticSpanProcessor(SpanProcessor):
             for k, v in original_attributes.items()
             if not any(substr in k for substr in self.USAGE_ATTRIBUTES_SUBSTRINGS)
         }
+        filtered_count = len(original_attributes) - len(filtered_attrs)
+        logger.debug(
+            "[paid:span] PydanticSpanProcessor on_end: scope=%s, filtered %d usage/cost attribute(s)",
+            scope_name, filtered_count,
+        )
         # This works because the exporter reads attributes during serialization
         object.__setattr__(span, "_attributes", filtered_attrs)
 
@@ -353,6 +372,7 @@ def setup_graceful_termination(paid_tracer_provider: TracerProvider):
         # signal handlers
         for sig in (signal.SIGINT, signal.SIGTERM):
             signal.signal(sig, create_chained_signal_handler(sig))
+        logger.debug("[paid:init] Registered atexit and signal handlers (SIGINT, SIGTERM)")
     except Exception as e:
         logger.warning(
             f"Could not set up termination handlers: {e}"
@@ -383,6 +403,9 @@ def initialize_tracing(
     if not collector_endpoint:
         collector_endpoint = DEFAULT_COLLECTOR_ENDPOINT
 
+    logger.debug("[paid:init] initialize_tracing called, endpoint=%s, api_key=%s",
+                 collector_endpoint, "provided" if api_key else "not provided (will check env)")
+
     try:
         # Check if tracing is disabled via environment variable
         paid_enabled = os.environ.get("PAID_ENABLED", "true").lower()
@@ -401,22 +424,29 @@ def initialize_tracing(
                 logger.error("API key must be provided via PAID_API_KEY environment variable")
                 # don't throw - tracing should not break the app
                 return
+            logger.debug("[paid:init] API key resolved from PAID_API_KEY environment variable")
+        else:
+            logger.debug("[paid:init] API key provided via parameter")
 
         set_token(api_key)
 
         resource = Resource(attributes={"api.key": api_key})
         # Create isolated tracer provider for Paid - don't use or modify global provider
         paid_tracer_provider = TracerProvider(resource=resource)
+        logger.debug("[paid:init] TracerProvider created")
 
         # Add span processor to prefix span names and add customer/agent ID attributes
         paid_tracer_provider.add_span_processor(PaidSpanProcessor())
+        logger.debug("[paid:init] Added PaidSpanProcessor")
 
         # Add Pydantic span processor - it self-filters by scope using the settings registry
         paid_tracer_provider.add_span_processor(PydanticSpanProcessor())
+        logger.debug("[paid:init] Added PydanticSpanProcessor")
 
         # Legacy support: if processor_settings.pydantic is provided, register it for the default scope
         if processor_settings and processor_settings.pydantic:
             _PydanticSettingsRegistry.register(PYDANTIC_SCOPE_NAME, processor_settings.pydantic)
+            logger.debug("[paid:init] Registered legacy PydanticProcessorSettings for scope=%s", PYDANTIC_SCOPE_NAME)
 
         # Set up OTLP exporter
         otlp_exporter = OTLPSpanExporter(
@@ -429,6 +459,7 @@ def initialize_tracing(
         # Airflow terminates processes before the batch is sent, losing traces.
         span_processor = SimpleSpanProcessor(otlp_exporter)
         paid_tracer_provider.add_span_processor(span_processor)
+        logger.debug("[paid:init] Added SimpleSpanProcessor with OTLPSpanExporter -> %s", collector_endpoint)
 
         setup_graceful_termination(paid_tracer_provider)  # doesn't throw
 
@@ -452,6 +483,7 @@ def get_paid_tracer() -> trace.Tracer:
         Tracing is automatically initialized when using @paid_tracing decorator or context manager.
     """
     global paid_tracer_provider
+    logger.debug("[paid:init] get_paid_tracer: provider_type=%s", type(paid_tracer_provider).__name__)
     return paid_tracer_provider.get_tracer("paid.python")
 
 
@@ -551,15 +583,20 @@ def trace_sync_(
             trace_flags=TraceFlags(TraceFlags.SAMPLED),
         )
         ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
+        logger.debug("[paid:distributed] trace_sync_ using override trace_id=%s", format(override_trace_id, '032x'))
+    else:
+        logger.debug("[paid:distributed] trace_sync_ no override trace_id, using auto-generated")
 
     try:
         tracer = get_paid_tracer()
-        logger.info(f"Creating span for external_customer_id: {external_customer_id}")
+        logger.debug("[paid:span] trace_sync_ creating parent_span for customer_id=%s, agent_id=%s, fn=%s",
+                      external_customer_id, external_agent_id, fn.__name__)
         with tracer.start_as_current_span("parent_span", context=ctx) as span:
+            logger.debug("[paid:span] trace_sync_ span created, name=%s, trace_id=%s", span.name, format(span.get_span_context().trace_id, '032x'))
             try:
                 result = fn(*args, **kwargs)
                 span.set_status(Status(StatusCode.OK))
-                logger.info(f"Function {fn.__name__} executed successfully")
+                logger.debug("[paid:span] trace_sync_ fn=%s completed successfully", fn.__name__)
                 return result
             except Exception as error:
                 span.set_status(Status(StatusCode.ERROR, str(error)))
@@ -622,18 +659,23 @@ async def trace_async_(
             trace_flags=TraceFlags(TraceFlags.SAMPLED),
         )
         ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
+        logger.debug("[paid:distributed] trace_async_ using override trace_id=%s", format(override_trace_id, '032x'))
+    else:
+        logger.debug("[paid:distributed] trace_async_ no override trace_id, using auto-generated")
 
     try:
         tracer = get_paid_tracer()
-        logger.info(f"Creating span for external_customer_id: {external_customer_id}")
+        logger.debug("[paid:span] trace_async_ creating parent_span for customer_id=%s, agent_id=%s, fn=%s",
+                      external_customer_id, external_agent_id, fn.__name__)
         with tracer.start_as_current_span("parent_span", context=ctx) as span:
+            logger.debug("[paid:span] trace_async_ span created, name=%s, trace_id=%s", span.name, format(span.get_span_context().trace_id, '032x'))
             try:
                 if asyncio.iscoroutinefunction(fn):
                     result = await fn(*args, **kwargs)
                 else:
                     result = fn(*args, **kwargs)
                 span.set_status(Status(StatusCode.OK))
-                logger.info(f"Async function {fn.__name__} executed successfully")
+                logger.debug("[paid:span] trace_async_ fn=%s completed successfully", fn.__name__)
                 return result
             except Exception as error:
                 span.set_status(Status(StatusCode.ERROR, str(error)))
