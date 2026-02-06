@@ -236,7 +236,7 @@ class PaidSpanProcessor(SpanProcessor):
             _OTEL_SAFE_TYPES = (bool, str, bytes, int, float)
 
             def _sanitize_value(v: Any) -> Any:
-                """Convert non-OTEL-safe values (e.g. UUID) to str."""
+                """Convert non-OTEL-safe values to str."""
                 if isinstance(v, _OTEL_SAFE_TYPES):
                     return v
                 if isinstance(v, (list, tuple)):
