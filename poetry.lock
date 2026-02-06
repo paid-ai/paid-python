@@ -1766,6 +1766,29 @@ wrapt = ">=1.14.0,<2"
 test = ["jsonschema", "openai", "pydantic (>=2.0.0)", "pytest-asyncio", "pytest-recording", "types-jsonschema"]
 
 [[package]]
+name = "openinference-instrumentation-anthropic"
+version = "0.1.20"
+description = "OpenInference Anthropic Instrumentation"
+optional = false
+python-versions = "<3.15,>=3.9"
+files = [
+    {file = "openinference_instrumentation_anthropic-0.1.20-py3-none-any.whl", hash = "sha256:f6dba468d7ae13296bbe221cd6968f98bc4760f62c45080e2de434ca6adc0a54"},
+    {file = "openinference_instrumentation_anthropic-0.1.20.tar.gz", hash = "sha256:d5339dffb100ad32bb7de9948386574e73af5ffdbcab4a4ebfa3d55c22256096"},
+]
+
+[package.dependencies]
+openinference-instrumentation = ">=0.1.27"
+openinference-semantic-conventions = ">=0.1.17"
+opentelemetry-api = "*"
+opentelemetry-instrumentation = "*"
+opentelemetry-semantic-conventions = "*"
+typing-extensions = "*"
+wrapt = "*"
+
+[package.extras]
+instruments = ["anthropic (>=0.41.0)"]
+
+[[package]]
 name = "openinference-instrumentation-bedrock"
 version = "0.1.32"
 description = "OpenInference Bedrock Instrumentation"
@@ -1989,23 +2012,6 @@ packaging = ">=18.0"
 wrapt = ">=1.0.0,<2.0.0"
 
 [[package]]
-name = "opentelemetry-instrumentation-anthropic"
-version = "0.50.1"
-description = "OpenTelemetry Anthropic instrumentation"
-optional = false
-python-versions = "<4,>=3.9"
-files = [
-    {file = "opentelemetry_instrumentation_anthropic-0.50.1-py3-none-any.whl", hash = "sha256:d5c12497c01a10ba34412805cb6d970fbdb5fc5d2f73f95ac387df99d2c9e813"},
-    {file = "opentelemetry_instrumentation_anthropic-0.50.1.tar.gz", hash = "sha256:d2c1a589d48bc056eb8424204a2a8b219854629278f851e9e7d4d18b8b788203"},
-]
-
-[package.dependencies]
-opentelemetry-api = ">=1.38.0,<2.0.0"
-opentelemetry-instrumentation = ">=0.59b0"
-opentelemetry-semantic-conventions = ">=0.59b0"
-opentelemetry-semantic-conventions-ai = ">=0.4.13,<0.5.0"
-
-[[package]]
 name = "opentelemetry-proto"
 version = "1.39.1"
 description = "OpenTelemetry Python Proto"
@@ -2049,17 +2055,6 @@ files = [
 [package.dependencies]
 opentelemetry-api = "1.39.1"
 typing-extensions = ">=4.5.0"
-
-[[package]]
-name = "opentelemetry-semantic-conventions-ai"
-version = "0.4.13"
-description = "OpenTelemetry Semantic Conventions Extension for Large Language Models"
-optional = false
-python-versions = "<4,>=3.9"
-files = [
-    {file = "opentelemetry_semantic_conventions_ai-0.4.13-py3-none-any.whl", hash = "sha256:883a30a6bb5deaec0d646912b5f9f6dcbb9f6f72557b73d0f2560bf25d13e2d5"},
-    {file = "opentelemetry_semantic_conventions_ai-0.4.13.tar.gz", hash = "sha256:94efa9fb4ffac18c45f54a3a338ffeb7eedb7e1bb4d147786e77202e159f0036"},
-]
 
 [[package]]
 name = "orjson"
@@ -3747,4 +3742,4 @@ cffi = ["cffi (>=1.17,<2.0)", "cffi (>=2.0.0b)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.14"
-content-hash = "0b977b8dab1c82047146f9f0bcdd2323761e16ba5b428004ddedde7f420bbb9f"
+content-hash = "d156d28d19441fd3f5b9ce71c996fd8c9c7ef745ecb5d2e364b5b06ec2bd1ec7"
