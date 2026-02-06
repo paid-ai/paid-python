@@ -15,7 +15,7 @@ from paid.logger import logger
 
 # Safe imports for instrumentation libraries
 try:
-    from opentelemetry.instrumentation.anthropic import AnthropicInstrumentor
+    from openinference.instrumentation.anthropic import AnthropicInstrumentor
 
     ANTHROPIC_AVAILABLE = True
 except Exception:
