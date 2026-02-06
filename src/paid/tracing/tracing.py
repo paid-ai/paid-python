@@ -583,20 +583,22 @@ def trace_sync_(
             trace_flags=TraceFlags(TraceFlags.SAMPLED),
         )
         ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
-        logger.debug("[paid:distributed] trace_sync_ using override trace_id=%s", format(override_trace_id, '032x'))
+        logger.debug("[paid:distributed] trace_sync_ using override trace_id=%s",
+                     format(override_trace_id, '032x') if isinstance(override_trace_id, int) else str(override_trace_id))
     else:
         logger.debug("[paid:distributed] trace_sync_ no override trace_id, using auto-generated")
 
     try:
         tracer = get_paid_tracer()
         logger.debug("[paid:span] trace_sync_ creating parent_span for customer_id=%s, agent_id=%s, fn=%s",
-                      external_customer_id, external_agent_id, fn.__name__)
+                      external_customer_id, external_agent_id, getattr(fn, '__name__', repr(fn)))
         with tracer.start_as_current_span("parent_span", context=ctx) as span:
-            logger.debug("[paid:span] trace_sync_ span created, trace_id=%s", format(span.get_span_context().trace_id, '032x'))
+            logger.debug("[paid:span] trace_sync_ span created, trace_id=%s",
+                         format(span.get_span_context().trace_id, '032x') if isinstance(span.get_span_context().trace_id, int) else str(span.get_span_context().trace_id))
             try:
                 result = fn(*args, **kwargs)
                 span.set_status(Status(StatusCode.OK))
-                logger.debug("[paid:span] trace_sync_ fn=%s completed successfully", fn.__name__)
+                logger.debug("[paid:span] trace_sync_ fn=%s completed successfully", getattr(fn, '__name__', repr(fn)))
                 return result
             except Exception as error:
                 span.set_status(Status(StatusCode.ERROR, str(error)))
@@ -659,23 +661,25 @@ async def trace_async_(
             trace_flags=TraceFlags(TraceFlags.SAMPLED),
         )
         ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
-        logger.debug("[paid:distributed] trace_async_ using override trace_id=%s", format(override_trace_id, '032x'))
+        logger.debug("[paid:distributed] trace_async_ using override trace_id=%s",
+                     format(override_trace_id, '032x') if isinstance(override_trace_id, int) else str(override_trace_id))
     else:
         logger.debug("[paid:distributed] trace_async_ no override trace_id, using auto-generated")
 
     try:
         tracer = get_paid_tracer()
         logger.debug("[paid:span] trace_async_ creating parent_span for customer_id=%s, agent_id=%s, fn=%s",
-                      external_customer_id, external_agent_id, fn.__name__)
+                      external_customer_id, external_agent_id, getattr(fn, '__name__', repr(fn)))
         with tracer.start_as_current_span("parent_span", context=ctx) as span:
-            logger.debug("[paid:span] trace_async_ span created, trace_id=%s", format(span.get_span_context().trace_id, '032x'))
+            logger.debug("[paid:span] trace_async_ span created, trace_id=%s",
+                         format(span.get_span_context().trace_id, '032x') if isinstance(span.get_span_context().trace_id, int) else str(span.get_span_context().trace_id))
             try:
                 if asyncio.iscoroutinefunction(fn):
                     result = await fn(*args, **kwargs)
                 else:
                     result = fn(*args, **kwargs)
                 span.set_status(Status(StatusCode.OK))
-                logger.debug("[paid:span] trace_async_ fn=%s completed successfully", fn.__name__)
+                logger.debug("[paid:span] trace_async_ fn=%s completed successfully", getattr(fn, '__name__', repr(fn)))
                 return result
             except Exception as error:
                 span.set_status(Status(StatusCode.ERROR, str(error)))
