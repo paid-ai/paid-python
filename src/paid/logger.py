@@ -5,10 +5,7 @@ This file exports `logger` object for unified logging across the Paid SDK.
 import logging
 import os
 
-import dotenv
-
 # Configure logging
-_ = dotenv.load_dotenv()
 logger = logging.getLogger(__name__)
 
 # Set default log level to ERROR, allow override via PAID_LOG_LEVEL environment variable

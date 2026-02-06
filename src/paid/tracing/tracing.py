@@ -6,7 +6,6 @@ import signal
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, Dict, Optional, Tuple, TypeVar, Union
 
-import dotenv
 from . import distributed_tracing
 from .context_data import ContextData
 from opentelemetry import trace
@@ -20,7 +19,6 @@ from opentelemetry.util.types import Attributes
 
 from paid.logger import logger
 
-_ = dotenv.load_dotenv()
 DEFAULT_COLLECTOR_ENDPOINT = (
     os.environ.get("PAID_OTEL_COLLECTOR_ENDPOINT") or "https://collector.agentpaid.io:4318/v1/traces"
 )
