@@ -592,7 +592,7 @@ def trace_sync_(
         logger.debug("[paid:span] trace_sync_ creating parent_span for customer_id=%s, agent_id=%s, fn=%s",
                       external_customer_id, external_agent_id, fn.__name__)
         with tracer.start_as_current_span("parent_span", context=ctx) as span:
-            logger.debug("[paid:span] trace_sync_ span created, name=%s, trace_id=%s", span.name, format(span.get_span_context().trace_id, '032x'))
+            logger.debug("[paid:span] trace_sync_ span created, trace_id=%s", format(span.get_span_context().trace_id, '032x'))
             try:
                 result = fn(*args, **kwargs)
                 span.set_status(Status(StatusCode.OK))
@@ -668,7 +668,7 @@ async def trace_async_(
         logger.debug("[paid:span] trace_async_ creating parent_span for customer_id=%s, agent_id=%s, fn=%s",
                       external_customer_id, external_agent_id, fn.__name__)
         with tracer.start_as_current_span("parent_span", context=ctx) as span:
-            logger.debug("[paid:span] trace_async_ span created, name=%s, trace_id=%s", span.name, format(span.get_span_context().trace_id, '032x'))
+            logger.debug("[paid:span] trace_async_ span created, trace_id=%s", format(span.get_span_context().trace_id, '032x'))
             try:
                 if asyncio.iscoroutinefunction(fn):
                     result = await fn(*args, **kwargs)

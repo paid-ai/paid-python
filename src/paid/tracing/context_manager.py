@@ -145,7 +145,7 @@ class paid_tracing:
         logger.debug("[paid:ctx] _enter_ctx: creating parent_span for customer_id=%s", self.external_customer_id)
         self.span_ctx = tracer.start_as_current_span("parent_span", context=ctx)
         self.span = self.span_ctx.__enter__()
-        logger.debug("[paid:ctx] _enter_ctx: span created, name=%s, trace_id=%s", self.span.name, format(self.span.get_span_context().trace_id, '032x'))
+        logger.debug("[paid:ctx] _enter_ctx: span created, trace_id=%s", format(self.span.get_span_context().trace_id, '032x'))
         return self
 
     def _exit_ctx(self, exc_type, exc_val, exc_tb):
