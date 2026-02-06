@@ -12,8 +12,9 @@ from opentelemetry import trace
 from opentelemetry.context import Context
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import ReadableSpan, Span, SpanProcessor, TracerProvider
+from opentelemetry.sdk.trace import ReadableSpan, Span, SpanLimits, SpanProcessor, TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+from opentelemetry.sdk.trace.sampling import ALWAYS_ON
 from opentelemetry.trace import NonRecordingSpan, NoOpTracerProvider, SpanContext, Status, StatusCode, TraceFlags
 from opentelemetry.util.types import Attributes
 
@@ -446,8 +447,23 @@ def initialize_tracing(
 
         resource = Resource(attributes={"api.key": api_key})
         # Create isolated tracer provider for Paid - don't use or modify global provider
-        paid_tracer_provider = TracerProvider(resource=resource)
-        logger.debug("[paid:init] TracerProvider created")
+        # Pass explicit sampler and span_limits to avoid inheriting from OTEL env vars
+        # (OTEL_TRACES_SAMPLER=always_off or OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT=1
+        #  set by the client app would silently break this)
+        paid_tracer_provider = TracerProvider(
+            resource=resource,
+            sampler=ALWAYS_ON,
+            span_limits=SpanLimits(
+                max_span_attributes=128,
+                max_event_attributes=128,
+                max_link_attributes=128,
+                max_events=128,
+                max_links=128,
+            ),
+        )
+        # Override OTEL_SDK_DISABLED - the client may set it to disable their own OTEL
+        paid_tracer_provider._disabled = False
+        logger.debug("[paid:init] TracerProvider created (sampler=ALWAYS_ON, OTEL_SDK_DISABLED overridden)")
 
         # Add span processor to prefix span names and add customer/agent ID attributes
         paid_tracer_provider.add_span_processor(PaidSpanProcessor())
@@ -462,10 +478,12 @@ def initialize_tracing(
             _PydanticSettingsRegistry.register(PYDANTIC_SCOPE_NAME, processor_settings.pydantic)
             logger.debug("[paid:init] Registered legacy PydanticProcessorSettings for scope=%s", PYDANTIC_SCOPE_NAME)
 
-        # Set up OTLP exporter
+        # Set up OTLP exporter with explicit settings to avoid inheriting from
+        # client OTEL env vars (e.g. OTEL_EXPORTER_OTLP_HEADERS, OTEL_EXPORTER_OTLP_TIMEOUT)
         otlp_exporter = OTLPSpanExporter(
             endpoint=collector_endpoint,
-            headers={},  # No additional headers needed for OTLP
+            headers={"_paid": "1"},  # Non-empty to prevent env var OTEL_EXPORTER_OTLP_HEADERS leak (empty dict is falsy)
+            timeout=10,  # Explicit timeout to prevent env var OTEL_EXPORTER_OTLP_TIMEOUT override
         )
 
         # Use SimpleSpanProcessor for immediate span export.
