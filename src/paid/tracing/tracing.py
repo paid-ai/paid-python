@@ -231,6 +231,20 @@ class PaidSpanProcessor(SpanProcessor):
         if metadata:
             metadata_attributes: dict[str, Any] = {}
 
+            # OTEL attributes only accept: bool, str, bytes, int, float
+            _OTEL_SAFE_TYPES = (bool, str, bytes, int, float)
+
+            def _sanitize_value(v: Any) -> Any:
+                """Convert non-OTEL-safe values (e.g. UUID) to str."""
+                if isinstance(v, _OTEL_SAFE_TYPES):
+                    return v
+                if isinstance(v, (list, tuple)):
+                    return [
+                        el if isinstance(el, _OTEL_SAFE_TYPES) else str(el)
+                        for el in v
+                    ]
+                return str(v)
+
             def flatten_dict(d: dict[str, Any], parent_key: str = "") -> None:
                 """Recursively flatten nested dictionaries into dot-notation keys."""
                 for k, v in d.items():
@@ -238,7 +252,7 @@ class PaidSpanProcessor(SpanProcessor):
                     if isinstance(v, dict):
                         flatten_dict(v, new_key)
                     else:
-                        metadata_attributes[new_key] = v
+                        metadata_attributes[new_key] = _sanitize_value(v)
 
             flatten_dict(metadata)
 
