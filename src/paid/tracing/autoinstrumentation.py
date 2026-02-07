@@ -157,7 +157,7 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
 
 def _instrument_anthropic() -> None:
     """
-    Instrument the Anthropic library using opentelemetry-instrumentation-anthropic.
+    Instrument the Anthropic library using openinference-instrumentation-anthropic.
     """
     if not ANTHROPIC_AVAILABLE:
         logger.warning("Anthropic library not available, skipping instrumentation")
@@ -168,8 +168,72 @@ def _instrument_anthropic() -> None:
     # Instrument Anthropic with Paid's tracer provider
     AnthropicInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
 
+    # Fix: The openinference instrumentor wraps streaming responses in _MessagesStream
+    # and _Stream (both ObjectProxy subclasses), but these proxies don't implement
+    # __aenter__/__aexit__/__enter__/__exit__. Python looks up dunder methods on the
+    # class, not the instance, so ObjectProxy's __getattr__ delegation doesn't help.
+    # This breaks any code that uses `async with client.messages.create(stream=True):`
+    _patch_anthropic_stream_proxies()
+
     _initialized_instrumentors.append("anthropic")
     logger.info("Anthropic auto-instrumentation enabled")
+
+
+def _patch_anthropic_stream_proxies() -> None:
+    """
+    Patch the openinference Anthropic stream proxy classes to support
+    context manager protocols (__enter__/__exit__/__aenter__/__aexit__).
+
+    The Anthropic SDK's Stream and AsyncStream classes implement both sync
+    and async context manager protocols, but the openinference proxy wrappers
+    (_Stream, _MessagesStream) only implement __iter__/__aiter__, which breaks
+    frameworks that use `async with` on streaming responses.
+    """
+    try:
+        from openinference.instrumentation.anthropic._stream import (
+            _MessagesStream,
+            _Stream,
+        )
+    except ImportError:
+        logger.debug("Could not import stream classes for patching, skipping")
+        return
+
+    for cls in (_MessagesStream, _Stream):
+        if not hasattr(cls, "__aenter__"):
+
+            async def _aenter(self):  # type: ignore[misc]
+                if hasattr(self.__wrapped__, "__aenter__"):
+                    await self.__wrapped__.__aenter__()
+                return self
+
+            cls.__aenter__ = _aenter  # type: ignore[attr-defined]
+
+        if not hasattr(cls, "__aexit__"):
+
+            async def _aexit(self, exc_type, exc_val, exc_tb):  # type: ignore[misc]
+                if hasattr(self.__wrapped__, "__aexit__"):
+                    return await self.__wrapped__.__aexit__(exc_type, exc_val, exc_tb)
+
+            cls.__aexit__ = _aexit  # type: ignore[attr-defined]
+
+        if not hasattr(cls, "__enter__"):
+
+            def _enter(self):  # type: ignore[misc]
+                if hasattr(self.__wrapped__, "__enter__"):
+                    self.__wrapped__.__enter__()
+                return self
+
+            cls.__enter__ = _enter  # type: ignore[attr-defined]
+
+        if not hasattr(cls, "__exit__"):
+
+            def _exit(self, exc_type, exc_val, exc_tb):  # type: ignore[misc]
+                if hasattr(self.__wrapped__, "__exit__"):
+                    return self.__wrapped__.__exit__(exc_type, exc_val, exc_tb)
+
+            cls.__exit__ = _exit  # type: ignore[attr-defined]
+
+    logger.debug("Patched openinference Anthropic stream proxies with context manager support")
 
 
 def _instrument_openai() -> None:
