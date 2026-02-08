@@ -13,7 +13,9 @@ class CustomerBillingAddress(UniversalBaseModel):
     line2: typing.Optional[str] = None
     city: typing.Optional[str] = None
     state: typing.Optional[str] = None
-    zip_code: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="zipCode")] = None
+    zip_code: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="zipCode"), pydantic.Field(alias="zipCode")
+    ] = None
     country: typing.Optional[str] = None
 
     if IS_PYDANTIC_V2:

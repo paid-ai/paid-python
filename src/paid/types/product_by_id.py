@@ -9,10 +9,9 @@ from ..core.serialization import FieldMetadata
 
 
 class ProductById(UniversalBaseModel):
-    product_id: typing_extensions.Annotated[str, FieldMetadata(alias="productId")] = pydantic.Field()
-    """
-    The Paid product ID
-    """
+    product_id: typing_extensions.Annotated[
+        str, FieldMetadata(alias="productId"), pydantic.Field(alias="productId", description="The Paid product ID")
+    ]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

@@ -1,0 +1,35 @@
+{
+  "cliVersion": "3.47.1",
+  "generatorName": "fernapi/fern-python-sdk",
+  "generatorVersion": "4.55.1",
+  "generatorConfig": {
+    "client_class_name": "Paid",
+    "pyproject_python_version": ">=3.10,<3.14",
+    "extra_dependencies": {
+      "opentelemetry-api": ">=1.23.0",
+      "opentelemetry-sdk": ">=1.23.0",
+      "opentelemetry-exporter-otlp-proto-http": ">=1.23.0",
+      "mutagen": ">=1.47.0",
+      "openinference-instrumentation-anthropic": ">=0.1.20",
+      "openinference-instrumentation-openai": ">=0.1.40",
+      "openinference-instrumentation-langchain": ">=0.1.55",
+      "openinference-instrumentation-openai-agents": ">=1.0.0",
+      "openinference-instrumentation-instructor": ">=0.1.0",
+      "openinference-instrumentation-bedrock": ">=0.1.0",
+      "openinference-instrumentation-google-genai": ">=0.1.8"
+    },
+    "extra_dev_dependencies": {
+      "mistralai": ">=1.9.0",
+      "anthropic": ">=0.57.0",
+      "google-genai": ">=1.19.0",
+      "instructor": ">=1.0.0",
+      "openai-agents": ">=0.2.0",
+      "langchain-core": ">=0.1.0",
+      "pydantic-ai": ">=1.41.0",
+      "openai": ">=1.12.0",
+      "pytest-recording": ">=0.13.0",
+      "vcrpy": ">=6.0.0"
+    }
+  },
+  "sdkVersion": "1.0.3"
+}

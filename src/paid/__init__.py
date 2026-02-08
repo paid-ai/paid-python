@@ -2,50 +2,129 @@
 
 # isort: skip_file
 
-from .types import (
-    Attribution,
-    BulkSignalsResponse,
-    Contact,
-    ContactBillingAddress,
-    ContactListResponse,
-    Customer,
-    CustomerAttribution,
-    CustomerBillingAddress,
-    CustomerByExternalId,
-    CustomerById,
-    CustomerCreationState,
-    CustomerListResponse,
-    EmptyResponse,
-    ErrorResponse,
-    Invoice,
-    InvoiceLine,
-    InvoiceLinePaymentStatus,
-    InvoiceLinesResponse,
-    InvoiceListResponse,
-    InvoicePaymentStatus,
-    InvoiceSource,
-    InvoiceStatus,
-    InvoiceTaxStatus,
-    Order,
-    OrderCreationState,
-    OrderLine,
-    OrderLinesResponse,
-    OrderListResponse,
-    Pagination,
-    Product,
-    ProductByExternalId,
-    ProductById,
-    ProductListResponse,
-    Signal,
-    UpdateContactRequest,
-    UpdateCustomerRequest,
-    UpdateProductRequest,
-)
-from .errors import BadRequestError, ForbiddenError, InternalServerError, NotFoundError
-from . import contacts, customers, invoices, orders, products, signals
-from .client import AsyncPaid, Paid
-from .environment import PaidEnvironment
-from .version import __version__
+import typing
+from importlib import import_module
+
+if typing.TYPE_CHECKING:
+    from .types import (
+        Attribution,
+        BulkSignalsResponse,
+        Contact,
+        ContactBillingAddress,
+        ContactListResponse,
+        Customer,
+        CustomerAttribution,
+        CustomerBillingAddress,
+        CustomerByExternalId,
+        CustomerById,
+        CustomerCreationState,
+        CustomerListResponse,
+        EmptyResponse,
+        ErrorResponse,
+        Invoice,
+        InvoiceLine,
+        InvoiceLinePaymentStatus,
+        InvoiceLinesResponse,
+        InvoiceListResponse,
+        InvoicePaymentStatus,
+        InvoiceSource,
+        InvoiceStatus,
+        InvoiceTaxStatus,
+        Order,
+        OrderCreationState,
+        OrderLine,
+        OrderLinesResponse,
+        OrderListResponse,
+        Pagination,
+        Product,
+        ProductByExternalId,
+        ProductById,
+        ProductListResponse,
+        Signal,
+        UpdateContactRequest,
+        UpdateCustomerRequest,
+        UpdateProductRequest,
+    )
+    from .errors import BadRequestError, ForbiddenError, InternalServerError, NotFoundError
+    from . import contacts, customers, invoices, orders, products, signals
+    from .client import AsyncPaid, Paid
+    from .environment import PaidEnvironment
+    from .version import __version__
+_dynamic_imports: typing.Dict[str, str] = {
+    "AsyncPaid": ".client",
+    "Attribution": ".types",
+    "BadRequestError": ".errors",
+    "BulkSignalsResponse": ".types",
+    "Contact": ".types",
+    "ContactBillingAddress": ".types",
+    "ContactListResponse": ".types",
+    "Customer": ".types",
+    "CustomerAttribution": ".types",
+    "CustomerBillingAddress": ".types",
+    "CustomerByExternalId": ".types",
+    "CustomerById": ".types",
+    "CustomerCreationState": ".types",
+    "CustomerListResponse": ".types",
+    "EmptyResponse": ".types",
+    "ErrorResponse": ".types",
+    "ForbiddenError": ".errors",
+    "InternalServerError": ".errors",
+    "Invoice": ".types",
+    "InvoiceLine": ".types",
+    "InvoiceLinePaymentStatus": ".types",
+    "InvoiceLinesResponse": ".types",
+    "InvoiceListResponse": ".types",
+    "InvoicePaymentStatus": ".types",
+    "InvoiceSource": ".types",
+    "InvoiceStatus": ".types",
+    "InvoiceTaxStatus": ".types",
+    "NotFoundError": ".errors",
+    "Order": ".types",
+    "OrderCreationState": ".types",
+    "OrderLine": ".types",
+    "OrderLinesResponse": ".types",
+    "OrderListResponse": ".types",
+    "Pagination": ".types",
+    "Paid": ".client",
+    "PaidEnvironment": ".environment",
+    "Product": ".types",
+    "ProductByExternalId": ".types",
+    "ProductById": ".types",
+    "ProductListResponse": ".types",
+    "Signal": ".types",
+    "UpdateContactRequest": ".types",
+    "UpdateCustomerRequest": ".types",
+    "UpdateProductRequest": ".types",
+    "__version__": ".version",
+    "contacts": ".contacts",
+    "customers": ".customers",
+    "invoices": ".invoices",
+    "orders": ".orders",
+    "products": ".products",
+    "signals": ".signals",
+}
+
+
+def __getattr__(attr_name: str) -> typing.Any:
+    module_name = _dynamic_imports.get(attr_name)
+    if module_name is None:
+        raise AttributeError(f"No {attr_name} found in _dynamic_imports for module name -> {__name__}")
+    try:
+        module = import_module(module_name, __package__)
+        if module_name == f".{attr_name}":
+            return module
+        else:
+            return getattr(module, attr_name)
+    except ImportError as e:
+        raise ImportError(f"Failed to import {attr_name} from {module_name}: {e}") from e
+    except AttributeError as e:
+        raise AttributeError(f"Failed to get {attr_name} from {module_name}: {e}") from e
+
+
+def __dir__():
+    lazy_attrs = list(_dynamic_imports.keys())
+    return sorted(lazy_attrs)
+
 
 __all__ = [
     "AsyncPaid",

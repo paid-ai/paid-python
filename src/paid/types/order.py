@@ -12,32 +12,62 @@ from .order_creation_state import OrderCreationState
 
 class Order(UniversalBaseModel):
     id: str
-    customer_id: typing_extensions.Annotated[str, FieldMetadata(alias="customerId")]
-    billing_customer_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="billingCustomerId")] = (
-        None
-    )
-    billing_contact_ids: typing_extensions.Annotated[typing.List[str], FieldMetadata(alias="billingContactIds")]
-    created_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="createdAt")]
-    updated_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="updatedAt")]
-    end_date: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="endDate")] = None
+    customer_id: typing_extensions.Annotated[str, FieldMetadata(alias="customerId"), pydantic.Field(alias="customerId")]
+    billing_customer_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="billingCustomerId"), pydantic.Field(alias="billingCustomerId")
+    ] = None
+    billing_contact_ids: typing_extensions.Annotated[
+        typing.List[str], FieldMetadata(alias="billingContactIds"), pydantic.Field(alias="billingContactIds")
+    ]
+    created_at: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")
+    ]
+    updated_at: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="updatedAt"), pydantic.Field(alias="updatedAt")
+    ]
+    end_date: typing_extensions.Annotated[
+        typing.Optional[dt.datetime], FieldMetadata(alias="endDate"), pydantic.Field(alias="endDate")
+    ] = None
     name: str
-    start_date: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="startDate")]
-    subscription_terms: typing_extensions.Annotated[typing.Optional[int], FieldMetadata(alias="subscriptionTerms")] = (
-        None
-    )
-    billed_amount_no_tax: typing_extensions.Annotated[float, FieldMetadata(alias="billedAmountNoTax")]
-    billed_tax: typing_extensions.Annotated[float, FieldMetadata(alias="billedTax")]
-    estimated_tax: typing_extensions.Annotated[float, FieldMetadata(alias="estimatedTax")]
-    order_amount: typing_extensions.Annotated[float, FieldMetadata(alias="orderAmount")]
-    pending_billing_amount: typing_extensions.Annotated[float, FieldMetadata(alias="pendingBillingAmount")]
-    total_amount: typing_extensions.Annotated[float, FieldMetadata(alias="totalAmount")]
-    total_billed_amount: typing_extensions.Annotated[float, FieldMetadata(alias="totalBilledAmount")]
-    creation_state: typing_extensions.Annotated[OrderCreationState, FieldMetadata(alias="creationState")]
-    payment_terms: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="paymentTerms")] = None
+    start_date: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="startDate"), pydantic.Field(alias="startDate")
+    ]
+    subscription_terms: typing_extensions.Annotated[
+        typing.Optional[int], FieldMetadata(alias="subscriptionTerms"), pydantic.Field(alias="subscriptionTerms")
+    ] = None
+    billed_amount_no_tax: typing_extensions.Annotated[
+        float, FieldMetadata(alias="billedAmountNoTax"), pydantic.Field(alias="billedAmountNoTax")
+    ]
+    billed_tax: typing_extensions.Annotated[float, FieldMetadata(alias="billedTax"), pydantic.Field(alias="billedTax")]
+    estimated_tax: typing_extensions.Annotated[
+        float, FieldMetadata(alias="estimatedTax"), pydantic.Field(alias="estimatedTax")
+    ]
+    order_amount: typing_extensions.Annotated[
+        float, FieldMetadata(alias="orderAmount"), pydantic.Field(alias="orderAmount")
+    ]
+    pending_billing_amount: typing_extensions.Annotated[
+        float, FieldMetadata(alias="pendingBillingAmount"), pydantic.Field(alias="pendingBillingAmount")
+    ]
+    total_amount: typing_extensions.Annotated[
+        float, FieldMetadata(alias="totalAmount"), pydantic.Field(alias="totalAmount")
+    ]
+    total_billed_amount: typing_extensions.Annotated[
+        float, FieldMetadata(alias="totalBilledAmount"), pydantic.Field(alias="totalBilledAmount")
+    ]
+    creation_state: typing_extensions.Annotated[
+        OrderCreationState, FieldMetadata(alias="creationState"), pydantic.Field(alias="creationState")
+    ]
+    payment_terms: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="paymentTerms"), pydantic.Field(alias="paymentTerms")
+    ] = None
     number: float
-    metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
-    show_payment_link: typing_extensions.Annotated[typing.Optional[bool], FieldMetadata(alias="showPaymentLink")] = None
-    show_bank_details: typing_extensions.Annotated[typing.Optional[bool], FieldMetadata(alias="showBankDetails")] = None
+    metadata: typing.Optional[typing.Dict[str, typing.Any]] = None
+    show_payment_link: typing_extensions.Annotated[
+        typing.Optional[bool], FieldMetadata(alias="showPaymentLink"), pydantic.Field(alias="showPaymentLink")
+    ] = None
+    show_bank_details: typing_extensions.Annotated[
+        typing.Optional[bool], FieldMetadata(alias="showBankDetails"), pydantic.Field(alias="showBankDetails")
+    ] = None
     version: int
 
     if IS_PYDANTIC_V2:

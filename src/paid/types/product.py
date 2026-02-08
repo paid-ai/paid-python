@@ -13,13 +13,23 @@ class Product(UniversalBaseModel):
     id: str
     name: str
     description: typing.Optional[str] = None
-    created_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="createdAt")]
-    updated_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="updatedAt")]
+    created_at: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")
+    ]
+    updated_at: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="updatedAt"), pydantic.Field(alias="updatedAt")
+    ]
     active: bool
-    product_code: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="productCode")] = None
-    external_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="externalId")] = None
-    archived_at: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="archivedAt")] = None
-    metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
+    product_code: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="productCode"), pydantic.Field(alias="productCode")
+    ] = None
+    external_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="externalId"), pydantic.Field(alias="externalId")
+    ] = None
+    archived_at: typing_extensions.Annotated[
+        typing.Optional[dt.datetime], FieldMetadata(alias="archivedAt"), pydantic.Field(alias="archivedAt")
+    ] = None
+    metadata: typing.Optional[typing.Dict[str, typing.Any]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

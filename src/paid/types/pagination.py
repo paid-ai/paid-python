@@ -12,7 +12,7 @@ class Pagination(UniversalBaseModel):
     limit: int
     offset: int
     total: int
-    has_more: typing_extensions.Annotated[bool, FieldMetadata(alias="hasMore")]
+    has_more: typing_extensions.Annotated[bool, FieldMetadata(alias="hasMore"), pydantic.Field(alias="hasMore")]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
