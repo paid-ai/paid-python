@@ -157,16 +157,22 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
 
 def _instrument_anthropic() -> None:
     """
-    Instrument the Anthropic library using opentelemetry-instrumentation-anthropic.
+    Instrument the Anthropic library using openinference-instrumentation-anthropic.
+
+    Applies three layers of fixes on top of the base instrumentor — see
+    ``paid.tracing.anthropic_patches`` for full details.
     """
     if not ANTHROPIC_AVAILABLE:
         logger.warning("Anthropic library not available, skipping instrumentation")
         return
 
+    from .anthropic_patches import instrument_anthropic
+
     logger.debug("[paid:autoinstrument] Instrumenting anthropic with AnthropicInstrumentor, provider=%s",
                  type(tracing.paid_tracer_provider).__name__)
-    # Instrument Anthropic with Paid's tracer provider
     AnthropicInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
+
+    instrument_anthropic()
 
     _initialized_instrumentors.append("anthropic")
     logger.info("Anthropic auto-instrumentation enabled")

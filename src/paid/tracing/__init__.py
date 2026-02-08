@@ -8,12 +8,12 @@ from .distributed_tracing import (
 )
 from .signal import signal
 from .tracing import (
-    get_paid_tracer_provider,
-    get_paid_tracer_provider_pydantic,
-    initialize_tracing,
     ProcessorSettings,
     PydanticProcessorSettings,
     PydanticTracerProvider,
+    get_paid_tracer_provider,
+    get_paid_tracer_provider_pydantic,
+    initialize_tracing,
 )
 
 __all__ = [
