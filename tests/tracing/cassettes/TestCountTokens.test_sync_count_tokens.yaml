@@ -46,7 +46,7 @@ interactions:
         H4sIAAAAAAAA/6tWyswrKC2JL8nPTs0rVrIyNKwFABo6w5ATAAAA
     headers:
       CF-RAY:
-      - 9cac22f8c8b94f42-LHR
+      - 9cac79cfdcac6101-LHR
       Connection:
       - keep-alive
       Content-Encoding:
@@ -56,23 +56,21 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Sun, 08 Feb 2026 15:24:54 GMT
+      - Sun, 08 Feb 2026 16:24:11 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
       - chunked
       X-Robots-Tag:
       - none
-      anthropic-organization-id:
-      - 871841f9-232e-4b73-8210-909ab1ab034a
       cf-cache-status:
       - DYNAMIC
       request-id:
-      - req_011CXvqKghMSRMQ4px6JzWr6
+      - req_011CXvuqtHAnWdJCf29sBxaf
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       x-envoy-upstream-service-time:
-      - '74'
+      - '88'
     status:
       code: 200
       message: OK

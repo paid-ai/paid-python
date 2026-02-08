@@ -47,17 +47,17 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAA/41SXU/cMBD8K5ZfeMlVyZEc0r0dLaUFhCpEKQJV1l6yJD4c2/jjBJzuv3edKroe
-        qFWf4szM7ux4veG9aVDxOa8VxAYn3miNYVJOpvm0yqui5BmXDfG9b0VenH58uqlOj84Xh9fF2Wr1
-        Ob4WCx9JE14sJhV6Dy0S4IxKAHgvfQAdCKqNDkin+f1m1Ad8TszwmfOvB0qxFgNbmtCx0CGzxkYF
-        QRrNQDcMHAKT+sG4/jdIJ/YNnPQseqnboQbWIBUsFbJgjPIf+Dbb+REioscxVfqPlKu0J0V5eYg/
-        vlxe3Bw/3p7fTuHTglQa+lRHQ4ndLKla20gjb3gtwwsJhiH49j+sKltJ+N4te1nWd6u7tT2ZLY6u
-        9q1Szn+Y/My4D8YKUtG+9r0GwuNTRF1TOx2VyngclkKNho4imEfUns/LWUFbgbpDUVOvFE3sK/KR
-        J7r5GzfWJgO0HfboQImqf6/fsUX3lt1m3MTwJ1TkM8qDbi1rFEGio6TpLTXgmuF2HtCllKJFQ5Q2
-        dHHj7umWfgGBT12a3AIAAA==
+        H4sIAAAAAAAA/41SXW/aQBD8K9a99MVUtgNU4hVStUGJitpQkSg6XXyLfXC+de8jlCL/9+45QoRU
+        ifrk88zszO7eHViDEjSbsFKLIGHg0Bjwg+GgyIpRNsqHLGVKEt+4imf5bVj/qS7G02rf1IvZTq1v
+        ZlPxgzR+30JUgXOiAgIs6ggI55TzwniCSjQe6DS5Pxz1Hn5Hpv9M2NcPWicV+OQRfZ34GpIW26CF
+        V2gSYWQiLIhEmTXa5hmkU/JNWOU+si49uSJqHhwce4//gbpffV+sri72yxY3xd2n2+1ivCtAksqI
+        JtZRND8lxmrTBmrswErl9yToo1j3H1HL2XxzPfq5XRar8dTD57m83OGX86g4zTshDylzHltOKrqV
+        86yecPArgCnJzgStUxb61ZNR78g9bsE4NhmOc9q9KGvgJXnF0fi5IjvyRMu3uGNtDIC2hgas0HzU
+        /Ks/sXn9mu1ShsG/hPKsoHnAPqkSuFdgadL4YqSwst/OGmyckleARBmkxT0JpcUjPbCu+wsnRE3z
+        wgIAAA==
     headers:
       CF-RAY:
-      - 9cac3441cd418eb4-LHR
+      - 9cac7ae8b9be8e49-LHR
       Connection:
       - keep-alive
       Content-Encoding:
@@ -67,55 +67,53 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Sun, 08 Feb 2026 15:36:44 GMT
+      - Sun, 08 Feb 2026 16:25:00 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
       - chunked
       X-Robots-Tag:
       - none
-      anthropic-organization-id:
-      - 871841f9-232e-4b73-8210-909ab1ab034a
       anthropic-ratelimit-input-tokens-limit:
       - '2000000'
       anthropic-ratelimit-input-tokens-remaining:
       - '2000000'
       anthropic-ratelimit-input-tokens-reset:
-      - '2026-02-08T15:36:43Z'
+      - '2026-02-08T16:24:59Z'
       anthropic-ratelimit-output-tokens-limit:
       - '400000'
       anthropic-ratelimit-output-tokens-remaining:
       - '400000'
       anthropic-ratelimit-output-tokens-reset:
-      - '2026-02-08T15:36:44Z'
+      - '2026-02-08T16:25:00Z'
       anthropic-ratelimit-requests-limit:
       - '4000'
       anthropic-ratelimit-requests-remaining:
       - '3999'
       anthropic-ratelimit-requests-reset:
-      - '2026-02-08T15:36:42Z'
+      - '2026-02-08T16:24:56Z'
       anthropic-ratelimit-tokens-limit:
       - '2400000'
       anthropic-ratelimit-tokens-remaining:
       - '2400000'
       anthropic-ratelimit-tokens-reset:
-      - '2026-02-08T15:36:43Z'
+      - '2026-02-08T16:24:59Z'
       cf-cache-status:
       - DYNAMIC
       request-id:
-      - req_011CXvrDsj5HSVaDYJQcH7ap
+      - req_011CXvuuCStkVnuWiJ68GmPU
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       x-envoy-upstream-service-time:
-      - '1956'
+      - '3645'
     status:
       code: 200
       message: OK
 - request:
     body: '{"max_tokens":4096,"messages":[{"role":"user","content":[{"text":"What
       are the population and area of Paris?","type":"text"}]},{"role":"assistant","content":[{"text":"I''ll
-      get both the population and area information for Paris using the available tools.","type":"text"},{"id":"toolu_014pE14N3eWHNLVBkXKX2aDA","type":"tool_use","name":"get_population","input":{"city":"Paris"}},{"id":"toolu_015p5iaUhbmi4cZjZvpE6A7R","type":"tool_use","name":"get_area","input":{"city":"Paris"}}]},{"role":"user","content":[{"tool_use_id":"toolu_014pE14N3eWHNLVBkXKX2aDA","type":"tool_result","content":"Paris:
-      2.1 million","is_error":false},{"tool_use_id":"toolu_015p5iaUhbmi4cZjZvpE6A7R","type":"tool_result","content":"Paris:
+      get both the population and area information for Paris.","type":"text"},{"id":"toolu_01YSQYJ3yVpoj2Z7UkQ6w2ed","type":"tool_use","name":"get_population","input":{"city":"Paris"}},{"id":"toolu_01VDKjM5WkV2Y6CteFKdEwoH","type":"tool_use","name":"get_area","input":{"city":"Paris"}}]},{"role":"user","content":[{"tool_use_id":"toolu_01YSQYJ3yVpoj2Z7UkQ6w2ed","type":"tool_result","content":"Paris:
+      2.1 million","is_error":false},{"tool_use_id":"toolu_01VDKjM5WkV2Y6CteFKdEwoH","type":"tool_result","content":"Paris:
       105 sq km","is_error":false}]}],"model":"claude-sonnet-4-20250514","stream":false,"system":"Always
       use both tools to answer completely.","tool_choice":{"type":"auto"},"tools":[{"name":"get_population","description":"Get
       population of a city.","input_schema":{"additionalProperties":false,"properties":{"city":{"type":"string"}},"required":["city"],"type":"object"}},{"name":"get_area","description":"Get
@@ -128,7 +126,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1265'
+      - '1239'
       Content-Type:
       - application/json
       Host:
@@ -162,15 +160,17 @@ interactions:
   response:
     body:
       string: !!binary |
-        H4sIAAAAAAAA/3WRy07DMBBFf8XyskpQUhIksoMFbChiASuKLBNPE6vOOPGjgKr8O+NCxUus7Lnn
-        2jNXs+eDVWB4w1sjo4LcW0QIeZUvi2Vd1GXFM64V8cF3oihvVt2tm663q4cJ3M3qvLufXsYr8oS3
-        EZILvJcdkOCsSYL0XvsgMZDUWgxAt+Zxf/QHeE3kcDT8UnpQzCILPTCNG+sGGTTVDoLTsAPVrHGN
-        i8WddNo3i8Uac0aVHaM5GEliy5OSDdoYKj/whQOZQFnUzE9sO/D5KeM+2FEQocDUGVCJEB3yT+Bh
-        ioAtjYjRmIzHQ6pmzzWOMYhgt4CeN2dVTbFk24No6a80gvjpKI6csPqPHd+mBjD2MICTRtTDX/8X
-        LfvfdM64jeG7dFpRHHA73YIIGhwFTbtQ0qm0VtyASyFFB5YQ2iDkTmojn2l18/wO1Qn+8hwCAAA=
+        H4sIAAAAAAAA/3WSUWsbMQzHv4rwY7iUu5Dbw72tg5YxGINthbIMo57VOxOf7di6rCHku0/Omo5u
+        9Em2fn//LQkd1RQMOdWp3uFsaJmD98TL9XJVr9q6bdaqUtYIn/Kg6+Z6+Prhu1m3nx8+0a+bu7ub
+        +3h/m0XDh0hFRTnjQJJIwZUE5mwzo2dJ9cEzyan7cbzomZ4KOYdOXWMmA8EDjwQGGeEjJOJkaU+m
+        2/iNXyy+YLK5Wyw2fglyC3F2yDZ4ScHqqoHJOifXP/h9IiygqVvIO9hOxePbaDMMdk8ZzmaAEF9s
+        wJDPlg8QHgFjTOHJTsjkDrCqq7quIVKIjiQkcZwxEWytCxMxpQom3Fo/gGXYzZbpbFbePvuTuVKn
+        n5XKHKKW0mTY0jV5o3lOXj2DTLuZfC/j8bNzlZrPE+2Oyvo4s+awFVfVvVs3MlLsR9K9eJXi9WtF
+        feGCzVvs8rZ8QHGkiRI63U7/6//SZvyXnioVZn5VnlSXKe1tT5otJWm07IHBZMpK+UdKpUk9UBDk
+        A2vco3X4IGtzOv0GWx/SZZgCAAA=
     headers:
       CF-RAY:
-      - 9cac344ecb6329c1-LHR
+      - 9cac7b00599f6557-LHR
       Connection:
       - keep-alive
       Content-Encoding:
@@ -180,47 +180,45 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Sun, 08 Feb 2026 15:36:46 GMT
+      - Sun, 08 Feb 2026 16:25:03 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
       - chunked
       X-Robots-Tag:
       - none
-      anthropic-organization-id:
-      - 871841f9-232e-4b73-8210-909ab1ab034a
       anthropic-ratelimit-input-tokens-limit:
       - '2000000'
       anthropic-ratelimit-input-tokens-remaining:
       - '2000000'
       anthropic-ratelimit-input-tokens-reset:
-      - '2026-02-08T15:36:45Z'
+      - '2026-02-08T16:25:01Z'
       anthropic-ratelimit-output-tokens-limit:
       - '400000'
       anthropic-ratelimit-output-tokens-remaining:
       - '400000'
       anthropic-ratelimit-output-tokens-reset:
-      - '2026-02-08T15:36:46Z'
+      - '2026-02-08T16:25:02Z'
       anthropic-ratelimit-requests-limit:
       - '4000'
       anthropic-ratelimit-requests-remaining:
       - '3999'
       anthropic-ratelimit-requests-reset:
-      - '2026-02-08T15:36:44Z'
+      - '2026-02-08T16:25:00Z'
       anthropic-ratelimit-tokens-limit:
       - '2400000'
       anthropic-ratelimit-tokens-remaining:
       - '2400000'
       anthropic-ratelimit-tokens-reset:
-      - '2026-02-08T15:36:45Z'
+      - '2026-02-08T16:25:01Z'
       cf-cache-status:
       - DYNAMIC
       request-id:
-      - req_011CXvrE2crs9PxXRNkGR8fS
+      - req_011CXvuuUeUGCtuq4K5v9aFD
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       x-envoy-upstream-service-time:
-      - '1583'
+      - '2696'
     status:
       code: 200
       message: OK

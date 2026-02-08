@@ -13,10 +13,18 @@ from paid.tracing.context_data import ContextData
 from paid.tracing.tracing import PaidSpanProcessor, PydanticSpanProcessor
 
 
+def _scrub_response_headers(response):
+    headers = response.get("headers", {})
+    for h in ["anthropic-organization-id"]:
+        headers.pop(h, None)
+    return response
+
+
 @pytest.fixture(scope="module")
 def vcr_config():
     return {
         "filter_headers": ["x-api-key", "anthropic-api-key", "authorization"],
+        "before_record_response": _scrub_response_headers,
         "cassette_library_dir": os.path.join(os.path.dirname(__file__), "cassettes"),
     }
 

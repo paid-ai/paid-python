@@ -45,12 +45,13 @@ interactions:
     body:
       string: 'event: message_start
 
-        data: {"type":"message_start","message":{"model":"claude-sonnet-4-20250514","id":"msg_01XMRKGs6GbpW7VbUEeDRE94","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":31,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard","inference_geo":"not_available"}}      }
+        data: {"type":"message_start","message":{"model":"claude-sonnet-4-20250514","id":"msg_01HukcWeC1eV4e7c5Mho8EZ7","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":31,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard","inference_geo":"not_available"}}           }
 
 
         event: content_block_start
 
-        data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}           }
+        data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}
+        }
 
 
         event: ping
@@ -60,34 +61,34 @@ interactions:
 
         event: content_block_delta
 
-        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Your"}       }
+        data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Your"}         }
 
 
         event: content_block_delta
 
         data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"
-        name is Alice."}             }
+        name is Alice."}     }
 
 
         event: content_block_stop
 
-        data: {"type":"content_block_stop","index":0      }
+        data: {"type":"content_block_stop","index":0         }
 
 
         event: message_delta
 
-        data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":31,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":8}           }
+        data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"input_tokens":31,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":8}            }
 
 
         event: message_stop
 
-        data: {"type":"message_stop"    }
+        data: {"type":"message_stop"   }
 
 
         '
     headers:
       CF-RAY:
-      - 9cac2342ae550035-LHR
+      - 9cac7a3afd76ed0a-LHR
       Cache-Control:
       - no-cache
       Connection:
@@ -97,47 +98,45 @@ interactions:
       Content-Type:
       - text/event-stream; charset=utf-8
       Date:
-      - Sun, 08 Feb 2026 15:25:07 GMT
+      - Sun, 08 Feb 2026 16:24:29 GMT
       Server:
       - cloudflare
       Transfer-Encoding:
       - chunked
       X-Robots-Tag:
       - none
-      anthropic-organization-id:
-      - 871841f9-232e-4b73-8210-909ab1ab034a
       anthropic-ratelimit-input-tokens-limit:
       - '2000000'
       anthropic-ratelimit-input-tokens-remaining:
       - '2000000'
       anthropic-ratelimit-input-tokens-reset:
-      - '2026-02-08T15:25:06Z'
+      - '2026-02-08T16:24:28Z'
       anthropic-ratelimit-output-tokens-limit:
       - '400000'
       anthropic-ratelimit-output-tokens-remaining:
       - '400000'
       anthropic-ratelimit-output-tokens-reset:
-      - '2026-02-08T15:25:06Z'
+      - '2026-02-08T16:24:28Z'
       anthropic-ratelimit-requests-limit:
       - '4000'
       anthropic-ratelimit-requests-remaining:
       - '3999'
       anthropic-ratelimit-requests-reset:
-      - '2026-02-08T15:25:06Z'
+      - '2026-02-08T16:24:28Z'
       anthropic-ratelimit-tokens-limit:
       - '2400000'
       anthropic-ratelimit-tokens-remaining:
       - '2400000'
       anthropic-ratelimit-tokens-reset:
-      - '2026-02-08T15:25:06Z'
+      - '2026-02-08T16:24:28Z'
       cf-cache-status:
       - DYNAMIC
       request-id:
-      - req_011CXvqLZKcywEHdrJugmLq2
+      - req_011CXvus9YiT81Pu1X5hNSj4
       strict-transport-security:
       - max-age=31536000; includeSubDomains; preload
       x-envoy-upstream-service-time:
-      - '760'
+      - '634'
     status:
       code: 200
       message: OK
