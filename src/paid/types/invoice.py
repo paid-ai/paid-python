@@ -15,37 +15,75 @@ from .invoice_tax_status import InvoiceTaxStatus
 
 class Invoice(UniversalBaseModel):
     id: str
-    display_number: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="displayNumber")] = None
-    order_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="orderId")] = None
-    customer_id: typing_extensions.Annotated[str, FieldMetadata(alias="customerId")]
+    display_number: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="displayNumber"), pydantic.Field(alias="displayNumber")
+    ] = None
+    order_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="orderId"), pydantic.Field(alias="orderId")
+    ] = None
+    customer_id: typing_extensions.Annotated[str, FieldMetadata(alias="customerId"), pydantic.Field(alias="customerId")]
     status: InvoiceStatus
-    payment_status: typing_extensions.Annotated[InvoicePaymentStatus, FieldMetadata(alias="paymentStatus")]
+    payment_status: typing_extensions.Annotated[
+        InvoicePaymentStatus, FieldMetadata(alias="paymentStatus"), pydantic.Field(alias="paymentStatus")
+    ]
     source: InvoiceSource
-    start_date: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="startDate")]
-    end_date: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="endDate")] = None
-    issue_date: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="issueDate")]
-    posted_date: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="postedDate")] = None
-    due_date: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="dueDate")] = None
+    start_date: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="startDate"), pydantic.Field(alias="startDate")
+    ]
+    end_date: typing_extensions.Annotated[
+        typing.Optional[dt.datetime], FieldMetadata(alias="endDate"), pydantic.Field(alias="endDate")
+    ] = None
+    issue_date: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="issueDate"), pydantic.Field(alias="issueDate")
+    ]
+    posted_date: typing_extensions.Annotated[
+        typing.Optional[dt.datetime], FieldMetadata(alias="postedDate"), pydantic.Field(alias="postedDate")
+    ] = None
+    due_date: typing_extensions.Annotated[
+        typing.Optional[dt.datetime], FieldMetadata(alias="dueDate"), pydantic.Field(alias="dueDate")
+    ] = None
     currency: str
-    tax_amount: typing_extensions.Annotated[float, FieldMetadata(alias="taxAmount")]
-    tax_rate: typing_extensions.Annotated[float, FieldMetadata(alias="taxRate")]
-    tax_status: typing_extensions.Annotated[InvoiceTaxStatus, FieldMetadata(alias="taxStatus")]
-    invoice_total_excluding_tax: typing_extensions.Annotated[float, FieldMetadata(alias="invoiceTotalExcludingTax")]
-    invoice_total: typing_extensions.Annotated[float, FieldMetadata(alias="invoiceTotal")]
-    amount_due: typing_extensions.Annotated[float, FieldMetadata(alias="amountDue")]
-    amount_paid: typing_extensions.Annotated[float, FieldMetadata(alias="amountPaid")]
-    amount_remaining: typing_extensions.Annotated[float, FieldMetadata(alias="amountRemaining")]
-    credit_notes_total: typing_extensions.Annotated[float, FieldMetadata(alias="creditNotesTotal")]
-    metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
-    created_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="createdAt")]
-    updated_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="updatedAt")]
-    payment_link: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="paymentLink")] = None
-    dispute_link: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="disputeLink")] = None
-    public_url_token: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="publicUrlToken")] = None
-    tax_exempt: typing_extensions.Annotated[bool, FieldMetadata(alias="taxExempt")]
-    billing_contact_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="billingContactId")] = (
-        None
-    )
+    tax_amount: typing_extensions.Annotated[float, FieldMetadata(alias="taxAmount"), pydantic.Field(alias="taxAmount")]
+    tax_rate: typing_extensions.Annotated[float, FieldMetadata(alias="taxRate"), pydantic.Field(alias="taxRate")]
+    tax_status: typing_extensions.Annotated[
+        InvoiceTaxStatus, FieldMetadata(alias="taxStatus"), pydantic.Field(alias="taxStatus")
+    ]
+    invoice_total_excluding_tax: typing_extensions.Annotated[
+        float, FieldMetadata(alias="invoiceTotalExcludingTax"), pydantic.Field(alias="invoiceTotalExcludingTax")
+    ]
+    invoice_total: typing_extensions.Annotated[
+        float, FieldMetadata(alias="invoiceTotal"), pydantic.Field(alias="invoiceTotal")
+    ]
+    amount_due: typing_extensions.Annotated[float, FieldMetadata(alias="amountDue"), pydantic.Field(alias="amountDue")]
+    amount_paid: typing_extensions.Annotated[
+        float, FieldMetadata(alias="amountPaid"), pydantic.Field(alias="amountPaid")
+    ]
+    amount_remaining: typing_extensions.Annotated[
+        float, FieldMetadata(alias="amountRemaining"), pydantic.Field(alias="amountRemaining")
+    ]
+    credit_notes_total: typing_extensions.Annotated[
+        float, FieldMetadata(alias="creditNotesTotal"), pydantic.Field(alias="creditNotesTotal")
+    ]
+    metadata: typing.Optional[typing.Dict[str, typing.Any]] = None
+    created_at: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")
+    ]
+    updated_at: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="updatedAt"), pydantic.Field(alias="updatedAt")
+    ]
+    payment_link: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="paymentLink"), pydantic.Field(alias="paymentLink")
+    ] = None
+    dispute_link: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="disputeLink"), pydantic.Field(alias="disputeLink")
+    ] = None
+    public_url_token: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="publicUrlToken"), pydantic.Field(alias="publicUrlToken")
+    ] = None
+    tax_exempt: typing_extensions.Annotated[bool, FieldMetadata(alias="taxExempt"), pydantic.Field(alias="taxExempt")]
+    billing_contact_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="billingContactId"), pydantic.Field(alias="billingContactId")
+    ] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

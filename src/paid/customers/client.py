@@ -79,7 +79,7 @@ class CustomersClient:
         billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
@@ -105,7 +105,7 @@ class CustomersClient:
 
         vat_number : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -185,7 +185,7 @@ class CustomersClient:
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         churn_date: typing.Optional[dt.datetime] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
@@ -215,7 +215,7 @@ class CustomersClient:
 
         vat_number : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -331,7 +331,7 @@ class CustomersClient:
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         churn_date: typing.Optional[dt.datetime] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
@@ -361,7 +361,7 @@ class CustomersClient:
 
         vat_number : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -503,7 +503,7 @@ class AsyncCustomersClient:
         billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
@@ -529,7 +529,7 @@ class AsyncCustomersClient:
 
         vat_number : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -625,7 +625,7 @@ class AsyncCustomersClient:
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         churn_date: typing.Optional[dt.datetime] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
@@ -655,7 +655,7 @@ class AsyncCustomersClient:
 
         vat_number : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -795,7 +795,7 @@ class AsyncCustomersClient:
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         churn_date: typing.Optional[dt.datetime] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
@@ -825,7 +825,7 @@ class AsyncCustomersClient:
 
         vat_number : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

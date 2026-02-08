@@ -2,43 +2,108 @@
 
 # isort: skip_file
 
-from .attribution import Attribution
-from .bulk_signals_response import BulkSignalsResponse
-from .contact import Contact
-from .contact_billing_address import ContactBillingAddress
-from .contact_list_response import ContactListResponse
-from .customer import Customer
-from .customer_attribution import CustomerAttribution
-from .customer_billing_address import CustomerBillingAddress
-from .customer_by_external_id import CustomerByExternalId
-from .customer_by_id import CustomerById
-from .customer_creation_state import CustomerCreationState
-from .customer_list_response import CustomerListResponse
-from .empty_response import EmptyResponse
-from .error_response import ErrorResponse
-from .invoice import Invoice
-from .invoice_line import InvoiceLine
-from .invoice_line_payment_status import InvoiceLinePaymentStatus
-from .invoice_lines_response import InvoiceLinesResponse
-from .invoice_list_response import InvoiceListResponse
-from .invoice_payment_status import InvoicePaymentStatus
-from .invoice_source import InvoiceSource
-from .invoice_status import InvoiceStatus
-from .invoice_tax_status import InvoiceTaxStatus
-from .order import Order
-from .order_creation_state import OrderCreationState
-from .order_line import OrderLine
-from .order_lines_response import OrderLinesResponse
-from .order_list_response import OrderListResponse
-from .pagination import Pagination
-from .product import Product
-from .product_by_external_id import ProductByExternalId
-from .product_by_id import ProductById
-from .product_list_response import ProductListResponse
-from .signal import Signal
-from .update_contact_request import UpdateContactRequest
-from .update_customer_request import UpdateCustomerRequest
-from .update_product_request import UpdateProductRequest
+import typing
+from importlib import import_module
+
+if typing.TYPE_CHECKING:
+    from .attribution import Attribution
+    from .bulk_signals_response import BulkSignalsResponse
+    from .contact import Contact
+    from .contact_billing_address import ContactBillingAddress
+    from .contact_list_response import ContactListResponse
+    from .customer import Customer
+    from .customer_attribution import CustomerAttribution
+    from .customer_billing_address import CustomerBillingAddress
+    from .customer_by_external_id import CustomerByExternalId
+    from .customer_by_id import CustomerById
+    from .customer_creation_state import CustomerCreationState
+    from .customer_list_response import CustomerListResponse
+    from .empty_response import EmptyResponse
+    from .error_response import ErrorResponse
+    from .invoice import Invoice
+    from .invoice_line import InvoiceLine
+    from .invoice_line_payment_status import InvoiceLinePaymentStatus
+    from .invoice_lines_response import InvoiceLinesResponse
+    from .invoice_list_response import InvoiceListResponse
+    from .invoice_payment_status import InvoicePaymentStatus
+    from .invoice_source import InvoiceSource
+    from .invoice_status import InvoiceStatus
+    from .invoice_tax_status import InvoiceTaxStatus
+    from .order import Order
+    from .order_creation_state import OrderCreationState
+    from .order_line import OrderLine
+    from .order_lines_response import OrderLinesResponse
+    from .order_list_response import OrderListResponse
+    from .pagination import Pagination
+    from .product import Product
+    from .product_by_external_id import ProductByExternalId
+    from .product_by_id import ProductById
+    from .product_list_response import ProductListResponse
+    from .signal import Signal
+    from .update_contact_request import UpdateContactRequest
+    from .update_customer_request import UpdateCustomerRequest
+    from .update_product_request import UpdateProductRequest
+_dynamic_imports: typing.Dict[str, str] = {
+    "Attribution": ".attribution",
+    "BulkSignalsResponse": ".bulk_signals_response",
+    "Contact": ".contact",
+    "ContactBillingAddress": ".contact_billing_address",
+    "ContactListResponse": ".contact_list_response",
+    "Customer": ".customer",
+    "CustomerAttribution": ".customer_attribution",
+    "CustomerBillingAddress": ".customer_billing_address",
+    "CustomerByExternalId": ".customer_by_external_id",
+    "CustomerById": ".customer_by_id",
+    "CustomerCreationState": ".customer_creation_state",
+    "CustomerListResponse": ".customer_list_response",
+    "EmptyResponse": ".empty_response",
+    "ErrorResponse": ".error_response",
+    "Invoice": ".invoice",
+    "InvoiceLine": ".invoice_line",
+    "InvoiceLinePaymentStatus": ".invoice_line_payment_status",
+    "InvoiceLinesResponse": ".invoice_lines_response",
+    "InvoiceListResponse": ".invoice_list_response",
+    "InvoicePaymentStatus": ".invoice_payment_status",
+    "InvoiceSource": ".invoice_source",
+    "InvoiceStatus": ".invoice_status",
+    "InvoiceTaxStatus": ".invoice_tax_status",
+    "Order": ".order",
+    "OrderCreationState": ".order_creation_state",
+    "OrderLine": ".order_line",
+    "OrderLinesResponse": ".order_lines_response",
+    "OrderListResponse": ".order_list_response",
+    "Pagination": ".pagination",
+    "Product": ".product",
+    "ProductByExternalId": ".product_by_external_id",
+    "ProductById": ".product_by_id",
+    "ProductListResponse": ".product_list_response",
+    "Signal": ".signal",
+    "UpdateContactRequest": ".update_contact_request",
+    "UpdateCustomerRequest": ".update_customer_request",
+    "UpdateProductRequest": ".update_product_request",
+}
+
+
+def __getattr__(attr_name: str) -> typing.Any:
+    module_name = _dynamic_imports.get(attr_name)
+    if module_name is None:
+        raise AttributeError(f"No {attr_name} found in _dynamic_imports for module name -> {__name__}")
+    try:
+        module = import_module(module_name, __package__)
+        if module_name == f".{attr_name}":
+            return module
+        else:
+            return getattr(module, attr_name)
+    except ImportError as e:
+        raise ImportError(f"Failed to import {attr_name} from {module_name}: {e}") from e
+    except AttributeError as e:
+        raise AttributeError(f"Failed to get {attr_name} from {module_name}: {e}") from e
+
+
+def __dir__():
+    lazy_attrs = list(_dynamic_imports.keys())
+    return sorted(lazy_attrs)
+
 
 __all__ = [
     "Attribution",

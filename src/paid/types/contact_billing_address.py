@@ -13,7 +13,9 @@ class ContactBillingAddress(UniversalBaseModel):
     city: typing.Optional[str] = None
     state: typing.Optional[str] = None
     country: typing.Optional[str] = None
-    zip_code: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="zipCode")] = None
+    zip_code: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="zipCode"), pydantic.Field(alias="zipCode")
+    ] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

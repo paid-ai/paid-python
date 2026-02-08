@@ -13,20 +13,32 @@ from .customer_creation_state import CustomerCreationState
 
 class UpdateCustomerRequest(UniversalBaseModel):
     name: typing.Optional[str] = None
-    legal_name: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="legalName")] = None
+    legal_name: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="legalName"), pydantic.Field(alias="legalName")
+    ] = None
     email: typing.Optional[str] = None
     phone: typing.Optional[str] = None
     website: typing.Optional[str] = None
-    external_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="externalId")] = None
+    external_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="externalId"), pydantic.Field(alias="externalId")
+    ] = None
     billing_address: typing_extensions.Annotated[
-        typing.Optional[CustomerBillingAddress], FieldMetadata(alias="billingAddress")
+        typing.Optional[CustomerBillingAddress],
+        FieldMetadata(alias="billingAddress"),
+        pydantic.Field(alias="billingAddress"),
     ] = None
     creation_state: typing_extensions.Annotated[
-        typing.Optional[CustomerCreationState], FieldMetadata(alias="creationState")
+        typing.Optional[CustomerCreationState],
+        FieldMetadata(alias="creationState"),
+        pydantic.Field(alias="creationState"),
     ] = None
-    churn_date: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="churnDate")] = None
-    vat_number: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="vatNumber")] = None
-    metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
+    churn_date: typing_extensions.Annotated[
+        typing.Optional[dt.datetime], FieldMetadata(alias="churnDate"), pydantic.Field(alias="churnDate")
+    ] = None
+    vat_number: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="vatNumber"), pydantic.Field(alias="vatNumber")
+    ] = None
+    metadata: typing.Optional[typing.Dict[str, typing.Any]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

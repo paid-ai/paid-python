@@ -9,10 +9,11 @@ from ..core.serialization import FieldMetadata
 
 
 class CustomerByExternalId(UniversalBaseModel):
-    external_customer_id: typing_extensions.Annotated[str, FieldMetadata(alias="externalCustomerId")] = pydantic.Field()
-    """
-    Your external customer ID
-    """
+    external_customer_id: typing_extensions.Annotated[
+        str,
+        FieldMetadata(alias="externalCustomerId"),
+        pydantic.Field(alias="externalCustomerId", description="Your external customer ID"),
+    ]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
