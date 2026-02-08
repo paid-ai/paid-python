@@ -1,0 +1,223 @@
+interactions:
+- request:
+    body: '{"max_tokens":4096,"messages":[{"role":"user","content":[{"text":"What
+      is the temperature in Paris?","type":"text"}]}],"model":"claude-sonnet-4-20250514","stream":false,"system":"Use
+      the get_temperature tool to answer.","tool_choice":{"type":"auto"},"tools":[{"name":"get_temperature","description":"Get
+      the current temperature for a city.","input_schema":{"additionalProperties":false,"properties":{"city":{"type":"string"}},"required":["city"],"type":"object"}}]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '465'
+      Content-Type:
+      - application/json
+      Host:
+      - api.anthropic.com
+      User-Agent:
+      - pydantic-ai/1.56.0
+      X-Stainless-Arch:
+      - arm64
+      X-Stainless-Async:
+      - async:asyncio
+      X-Stainless-Lang:
+      - python
+      X-Stainless-OS:
+      - MacOS
+      X-Stainless-Package-Version:
+      - 0.78.0
+      X-Stainless-Runtime:
+      - CPython
+      X-Stainless-Runtime-Version:
+      - 3.13.12
+      anthropic-version:
+      - '2023-06-01'
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-timeout:
+      - '600'
+    method: POST
+    uri: https://api.anthropic.com/v1/messages?beta=true
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAA/3VRXUsDMRD8K0defLlKv0v7pojWUqRCUUEkxNy2Dc1lr8mmWMr9dzcHpVbxKcnO
+        7MzO5ihKLMCKidBWxQJaAZ0DavVb3XZ30B50+iIXpmC8DGvZ7tzezJ92z8N5NX+pxvu78NaL01fD
+        HDpUkFgQgloDFzzaVFAhmEDKEZc0OgK+Td6PJz7BV0KaYyIer6zN9Ab0NqMNZDp6z/yMoKzAK4oe
+        MuOyhfImZCv02QHjtajzsxqilTHAaeb0jjz1bLRcdM32BrCY4v1y9uD0aIvMcqpMfWsg+cMktbsq
+        8kRHoQ0dmNF4irr+yEUgrKQHxZu6tGyAALsITrOqi9bmIjbrYKFGURJuwQUx6Y3HvA/FWaVmLTLo
+        5CWjfcIZLv7DTr3JAKoNlJzAykH5l39GO5vfaJ0LjPSzNBxwHPB7o0GSAc9B0ycWyhfNclbgU0i5
+        BmTIIUm1V8aqT/7zuv4G9MYnm1UCAAA=
+    headers:
+      CF-RAY:
+      - 9cac341b7fee38c0-LHR
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - default-src 'none'; frame-ancestors 'none'
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 08 Feb 2026 15:36:38 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Robots-Tag:
+      - none
+      anthropic-organization-id:
+      - 871841f9-232e-4b73-8210-909ab1ab034a
+      anthropic-ratelimit-input-tokens-limit:
+      - '2000000'
+      anthropic-ratelimit-input-tokens-remaining:
+      - '2000000'
+      anthropic-ratelimit-input-tokens-reset:
+      - '2026-02-08T15:36:37Z'
+      anthropic-ratelimit-output-tokens-limit:
+      - '400000'
+      anthropic-ratelimit-output-tokens-remaining:
+      - '400000'
+      anthropic-ratelimit-output-tokens-reset:
+      - '2026-02-08T15:36:38Z'
+      anthropic-ratelimit-requests-limit:
+      - '4000'
+      anthropic-ratelimit-requests-remaining:
+      - '3999'
+      anthropic-ratelimit-requests-reset:
+      - '2026-02-08T15:36:36Z'
+      anthropic-ratelimit-tokens-limit:
+      - '2400000'
+      anthropic-ratelimit-tokens-remaining:
+      - '2400000'
+      anthropic-ratelimit-tokens-reset:
+      - '2026-02-08T15:36:37Z'
+      cf-cache-status:
+      - DYNAMIC
+      request-id:
+      - req_011CXvrDRWjpRRMWRiL39ayX
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-envoy-upstream-service-time:
+      - '1704'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"max_tokens\":4096,\"messages\":[{\"role\":\"user\",\"content\":[{\"text\":\"What
+      is the temperature in Paris?\",\"type\":\"text\"}]},{\"role\":\"assistant\",\"content\":[{\"text\":\"I'll
+      check the current temperature in Paris for you.\",\"type\":\"text\"},{\"id\":\"toolu_01J7TP2ikAeodHoFTJGnc7ko\",\"type\":\"tool_use\",\"name\":\"get_temperature\",\"input\":{\"city\":\"Paris\"}}]},{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_01J7TP2ikAeodHoFTJGnc7ko\",\"type\":\"tool_result\",\"content\":\"72\xB0F
+      in Paris\",\"is_error\":false}]}],\"model\":\"claude-sonnet-4-20250514\",\"stream\":false,\"system\":\"Use
+      the get_temperature tool to answer.\",\"tool_choice\":{\"type\":\"auto\"},\"tools\":[{\"name\":\"get_temperature\",\"description\":\"Get
+      the current temperature for a city.\",\"input_schema\":{\"additionalProperties\":false,\"properties\":{\"city\":{\"type\":\"string\"}},\"required\":[\"city\"],\"type\":\"object\"}}]}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '826'
+      Content-Type:
+      - application/json
+      Host:
+      - api.anthropic.com
+      User-Agent:
+      - pydantic-ai/1.56.0
+      X-Stainless-Arch:
+      - arm64
+      X-Stainless-Async:
+      - async:asyncio
+      X-Stainless-Lang:
+      - python
+      X-Stainless-OS:
+      - MacOS
+      X-Stainless-Package-Version:
+      - 0.78.0
+      X-Stainless-Runtime:
+      - CPython
+      X-Stainless-Runtime-Version:
+      - 3.13.12
+      anthropic-version:
+      - '2023-06-01'
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-timeout:
+      - '600'
+    method: POST
+    uri: https://api.anthropic.com/v1/messages?beta=true
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAA/3WR3UoDMRCFX2XJ9VZ2y5bK3glVvPQPC4qENJnuxmYnazIpStl38hl8MmeLxaoI
+        gYTznWTOTHai8wacqIV2KhmYRI8INKkm02I6K2ZlJXJhDfMuNrIo7/XDsm9uzm7n191itVleLp7X
+        5w176K2H0QUxqgZYCN6NgorRRlJILGmPBHyqH3cHP8HrSPZbLe5ayHQKgU0ZQddDUJQCZBazKxVs
+        zHjNpx/vFydieMpFJN/LAIoz82VAI9mN4gtEeEmAmqtgci4XaR+s3gmLfSJJfgMYRV2dlpxM6Rak
+        5rfIepQ/HcWBMzb/scPdsQD0LXSc3clZ99f/Tcv2Nx1y4RMdS2XF7UDYWg2SLARudBynUcGMP4Nr
+        CGOTsgHPCD1JtVXWqRVPfxg+AU5tgQXfAQAA
+    headers:
+      CF-RAY:
+      - 9cac34272d99a430-LHR
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - default-src 'none'; frame-ancestors 'none'
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 08 Feb 2026 15:36:39 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Robots-Tag:
+      - none
+      anthropic-organization-id:
+      - 871841f9-232e-4b73-8210-909ab1ab034a
+      anthropic-ratelimit-input-tokens-limit:
+      - '2000000'
+      anthropic-ratelimit-input-tokens-remaining:
+      - '2000000'
+      anthropic-ratelimit-input-tokens-reset:
+      - '2026-02-08T15:36:38Z'
+      anthropic-ratelimit-output-tokens-limit:
+      - '400000'
+      anthropic-ratelimit-output-tokens-remaining:
+      - '400000'
+      anthropic-ratelimit-output-tokens-reset:
+      - '2026-02-08T15:36:39Z'
+      anthropic-ratelimit-requests-limit:
+      - '4000'
+      anthropic-ratelimit-requests-remaining:
+      - '3999'
+      anthropic-ratelimit-requests-reset:
+      - '2026-02-08T15:36:38Z'
+      anthropic-ratelimit-tokens-limit:
+      - '2400000'
+      anthropic-ratelimit-tokens-remaining:
+      - '2400000'
+      anthropic-ratelimit-tokens-reset:
+      - '2026-02-08T15:36:38Z'
+      cf-cache-status:
+      - DYNAMIC
+      request-id:
+      - req_011CXvrDZVTZa5PkbSwKdq2h
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-envoy-upstream-service-time:
+      - '740'
+    status:
+      code: 200
+      message: OK
+version: 1

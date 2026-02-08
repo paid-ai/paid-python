@@ -1,0 +1,79 @@
+interactions:
+- request:
+    body: '{"messages":[{"role":"user","content":"Hello, world!"}],"model":"claude-sonnet-4-20250514"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '91'
+      Content-Type:
+      - application/json
+      Host:
+      - api.anthropic.com
+      User-Agent:
+      - AsyncAnthropic/Python 0.78.0
+      X-Stainless-Arch:
+      - arm64
+      X-Stainless-Async:
+      - async:asyncio
+      X-Stainless-Lang:
+      - python
+      X-Stainless-OS:
+      - MacOS
+      X-Stainless-Package-Version:
+      - 0.78.0
+      X-Stainless-Runtime:
+      - CPython
+      X-Stainless-Runtime-Version:
+      - 3.13.12
+      anthropic-version:
+      - '2023-06-01'
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-timeout:
+      - NOT_GIVEN
+    method: POST
+    uri: https://api.anthropic.com/v1/messages/count_tokens
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAA/6tWyswrKC2JL8nPTs0rVrIyNKwFABo6w5ATAAAA
+    headers:
+      CF-RAY:
+      - 9cac22fa0f96f668-LHR
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - default-src 'none'; frame-ancestors 'none'
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 08 Feb 2026 15:24:54 GMT
+      Server:
+      - cloudflare
+      Transfer-Encoding:
+      - chunked
+      X-Robots-Tag:
+      - none
+      anthropic-organization-id:
+      - 871841f9-232e-4b73-8210-909ab1ab034a
+      cf-cache-status:
+      - DYNAMIC
+      request-id:
+      - req_011CXvqKhg8oqU5h4z7xX9Zp
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-envoy-upstream-service-time:
+      - '81'
+    status:
+      code: 200
+      message: OK
+version: 1
