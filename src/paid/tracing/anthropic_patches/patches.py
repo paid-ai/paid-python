@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Dict
 
 from opentelemetry import trace as trace_api
 from wrapt import ObjectProxy, wrap_function_wrapper  # type: ignore[import-untyped]
@@ -12,12 +12,19 @@ from paid.tracing import tracing
 
 _original_async_messages_stream = None
 
+# Originals for the beta path, keyed by method name.
+_beta_originals: Dict[str, Any] = {}
+
+_BETA_MODULE = "anthropic.resources.beta.messages.messages"
+
 
 def instrument_anthropic() -> None:
     """Apply all Anthropic patches. Call after AnthropicInstrumentor().instrument()."""
     _patch_stream_context_managers()
     _patch_message_stream_manager()
     _wrap_async_messages_stream()
+    _patch_response_accumulator_for_beta()
+    _wrap_beta_messages()
 
 
 def uninstrument_anthropic() -> None:
@@ -30,9 +37,7 @@ def uninstrument_anthropic() -> None:
             pass
         _original_async_messages_stream = None
 
-
-# Fix 1: _MessagesStream/_Stream — missing context-manager protocol.
-# Python resolves dunders on the class, not the instance, so ObjectProxy.__getattr__ doesn't help.
+    _uninstrument_beta_messages()
 
 def _patch_stream_context_managers() -> None:
     try:
@@ -168,3 +173,222 @@ def _wrap_async_messages_stream() -> None:
 
     wrap_function_wrapper(module="anthropic.resources.messages", name="AsyncMessages.stream", wrapper=_wrapper)
     logger.debug("Wrapped AsyncMessages.stream for instrumentation")
+
+
+
+
+def _patch_response_accumulator_for_beta() -> None:
+    """Extend _MessageResponseAccumulator.process_chunk to handle beta event types."""
+    try:
+        from openinference.instrumentation.anthropic._stream import _MessageResponseAccumulator
+    except ImportError:
+        logger.debug("Could not import _MessageResponseAccumulator, skipping beta accumulator patch")
+        return
+
+    try:
+        from anthropic.types.beta import (
+            BetaRawContentBlockDeltaEvent,
+            BetaRawContentBlockStartEvent,
+            BetaRawMessageDeltaEvent,
+            BetaRawMessageStartEvent,
+        )
+    except ImportError:
+        logger.debug("Could not import beta event types, skipping beta accumulator patch")
+        return
+
+    _original_process_chunk = _MessageResponseAccumulator.process_chunk
+
+    def _process_chunk_with_beta(self, chunk):  # type: ignore[misc]
+        """Handles both regular and beta event types."""
+        if isinstance(chunk, BetaRawMessageStartEvent):
+            self._is_null = False
+            self._current_message_idx += 1
+            value = {
+                "messages": {
+                    "index": str(self._current_message_idx),
+                    "role": chunk.message.role,
+                    "input_tokens": str(chunk.message.usage.input_tokens),
+                }
+            }
+            self._values += value
+        elif isinstance(chunk, BetaRawContentBlockStartEvent):
+            self._is_null = False
+            self._current_content_block_type = chunk.content_block
+        elif isinstance(chunk, BetaRawContentBlockDeltaEvent):
+            self._is_null = False
+            # Duck-type check: BetaTextBlock/BetaToolUseBlock have the same .type attribute
+            block_type = getattr(self._current_content_block_type, "type", None)
+            if block_type == "text":
+                value = {
+                    "messages": {
+                        "index": str(self._current_message_idx),
+                        "content": {
+                            "index": chunk.index,
+                            "type": block_type,
+                            "text": chunk.delta.text,  # type: ignore[union-attr]
+                        },
+                    }
+                }
+                self._values += value
+            elif block_type == "tool_use":
+                value = {
+                    "messages": {
+                        "index": str(self._current_message_idx),
+                        "content": {
+                            "index": chunk.index,
+                            "type": block_type,
+                            "tool_name": self._current_content_block_type.name,
+                            "tool_input": chunk.delta.partial_json,  # type: ignore[union-attr]
+                        },
+                    }
+                }
+                self._values += value
+        elif isinstance(chunk, BetaRawMessageDeltaEvent):
+            self._is_null = False
+            value = {
+                "messages": {
+                    "index": str(self._current_message_idx),
+                    "stop_reason": chunk.delta.stop_reason,
+                    "output_tokens": str(chunk.usage.output_tokens),
+                }
+            }
+            self._values += value
+        else:
+            # Non-beta event — delegate to the original.
+            return _original_process_chunk(self, chunk)
+
+    _MessageResponseAccumulator.process_chunk = _process_chunk_with_beta  # type: ignore[method-assign]
+    logger.debug("Patched _MessageResponseAccumulator.process_chunk for beta event types")
+
+
+# ---------------------------------------------------------------------------
+# We reuse the same openinference wrapper classes (_MessagesWrapper,
+# _AsyncMessagesWrapper, _MessagesStreamWrapper) targeting the beta module.
+# For AsyncMessages.stream we use the same custom approach as Fix 3 since
+# openinference has no async stream wrapper.
+# ---------------------------------------------------------------------------
+
+
+def _wrap_beta_messages() -> None:
+    """Wrap the beta Messages/AsyncMessages.create and .stream methods."""
+    try:
+        from anthropic.resources.beta.messages.messages import (
+            AsyncMessages as BetaAsyncMessages,
+        )
+        from anthropic.resources.beta.messages.messages import (
+            Messages as BetaMessages,
+        )
+    except ImportError:
+        logger.debug("Could not import beta Messages classes, skipping beta wrapping")
+        return
+
+    try:
+        from openinference.instrumentation import OITracer, TraceConfig
+        from openinference.instrumentation.anthropic._wrappers import (
+            _AsyncMessagesWrapper,
+            _MessagesStreamWrapper,
+            _MessagesWrapper,
+        )
+    except ImportError:
+        logger.debug("Could not import openinference wrappers, skipping beta wrapping")
+        return
+
+    tracer: trace_api.Tracer = OITracer(
+        tracing.paid_tracer_provider.get_tracer(__name__),
+        config=TraceConfig(),
+    )
+
+    # --- beta Messages.create (sync) ---
+    _beta_originals["Messages.create"] = BetaMessages.create
+    wrap_function_wrapper(
+        module=_BETA_MODULE,
+        name="Messages.create",
+        wrapper=_MessagesWrapper(tracer=tracer),
+    )
+
+    # --- beta AsyncMessages.create (async — primary path for pydantic-ai) ---
+    _beta_originals["AsyncMessages.create"] = BetaAsyncMessages.create
+    wrap_function_wrapper(
+        module=_BETA_MODULE,
+        name="AsyncMessages.create",
+        wrapper=_AsyncMessagesWrapper(tracer=tracer),
+    )
+
+    # --- beta Messages.stream (sync) ---
+    _beta_originals["Messages.stream"] = BetaMessages.stream
+    wrap_function_wrapper(
+        module=_BETA_MODULE,
+        name="Messages.stream",
+        wrapper=_MessagesStreamWrapper(tracer=tracer),
+    )
+
+    # --- beta AsyncMessages.stream (async) ---
+    _beta_originals["AsyncMessages.stream"] = BetaAsyncMessages.stream  # type: ignore[assignment]
+
+    def _beta_async_stream_wrapper(wrapped, instance, args, kwargs):  # type: ignore[misc]
+        beta_tracer = tracing.paid_tracer_provider.get_tracer("paid.anthropic")
+        span = beta_tracer.start_span(
+            name="AsyncMessagesStream", record_exception=False, set_status_on_exception=False
+        )
+
+        try:
+            if kwargs.get("model"):
+                span.set_attribute("llm.model_name", str(kwargs["model"]))
+            span.set_attribute("openinference.span.kind", "LLM")
+            span.set_attribute("llm.provider", "anthropic")
+            span.set_attribute("llm.system", "anthropic")
+        except Exception:
+            pass
+
+        try:
+            response = wrapped(*args, **kwargs)
+        except Exception as exc:
+            span.set_status(trace_api.Status(trace_api.StatusCode.ERROR, str(exc)))
+            span.record_exception(exc)
+            span.end()
+            raise
+
+        return _AsyncMessageStreamManagerProxy(response, span)
+
+    wrap_function_wrapper(
+        module=_BETA_MODULE,
+        name="AsyncMessages.stream",
+        wrapper=_beta_async_stream_wrapper,
+    )
+
+    logger.debug("Wrapped beta Messages/AsyncMessages.create and .stream for instrumentation")
+
+
+def _uninstrument_beta_messages() -> None:
+    """Restore original beta Messages/AsyncMessages methods."""
+    if not _beta_originals:
+        return
+
+    try:
+        from anthropic.resources.beta.messages.messages import (
+            AsyncMessages as BetaAsyncMessages,
+        )
+        from anthropic.resources.beta.messages.messages import (
+            Messages as BetaMessages,
+        )
+    except ImportError:
+        _beta_originals.clear()
+        return
+
+    _restore = {
+        "Messages.create": (BetaMessages, "create"),
+        "Messages.stream": (BetaMessages, "stream"),
+        "AsyncMessages.create": (BetaAsyncMessages, "create"),
+        "AsyncMessages.stream": (BetaAsyncMessages, "stream"),
+    }
+
+    for key, (cls, attr) in _restore.items():
+        original = _beta_originals.pop(key, None)
+        if original is not None:
+            try:
+                setattr(cls, attr, original)
+            except Exception:
+                logger.debug("Failed to restore beta %s", key, exc_info=True)
+
+    _beta_originals.clear()
+    logger.debug("Restored beta Messages/AsyncMessages originals")
