@@ -124,7 +124,7 @@ class RawOrdersClient:
         billing_anchor: typing.Optional[float] = OMIT,
         payment_terms: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Order]:
         """
@@ -154,7 +154,7 @@ class RawOrdersClient:
 
         external_id : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -318,7 +318,7 @@ class RawOrdersClient:
         billing_anchor: typing.Optional[float] = OMIT,
         payment_terms: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         billing_customer_id: typing.Optional[str] = OMIT,
         billing_contact_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -346,7 +346,7 @@ class RawOrdersClient:
 
         external_id : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         billing_customer_id : typing.Optional[str]
 
@@ -696,7 +696,7 @@ class AsyncRawOrdersClient:
         billing_anchor: typing.Optional[float] = OMIT,
         payment_terms: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Order]:
         """
@@ -726,7 +726,7 @@ class AsyncRawOrdersClient:
 
         external_id : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -890,7 +890,7 @@ class AsyncRawOrdersClient:
         billing_anchor: typing.Optional[float] = OMIT,
         payment_terms: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         billing_customer_id: typing.Optional[str] = OMIT,
         billing_contact_ids: typing.Optional[typing.Sequence[str]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -918,7 +918,7 @@ class AsyncRawOrdersClient:
 
         external_id : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         billing_customer_id : typing.Optional[str]
 

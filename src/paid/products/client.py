@@ -71,7 +71,7 @@ class ProductsClient:
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
@@ -89,7 +89,7 @@ class ProductsClient:
 
         external_id : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -160,7 +160,7 @@ class ProductsClient:
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
@@ -180,7 +180,7 @@ class ProductsClient:
 
         external_id : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -254,7 +254,7 @@ class ProductsClient:
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
@@ -274,7 +274,7 @@ class ProductsClient:
 
         external_id : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -375,7 +375,7 @@ class AsyncProductsClient:
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
@@ -393,7 +393,7 @@ class AsyncProductsClient:
 
         external_id : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -480,7 +480,7 @@ class AsyncProductsClient:
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
@@ -500,7 +500,7 @@ class AsyncProductsClient:
 
         external_id : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -590,7 +590,7 @@ class AsyncProductsClient:
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
@@ -610,7 +610,7 @@ class AsyncProductsClient:
 
         external_id : typing.Optional[str]
 
-        metadata : typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]]
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

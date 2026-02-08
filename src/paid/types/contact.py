@@ -12,17 +12,25 @@ from .contact_billing_address import ContactBillingAddress
 
 class Contact(UniversalBaseModel):
     id: str
-    customer_id: typing_extensions.Annotated[str, FieldMetadata(alias="customerId")]
-    first_name: typing_extensions.Annotated[str, FieldMetadata(alias="firstName")]
-    last_name: typing_extensions.Annotated[str, FieldMetadata(alias="lastName")]
+    customer_id: typing_extensions.Annotated[str, FieldMetadata(alias="customerId"), pydantic.Field(alias="customerId")]
+    first_name: typing_extensions.Annotated[str, FieldMetadata(alias="firstName"), pydantic.Field(alias="firstName")]
+    last_name: typing_extensions.Annotated[str, FieldMetadata(alias="lastName"), pydantic.Field(alias="lastName")]
     email: str
     phone: typing.Optional[str] = None
     billing_address: typing_extensions.Annotated[
-        typing.Optional[ContactBillingAddress], FieldMetadata(alias="billingAddress")
+        typing.Optional[ContactBillingAddress],
+        FieldMetadata(alias="billingAddress"),
+        pydantic.Field(alias="billingAddress"),
     ] = None
-    external_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="externalId")] = None
-    created_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="createdAt")]
-    updated_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="updatedAt")]
+    external_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="externalId"), pydantic.Field(alias="externalId")
+    ] = None
+    created_at: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")
+    ]
+    updated_at: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="updatedAt"), pydantic.Field(alias="updatedAt")
+    ]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

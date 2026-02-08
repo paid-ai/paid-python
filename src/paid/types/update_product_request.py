@@ -12,9 +12,13 @@ class UpdateProductRequest(UniversalBaseModel):
     name: typing.Optional[str] = None
     description: typing.Optional[str] = None
     active: typing.Optional[bool] = None
-    product_code: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="productCode")] = None
-    external_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="externalId")] = None
-    metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
+    product_code: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="productCode"), pydantic.Field(alias="productCode")
+    ] = None
+    external_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="externalId"), pydantic.Field(alias="externalId")
+    ] = None
+    metadata: typing.Optional[typing.Dict[str, typing.Any]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

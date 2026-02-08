@@ -12,25 +12,45 @@ from .invoice_line_payment_status import InvoiceLinePaymentStatus
 
 class InvoiceLine(UniversalBaseModel):
     id: str
-    order_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="orderId")] = None
-    order_line_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="orderLineId")] = None
-    order_line_attribute_id: typing_extensions.Annotated[
-        typing.Optional[str], FieldMetadata(alias="orderLineAttributeId")
+    order_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="orderId"), pydantic.Field(alias="orderId")
     ] = None
-    start_date: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="startDate")]
-    end_date: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="endDate")]
-    payment_status: typing_extensions.Annotated[InvoiceLinePaymentStatus, FieldMetadata(alias="paymentStatus")]
+    order_line_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="orderLineId"), pydantic.Field(alias="orderLineId")
+    ] = None
+    order_line_attribute_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="orderLineAttributeId"), pydantic.Field(alias="orderLineAttributeId")
+    ] = None
+    start_date: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="startDate"), pydantic.Field(alias="startDate")
+    ]
+    end_date: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="endDate"), pydantic.Field(alias="endDate")]
+    payment_status: typing_extensions.Annotated[
+        InvoiceLinePaymentStatus, FieldMetadata(alias="paymentStatus"), pydantic.Field(alias="paymentStatus")
+    ]
     quantity: int
-    total_price_before_tax: typing_extensions.Annotated[float, FieldMetadata(alias="totalPriceBeforeTax")]
+    total_price_before_tax: typing_extensions.Annotated[
+        float, FieldMetadata(alias="totalPriceBeforeTax"), pydantic.Field(alias="totalPriceBeforeTax")
+    ]
     tax: float
-    tax_rate: typing_extensions.Annotated[float, FieldMetadata(alias="taxRate")]
-    total_price_after_tax: typing_extensions.Annotated[float, FieldMetadata(alias="totalPriceAfterTax")]
+    tax_rate: typing_extensions.Annotated[float, FieldMetadata(alias="taxRate"), pydantic.Field(alias="taxRate")]
+    total_price_after_tax: typing_extensions.Annotated[
+        float, FieldMetadata(alias="totalPriceAfterTax"), pydantic.Field(alias="totalPriceAfterTax")
+    ]
     currency: str
     description: str
-    balance_amount: typing_extensions.Annotated[float, FieldMetadata(alias="balanceAmount")]
-    credited_amount: typing_extensions.Annotated[float, FieldMetadata(alias="creditedAmount")]
-    created_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="createdAt")]
-    updated_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="updatedAt")]
+    balance_amount: typing_extensions.Annotated[
+        float, FieldMetadata(alias="balanceAmount"), pydantic.Field(alias="balanceAmount")
+    ]
+    credited_amount: typing_extensions.Annotated[
+        float, FieldMetadata(alias="creditedAmount"), pydantic.Field(alias="creditedAmount")
+    ]
+    created_at: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")
+    ]
+    updated_at: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="updatedAt"), pydantic.Field(alias="updatedAt")
+    ]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

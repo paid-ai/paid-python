@@ -14,20 +14,36 @@ from .customer_creation_state import CustomerCreationState
 class Customer(UniversalBaseModel):
     id: str
     name: str
-    legal_name: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="legalName")] = None
+    legal_name: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="legalName"), pydantic.Field(alias="legalName")
+    ] = None
     email: str
     phone: str
     website: str
-    external_id: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="externalId")] = None
-    billing_address: typing_extensions.Annotated[
-        typing.Optional[CustomerBillingAddress], FieldMetadata(alias="billingAddress")
+    external_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="externalId"), pydantic.Field(alias="externalId")
     ] = None
-    creation_state: typing_extensions.Annotated[CustomerCreationState, FieldMetadata(alias="creationState")]
-    churn_date: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="churnDate")] = None
-    vat_number: typing_extensions.Annotated[typing.Optional[str], FieldMetadata(alias="vatNumber")] = None
-    metadata: typing.Optional[typing.Dict[str, typing.Optional[typing.Any]]] = None
-    created_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="createdAt")]
-    updated_at: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="updatedAt")]
+    billing_address: typing_extensions.Annotated[
+        typing.Optional[CustomerBillingAddress],
+        FieldMetadata(alias="billingAddress"),
+        pydantic.Field(alias="billingAddress"),
+    ] = None
+    creation_state: typing_extensions.Annotated[
+        CustomerCreationState, FieldMetadata(alias="creationState"), pydantic.Field(alias="creationState")
+    ]
+    churn_date: typing_extensions.Annotated[
+        typing.Optional[dt.datetime], FieldMetadata(alias="churnDate"), pydantic.Field(alias="churnDate")
+    ] = None
+    vat_number: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="vatNumber"), pydantic.Field(alias="vatNumber")
+    ] = None
+    metadata: typing.Optional[typing.Dict[str, typing.Any]] = None
+    created_at: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")
+    ]
+    updated_at: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="updatedAt"), pydantic.Field(alias="updatedAt")
+    ]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

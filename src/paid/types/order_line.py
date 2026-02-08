@@ -11,11 +11,15 @@ from ..core.serialization import FieldMetadata
 
 class OrderLine(UniversalBaseModel):
     id: str
-    product_id: typing_extensions.Annotated[str, FieldMetadata(alias="productId")]
+    product_id: typing_extensions.Annotated[str, FieldMetadata(alias="productId"), pydantic.Field(alias="productId")]
     name: str
     description: typing.Optional[str] = None
-    start_date: typing_extensions.Annotated[dt.datetime, FieldMetadata(alias="startDate")]
-    end_date: typing_extensions.Annotated[typing.Optional[dt.datetime], FieldMetadata(alias="endDate")] = None
+    start_date: typing_extensions.Annotated[
+        dt.datetime, FieldMetadata(alias="startDate"), pydantic.Field(alias="startDate")
+    ]
+    end_date: typing_extensions.Annotated[
+        typing.Optional[dt.datetime], FieldMetadata(alias="endDate"), pydantic.Field(alias="endDate")
+    ] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

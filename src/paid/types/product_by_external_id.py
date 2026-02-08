@@ -9,10 +9,11 @@ from ..core.serialization import FieldMetadata
 
 
 class ProductByExternalId(UniversalBaseModel):
-    external_product_id: typing_extensions.Annotated[str, FieldMetadata(alias="externalProductId")] = pydantic.Field()
-    """
-    Your external product ID
-    """
+    external_product_id: typing_extensions.Annotated[
+        str,
+        FieldMetadata(alias="externalProductId"),
+        pydantic.Field(alias="externalProductId", description="Your external product ID"),
+    ]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
