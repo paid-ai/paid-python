@@ -300,3 +300,22 @@ class TestCombinedInstrumentation:
         assert result.output
         assert len(_gen_ai_spans(exporter)) >= 1
         assert len(exporter.get_finished_spans()) >= len(_gen_ai_spans(exporter))
+
+    @pytest.mark.vcr()
+    async def test_pydantic_stream_with_anthropic_autoinstrumentation(self, tracing_setup, tracing_provider):
+        exporter = tracing_setup
+        paid_autoinstrument(libraries=["anthropic"])
+        agent = Agent(ANTHROPIC_MODEL, instrument=_instr(tracing_provider))
+        async with agent.run_stream("Say hello.") as stream:
+            chunks = [t async for t in stream.stream_text()]
+        assert len(chunks[-1] if chunks else "") > 0
+        # Pydantic-level gen_ai spans
+        gen_ai = _gen_ai_spans(exporter)
+        assert len(gen_ai) >= 1
+        # Anthropic-level LLM spans from beta path instrumentation
+        all_spans = exporter.get_finished_spans()
+        anthropic_spans = [
+            s for s in all_spans
+            if s.attributes and s.attributes.get("llm.provider") == "anthropic"
+        ]
+        assert len(anthropic_spans) >= 1, "Expected anthropic-level spans from beta path instrumentation"

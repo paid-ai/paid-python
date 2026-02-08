@@ -336,24 +336,36 @@ class TestBetaMessages:
 
     @pytest.mark.vcr()
     def test_sync_beta_messages_create(self, tracing_setup, anthropic_client: Anthropic):
-        _setup(tracing_setup)
+        exporter = _setup(tracing_setup)
         r = anthropic_client.beta.messages.create(**SIMPLE_MESSAGE_PARAMS)
         assert r.content and r.usage.input_tokens > 0 and r.usage.output_tokens > 0
+        spans = _get_message_spans(exporter)
+        assert len(spans) == 1
+        _assert_span_matches_response(spans[0], r)
 
     @pytest.mark.vcr()
     async def test_async_beta_messages_create(self, tracing_setup, async_anthropic_client: AsyncAnthropic):
-        _setup(tracing_setup)
+        exporter = _setup(tracing_setup)
         r = await async_anthropic_client.beta.messages.create(**SIMPLE_MESSAGE_PARAMS)
         assert r.content and r.usage.input_tokens > 0 and r.usage.output_tokens > 0
+        spans = _get_message_spans(exporter)
+        assert len(spans) == 1
+        _assert_span_matches_response(spans[0], r)
 
     @pytest.mark.vcr()
     def test_sync_beta_messages_create_stream(self, tracing_setup, anthropic_client: Anthropic):
-        _setup(tracing_setup)
+        exporter = _setup(tracing_setup)
         events = list(anthropic_client.beta.messages.create(**SIMPLE_MESSAGE_PARAMS, stream=True))
         assert len(events) > 0 and "message_start" in {e.type for e in events}
+        spans = _get_message_spans(exporter)
+        assert len(spans) == 1
+        _assert_streaming_span_has_token_counts(spans[0])
 
     @pytest.mark.vcr()
     async def test_async_beta_messages_create_stream(self, tracing_setup, async_anthropic_client: AsyncAnthropic):
-        _setup(tracing_setup)
+        exporter = _setup(tracing_setup)
         events = [e async for e in await async_anthropic_client.beta.messages.create(**SIMPLE_MESSAGE_PARAMS, stream=True)]
         assert len(events) > 0 and "message_start" in {e.type for e in events}
+        spans = _get_message_spans(exporter)
+        assert len(spans) == 1
+        _assert_streaming_span_has_token_counts(spans[0])
