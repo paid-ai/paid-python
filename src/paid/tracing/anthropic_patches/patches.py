@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from opentelemetry import trace as trace_api
-from wrapt import ObjectProxy, wrap_function_wrapper
+from wrapt import ObjectProxy, wrap_function_wrapper  # type: ignore[import-untyped]
 
 from paid.logger import logger
 from paid.tracing import tracing
@@ -101,8 +101,8 @@ def _patch_message_stream_manager() -> None:
         finally:
             self._self_with_span.finish_tracing()  # idempotent
 
-    _MessageStreamManager.__enter__ = _fixed_enter  # type: ignore[attr-defined]
-    _MessageStreamManager.__exit__ = _fixed_exit  # type: ignore[attr-defined]
+    _MessageStreamManager.__enter__ = _fixed_enter  # type: ignore[attr-defined, method-assign]
+    _MessageStreamManager.__exit__ = _fixed_exit  # type: ignore[attr-defined, method-assign]
 
     logger.debug("Patched _MessageStreamManager with fixed __enter__/__exit__")
 

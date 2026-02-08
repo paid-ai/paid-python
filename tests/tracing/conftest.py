@@ -1,5 +1,5 @@
 import os
-from typing import Generator
+from typing import Any, Generator
 
 import pytest
 from anthropic import Anthropic, AsyncAnthropic
@@ -86,13 +86,13 @@ def async_anthropic_client() -> AsyncAnthropic:
     return AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
 
 
-SIMPLE_MESSAGE_PARAMS = {
+SIMPLE_MESSAGE_PARAMS: dict[str, Any] = {
     "model": "claude-sonnet-4-20250514",
     "max_tokens": 32,
     "messages": [{"role": "user", "content": "Say hello in exactly 3 words."}],
 }
 
-TOOL_USE_PARAMS = {
+TOOL_USE_PARAMS: dict[str, Any] = {
     "model": "claude-sonnet-4-20250514",
     "max_tokens": 128,
     "messages": [{"role": "user", "content": "What is the weather in San Francisco?"}],
@@ -111,14 +111,14 @@ TOOL_USE_PARAMS = {
     ],
 }
 
-SYSTEM_PROMPT_PARAMS = {
+SYSTEM_PROMPT_PARAMS: dict[str, Any] = {
     "model": "claude-sonnet-4-20250514",
     "max_tokens": 32,
     "system": "You are a pirate. Respond in pirate speak only.",
     "messages": [{"role": "user", "content": "Say hello."}],
 }
 
-MULTI_TURN_PARAMS = {
+MULTI_TURN_PARAMS: dict[str, Any] = {
     "model": "claude-sonnet-4-20250514",
     "max_tokens": 32,
     "messages": [
@@ -128,12 +128,12 @@ MULTI_TURN_PARAMS = {
     ],
 }
 
-COUNT_TOKENS_PARAMS = {
+COUNT_TOKENS_PARAMS: dict[str, Any] = {
     "model": "claude-sonnet-4-20250514",
     "messages": [{"role": "user", "content": "Hello, world!"}],
 }
 
-CACHE_CONTROL_PARAMS = {
+CACHE_CONTROL_PARAMS: dict[str, Any] = {
     "model": "claude-sonnet-4-20250514",
     "max_tokens": 32,
     "system": [

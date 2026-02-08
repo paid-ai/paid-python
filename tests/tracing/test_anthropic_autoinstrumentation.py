@@ -224,7 +224,7 @@ class TestContextPropagation:
             return await async_anthropic_client.messages.create(**SIMPLE_MESSAGE_PARAMS)
 
         result = await trace_async_(external_customer_id="cust-async", fn=call)
-        assert result.content
+        assert result.content  # type: ignore[union-attr]
         for span in exporter.get_finished_spans():
             assert span.attributes.get("external_customer_id") == "cust-async"
 
