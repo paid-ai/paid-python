@@ -1,4 +1,4 @@
-# Initializing tracing for OTLP
+# Core OpenTelemetry tracing infrastructure for the Paid SDK
 import asyncio
 import atexit
 import os
@@ -151,7 +151,7 @@ def set_token(token: str) -> None:
 
 
 # Isolated tracer provider for Paid - separate from any user OTEL setup
-# Initialized at module load with defaults, never None (uses no-op provider if not initialized or API key isn't available)
+# Starts as NoOpTracerProvider; replaced with a real TracerProvider by initialize_tracing()
 paid_tracer_provider: Union[TracerProvider, NoOpTracerProvider] = NoOpTracerProvider()
 
 def get_paid_tracer_provider() -> Optional[TracerProvider]:
@@ -202,12 +202,11 @@ class PaidSpanProcessor(SpanProcessor):
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
         """Called when a span is started. Prefix the span name and add attributes."""
 
+        # LangChain instrumentation creates duplicate spans that overlap with provider-specific
+        # instrumentors (e.g. OpenAI, Anthropic). Drop them by raising so the span is never recorded.
+        # Not all LangChain spans are duplicates (e.g. ChatGoogleGenerativeAI is unique).
         LANGCHAIN_SPAN_FILTERS = ["ChatOpenAI", "ChatAnthropic"]
         if any(f in span.name for f in LANGCHAIN_SPAN_FILTERS):
-            # HACK TO FILTER DUPLICATE SPANS CREATED BY LANGCHAIN INSTRUMENTATION.
-            # Langchain instrumentation creates spans, that are created by other instrumentations (ex. OpenAI, Anthropic).
-            # Not all spans need filtering (ex. ChatGoogleGenerativeAI), so first test actual telemetry before adding filters.
-            # TODO: maybe consider a dropping sampler for such spans instead of raising an exception?
             logger.debug("[paid:span] Dropping duplicate LangChain span: %s", span.name)
             raise Exception(f"Dropping Langchain span: {span.name}")
 
@@ -267,11 +266,10 @@ class PaidSpanProcessor(SpanProcessor):
             logger.debug("[paid:span] on_start: attached metadata keys=%s", list(metadata_attributes.keys()))
 
     def on_end(self, span: ReadableSpan) -> None:
+        """Prefix span name if needed and filter out prompt/response contents unless store_prompt=True."""
         if span.name and not span.name.startswith(self.SPAN_NAME_PREFIX):
             # Note: ReadableSpan is immutable, need to use internal attribute
             object.__setattr__(span, "_name", f"{self.SPAN_NAME_PREFIX}{span.name}")
-            
-        """Filter out prompt and response contents unless explicitly asked to store"""
         store_prompt = ContextData.get_context_key("store_prompt")
         if store_prompt:
             logger.debug("[paid:span] on_end: name=%s, store_prompt=True, keeping all attributes", span.name)

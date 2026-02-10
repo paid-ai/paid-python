@@ -95,18 +95,18 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
 
     Note:
         If tracing is not already initialized, this function will automatically call
-        _initialize_tracing() to set it up.
+        initialize_tracing() to set it up.
 
     Example:
         >>> from paid import Paid
-        >>> from paid.tracing import paidAutoInstrument
+        >>> from paid.tracing import paid_autoinstrument
         >>> from anthropic import Anthropic
         >>>
         >>> client = Paid(token="YOUR_API_KEY")
         >>> client.initialize_tracing()
         >>>
         >>> # Instrument only Anthropic
-        >>> paidAutoInstrument(libraries=["anthropic"]) # empty args will instrument all it can
+        >>> paid_autoinstrument(libraries=["anthropic"]) # empty args will instrument all it can
         >>>
         >>> # Now all Anthropic API calls will be automatically traced
         >>> anthropic_client = Anthropic()
@@ -180,7 +180,7 @@ def _instrument_anthropic() -> None:
 
 def _instrument_openai() -> None:
     """
-    Instrument the OpenAI library using opentelemetry-instrumentation-openai.
+    Instrument the OpenAI library using openinference-instrumentation-openai.
     """
     if not OPENAI_AVAILABLE:
         logger.warning("OpenAI library not available, skipping instrumentation")

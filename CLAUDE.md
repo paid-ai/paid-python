@@ -55,13 +55,12 @@ poetry run ruff format .
 
 This is where most development work happens. The tracing system provides automatic cost tracking for AI provider API calls.
 
-**tracing.py** (370 lines) - Core tracing implementation
+**tracing.py** - Core tracing implementation
 
-- `_initialize_tracing()` - Sets up isolated TracerProvider with OTLP exporter to Paid backend
+- `initialize_tracing()` - Sets up isolated TracerProvider with OTLP exporter to Paid backend
 - `get_paid_tracer()` - Returns the isolated tracer instance
-- `_trace_sync()` / `_trace_async()` - Core tracing logic for sync/async workflows
-- `paid_tracing` decorator - Main decorator for wrapping user functions
-- `generate_tracing_token()` / `set_tracing_token()` / `unset_tracing_token()` - Distributed tracing token management
+- `trace_sync_()` / `trace_async_()` - Core tracing logic for sync/async workflows
+- `PaidSpanProcessor` / `PydanticSpanProcessor` - Span processors for attribute injection and filtering
 - Context variables management - context_data.py
 
 Key implementation details:
@@ -71,39 +70,22 @@ Key implementation details:
 - Creates spans with custom trace IDs for distributed tracing using `NonRecordingSpan` and `SpanContext`
 - Context variables ensure customer/agent IDs propagate through nested calls
 
-**signal.py** (55 lines) - Signal emission via OTEL
+**signal.py** - Signal emission via OTEL
 
-- `_signal()` - Sends events as OTEL spans with optional cost tracking association
-- Validates that signals are sent within a tracing context
+- `signal()` - Sends events as OTEL spans with optional cost tracking association
+- Must be called within a `@paid_tracing()` context
 - Supports `enable_cost_tracing` flag to link signals with cost data from the same trace
 
-**wrappers/** - AI Provider SDK Wrappers
-Each wrapper intercepts AI provider calls and creates OTEL spans with cost data:
+**wrappers/** - Callback/Hook Integrations
 
-- **openai/** - Wraps OpenAI client (chat completions, embeddings, images, audio, etc.)
-- **anthropic/** - Wraps Anthropic client (messages API)
-- **mistral/** - Wraps Mistral client
-- **gemini/** - Wraps Google Gemini client
-- **bedrock/** - Wraps AWS Bedrock client
-- **langchain/** - Callback handler for LangChain
-- **openai_agents/** - Hook for OpenAI Agents SDK
-- **utils.py** - Shared utilities (e.g., `get_audio_duration()` for audio file cost calculation using mutagen)
-
-Wrapper pattern:
-
-1. Wrap provider client class (e.g., `PaidOpenAI` wraps `OpenAI`)
-2. Intercept API calls (chat completions, embeddings, etc.)
-3. Extract usage data (tokens, units, etc.) from responses
-4. Create OTEL span with cost attributes
-5. Calculate costs based on usage and model pricing
-6. Pass through original response unchanged
+- **langchain/** - Callback handler for LangChain (`PaidLangChainCallback`)
+- **openai_agents/** - Hook for OpenAI Agents SDK (`PaidOpenAIAgentsHook`)
 
 **autoinstrumentation.py** - Auto-instrumentation for AI libraries
 
 - `paid_autoinstrument()` - Main function to enable auto-instrumentation for supported libraries
-- `_instrument_anthropic()` - Helper to instrument Anthropic library
-- Uses module-level import (`from . import tracing as tracing_module`) to access `paid_tracer_provider` dynamically
-- **Important**: Sets `paid_tracer_provider` as the global tracer provider because instrumentors use `trace.get_tracer_provider()`
+- Per-library helpers: `_instrument_anthropic()`, `_instrument_openai()`, `_instrument_google_genai()`, etc.
+- Passes `paid_tracer_provider` directly to each instrumentor
 
 #### src/paid/client.py - Main Client Classes
 
@@ -132,9 +114,8 @@ Note: Tracing functionality is accessed via the `paid.tracing` module, not the c
 
 1. **Isolated Tracing**: Uses a separate `TracerProvider` (`paid_tracer_provider`) that Paid controls entirely.
 
-   - Manual tracing (wrappers) uses this provider directly without setting it globally
-   - Auto-instrumentation requires setting it as the global provider via `trace.set_tracer_provider()` because instrumentors expect the global provider
-   - Despite being "global", Paid still controls the provider's configuration and lifecycle
+   - Auto-instrumentation passes this provider to each instrumentor
+   - Paid controls the provider's configuration and lifecycle
 
 2. **Context Variables**: Uses `contextvars` (not thread-local storage) for async-safe propagation of customer IDs, agent IDs, and tokens through nested function calls.
 
@@ -151,9 +132,7 @@ Note: Tracing functionality is accessed via the `paid.tracing` module, not the c
 
 5. **Sync/Async Support**: Both `_trace_sync()` and `_trace_async()` with identical logic. The `@paid_tracing` decorator auto-detects and wraps appropriately using `functools.wraps`.
 
-6. **Graceful Degradation**: Wrappers are designed to pass through original responses even if cost tracking fails (logged but not raised).
-
-7. **Module-level Imports for Mutable State**: In `autoinstrumentation.py`, we use `from . import tracing as tracing_module` instead of `from .tracing import paid_tracer_provider` because the latter captures the value at import time (None), while the former allows accessing the current value after it's initialized.
+6. **Graceful Degradation**: Tracing is designed to not break the application if cost tracking fails (logged but not raised).
 
 ## Development Guidelines
 
@@ -174,21 +153,6 @@ Note: Tracing functionality is accessed via the `paid.tracing` module, not the c
 - Most of `src/paid/client.py` - Constructor and resource client initialization
 
 Changes to auto-generated code will be overwritten on next Fern generation.
-
-### Adding New AI Provider Wrappers
-
-When adding a wrapper for a new AI provider (e.g., Cohere, AI21):
-
-1. Create new directory: `src/paid/tracing/wrappers/provider_name/`
-2. Implement wrapper class that:
-   - Wraps the provider's client class
-   - Intercepts API calls (using `__getattr__` or direct method overrides)
-   - Extracts usage data from responses (tokens, units, etc.)
-   - Creates OTEL span with cost attributes using `get_paid_tracer().start_as_current_span()`
-   - Calculates costs based on model pricing
-   - Returns original response unchanged
-3. Export wrapper in `src/paid/tracing/wrappers/__init__.py`
-4. Follow existing wrapper patterns (see `openai/`, `anthropic/` for examples)
 
 ### Environment Variables
 

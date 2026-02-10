@@ -1,5 +1,5 @@
 import json
-import typing
+from typing import Any, Optional, Union
 
 from .tracing import get_paid_tracer
 from opentelemetry.trace import Status, StatusCode
@@ -7,7 +7,7 @@ from opentelemetry.trace import Status, StatusCode
 from paid.logger import logger
 
 
-def signal(event_name: str, enable_cost_tracing: bool = False, data: typing.Optional[dict[str, typing.Any]] = None):
+def signal(event_name: str, enable_cost_tracing: bool = False, data: Optional[dict[str, Any]] = None):
     """
     Emit a signal within a tracing context.
 
@@ -58,7 +58,7 @@ def signal(event_name: str, enable_cost_tracing: bool = False, data: typing.Opti
 
     tracer = get_paid_tracer()
     with tracer.start_as_current_span("signal") as span:
-        attributes: dict[str, typing.Union[str, bool, int, float]] = {
+        attributes: dict[str, Union[str, bool, int, float]] = {
             "event_name": event_name,
         }
 

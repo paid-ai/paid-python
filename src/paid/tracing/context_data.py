@@ -35,10 +35,6 @@ class ContextData:
         return reset_tokens
 
     @classmethod
-    def get_context(cls) -> dict[str, Any]:
-        return {key: var.get() for key, var in cls._context.items()}
-
-    @classmethod
     def get_context_key(cls, key: str) -> Any:
         return cls._context[key].get() if key in cls._context else None
 
@@ -76,13 +72,3 @@ class ContextData:
                 cls._context[key].reset(reset_token)
             reset_tokens.clear()
 
-    @classmethod
-    def reset_context_key(cls, key: str) -> None:
-        """Reset a specific context key to its previous value using the stored reset token."""
-        if key not in cls._context:
-            logger.warning(f"Invalid context key: {key}")
-            return
-        reset_tokens = cls._reset_tokens.get()
-        if reset_tokens and key in reset_tokens:
-            cls._context[key].reset(reset_tokens[key])
-            del reset_tokens[key]

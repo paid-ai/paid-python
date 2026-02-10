@@ -2,7 +2,7 @@ from openinference.instrumentation.anthropic._stream import _MessagesStream, _St
 from openinference.instrumentation.anthropic._with_span import _WithSpan
 from opentelemetry.trace import INVALID_SPAN
 
-from paid.tracing.anthropic_patches import _patch_stream_context_managers
+from paid.tracing.anthropic_patches.patches import _patch_stream_context_managers
 
 
 class MockWithSpan(_WithSpan):
