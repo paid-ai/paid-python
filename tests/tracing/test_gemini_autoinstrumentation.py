@@ -57,7 +57,12 @@ def _setup(tracing_setup):
 
 def _assert_span_matches_response(span, response):
     """Cross-check span attributes against the Gemini response."""
+    from paid.version import __version__
+
     attrs = dict(span.attributes) if span.attributes else {}
+
+    # SDK version must be stamped on every span
+    assert attrs.get("paid.sdk.version") == f"python-{__version__}"
 
     # Verify response ID is captured
     assert attrs.get(ATTR_RESPONSE_ID) == response.response_id, (

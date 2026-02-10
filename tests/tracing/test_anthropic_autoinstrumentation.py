@@ -43,8 +43,13 @@ def _setup(tracing_setup):
 
 def _assert_span_matches_response(span, response):
     """Cross-check span attributes against the Anthropic response."""
+    from paid.version import __version__
+
     attrs = dict(span.attributes) if span.attributes else {}
     usage = response.usage
+
+    # SDK version must be stamped on every span
+    assert attrs.get("paid.sdk.version") == f"python-{__version__}"
 
     assert attrs.get(ATTR_MODEL) == response.model
     assert attrs.get(ATTR_PROVIDER) == "anthropic"

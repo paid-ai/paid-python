@@ -1,3 +1,6 @@
 from importlib import metadata
 
-__version__ = metadata.version("paid-python")
+try:
+    __version__ = metadata.version("paid-python")
+except metadata.PackageNotFoundError:
+    __version__ = "unknown"
