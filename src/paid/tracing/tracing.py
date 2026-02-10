@@ -19,6 +19,7 @@ from opentelemetry.trace import NonRecordingSpan, NoOpTracerProvider, SpanContex
 from opentelemetry.util.types import Attributes
 
 from paid.logger import logger
+from paid.version import __version__ as _paid_version
 
 DEFAULT_COLLECTOR_ENDPOINT = (
     os.environ.get("PAID_OTEL_COLLECTOR_ENDPOINT") or "https://collector.agentpaid.io:4318/v1/traces"
@@ -222,6 +223,9 @@ class PaidSpanProcessor(SpanProcessor):
         agent_id = ContextData.get_context_key("external_agent_id")
         if agent_id:
             span.set_attribute("external_agent_id", agent_id)
+
+        # Always stamp the SDK version so the backend can identify the source
+        span.set_attribute("paid.sdk.version", f"python-{_paid_version}")
 
         logger.debug(
             "[paid:span] on_start: name=%s, customer_id=%s, agent_id=%s",

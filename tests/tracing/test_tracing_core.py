@@ -124,6 +124,16 @@ class TestPaidSpanProcessor:
         finally:
             ContextData.reset_context()
 
+    def test_sdk_version_added_to_span(self, tracing_setup, tracing_provider):
+        from paid.version import __version__
+
+        exporter = tracing_setup
+        tracer = tracing_provider.get_tracer("test")
+        with tracer.start_as_current_span("test_op"):
+            pass
+        attrs = dict(exporter.get_finished_spans()[0].attributes)
+        assert attrs.get("paid.sdk.version") == f"python-{__version__}"
+
     def test_metadata_flattened_on_span(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
         tracer = tracing_provider.get_tracer("test")
