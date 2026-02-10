@@ -4,12 +4,10 @@ Record cassettes: ANTHROPIC_API_KEY=sk-... poetry run pytest tests/tracing/ --re
 """
 
 import pytest
-from anthropic import Anthropic, AsyncAnthropic
-
-from paid.tracing.autoinstrumentation import paid_autoinstrument
-from paid.tracing.tracing import trace_async_, trace_sync_
-
 from .conftest import (
+    ANTHROPIC_STOP_SEQUENCES_PARAMS,
+    ANTHROPIC_TOOL_CHOICE_ANY_PARAMS,
+    ANTHROPIC_TOOL_CHOICE_SPECIFIC_PARAMS,
     CACHE_CONTROL_PARAMS,
     COUNT_TOKENS_PARAMS,
     MULTI_TURN_PARAMS,
@@ -17,6 +15,10 @@ from .conftest import (
     SYSTEM_PROMPT_PARAMS,
     TOOL_USE_PARAMS,
 )
+from anthropic import Anthropic, AsyncAnthropic
+
+from paid.tracing.autoinstrumentation import paid_autoinstrument
+from paid.tracing.tracing import trace_async_, trace_sync_
 
 ATTR_MODEL = "llm.model_name"
 ATTR_TOKENS_PROMPT = "llm.token_count.prompt"
@@ -27,6 +29,7 @@ ATTR_PROVIDER = "llm.provider"
 ATTR_SYSTEM = "llm.system"
 ATTR_CACHE_READ = "llm.token_count.prompt_details.cache_read"
 ATTR_CACHE_WRITE = "llm.token_count.prompt_details.cache_write"
+ATTR_RESPONSE_ID = "gen_ai.response.id"
 
 
 def _get_message_spans(exporter):
@@ -48,6 +51,11 @@ def _assert_span_matches_response(span, response):
     assert attrs.get(ATTR_SYSTEM) == "anthropic"
     assert attrs.get(ATTR_SPAN_KIND) == "LLM"
 
+    # Verify response ID is captured
+    assert attrs.get(ATTR_RESPONSE_ID) == response.id, (
+        f"Expected response ID '{response.id}', got '{attrs.get(ATTR_RESPONSE_ID)}'"
+    )
+
     expected_prompt = usage.input_tokens + (usage.cache_creation_input_tokens or 0) + (usage.cache_read_input_tokens or 0)
     assert attrs.get(ATTR_TOKENS_PROMPT) == expected_prompt
     assert attrs.get(ATTR_TOKENS_COMPLETION) == usage.output_tokens
@@ -60,10 +68,17 @@ def _assert_span_matches_response(span, response):
     assert span.status.status_code.name == "OK"
 
 
-def _assert_streaming_span_has_token_counts(span):
+def _assert_streaming_span_has_token_counts(span, expect_response_id: bool = True):
     attrs = dict(span.attributes) if span.attributes else {}
     assert attrs.get(ATTR_TOKENS_PROMPT) is not None and attrs[ATTR_TOKENS_PROMPT] > 0
     assert attrs.get(ATTR_TOKENS_COMPLETION) is not None and attrs[ATTR_TOKENS_COMPLETION] > 0
+    if expect_response_id:
+        assert attrs.get(ATTR_RESPONSE_ID) is not None, (
+            f"Expected response ID in streaming span, got attrs: {list(attrs.keys())}"
+        )
+        assert attrs[ATTR_RESPONSE_ID].startswith("msg_"), (
+            f"Expected response ID to start with 'msg_', got '{attrs[ATTR_RESPONSE_ID]}'"
+        )
 
 
 class TestSyncMessagesCreate:
@@ -369,3 +384,77 @@ class TestBetaMessages:
         spans = _get_message_spans(exporter)
         assert len(spans) == 1
         _assert_streaming_span_has_token_counts(spans[0])
+
+
+class TestToolChoice:
+
+    @pytest.mark.vcr()
+    def test_sync_tool_choice_any(self, tracing_setup, anthropic_client: Anthropic):
+        exporter = _setup(tracing_setup)
+        response = anthropic_client.messages.create(**ANTHROPIC_TOOL_CHOICE_ANY_PARAMS)
+        # With tool_choice=any, the model must use a tool
+        assert response.stop_reason == "tool_use"
+        assert any(b.type == "tool_use" for b in response.content)
+        spans = _get_message_spans(exporter)
+        assert len(spans) == 1
+        _assert_span_matches_response(spans[0], response)
+        assert any("llm.tools" in k for k in dict(spans[0].attributes))
+
+    @pytest.mark.vcr()
+    async def test_async_tool_choice_any(self, tracing_setup, async_anthropic_client: AsyncAnthropic):
+        exporter = _setup(tracing_setup)
+        response = await async_anthropic_client.messages.create(**ANTHROPIC_TOOL_CHOICE_ANY_PARAMS)
+        assert response.stop_reason == "tool_use"
+        assert any(b.type == "tool_use" for b in response.content)
+        spans = _get_message_spans(exporter)
+        assert len(spans) == 1
+        _assert_span_matches_response(spans[0], response)
+
+    @pytest.mark.vcr()
+    def test_sync_tool_choice_specific(self, tracing_setup, anthropic_client: Anthropic):
+        exporter = _setup(tracing_setup)
+        response = anthropic_client.messages.create(**ANTHROPIC_TOOL_CHOICE_SPECIFIC_PARAMS)
+        # With tool_choice=tool(name=get_weather), must call exactly get_weather
+        assert response.stop_reason == "tool_use"
+        tool_blocks = [b for b in response.content if b.type == "tool_use"]
+        assert len(tool_blocks) >= 1
+        assert tool_blocks[0].name == "get_weather"
+        spans = _get_message_spans(exporter)
+        assert len(spans) == 1
+        _assert_span_matches_response(spans[0], response)
+
+    @pytest.mark.vcr()
+    async def test_async_tool_choice_specific(self, tracing_setup, async_anthropic_client: AsyncAnthropic):
+        exporter = _setup(tracing_setup)
+        response = await async_anthropic_client.messages.create(**ANTHROPIC_TOOL_CHOICE_SPECIFIC_PARAMS)
+        assert response.stop_reason == "tool_use"
+        tool_blocks = [b for b in response.content if b.type == "tool_use"]
+        assert len(tool_blocks) >= 1
+        assert tool_blocks[0].name == "get_weather"
+        spans = _get_message_spans(exporter)
+        assert len(spans) == 1
+        _assert_span_matches_response(spans[0], response)
+
+
+class TestStopSequences:
+
+    @pytest.mark.vcr()
+    def test_sync_stop_sequences(self, tracing_setup, anthropic_client: Anthropic):
+        exporter = _setup(tracing_setup)
+        response = anthropic_client.messages.create(**ANTHROPIC_STOP_SEQUENCES_PARAMS)
+        # Model should stop at the comma
+        assert response.stop_reason == "stop_sequence"
+        assert response.content
+        spans = _get_message_spans(exporter)
+        assert len(spans) == 1
+        _assert_span_matches_response(spans[0], response)
+
+    @pytest.mark.vcr()
+    async def test_async_stop_sequences(self, tracing_setup, async_anthropic_client: AsyncAnthropic):
+        exporter = _setup(tracing_setup)
+        response = await async_anthropic_client.messages.create(**ANTHROPIC_STOP_SEQUENCES_PARAMS)
+        assert response.stop_reason == "stop_sequence"
+        assert response.content
+        spans = _get_message_spans(exporter)
+        assert len(spans) == 1
+        _assert_span_matches_response(spans[0], response)

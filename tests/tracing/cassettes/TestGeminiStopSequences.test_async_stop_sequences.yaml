@@ -1,0 +1,61 @@
+interactions:
+- request:
+    body: '{"contents": [{"parts": [{"text": "Count from 1 to 10, separated by commas."}],
+      "role": "user"}], "generationConfig": {"stopSequences": [","]}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '143'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/2WQX0vDMBTF3/MpSp5X2UpF8U2mD7JNixYZiA8Xc9cG06Q2t1Ap/e6m7dqlmIcQ
+        zjm5f34tCwL+BVpIAYSW3wUfTgmCdrh7z2hCTc6YJCeWUNElO57We7sIYdN/4hvu6d38/lxdqlVG
+        YR8tjEA1xbspwE9SS5u/Ilij+9hb+pLw2ZVaYOPkNZsaDKV5bSHDAxK4vWCenpeVKUpKzTfqramH
+        vTbxWMzDsPTPNhkCtXDiaPWvqn1wPaXy6Xjg3IqgJP32e6SPx5R7GGg51MSBebg45abOcloOGN2w
+        M68R4TtWVo6sMiwcvTC6ug5PCmw+9OMV2tJoi0+izyRruQdxPOx327B5vk3iGHY/9xlnHfsDCaTC
+        4B4CAAA=
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 15:01:19 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=664
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

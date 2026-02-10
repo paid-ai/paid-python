@@ -1,0 +1,61 @@
+interactions:
+- request:
+    body: '{"contents": [{"parts": [{"text": "Say hello in exactly 3 words."}], "role":
+      "user"}]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '86'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/2WQ0U/CMBDG3/dXNH0GghMUfTNCIgYi0YUQjQ+NPbaGrresRwQX/nfbzUEX+9A0
+        9329u+9XRYzxL2GkkoLA8nv24SqMVfXtNTQEhpzQllyxECVdvM2pgrezEBz8J/4EWmOPpYiSSXEc
+        8MB2Or8/e5fmJWrwP3OUoFv7qTXwrTLKZq8gLBpve0teVvysKiPh4MrDqB1Qt+Z7K1JYAgkXU5zD
+        8KLEvKAEd2AecV/HvGt6BVA68vhPJiShO0ocj3r/utqpm6l0CCvg6CIKrejocySzTcIDDNRZqsUQ
+        BbQ4ZbhPM+ouGF/57DWvBuEaSqsaVinkjl4/Hoz7Wy1sVs/jJdgCjYW59J7J9GYh3n+eZ/Pk+3Y5
+        We0W15vRw5BHp+gX8xDkWS0CAAA=
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 14:21:36 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=1313
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

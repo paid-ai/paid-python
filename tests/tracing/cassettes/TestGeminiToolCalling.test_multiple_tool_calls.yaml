@@ -1,0 +1,152 @@
+interactions:
+- request:
+    body: '{"contents": [{"parts": [{"text": "What are the population and area of
+      Paris?"}], "role": "user"}], "systemInstruction": {"parts": [{"text": "Always
+      use both tools to answer completely."}], "role": "user"}, "tools": [{"functionDeclarations":
+      [{"description": "Get population of a city.", "name": "get_population", "parameters_json_schema":
+      {"additionalProperties": false, "properties": {"city": {"type": "string"}},
+      "required": ["city"], "type": "object"}}, {"description": "Get area of a city
+      in sq km.", "name": "get_area", "parameters_json_schema": {"additionalProperties":
+      false, "properties": {"city": {"type": "string"}}, "required": ["city"], "type":
+      "object"}}]}], "generationConfig": {"responseModalities": ["TEXT"]}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '726'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      User-Agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      X-Server-Timeout:
+      - '600'
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/7VUy5KiMBTd+xUWq5lyulVsBWaniE9UHr6npqYiRIhCwCQg2tX/Pvjqhq7eTQ0L
+        Ktxzcu/h3Ny8FopFzgLYRjZgkHI/i7/SSLH4en1fsAAziFkKPEJpMASEfXBvz2tmnVK2EbYYCrAM
+        PC+3+Y5j4MM0zjmQ/QmDMPLAhc39+MwDxKFf7L8oQ+x0yaABgij3CX/Lfb/l03LMDSLHZSZyMGAR
+        uQqRDyu5uXkpSTE1ja7eO5LFcaOtyWjak8KImnUBlVThOAtgbdlUR3Kj3m2ZyRopYsc8qG5X6Qve
+        i6vW57U6nLYXRIx90ZpZ7dosYYZR82F3hWfWolaK7cjexk2pLyQKi4MjtvxNNKSJ12qKPWlSbZG1
+        Fi+SgYmC0LTZGPusUxk4iegbjjcL69WJ3hwPTacxXs0be9hVOmxeNTFShU3/lMg1fUmG+3q5fW50
+        yNkYdjW7vSwtEl1pyy6/0Qc7UcZryBPDEWxPOE4mm9pInlbatCzZnXBf6W4WPIajcrU3OA9seYqX
+        0BCkAS4b2lwuK7p7pkOZVSV9g6xhGBp2ZZes9ahnNLvliua2gdrs89uKaPCtgyC4xik5ompzopy9
+        ZaCvxqflXgS829OVXWcf8xN1t9D8qFr2UCTFO1UFBxxmu5nr3T8cMkAg+F/Hq/DV+vdHMY4E3lWI
+        H9jQeyR7/zNuizCirgEBTUcgpZnTifaulUPYhkkarnzijyClwLnmHV3yFh2IIUnH2C4+jClaqTPf
+        6PfnW82LuKssLrrsHEEG0rEH7wZwIQn8kE2DPcRyEF3HXhJvZTO3RA6v3WVxLGDAy0FV6YFl8tJ2
+        WhV52esjc7OkBgHv7vxUWU4zHUsL5GQ9XCxkzH5Mdl5igy/c3b41YA4JRTenHeinXj7xz/WnrQeo
+        e63HEUjDAFPYty+c7XyiAutp3YvNQTIWtcZB9pFucYW3wl8ZpqwFPwUAAA==
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 15:49:17 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=755
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"contents": [{"parts": [{"text": "What are the population and area of
+      Paris?"}], "role": "user"}, {"parts": [{"functionCall": {"id": "pyd_ai_baff4e12c68845109d07a1992fb8a12f",
+      "args": {"city": "Paris"}, "name": "get_population"}, "thoughtSignature": "CqYCAb4-9vsSRGQHwrWwbPZrMTH9pusS57i-L7wUoe3XALMC65GBSxZiE8FSqLhGEI7l4hL5V35eTDWr8vm8cUcD3UxtRR3meGYnUcW3-vdudfvA9I7xEtvowncmbuKsxlBA8H9O1BrZPvWxJSiopSdtNnmtF0Jgx8mRglUp51OQANKSg6NYV6keGEFtV1SniL7bIyxC3QXrKk5_Dz6FrzRKGPdDX-WxQEDCh2bQJj8CnZe2rRg7dl7wOOb3MCT0Ds_9dFpk0GbW2neM_1HJzJdCTnXeR79Jn_RPVC_EQhzsKCt19QbicKppRd0jxZQuHRAG_0PhDaLAI2f08R2Bq77hRyxwi1AOEzlXoQYNyXk8a2hHQEjFkv2OLjWPmu1_liu9vjLLaqnp"},
+      {"functionCall": {"id": "pyd_ai_d2f4dd2496c843c09edceb4a3bd46a32", "args": {"city":
+      "Paris"}, "name": "get_area"}}], "role": "model"}, {"parts": [{"functionResponse":
+      {"id": "pyd_ai_baff4e12c68845109d07a1992fb8a12f", "name": "get_population",
+      "response": {"return_value": "Paris: 2.1 million"}}}, {"functionResponse": {"id":
+      "pyd_ai_d2f4dd2496c843c09edceb4a3bd46a32", "name": "get_area", "response": {"return_value":
+      "Paris: 105 sq km"}}}], "role": "user"}], "systemInstruction": {"parts": [{"text":
+      "Always use both tools to answer completely."}], "role": "user"}, "tools": [{"functionDeclarations":
+      [{"description": "Get population of a city.", "name": "get_population", "parameters_json_schema":
+      {"additionalProperties": false, "properties": {"city": {"type": "string"}},
+      "required": ["city"], "type": "object"}}, {"description": "Get area of a city
+      in sq km.", "name": "get_area", "parameters_json_schema": {"additionalProperties":
+      false, "properties": {"city": {"type": "string"}}, "required": ["city"], "type":
+      "object"}}]}], "generationConfig": {"responseModalities": ["TEXT"]}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1737'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      User-Agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      X-Server-Timeout:
+      - '600'
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/2WQXU/CMBSG7/crTnoNhCH4dedXIlEC0cVoDBcn7gwauna2ZwYl/HfbjcHQZuma
+        9317zumziQDEB+pUpsjkxCW8ewVgU+3BM5pJszcayYsFWj5k67VpnX2EaR0uiWRJUJiiVMjSaDAZ
+        zNBKB/4b9GLIpVJB9xOAZAdoCYMX90fgPmGV90Sr7nZ/nncO01ijKLTKTUqqiW+bgMiklm75ROiM
+        DrHnZDoTe1fqlNZe7kdNg6q0KB0uaEKMngvuXy8Ka/KCE7MifWPKikt8dlJXa3E8Cgzinc+GUR3f
+        vRh2/hV2t76tVG3ALfb+lagkf1dw714T0SLBf+ZqWFT/ebSjUoN6IetkTWRBuWfUHfRG3UyhW1Yl
+        hSVXGO1onIZMpqaPiD+n19n921c6ng3Nw/niaiKibfQLwUg0yEQCAAA=
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 15:49:18 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=529
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

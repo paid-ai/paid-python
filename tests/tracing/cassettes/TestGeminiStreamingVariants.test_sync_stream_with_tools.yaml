@@ -1,0 +1,66 @@
+interactions:
+- request:
+    body: '{"contents": [{"parts": [{"text": "What is the weather in San Francisco?"}],
+      "role": "user"}], "tools": [{"functionDeclarations": [{"description": "Get the
+      weather for a location", "name": "get_weather", "parameters": {"properties":
+      {"location": {"description": "City and state, e.g. San Francisco, CA", "type":
+      "STRING"}}, "required": ["location"], "type": "OBJECT"}}]}], "generationConfig":
+      {}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '396'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse
+  response:
+    body:
+      string: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"functionCall\":
+        {\"name\": \"get_weather\",\"args\": {\"location\": \"San Francisco, CA\"}},\"thoughtSignature\":
+        \"CiQBvj72++ZdpJ6YAT3O+XIpwuNrVL741eu8kRNZ4+uYAccCP5oKYwG+Pvb7N8B2FYJl8UgJCv4Q53sZASaJnvbbWfzB0aiLxcFw4ty6jY5o4BPxRpOeg1IZY4iNKLGV0WW5NvQfy6MNirE/7FuaRC0hdcaCl4aS8lHda7OGmqa9jozSKuvFIXq1nQqJAgG+Pvb7mGxKPdVLczuxkxfNYB9kUl01LVbG2pr8pT9E/ecPyBypliZkQ9RhRuxVoHGXxfH35aG4i5tBZUWL2n0nmhPPxVbi6/9/aRCW6o/RJr9YATT0NdYArKHI1CGy755TEdwTfQm9EDvofwTZP9v9NrfXiMXf9voeezJglukoQz4ffi7QKox96Md4mGY32nJqVHzvF9XniX4TKbMiNCgSiRogSw+596rYUvvLXwlJWJ3orchUwcICpRZPa9GcVK/mh8nYVT4BOZK7rEjFgL7UmyyHg8BlsaEyIcTEMuLE/CXUU+wxHV275cXzokb99zmXZSqRzp5hioSfqufdt5HAcg2MUGkSfmgK4gEBvj72+2kn/ErHAvRVhq78bzBMs6Px4JxVAqkgN5iqZyiuHp1+ZYEX2iw1DQ9j5hiKmvQrrSJZQg69/KvP+92CEY3grUP+o4XHNO1bnF2j2ZFJ0QkfcgRX5DnDtNf5iYKE7bdW+q7d+kI4dJIuvNlJ+E14y5qPfi8njzbS5uadwy9rq8coHc5Wx6DY3FgitRprChIUvk3+rYnxhy88MVfxdCSXNBMY4MAt8xQN7ZIMQTSfx5rLg0ST4b8m8pciKAb1sjFYXGMhR+jBukgEO8dYgyU/we+HNYY/Ffhh7dEDSPTS\"}],\"role\":
+        \"model\"},\"finishReason\": \"STOP\",\"index\": 0,\"finishMessage\": \"Model
+        generated function call(s).\"}],\"usageMetadata\": {\"promptTokenCount\":
+        58,\"candidatesTokenCount\": 18,\"totalTokenCount\": 185,\"promptTokensDetails\":
+        [{\"modality\": \"TEXT\",\"tokenCount\": 58}],\"thoughtsTokenCount\": 109},\"modelVersion\":
+        \"gemini-2.5-flash\",\"responseId\": \"7j6Laa2ZE4WBkdUP1aqesA8\"}\r\n\r\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Disposition:
+      - attachment
+      Content-Type:
+      - text/event-stream
+      Date:
+      - Tue, 10 Feb 2026 14:21:34 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=875
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

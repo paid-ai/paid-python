@@ -1,0 +1,73 @@
+interactions:
+- request:
+    body: '{"contents": [{"parts": [{"text": "What is the weather in San Francisco?"}],
+      "role": "user"}], "tools": [{"functionDeclarations": [{"description": "Get the
+      weather for a location", "name": "get_weather", "parameters": {"properties":
+      {"location": {"description": "City and state, e.g. San Francisco, CA", "type":
+      "STRING"}}, "required": ["location"], "type": "OBJECT"}}]}], "generationConfig":
+      {}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '396'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/21TwXKiQBC9+xUUp91iE1Ew6lbtAUg0KggqRnRra2uAEUZhBmdGRVL590WNiaaW
+        AwX93vTr6e73WhEEMQA4RCHgkIk/hd9lRBBeT+8jRjCHmJfAJVQGM0D5J/f8vF59l5TlFgccEWyA
+        JLk5/I5jkMIyLkaQ/91DwGNIxR9fSYBG7D+HSyQhATimP6aYACx0KMABYgH5IRia+IX/dvP/disj
+        8phso5hPUIQB39JTVQZbG5qvSu3dNp84482ws87dHtBqJomVuknjxerFw4PDwa72Uw4n44HrGsE0
+        C3aGqqiarrUenHZ1P6NhaNP1SN8FqT32OCC9peIoQbRwCm/QGA1AYjSoMtK3lsxfpGnqFNUd1qfW
+        KFu7O6OrVz0txePBbIn27qBteGSYFlgKDHUvmcPeXOprXNZg09HcfdIO6mlo2HM/fIT1vmUerHY/
+        hv18No+gqq+Y+zzznM1zByDkadbTHtGGls3nk242UGt1FEiW2VPix2YG0rRnPulwoRHf7yu+VK+G
+        ClZDno2JX/jIt4adpb+YcUt2Wzlc7YwCN5PQ8zVtqE0RZbkaB27La3uPqt5dFTWWyN3yQqbtHeQX
+        pzfeLFpFDq2q2pztarrHWrISjVYRWzfddprrc7mBcbzJ5RmF41lUP7B4N/WtzSpALULWXYfxatqz
+        V/NRVJNJUWBLkgBOHzocGtvo1/X0Pyf/53PqIiXJacopCWFyoX+shbhEGLF4DAF73y/Xdj52U0Q4
+        hHkZlr/wLcgYiE55rWNeIYIY0tJUoXDxghCUZvjGvt+fNY/FncoSt8eTFuSgNCH4WHgxoyTNuEvW
+        EBtkezJho3WWvfLsDV674JxwkNxC6gW7ysseS1WUXJv5yudlg0CC+OF4KffJc68cWgrclHXpYuWq
+        2Rdr3ZbYrFfeu30ewAuk7N3JEUzLXt7V7xt3ywSw+KQnUsgyghnshUdOw30wwcKGzyacr8Op06S2
+        q2pMrLxV/gHhow9HzQQAAA==
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 14:21:25 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=918
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

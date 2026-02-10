@@ -1,0 +1,144 @@
+interactions:
+- request:
+    body: '{"contents": [{"parts": [{"text": "What is the temperature in Paris?"}],
+      "role": "user"}], "systemInstruction": {"parts": [{"text": "Use the get_temperature
+      tool to answer."}], "role": "user"}, "tools": [{"functionDeclarations": [{"description":
+      "Get the current temperature for a city.", "name": "get_temperature", "parameters_json_schema":
+      {"additionalProperties": false, "properties": {"city": {"type": "string"}},
+      "required": ["city"], "type": "object"}}]}], "generationConfig": {"responseModalities":
+      ["TEXT"]}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '516'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      User-Agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      X-Server-Timeout:
+      - '600'
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/21T23KiQBR89ysonnaLTRQFhK3Kg1yMlyiiBCVbW1ujjDAKM4QZvKXy7wteEs0u
+        DxSc7ulzqqfPW4Xj+AXAAQoAg5T/yf0qKhz3dnyXGMEMYlYAl1JRTEHGPrmn5+3qu6Asc7xgiGAD
+        xPHN4TOOQQKLOh9C9ofBJIUZYHkG+R9fiSAL6X8EytEQ25cSI5Ahyn/B32/+329leRaRPIzYBIX4
+        1LaQMZiqt+aSoG02ej9o9jxFJ8N41kLWcF4nXnOrgY2G8lXeOUxgNqi/dhLHsBvjttCWk/YOOtJs
+        ZlarUZI7lqC9rCfdaJbXqpkwj/ueJNmqqG9dU5hup73uqBZbup5qwQBaY9sVPdOH4nPKInMbrKiw
+        Wxyw+qj41RUVN4eeZLWrsod9x9yu9ceWMX2y4roDGt2h3/KcjriwDMUWTH9vLvad6a4Y1TMGtlZT
+        AKLe68y1PGufDhv9x17yLDaSwJVegdr1NnGwnfpo5SrkJWI1Jnaa8sLbGxMnV5cjU1J7vpYTAR3s
+        9ZMCI1sZ6bKeyz2tPw6dh4drxz/d/v3pNJ+R+OhsQgIYX+gfV8EvEUY0GkNACS5pE9cefdw/j3AA
+        d0W59oU/gJSC8Kg7KHW5EOIyPDDgLpnjFkXovtHv96ee5XDHsfi8PDmADBRhBx+h4tOMJClzyRpi
+        g+THsMvqqe3VbtzgonzGGWEgvoXE5o9/dKlZdEXx9dJc7VNhEIjPaXatmXu1BUWDm7EuLlauzL7E
+        +XZESaqc3T5dgAczik5OhzApvLyr38t3yxjQ6NiPzyBNCaawG5QcGNtPYK40ur2lt6O1UaQip9by
+        +cp75S/JIw7QNQQAAA==
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 15:49:14 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=690
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"contents": [{"parts": [{"text": "What is the temperature in Paris?"}],
+      "role": "user"}, {"parts": [{"functionCall": {"id": "pyd_ai_347b5cb5c6c648a3ad9d331b24e8011c",
+      "args": {"city": "Paris"}, "name": "get_temperature"}, "thoughtSignature": "Ct8BAb4-9vvBKd7JV6BoNlXAiENb2oV7w9av9iujuHzSerM2qHmQCO3RF-F5mFxeQ4XXD__hmuQE-9ZkSIhXu0_r-blKV44O81BwTD-WwWJIP0lEBBp9dMeEROT1VDYe1UpthDwdjs-xczn8G6Y_js1vzJ4EF_5VnYQDwkBGACWLEl2Qa3INYAVQH1cEC6O-DYyDcyHWxV7wVCMO906aisVqXTEVEypN3KGJmU13mdT4qa8IVvldwWYijT6oZht0t1H75cVyCSQu8fPD48JY9uo-izOkL6ehO6PB5Bu5J9KRgQ=="}],
+      "role": "model"}, {"parts": [{"functionResponse": {"id": "pyd_ai_347b5cb5c6c648a3ad9d331b24e8011c",
+      "name": "get_temperature", "response": {"return_value": "72F in Paris"}}}],
+      "role": "user"}], "systemInstruction": {"parts": [{"text": "Use the get_temperature
+      tool to answer."}], "role": "user"}, "tools": [{"functionDeclarations": [{"description":
+      "Get the current temperature for a city.", "name": "get_temperature", "parameters_json_schema":
+      {"additionalProperties": false, "properties": {"city": {"type": "string"}},
+      "required": ["city"], "type": "object"}}]}], "generationConfig": {"responseModalities":
+      ["TEXT"]}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1172'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      User-Agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      X-Server-Timeout:
+      - '600'
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/12Q0U+DMBDG3/krmj67ZUON09dNjYkKU7KYmD1c5BiN0JL2iBjC/24pg3USQpv7
+        vvuO+7UBY/wLZCpSIDT8jn3aCmOt+/aakoSSrDCWbLECTSfv8LTe3VoIm76JJzkywrJCDVRrZEKy
+        GLQwzL434cOce23ddN9fnIZpVWCfVKoUi9HejQaeCSlM/oZglOxt70kU80kVMsXGlhfBOMBF89rA
+        AV+QwK4N03K80qqsKFHfKNeqdmvfXg1hHqUzfbk46qQIin/S2Ovlmo2dKgofn0fWLgmFoF+H7v4j
+        4R4IOv+tkYQ798GRyYBph9qIgccBS0toFs6vZ1kBJneJXKOplDT4lPYeXEbPgNHPJluvmtdVbODy
+        MdxuedAFf3a4DrMhAgAA
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 15:49:15 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=699
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,0 +1,84 @@
+interactions:
+- request:
+    body: '{"contents": [{"parts": [{"text": "Where were the 2012 Olympics held?"}],
+      "role": "user"}], "tools": [{"functionDeclarations": [{"description": "The final
+      response which ends this conversation", "name": "final_result", "parameters_json_schema":
+      {"properties": {"city": {"type": "string"}, "country": {"type": "string"}},
+      "required": ["city", "country"], "type": "object"}}]}], "toolConfig": {"functionCallingConfig":
+      {"allowedFunctionNames": ["final_result"], "mode": "ANY"}}, "generationConfig":
+      {"responseModalities": ["TEXT"]}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '530'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      User-Agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      X-Server-Timeout:
+      - '600'
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/22V2bKaWBSG789TWF51F0kUGZS+k1GQwYFJurq6mEVhb4SNDKm8e6MnJzknaS8o
+        WetfQ/1Ufevry2QyDX0QZZGP4nr61+TvMTKZfH0+HzkIUAzQmHgLjcHSr9BP7evv67v/oyRpQIgy
+        CDg/zz8Uf88Dv4jH+DTJgJ//W8V1k6Ppp19VfpXW/1P93KsBqOofLSyQoTiabDOQRrD4rclDnKGn
+        UoUggmD6i+Dbh/dvH+un6Ayb9IyOWQp81FTPpbm7IK4DEmPuNVI0/9qQ980GqbtEoS9hxarXoy2Q
+        w75zYGZkttQacL3RWj2r+76BuEU7gAUUX/QpPPCGku8oZAezqplBiYAxax6EhibVe60NxaEL6Lnj
+        HFeI7gynSUKNSAorGEC5X2hRKpYzp/MGCJwDfd53UtySoOz0JQFnDiBhMbD1YLsrD9zTW6rGVDOA
+        CN86hoyjTr5jSWntGEfZMRs7VNfisLGrktja4Y3d2VjkVmFCREZLONGFDlwfX7Hk9bKqTQ80DSel
+        qD50RL/P+swJYovAa0TJEs5Vy/WxswU/P5xvbE+JmobEu+PpYm6kRBafC8XFOl8NPNcdCsBbAjqx
+        M29OGyzfC/aB1FmJacX9QmdvtU0pnIsFpbwY2NzSbpxUOn3qzQiGlt0rA9MhBvkxW+VRHPsUtAul
+        UZvm3ur+OV+2jOwFVbgUOTyjDb7WTMz1umq+hjHSYb03Mbvc1DPFu+ectCu1pkSdq6y3K4KtaRRV
+        NaEcvIOu1ieJzaG9PVzESkFZvr8PwemiNEGW5GS4WKyPpV7qe5pfrZl+DZrSz7DsRuQLysAUxwfL
+        WRLo3Ryu4tLoMa9IlcCKsJo3r+mVAk6LsYTMYAOnOUwYUPOSx3xPMEUl1zXsTHGCbdznhHLh8KSP
+        axM/qsNaQo0bzBfyOUmoPsQw14wd7njkc3El665y2hNWZnazTbCOakxiyt3WtVzJ5Ly82fZJJgSz
+        oTCEvrBn4upWDiTFXc3eDAUBQ8mpJ9nFHpeZqIDqVrNbmXJaet7OQDTXKMxqKLwleTwyXY/RmFU6
+        7oPPhE3Ges6Op9vWtEshvEZL13MLrDIk9YLXdnG88gUh4oldDWramwvt6NxHG3gM8Otgb+a6DF1L
+        wzeSVxlnK2fEebRq54vzibspntQteUHrKBsBUkU9Ry+KIMJaocNKIPtaNytkYyNseg2Iyk3C5g7j
+        lGCTWfoyxDos3NAh6VzWq9uuglhXbU/rqz7feoMUd/5NTXpCZc+VRZDyIJ54ViLFG6tdsFVhqawi
+        RycBvifGT1r885MU0wrmTzIUMIrzN/kPlDwol9XnQ+zXI35G2dE0dj9ANc1AFHdjeP6LXovr2k+f
+        fbVH30kag7jyH7B7w+skHPn6R/3nl9eZj+Wea02bR6UWI3/kuv8DodOygkWJTHiNAfcg6JihF69j
+        352BD/kF/j2PIPLzjyli9em3vjU/Ts3y9/fh3ekYDfLz7zg2Bdd8h+txwIe13lx8eWf2G44/rohT
+        1Mt3u1+/gB1XdfZqdRoXo5mfF1+oz0nu1+fnwOl4cEoI6liOHppYNFQ/Jg5G1ff3SN6B0tXJvTZ9
+        +fbyHwm+mZ8hBwAA
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 15:49:13 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=1297
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1
