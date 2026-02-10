@@ -29,7 +29,7 @@ class PaidLangChainCallback(BaseCallbackHandler):
 
     Usage:
         # Initialize with your existing Paid setup
-        callback_handler = PaidCallbackHandler()
+        callback_handler = PaidLangChainCallback()
 
         # Use with LangChain
         llm = ChatOpenAI(callbacks=[callback_handler])
@@ -391,18 +391,3 @@ class PaidLangChainCallback(BaseCallbackHandler):
                 return "huggingface"
 
         return "unknown"
-
-
-# Convenience function to create callback
-def create_paid_callback() -> PaidLangChainCallback:
-    """
-    Create a PaidCallbackHandler instance.
-
-    Returns:
-        PaidCallbackHandler instance
-
-    Example:
-        callback = create_paid_callback()
-        llm = ChatOpenAI(callbacks=[callback])
-    """
-    return PaidLangChainCallback()

@@ -23,14 +23,16 @@ _paid_span_store: dict[int, Span] = {}
 
 class PaidOpenAIAgentsHook(RunHooks[Any]):
     """
-    Hook that traces individual LLM calls for OpenAI Agents SDK with Paid tracking.
+    Hook that traces agent-level operations for OpenAI Agents SDK with Paid tracking.
 
+    Creates spans for on_agent_start/on_agent_end to capture usage data.
+    LLM-level hooks (on_llm_start/on_llm_end) are delegated to user hooks only.
     Can optionally wrap user-provided hooks to combine Paid tracking with custom behavior.
     """
 
     def __init__(self, user_hooks: Optional[RunHooks[Any]] = None):
         """
-        Initialize PaidAgentsHook.
+        Initialize PaidOpenAIAgentsHook.
 
         Args:
             user_hooks: Optional user-provided RunHooks to combine with Paid tracking
@@ -38,7 +40,7 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
         Usage:
             @paid_tracing("<ext_customer_id>", external_product_id="<ext_product_id>")
             def run_agent():
-                hook = PaidAgentsHook()
+                hook = PaidOpenAIAgentsHook()
                 return Runner.run_streamed(agent, input, hooks=hook)
             run_agent()
 
@@ -48,7 +50,7 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
                     print("Starting LLM call!")
 
             my_hook = MyHook()
-            hook = PaidAgentsHook(user_hooks=my_hook)
+            hook = PaidOpenAIAgentsHook(user_hooks=my_hook)
         """
         super().__init__()
         self.user_hooks = user_hooks
@@ -78,7 +80,7 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
             _paid_span_store[context_id] = span
 
         except Exception as error:
-            logger.error(f"Error while starting span in PaidAgentsHook.{hook_name}: {error}")
+            logger.error(f"Error while starting span in PaidOpenAIAgentsHook.{hook_name}: {error}")
 
     def _end_span(self, context, hook_name):
         try:
@@ -118,7 +120,7 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
 
         except Exception as error:
             # Try to end span on error
-            logger.error(f"Error while ending span in PaidAgentsHook.{hook_name}: {error}")
+            logger.error(f"Error while ending span in PaidOpenAIAgentsHook.{hook_name}: {error}")
             try:
                 context_id = id(context)
                 span = _paid_span_store.get(context_id)
@@ -128,7 +130,7 @@ class PaidOpenAIAgentsHook(RunHooks[Any]):
                     span.end()
                     del _paid_span_store[context_id]
             except:
-                logger.error(f"Failed to end span after error in PaidAgentsHook.{hook_name}")
+                logger.error(f"Failed to end span after error in PaidOpenAIAgentsHook.{hook_name}")
 
     async def on_llm_start(self, context, agent, system_prompt, input_items) -> None:
         if self.user_hooks and hasattr(self.user_hooks, "on_llm_start"):

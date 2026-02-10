@@ -3,35 +3,7 @@
 # Use lazy imports to avoid requiring peer dependencies when not in use
 def __getattr__(name):
     """Lazy import wrappers to avoid requiring peer dependencies."""
-    if name == "PaidOpenAI":
-        from .openai.openAiWrapper import PaidOpenAI
-
-        return PaidOpenAI
-    elif name == "PaidAsyncOpenAI":
-        from .openai.openAiWrapper import PaidAsyncOpenAI
-
-        return PaidAsyncOpenAI
-    elif name == "PaidAnthropic":
-        from .anthropic.anthropicWrapper import PaidAnthropic
-
-        return PaidAnthropic
-    elif name == "PaidAsyncAnthropic":
-        from .anthropic.anthropicWrapper import PaidAsyncAnthropic
-
-        return PaidAsyncAnthropic
-    elif name == "PaidMistral":
-        from .mistral.mistralWrapper import PaidMistral
-
-        return PaidMistral
-    elif name == "PaidBedrock":
-        from .bedrock.bedrockWrapper import PaidBedrock
-
-        return PaidBedrock
-    elif name == "PaidGemini":
-        from .gemini.geminiWrapper import PaidGemini
-
-        return PaidGemini
-    elif name == "PaidLangChainCallback":
+    if name == "PaidLangChainCallback":
         from .langchain.paidLangChainCallback import PaidLangChainCallback
 
         return PaidLangChainCallback
