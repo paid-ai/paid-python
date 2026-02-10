@@ -117,7 +117,9 @@ class TestSyncGenerateContent:
     def test_basic_generate_content(self, tracing_setup, gemini_client: genai.Client):
         exporter = _setup(tracing_setup)
         response = gemini_client.models.generate_content(**GEMINI_SIMPLE_PARAMS)
-        assert response.text and response.usage_metadata.prompt_token_count > 0
+        assert response.text
+        assert response.usage_metadata and response.usage_metadata.prompt_token_count
+        assert response.usage_metadata.prompt_token_count > 0
         spans = _get_generate_content_spans(exporter)
         assert len(spans) >= 1
         _assert_span_matches_response(spans[0], response)
@@ -160,7 +162,9 @@ class TestAsyncGenerateContent:
     async def test_basic_generate_content(self, tracing_setup, gemini_client: genai.Client):
         exporter = _setup(tracing_setup)
         response = await gemini_client.aio.models.generate_content(**GEMINI_SIMPLE_PARAMS)
-        assert response.text and response.usage_metadata.prompt_token_count > 0
+        assert response.text
+        assert response.usage_metadata and response.usage_metadata.prompt_token_count
+        assert response.usage_metadata.prompt_token_count > 0
         spans = _get_generate_content_spans(exporter)
         assert len(spans) >= 1
         _assert_span_matches_response(spans[0], response)
@@ -393,13 +397,13 @@ class TestGeminiCountTokens:
     def test_sync_count_tokens(self, tracing_setup, gemini_client: genai.Client):
         _setup(tracing_setup)
         result = gemini_client.models.count_tokens(**GEMINI_COUNT_TOKENS_PARAMS)
-        assert result.total_tokens > 0
+        assert result.total_tokens and result.total_tokens > 0
 
     @pytest.mark.vcr()
     async def test_async_count_tokens(self, tracing_setup, gemini_client: genai.Client):
         _setup(tracing_setup)
         result = await gemini_client.aio.models.count_tokens(**GEMINI_COUNT_TOKENS_PARAMS)
-        assert result.total_tokens > 0
+        assert result.total_tokens and result.total_tokens > 0
 
 
 # ===========================================================================
@@ -413,14 +417,16 @@ class TestGeminiEmbedContent:
         _setup(tracing_setup)
         result = gemini_client.models.embed_content(**GEMINI_EMBED_PARAMS)
         assert result.embeddings and len(result.embeddings) > 0
-        assert len(result.embeddings[0].values) > 0
+        values = result.embeddings[0].values
+        assert values and len(values) > 0
 
     @pytest.mark.vcr()
     async def test_async_embed_content(self, tracing_setup, gemini_client: genai.Client):
         _setup(tracing_setup)
         result = await gemini_client.aio.models.embed_content(**GEMINI_EMBED_PARAMS)
         assert result.embeddings and len(result.embeddings) > 0
-        assert len(result.embeddings[0].values) > 0
+        values = result.embeddings[0].values
+        assert values and len(values) > 0
 
 
 # ===========================================================================
@@ -482,6 +488,7 @@ class TestGeminiThinkingConfig:
         response = gemini_client.models.generate_content(**GEMINI_THINKING_PARAMS)
         assert response.text
         # Verify that thinking tokens were used
+        assert response.usage_metadata
         assert response.usage_metadata.thoughts_token_count and response.usage_metadata.thoughts_token_count > 0
         spans = _get_generate_content_spans(exporter)
         assert len(spans) >= 1
@@ -499,6 +506,7 @@ class TestGeminiThinkingConfig:
         exporter = _setup(tracing_setup)
         response = await gemini_client.aio.models.generate_content(**GEMINI_THINKING_PARAMS)
         assert response.text
+        assert response.usage_metadata
         assert response.usage_metadata.thoughts_token_count and response.usage_metadata.thoughts_token_count > 0
         spans = _get_generate_content_spans(exporter)
         assert len(spans) >= 1
@@ -517,8 +525,9 @@ class TestGeminiForcedToolUse:
         response = gemini_client.models.generate_content(**GEMINI_FORCED_TOOL_PARAMS)
         assert response.candidates
         # With mode=ANY, the model must call a function
-        parts = response.candidates[0].content.parts
-        assert any(p.function_call is not None for p in parts), "Expected a function_call part with tool_config mode=ANY"
+        content = response.candidates[0].content
+        assert content and content.parts
+        assert any(p.function_call is not None for p in content.parts), "Expected a function_call part with tool_config mode=ANY"
         spans = _get_generate_content_spans(exporter)
         assert len(spans) >= 1
         _assert_span_matches_response(spans[0], response)
@@ -528,8 +537,9 @@ class TestGeminiForcedToolUse:
         exporter = _setup(tracing_setup)
         response = await gemini_client.aio.models.generate_content(**GEMINI_FORCED_TOOL_PARAMS)
         assert response.candidates
-        parts = response.candidates[0].content.parts
-        assert any(p.function_call is not None for p in parts), "Expected a function_call part with tool_config mode=ANY"
+        content = response.candidates[0].content
+        assert content and content.parts
+        assert any(p.function_call is not None for p in content.parts), "Expected a function_call part with tool_config mode=ANY"
         spans = _get_generate_content_spans(exporter)
         assert len(spans) >= 1
         _assert_span_matches_response(spans[0], response)

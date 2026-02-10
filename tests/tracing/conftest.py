@@ -229,7 +229,7 @@ def gemini_client() -> genai.Client:
 
     return genai.Client(
         api_key=GEMINI_API_KEY,
-        http_options={"httpx_async_client": httpx.AsyncClient()},
+        http_options={"httpx_async_client": httpx.AsyncClient()},  # type: ignore[arg-type]
     )
 
 

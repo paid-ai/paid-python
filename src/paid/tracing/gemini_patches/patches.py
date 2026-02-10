@@ -27,7 +27,7 @@ def uninstrument_google_genai() -> None:
                 _response_attributes_extractor as mod,
             )
 
-            mod._ResponseAttributesExtractor._get_attributes_from_generate_content = _originals.pop(
+            mod._ResponseAttributesExtractor._get_attributes_from_generate_content = _originals.pop(  # type: ignore[method-assign]
                 "get_attributes_from_generate_content"
             )
         except Exception:
@@ -37,7 +37,7 @@ def uninstrument_google_genai() -> None:
         try:
             from openinference.instrumentation.google_genai import _stream as stream_mod
 
-            stream_mod._ResponseExtractor.get_extra_attributes = _originals.pop(
+            stream_mod._ResponseExtractor.get_extra_attributes = _originals.pop(  # type: ignore[method-assign]
                 "stream_get_extra_attributes"
             )
         except Exception:
