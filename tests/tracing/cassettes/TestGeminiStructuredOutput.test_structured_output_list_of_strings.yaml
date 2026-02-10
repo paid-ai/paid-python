@@ -1,0 +1,74 @@
+interactions:
+- request:
+    body: '{"contents": [{"parts": [{"text": "List 3 colors. Return only the list."}],
+      "role": "user"}], "tools": [{"functionDeclarations": [{"description": "The final
+      response which ends this conversation", "name": "final_result", "parameters_json_schema":
+      {"properties": {"response": {"items": {"type": "string"}, "type": "array"}},
+      "required": ["response"], "type": "object"}}]}], "toolConfig": {"functionCallingConfig":
+      {"allowedFunctionNames": ["final_result"], "mode": "ANY"}}, "generationConfig":
+      {"responseModalities": ["TEXT"]}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '526'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      User-Agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      X-Server-Timeout:
+      - '600'
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/21TXW+iQBR991cQnnbjtgqKyiZ9qApdqlQR/GLTbEaZIgVm6MyASNP/voDVYlse
+        DN5z7gfn3vNa4zh+C5DjOYBByv/m/uYRjnstfwsMIwYRy4FTKA9GgLAP7vF5rbznlKcYbZmH0QAE
+        wUXyO45ACPM4/+QhEPwjkMYB4399ZgHi0m+ycyTPiDCi8NMUFdz5Uq4ENkEMv0dcAiHivyCPnyJv
+        F//fLkvxbIdjd8dMz0WAxaT8xkGi9G837bqcsNGmvnXHUvBn0bLmO9PK1PG92J/ZivJMsd/uDlJn
+        9GIDR2iJNNFsmK3NniS/6OEyDVvpyAkT/LBJ24O9MGd+78Gb3gv2vueM8XBqh807Y6hG01YKjE6M
+        /BamEmDzNg2aoHPf6D+IcD3fW43VpKPKoSglpol1hUkNyVbwLFNloycr9SjcZav2euWPE3gQ1Pq6
+        p2/JsMPUht09KFBOWzI8dOfbphUoywUhmr+fxUq8bCQk05IoNOuCv4Thiuymy8lz/damSB9bYtfU
+        9xIQ1pm2mEta3/MQtlWUQWIrfSOiYsfw/aWqdue0qdZHQrRYUv9Om67vYNo4KC9EMW5uqrv52MLj
+        xwZ4goNS8RA7MDjRzysqjs2juxkEFKOCZlqT6fkWeA85MM3DzU98HVIK3LKuXtTlXIggye3icKcr
+        57b5mf+gP6+PPYvhyrH4uMjUIQO5vcD5kvmI4DBiFvYhGuC4tJckHttW3HiBi8I7zjADwQUkiKfc
+        Sl06zLt6QdWmFQfnAoHAY4fioyxlZVUckTe4GOukYq0i9unML0dsy7V3tY8LWEBCvaPSLgxzLa/E
+        a+nqKQB0V/Y7m1hzCg5cTMZg88cZr7OrxNGmkRMPDYOvvdX+A3x12UGmBAAA
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 15:49:13 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=684
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

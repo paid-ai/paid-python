@@ -1,0 +1,139 @@
+interactions:
+- request:
+    body: '{"contents": [{"parts": [{"text": "Please greet me."}], "role": "user"}],
+      "systemInstruction": {"parts": [{"text": "Use the greet tool."}], "role": "user"},
+      "tools": [{"functionDeclarations": [{"description": "Greet the user by name.",
+      "name": "greet", "parameters_json_schema": {"additionalProperties": false, "properties":
+      {}, "type": "object"}}]}], "generationConfig": {"responseModalities": ["TEXT"]}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '405'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      User-Agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      X-Server-Timeout:
+      - '600'
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/2WSX3OiMBTF3/0UTJ66039WEWFn+lDFtlIVq6y27uzsBAiQggkmAW2dfvcNWFvo
+        8sAw95zce/Pj7BuKAjxIfOxDgTj4qfyWFUXZl+9Co0QgIqRwLMliCpn48h6efeVbWoKMeAJT0odJ
+        Ujv8oRO4RrIOQoaQAGffZcjCYsD+vSa8131ARDQLIzHHIYEiY2XDPvvVu3HVUyMXo9UmWmrDpjF/
+        jdK8nXeMFh3oN7qHrMn2NHfZwnwJpqk+py33Ln00yO1ycIX6RqYlFu2qV4MJe/JWq5lK4enYjJtE
+        G3LfEG+3z1Qkm4WXTzPHVXumGqP5JdmieBP6MdvNJvbdw+Xinq2ejK2K3YHdGSK2tjI3NXvNV+05
+        bb757ZbTJfHSEtQizBjNH5e5E+gadbRwhTdJ4Fn2qLd52eG8ZfN70/R18gAndjC5mqqYZPcr1Gqi
+        nRr5VjSdvWyvr0EFzRe1P1/EAKNJSWhNfZQc7Z9IQYAJ5tEMQU5JYZs79vTzxwBMfLST5eY3/xhx
+        DsOy77joq4SIICaz5CvHCCiezMAJ/3FxmFksV64FsuLkGAkoswc/QwJSRtepcGiMSJ9mZfba2mFs
+        Jao1Xf+QBRUwqSnd7tl/XbkpZ+KkmuBKuCUemGDxWlzJGTw5lXDK/rWljgwbFdTHUNYXbLcbH6wP
+        +BeIcXzgHKK1JHneuuicBwnkUTkPMMRTSjga+oUnuLVHEC2TnmuudxN9qv/tG/GjBxrvjX8so+bi
+        wgMAAA==
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 15:49:16 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=631
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"contents": [{"parts": [{"text": "Please greet me."}], "role": "user"},
+      {"parts": [{"functionCall": {"id": "pyd_ai_cb4acee11f10483eaab3ccb845705678",
+      "args": {}, "name": "greet"}, "thoughtSignature": "CrUBAb4-9vtLZqhW6I09Syhpv3v592oE8A8ceJNw-vbrVDjfPp8So2bGpQ9nFWE1eC9u6lJo741ENrXcZZR4oa-MDk0n6Isd9tzFYotlqVcvPuTb4BD4keS_nwekqgdkrxRNOGK_VHrZX9w4ibEO5IermJubpDB0y6Yp0zd32T7nkWJtoJnr9LSQWvTf86oT6gZiqlfcJOLBqjxiv2OsHDDd8nKaNOfN1P4inuHZe20ex4hdJhPRjw=="}],
+      "role": "model"}, {"parts": [{"functionResponse": {"id": "pyd_ai_cb4acee11f10483eaab3ccb845705678",
+      "name": "greet", "response": {"return_value": "Hello, Alice!"}}}], "role": "user"}],
+      "systemInstruction": {"parts": [{"text": "Use the greet tool."}], "role": "user"},
+      "tools": [{"functionDeclarations": [{"description": "Greet the user by name.",
+      "name": "greet", "parameters_json_schema": {"additionalProperties": false, "properties":
+      {}, "type": "object"}}]}], "generationConfig": {"responseModalities": ["TEXT"]}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '971'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      User-Agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      X-Server-Timeout:
+      - '600'
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/2WQUUvDMBSF3/srYp47kaJDfBub4sCxoUUEGeOy3m5haW5NUtko/e8m7dpl2Ic2
+        3HPuSc9XR4zxLahMZGDR8Cf27SaM1e3ba6QsKuuEfuSGJWh78XZPHZydxeLRL/FXlJJiNpFiizc8
+        8DTDeR1fkjVJ9GsFZSh7e9MbeC6UMPt3BEPK2z7S5YoPqlAZHt34LuovaKN5ZWCHC7TgOsLQhJea
+        itKmdEA1partOE66sADJlX5/li1ZkNeb4/hfqpm5O4UMSQUQXUWQwp58j/T5K+UBBnv9Uz2H9ruO
+        zkQ6SJ+ojeho7LBwfEbJ7cMol2D2bSLXaEpSBueZ9+QvyzfIp4u5PlXJI6029Dv7mRx41ER/Lle7
+        vgwCAAA=
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 15:49:16 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=343
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

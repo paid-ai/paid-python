@@ -1,0 +1,126 @@
+interactions:
+- request:
+    body: '{"contents": [{"parts": [{"text": "My name is Alice."}], "role": "user"}],
+      "generationConfig": {"responseModalities": ["TEXT"]}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '128'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      User-Agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      X-Server-Timeout:
+      - '600'
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/2WQzU7DMBCE73kK4wuXtiJBhcINARIRPy0QIRBCyDTbxuB4Q7yRWkV5d5ykSR3h
+        g7XaGe96vtJjjC+FjmUsCAw/Z++2w1jZ3LWGmkCTFbqWbWYip723PaVTWwvBpn7Eb0ApZBdKLuGA
+        hXRomLYlI2QpALEtFhPuvKz6+mO035ejgnpYijGozl51Br6SWprkCYRBXdueo/mC96rUMWxs+8jr
+        FjSjeWHEGu6BhE0u+nw8yzHNKMIf0JdYNMlP2lkOp4Hs+zudkIQaSMHxdPRvrLmyS6VyATpsbUah
+        JG3rINH1a8QdDjT4VcfBc3BxSrBYJzT8YeDPvB2wluEL5Ea2sNaQWnzjYDIdr5QwSbOP52Ay1AbC
+        uPGo+Z34mr+Fn9+nm4fZ4uz3Nh8/Gu5V3h/BrD6QQQIAAA==
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 15:49:22 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=1950
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"contents": [{"parts": [{"text": "My name is Alice."}], "role": "user"},
+      {"parts": [{"text": "Hello Alice! It''s nice to meet you."}], "role": "model"},
+      {"parts": [{"text": "What is my name?"}], "role": "user"}], "generationConfig":
+      {"responseModalities": ["TEXT"]}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '266'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      User-Agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      X-Server-Timeout:
+      - '600'
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/1WQUUvDMBSF3/srQp7dmNP1wbehIhOlwxVRRCQst20wTWpyK5XS/27aLl2ahxDu
+        Obn3nq+NCKFHprjgDMHSG/LhKoS0w91rWiEodIIvuWLFDJ6942mDt7MgNP0n+q5rQxQrgQhLtlIc
+        YUkDZze9Py/O/Y2W0H8uNQfp7Z030EwoYYsXYFar3nZIkz2dVKE4NK68ivyAoTWtLcvhGZC5pGzK
+        QyujywpT/Q3qVtdD0vX12CwAM9M3Jxk1MjlTYi8FXe2dmylkyCtA6SIyKfCvz5Hev6U0wIDzpTyH
+        KMBFsdB1XuB8was4OvEaEb6CsWJklUPp6C3Wy80ik8wWwzxqwFZaWdjxwXOZPLFMNQ+PX/Ev3+2b
+        7JD8bFc06qJ/QhwKIjACAAA=
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 15:49:23 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=775
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

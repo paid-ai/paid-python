@@ -1,0 +1,63 @@
+interactions:
+- request:
+    body: '{"contents": [{"parts": [{"text": "Say hello."}], "role": "user"}], "generationConfig":
+      {"responseModalities": ["TEXT"]}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '121'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      User-Agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      X-Server-Timeout:
+      - '600'
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/2WQQU/DMAyF7/0VxecNwcQOcN2GhgBtQEFDiIOhXhstTarGlVpV/e8k7bqlIoco
+        8nux/b4mCEP4RRWLGJkM3IVfthKGTXc7TSsmxVYYSraYY8Fnb38a720tTJX7BGuSUl+AJ7an9/fk
+        3LLQkpw/0zHJwd4OBtgLJUz6Smi0cra3aLOFkypUTJUtXwXDgK41lAYTeiZGGw5PESAvdJZzpA+k
+        Frrswt30vTwUI3l2lFkzyrEyn/xrapZ2pJA+IQ+eTYhScO1iRKtdBB4FHu00UAg8WMCpLpOUx/td
+        3wZHWj3ADyqM6EkllFl209nlfLqXaNJuHBRkcq0MPcTOk8rNE34+3i9xUSuz2lY/9frw8g5BG/wB
+        W5yylCECAAA=
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 15:49:26 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=508
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

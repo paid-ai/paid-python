@@ -212,6 +212,7 @@ ANTHROPIC_STOP_SEQUENCES_PARAMS: dict[str, Any] = {
 }
 
 ANTHROPIC_MODEL = "anthropic:claude-sonnet-4-20250514"
+GEMINI_PYDANTIC_MODEL = "google-gla:gemini-2.5-flash"
 
 
 # ---------------------------------------------------------------------------
