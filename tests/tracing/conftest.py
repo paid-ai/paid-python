@@ -3,6 +3,7 @@ from typing import Any, Generator
 
 import pytest
 from anthropic import Anthropic, AsyncAnthropic
+from google import genai
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
@@ -23,7 +24,7 @@ def _scrub_response_headers(response):
 @pytest.fixture(scope="module")
 def vcr_config():
     return {
-        "filter_headers": ["x-api-key", "anthropic-api-key", "authorization"],
+        "filter_headers": ["x-api-key", "anthropic-api-key", "authorization", "x-goog-api-key"],
         "before_record_response": _scrub_response_headers,
         "cassette_library_dir": os.path.join(os.path.dirname(__file__), "cassettes"),
     }
@@ -67,6 +68,18 @@ def tracing_setup(
     try:
         from paid.tracing.anthropic_patches import uninstrument_anthropic
         uninstrument_anthropic()
+    except Exception:
+        pass
+
+    try:
+        from openinference.instrumentation.google_genai import GoogleGenAIInstrumentor
+        GoogleGenAIInstrumentor().uninstrument()
+    except Exception:
+        pass
+
+    try:
+        from paid.tracing.gemini_patches import uninstrument_google_genai
+        uninstrument_google_genai()
     except Exception:
         pass
 
@@ -147,3 +160,87 @@ CACHE_CONTROL_PARAMS: dict[str, Any] = {
 }
 
 ANTHROPIC_MODEL = "anthropic:claude-sonnet-4-20250514"
+
+
+# ---------------------------------------------------------------------------
+# Gemini fixtures & params
+# ---------------------------------------------------------------------------
+
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "test-key-for-cassettes")
+if "GEMINI_API_KEY" not in os.environ:
+    os.environ["GEMINI_API_KEY"] = GEMINI_API_KEY
+
+GEMINI_MODEL = "gemini-2.5-flash"
+
+
+@pytest.fixture()
+def gemini_client() -> genai.Client:
+    # Pass httpx_async_client to force the SDK to use httpx instead of aiohttp
+    # for async requests.  VCR.py intercepts httpx reliably, whereas its
+    # aiohttp stubs don't support SSE streaming which Gemini uses.
+    import httpx
+
+    return genai.Client(
+        api_key=GEMINI_API_KEY,
+        http_options={"httpx_async_client": httpx.AsyncClient()},
+    )
+
+
+GEMINI_EMBED_MODEL = "gemini-embedding-001"
+
+GEMINI_SIMPLE_PARAMS: dict[str, Any] = {
+    "model": GEMINI_MODEL,
+    "contents": "Say hello in exactly 3 words.",
+}
+
+GEMINI_SYSTEM_PROMPT_PARAMS: dict[str, Any] = {
+    "model": GEMINI_MODEL,
+    "contents": "Say hello.",
+    "config": {"system_instruction": "You are a pirate. Respond in pirate speak only."},
+}
+
+GEMINI_MULTI_TURN_PARAMS: dict[str, Any] = {
+    "model": GEMINI_MODEL,
+    "contents": [
+        {"role": "user", "parts": [{"text": "My name is Alice."}]},
+        {"role": "model", "parts": [{"text": "Hello Alice! Nice to meet you."}]},
+        {"role": "user", "parts": [{"text": "What is my name?"}]},
+    ],
+}
+
+GEMINI_TOOL_USE_PARAMS: dict[str, Any] = {
+    "model": GEMINI_MODEL,
+    "contents": "What is the weather in San Francisco?",
+    "config": {
+        "tools": [
+            {
+                "function_declarations": [
+                    {
+                        "name": "get_weather",
+                        "description": "Get the weather for a location",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "location": {
+                                    "type": "string",
+                                    "description": "City and state, e.g. San Francisco, CA",
+                                }
+                            },
+                            "required": ["location"],
+                        },
+                    }
+                ]
+            }
+        ]
+    },
+}
+
+GEMINI_COUNT_TOKENS_PARAMS: dict[str, Any] = {
+    "model": GEMINI_MODEL,
+    "contents": "Hello, world!",
+}
+
+GEMINI_EMBED_PARAMS: dict[str, Any] = {
+    "model": GEMINI_EMBED_MODEL,
+    "contents": "Hello, world!",
+}

@@ -4,11 +4,6 @@ Record cassettes: ANTHROPIC_API_KEY=sk-... poetry run pytest tests/tracing/ --re
 """
 
 import pytest
-from anthropic import Anthropic, AsyncAnthropic
-
-from paid.tracing.autoinstrumentation import paid_autoinstrument
-from paid.tracing.tracing import trace_async_, trace_sync_
-
 from .conftest import (
     CACHE_CONTROL_PARAMS,
     COUNT_TOKENS_PARAMS,
@@ -17,6 +12,10 @@ from .conftest import (
     SYSTEM_PROMPT_PARAMS,
     TOOL_USE_PARAMS,
 )
+from anthropic import Anthropic, AsyncAnthropic
+
+from paid.tracing.autoinstrumentation import paid_autoinstrument
+from paid.tracing.tracing import trace_async_, trace_sync_
 
 ATTR_MODEL = "llm.model_name"
 ATTR_TOKENS_PROMPT = "llm.token_count.prompt"
@@ -27,6 +26,7 @@ ATTR_PROVIDER = "llm.provider"
 ATTR_SYSTEM = "llm.system"
 ATTR_CACHE_READ = "llm.token_count.prompt_details.cache_read"
 ATTR_CACHE_WRITE = "llm.token_count.prompt_details.cache_write"
+ATTR_RESPONSE_ID = "gen_ai.response.id"
 
 
 def _get_message_spans(exporter):
@@ -48,6 +48,11 @@ def _assert_span_matches_response(span, response):
     assert attrs.get(ATTR_SYSTEM) == "anthropic"
     assert attrs.get(ATTR_SPAN_KIND) == "LLM"
 
+    # Verify response ID is captured
+    assert attrs.get(ATTR_RESPONSE_ID) == response.id, (
+        f"Expected response ID '{response.id}', got '{attrs.get(ATTR_RESPONSE_ID)}'"
+    )
+
     expected_prompt = usage.input_tokens + (usage.cache_creation_input_tokens or 0) + (usage.cache_read_input_tokens or 0)
     assert attrs.get(ATTR_TOKENS_PROMPT) == expected_prompt
     assert attrs.get(ATTR_TOKENS_COMPLETION) == usage.output_tokens
@@ -60,10 +65,17 @@ def _assert_span_matches_response(span, response):
     assert span.status.status_code.name == "OK"
 
 
-def _assert_streaming_span_has_token_counts(span):
+def _assert_streaming_span_has_token_counts(span, expect_response_id: bool = True):
     attrs = dict(span.attributes) if span.attributes else {}
     assert attrs.get(ATTR_TOKENS_PROMPT) is not None and attrs[ATTR_TOKENS_PROMPT] > 0
     assert attrs.get(ATTR_TOKENS_COMPLETION) is not None and attrs[ATTR_TOKENS_COMPLETION] > 0
+    if expect_response_id:
+        assert attrs.get(ATTR_RESPONSE_ID) is not None, (
+            f"Expected response ID in streaming span, got attrs: {list(attrs.keys())}"
+        )
+        assert attrs[ATTR_RESPONSE_ID].startswith("msg_"), (
+            f"Expected response ID to start with 'msg_', got '{attrs[ATTR_RESPONSE_ID]}'"
+        )
 
 
 class TestSyncMessagesCreate:

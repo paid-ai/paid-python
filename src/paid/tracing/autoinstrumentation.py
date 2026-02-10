@@ -249,14 +249,22 @@ def _instrument_langchain() -> None:
 def _instrument_google_genai() -> None:
     """
     Instrument Google GenAI using openinference-instrumentation-google-genai.
+
+    Applies patches on top of the base instrumentor to capture response IDs — see
+    ``paid.tracing.gemini_patches`` for full details.
     """
     if not GOOGLE_GENAI_AVAILABLE:
         logger.warning("Google GenAI instrumentation library not available, skipping instrumentation")
         return
 
+    from .gemini_patches import instrument_google_genai
+
     logger.debug("[paid:autoinstrument] Instrumenting google-genai with GoogleGenAIInstrumentor, provider=%s",
                  type(tracing.paid_tracer_provider).__name__)
     GoogleGenAIInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
+
+    instrument_google_genai()
+
     _initialized_instrumentors.append("google-genai")
     logger.info("Google GenAI auto-instrumentation enabled")
 

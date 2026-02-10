@@ -17,6 +17,8 @@ _beta_originals: Dict[str, Any] = {}
 
 _BETA_MODULE = "anthropic.resources.beta.messages.messages"
 
+_ATTR_RESPONSE_ID = "gen_ai.response.id"
+
 
 def instrument_anthropic() -> None:
     """Apply all Anthropic patches. Call after AnthropicInstrumentor().instrument()."""
@@ -24,6 +26,8 @@ def instrument_anthropic() -> None:
     _patch_message_stream_manager()
     _wrap_async_messages_stream()
     _patch_response_accumulator_for_beta()
+    _patch_response_id_extraction()
+    _patch_streaming_response_id_extraction()
     _wrap_beta_messages()
 
 
@@ -120,14 +124,26 @@ class _AsyncMessageStreamManagerProxy(ObjectProxy):  # type: ignore[misc]
     def __init__(self, manager: Any, span: trace_api.Span) -> None:
         super().__init__(manager)
         self._self_span = span
+        self._self_stream: Any = None
 
     async def __aenter__(self):  # type: ignore[misc]
-        return await self.__wrapped__.__aenter__()
+        stream = await self.__wrapped__.__aenter__()
+        self._self_stream = stream
+        return stream
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):  # type: ignore[misc]
         try:
             return await self.__wrapped__.__aexit__(exc_type, exc_val, exc_tb)
         finally:
+            try:
+                # Try to capture response ID from the stream's final message snapshot
+                stream = self._self_stream
+                if stream is not None:
+                    final_msg = getattr(stream, "_MessageStream__final_message_snapshot", None)
+                    if final_msg is not None and hasattr(final_msg, "id") and final_msg.id:
+                        self._self_span.set_attribute(_ATTR_RESPONSE_ID, final_msg.id)
+            except Exception:
+                logger.debug("Failed to capture response ID from async stream", exc_info=True)
             try:
                 if exc_type:
                     self._self_span.set_status(trace_api.Status(trace_api.StatusCode.ERROR, str(exc_val)))
@@ -178,7 +194,7 @@ def _wrap_async_messages_stream() -> None:
 
 
 def _patch_response_accumulator_for_beta() -> None:
-    """Extend _MessageResponseAccumulator.process_chunk to handle beta event types."""
+    """Extend _MessageResponseAccumulator.process_chunk to handle beta event types and capture response IDs."""
     try:
         from openinference.instrumentation.anthropic._stream import _MessageResponseAccumulator
     except ImportError:
@@ -196,13 +212,21 @@ def _patch_response_accumulator_for_beta() -> None:
         logger.debug("Could not import beta event types, skipping beta accumulator patch")
         return
 
+    try:
+        from anthropic.types.raw_message_start_event import RawMessageStartEvent
+    except ImportError:
+        RawMessageStartEvent = None  # type: ignore[assignment,misc]
+
     _original_process_chunk = _MessageResponseAccumulator.process_chunk
 
     def _process_chunk_with_beta(self, chunk):  # type: ignore[misc]
-        """Handles both regular and beta event types."""
+        """Handles both regular and beta event types, and captures response IDs."""
         if isinstance(chunk, BetaRawMessageStartEvent):
             self._is_null = False
             self._current_message_idx += 1
+            # Capture response ID from beta message start
+            if hasattr(chunk.message, "id") and chunk.message.id:
+                self._values += {"response_id": chunk.message.id}
             value = {
                 "messages": {
                     "index": str(self._current_message_idx),
@@ -254,11 +278,57 @@ def _patch_response_accumulator_for_beta() -> None:
             }
             self._values += value
         else:
-            # Non-beta event — delegate to the original.
+            # Non-beta event — capture response ID from regular RawMessageStartEvent
+            # before delegating to the original handler.
+            if RawMessageStartEvent is not None and isinstance(chunk, RawMessageStartEvent):
+                if hasattr(chunk.message, "id") and chunk.message.id:
+                    self._values += {"response_id": chunk.message.id}
             return _original_process_chunk(self, chunk)
 
     _MessageResponseAccumulator.process_chunk = _process_chunk_with_beta  # type: ignore[method-assign]
-    logger.debug("Patched _MessageResponseAccumulator.process_chunk for beta event types")
+    logger.debug("Patched _MessageResponseAccumulator.process_chunk for beta event types and response IDs")
+
+
+def _patch_response_id_extraction() -> None:
+    """Patch openinference to extract response.id from non-streaming Anthropic messages."""
+    try:
+        from openinference.instrumentation.anthropic import _wrappers
+    except ImportError:
+        logger.debug("Could not import openinference anthropic _wrappers, skipping response ID patch")
+        return
+
+    _original = _wrappers._get_llm_model_name_from_response
+
+    def _patched(message):  # type: ignore[misc]
+        yield from _original(message)
+        if response_id := getattr(message, "id", None):
+            yield _ATTR_RESPONSE_ID, response_id
+
+    _wrappers._get_llm_model_name_from_response = _patched  # type: ignore[attr-defined]
+    logger.debug("Patched _get_llm_model_name_from_response to also yield response ID")
+
+
+def _patch_streaming_response_id_extraction() -> None:
+    """Patch openinference _MessageResponseExtractor to yield response ID from accumulated data."""
+    try:
+        from openinference.instrumentation.anthropic._stream import _MessageResponseExtractor
+    except ImportError:
+        logger.debug("Could not import _MessageResponseExtractor, skipping streaming response ID patch")
+        return
+
+    _original_get_extra = _MessageResponseExtractor.get_extra_attributes
+
+    def _get_extra_with_response_id(self):  # type: ignore[misc]
+        yield from _original_get_extra(self)
+        try:
+            result = self._response_accumulator._result()
+            if result and (response_id := result.get("response_id")):
+                yield _ATTR_RESPONSE_ID, response_id
+        except Exception:
+            pass
+
+    _MessageResponseExtractor.get_extra_attributes = _get_extra_with_response_id  # type: ignore[method-assign]
+    logger.debug("Patched _MessageResponseExtractor.get_extra_attributes for response IDs")
 
 
 # ---------------------------------------------------------------------------
