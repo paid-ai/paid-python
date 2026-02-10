@@ -12,10 +12,8 @@ from paid.tracing.tracing import trace_async_, trace_sync_
 
 from .conftest import (
     GEMINI_COUNT_TOKENS_PARAMS,
-    GEMINI_EMBED_MODEL,
     GEMINI_EMBED_PARAMS,
     GEMINI_FORCED_TOOL_PARAMS,
-    GEMINI_MODEL,
     GEMINI_MULTI_TURN_PARAMS,
     GEMINI_SIMPLE_PARAMS,
     GEMINI_STOP_SEQUENCES_PARAMS,
@@ -50,13 +48,6 @@ def _get_stream_spans(exporter):
     """Get spans related to GenerateContentStream."""
     return [s for s in exporter.get_finished_spans() if "GenerateContentStream" in s.name]
 
-
-def _get_all_genai_spans(exporter):
-    """Get all GenerateContent or GenerateContentStream spans."""
-    return [
-        s for s in exporter.get_finished_spans()
-        if "GenerateContent" in s.name
-    ]
 
 
 def _setup(tracing_setup):
