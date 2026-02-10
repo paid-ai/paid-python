@@ -1,0 +1,62 @@
+interactions:
+- request:
+    body: '{"contents": [{"parts": [{"text": "What is 15 * 37?"}], "role": "user"}],
+      "generationConfig": {"thinkingConfig": {"thinking_budget": 1024}}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '140'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/2VR0U7CMBR931fc9AkmkM3RoCY8GMVEo4HIYlDxobKyNZR2rl1ECf9uuzIYsQ/N
+        3Tln596eu/UA0IKIhCVEU4Wu4N0gANvqtpwUmgptiBoyYE4KfdS6s23URqLpxv6EYgkLwhclN/YQ
+        YvAhGlzNxVy8ytIwAj4LSlbANCTyWxhmr4GhU7eiAM5g0J6LIbQcF7QN4mqH97HVhAG2Hxhjaz+V
+        HTha+b6Bfb+HGkPuDvVH5/i0QnJq517LhPJavqsFaMkEU9kzJUoKK5vG4wk6sEwkdGPgwKsbVNao
+        VCSlT1QTEzI5RInyQq5zHcsVFTeyrEIOQ2fW2MkJfzHY81pqwk+ofv+y889X3ZqujDeX1dijeSTh
+        TP9UixrNYtQIQp+OVSfhNQJDOpNlmunTESNsxVVkLsUXWijm4krp2gTYPe/h7pITlVUNUUFVLoWi
+        94nVjAP2SN6Ku3E3SoUaTcTD7+zrOkDezvsDI9epPq4CAAA=
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 15:01:16 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=2083
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -159,6 +159,53 @@ CACHE_CONTROL_PARAMS: dict[str, Any] = {
     "messages": [{"role": "user", "content": "What is 2+2?"}],
 }
 
+ANTHROPIC_TOOL_CHOICE_ANY_PARAMS: dict[str, Any] = {
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 128,
+    "messages": [{"role": "user", "content": "What is the weather in San Francisco?"}],
+    "tools": [
+        {
+            "name": "get_weather",
+            "description": "Get the weather for a location",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "location": {"type": "string", "description": "City and state, e.g. San Francisco, CA"}
+                },
+                "required": ["location"],
+            },
+        }
+    ],
+    "tool_choice": {"type": "any"},
+}
+
+ANTHROPIC_TOOL_CHOICE_SPECIFIC_PARAMS: dict[str, Any] = {
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 128,
+    "messages": [{"role": "user", "content": "Tell me about the weather in London."}],
+    "tools": [
+        {
+            "name": "get_weather",
+            "description": "Get the weather for a location",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "location": {"type": "string", "description": "City and state, e.g. London, UK"}
+                },
+                "required": ["location"],
+            },
+        }
+    ],
+    "tool_choice": {"type": "tool", "name": "get_weather"},
+}
+
+ANTHROPIC_STOP_SEQUENCES_PARAMS: dict[str, Any] = {
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 64,
+    "messages": [{"role": "user", "content": "Count from 1 to 10, separated by commas."}],
+    "stop_sequences": [","],
+}
+
 ANTHROPIC_MODEL = "anthropic:claude-sonnet-4-20250514"
 
 
@@ -243,4 +290,60 @@ GEMINI_COUNT_TOKENS_PARAMS: dict[str, Any] = {
 GEMINI_EMBED_PARAMS: dict[str, Any] = {
     "model": GEMINI_EMBED_MODEL,
     "contents": "Hello, world!",
+}
+
+GEMINI_STRUCTURED_OUTPUT_PARAMS: dict[str, Any] = {
+    "model": GEMINI_MODEL,
+    "contents": "What is the capital of France? Return the country and its capital.",
+    "config": {
+        "response_mime_type": "application/json",
+        "response_schema": {
+            "type": "object",
+            "properties": {
+                "capital": {"type": "string"},
+                "country": {"type": "string"},
+            },
+            "required": ["capital", "country"],
+        },
+    },
+}
+
+GEMINI_THINKING_PARAMS: dict[str, Any] = {
+    "model": GEMINI_MODEL,
+    "contents": "What is 15 * 37?",
+    "config": {"thinking_config": {"thinking_budget": 1024}},
+}
+
+GEMINI_FORCED_TOOL_PARAMS: dict[str, Any] = {
+    "model": GEMINI_MODEL,
+    "contents": "What is the weather in San Francisco?",
+    "config": {
+        "tools": [
+            {
+                "function_declarations": [
+                    {
+                        "name": "get_weather",
+                        "description": "Get the weather for a location",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "location": {
+                                    "type": "string",
+                                    "description": "City and state, e.g. San Francisco, CA",
+                                }
+                            },
+                            "required": ["location"],
+                        },
+                    }
+                ]
+            }
+        ],
+        "tool_config": {"function_calling_config": {"mode": "ANY"}},
+    },
+}
+
+GEMINI_STOP_SEQUENCES_PARAMS: dict[str, Any] = {
+    "model": GEMINI_MODEL,
+    "contents": "Count from 1 to 10, separated by commas.",
+    "config": {"stop_sequences": [","]},
 }

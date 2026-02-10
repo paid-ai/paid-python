@@ -1,0 +1,64 @@
+interactions:
+- request:
+    body: '{"contents": [{"parts": [{"text": "What is the capital of France? Return
+      the country and its capital."}], "role": "user"}], "generationConfig": {"responseMimeType":
+      "application/json", "responseSchema": {"properties": {"capital": {"type": "STRING"},
+      "country": {"type": "STRING"}}, "property_ordering": ["capital", "country"],
+      "required": ["capital", "country"], "type": "OBJECT"}}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '382'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/2WQQU/CQBCF7/0VzZzBCIYD3oxiYoJKpBoT62GkQ7taduvukECa/ndnKYVt7KGZ
+        znt9M/PVURzDCnWmMmRycB1/SCeO68Pba0YzaRaha0mzQstnb/vUQS0Wpp3/CepU4ivFWKbymcIC
+        rXIpDKRcma1mu2/79xb1ilJoIMhpTvXn4DzdmpJ89MZkVHb2pjPAWmnlihdCZ7S3LZPnBZxUpTPa
+        Sfsy6gYcomHrMKdHYhQOeLoWKms2FSfmh/StX1eU0aQNC7D19fFRZyNX96XRdPAv193JVFWGPAPU
+        ciSWivf+kmT2nkAAgvtrdSSiABhwYbZ5wf0Vp+PoSKyF+EbWqZZWThvhNxxfTIbrEl1xmAeWXGW0
+        o4fMe55e1Ry/rmj2u/zWbrYY2fk+v3mFqIn+AAliNOtQAgAA
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 10 Feb 2026 15:01:09 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=871
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

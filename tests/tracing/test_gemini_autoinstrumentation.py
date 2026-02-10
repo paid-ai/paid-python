@@ -14,10 +14,14 @@ from .conftest import (
     GEMINI_COUNT_TOKENS_PARAMS,
     GEMINI_EMBED_MODEL,
     GEMINI_EMBED_PARAMS,
+    GEMINI_FORCED_TOOL_PARAMS,
     GEMINI_MODEL,
     GEMINI_MULTI_TURN_PARAMS,
     GEMINI_SIMPLE_PARAMS,
+    GEMINI_STOP_SEQUENCES_PARAMS,
+    GEMINI_STRUCTURED_OUTPUT_PARAMS,
     GEMINI_SYSTEM_PROMPT_PARAMS,
+    GEMINI_THINKING_PARAMS,
     GEMINI_TOOL_USE_PARAMS,
 )
 
@@ -417,3 +421,141 @@ class TestGeminiEmbedContent:
         result = await gemini_client.aio.models.embed_content(**GEMINI_EMBED_PARAMS)
         assert result.embeddings and len(result.embeddings) > 0
         assert len(result.embeddings[0].values) > 0
+
+
+# ===========================================================================
+# Structured output (JSON mode)
+# ===========================================================================
+
+class TestGeminiStructuredOutput:
+
+    @pytest.mark.vcr()
+    def test_sync_json_mode(self, tracing_setup, gemini_client: genai.Client):
+        exporter = _setup(tracing_setup)
+        response = gemini_client.models.generate_content(**GEMINI_STRUCTURED_OUTPUT_PARAMS)
+        assert response.text
+        import json
+        parsed = json.loads(response.text)
+        assert "capital" in parsed and "country" in parsed
+        spans = _get_generate_content_spans(exporter)
+        assert len(spans) >= 1
+        _assert_span_matches_response(spans[0], response)
+
+    @pytest.mark.vcr()
+    async def test_async_json_mode(self, tracing_setup, gemini_client: genai.Client):
+        exporter = _setup(tracing_setup)
+        response = await gemini_client.aio.models.generate_content(**GEMINI_STRUCTURED_OUTPUT_PARAMS)
+        assert response.text
+        import json
+        parsed = json.loads(response.text)
+        assert "capital" in parsed and "country" in parsed
+        spans = _get_generate_content_spans(exporter)
+        assert len(spans) >= 1
+        _assert_span_matches_response(spans[0], response)
+
+    @pytest.mark.vcr()
+    def test_sync_stream_json_mode(self, tracing_setup, gemini_client: genai.Client):
+        exporter = _setup(tracing_setup)
+        text_parts = []
+        for chunk in gemini_client.models.generate_content_stream(**GEMINI_STRUCTURED_OUTPUT_PARAMS):
+            if chunk.text:
+                text_parts.append(chunk.text)
+        full_text = "".join(text_parts)
+        assert len(full_text) > 0
+        import json
+        parsed = json.loads(full_text)
+        assert "capital" in parsed and "country" in parsed
+        spans = _get_stream_spans(exporter)
+        assert len(spans) >= 1
+        _assert_streaming_span_has_token_counts(spans[0])
+
+
+# ===========================================================================
+# Thinking config
+# ===========================================================================
+
+class TestGeminiThinkingConfig:
+
+    @pytest.mark.vcr()
+    def test_sync_with_thinking_budget(self, tracing_setup, gemini_client: genai.Client):
+        exporter = _setup(tracing_setup)
+        response = gemini_client.models.generate_content(**GEMINI_THINKING_PARAMS)
+        assert response.text
+        # Verify that thinking tokens were used
+        assert response.usage_metadata.thoughts_token_count and response.usage_metadata.thoughts_token_count > 0
+        spans = _get_generate_content_spans(exporter)
+        assert len(spans) >= 1
+        _assert_span_matches_response(spans[0], response)
+        # Explicitly verify thinking tokens contribute to completion count
+        attrs = dict(spans[0].attributes) if spans[0].attributes else {}
+        expected_completion = (
+            (response.usage_metadata.candidates_token_count or 0)
+            + (response.usage_metadata.thoughts_token_count or 0)
+        )
+        assert attrs.get(ATTR_TOKENS_COMPLETION) == expected_completion
+
+    @pytest.mark.vcr()
+    async def test_async_with_thinking_budget(self, tracing_setup, gemini_client: genai.Client):
+        exporter = _setup(tracing_setup)
+        response = await gemini_client.aio.models.generate_content(**GEMINI_THINKING_PARAMS)
+        assert response.text
+        assert response.usage_metadata.thoughts_token_count and response.usage_metadata.thoughts_token_count > 0
+        spans = _get_generate_content_spans(exporter)
+        assert len(spans) >= 1
+        _assert_span_matches_response(spans[0], response)
+
+
+# ===========================================================================
+# Forced tool use (tool_config mode=ANY)
+# ===========================================================================
+
+class TestGeminiForcedToolUse:
+
+    @pytest.mark.vcr()
+    def test_sync_forced_tool_call(self, tracing_setup, gemini_client: genai.Client):
+        exporter = _setup(tracing_setup)
+        response = gemini_client.models.generate_content(**GEMINI_FORCED_TOOL_PARAMS)
+        assert response.candidates
+        # With mode=ANY, the model must call a function
+        parts = response.candidates[0].content.parts
+        assert any(p.function_call is not None for p in parts), "Expected a function_call part with tool_config mode=ANY"
+        spans = _get_generate_content_spans(exporter)
+        assert len(spans) >= 1
+        _assert_span_matches_response(spans[0], response)
+
+    @pytest.mark.vcr()
+    async def test_async_forced_tool_call(self, tracing_setup, gemini_client: genai.Client):
+        exporter = _setup(tracing_setup)
+        response = await gemini_client.aio.models.generate_content(**GEMINI_FORCED_TOOL_PARAMS)
+        assert response.candidates
+        parts = response.candidates[0].content.parts
+        assert any(p.function_call is not None for p in parts), "Expected a function_call part with tool_config mode=ANY"
+        spans = _get_generate_content_spans(exporter)
+        assert len(spans) >= 1
+        _assert_span_matches_response(spans[0], response)
+
+
+# ===========================================================================
+# Stop sequences
+# ===========================================================================
+
+class TestGeminiStopSequences:
+
+    @pytest.mark.vcr()
+    def test_sync_stop_sequences(self, tracing_setup, gemini_client: genai.Client):
+        exporter = _setup(tracing_setup)
+        response = gemini_client.models.generate_content(**GEMINI_STOP_SEQUENCES_PARAMS)
+        # Model should have stopped early due to the comma stop sequence
+        assert response.text is not None
+        spans = _get_generate_content_spans(exporter)
+        assert len(spans) >= 1
+        _assert_span_matches_response(spans[0], response)
+
+    @pytest.mark.vcr()
+    async def test_async_stop_sequences(self, tracing_setup, gemini_client: genai.Client):
+        exporter = _setup(tracing_setup)
+        response = await gemini_client.aio.models.generate_content(**GEMINI_STOP_SEQUENCES_PARAMS)
+        assert response.text is not None
+        spans = _get_generate_content_spans(exporter)
+        assert len(spans) >= 1
+        _assert_span_matches_response(spans[0], response)
