@@ -1,4 +1,5 @@
 import os
+from collections.abc import AsyncGenerator
 from typing import Any, Generator
 
 import pytest
@@ -221,16 +222,19 @@ GEMINI_MODEL = "gemini-2.5-flash"
 
 
 @pytest.fixture()
-def gemini_client() -> genai.Client:
+async def gemini_client() -> AsyncGenerator[genai.Client, None]:
     # Pass httpx_async_client to force the SDK to use httpx instead of aiohttp
     # for async requests.  VCR.py intercepts httpx reliably, whereas its
     # aiohttp stubs don't support SSE streaming which Gemini uses.
     import httpx
 
-    return genai.Client(
+    async_client = httpx.AsyncClient()
+    client = genai.Client(
         api_key=GEMINI_API_KEY,
-        http_options={"httpx_async_client": httpx.AsyncClient()},  # type: ignore[arg-type]
+        http_options={"httpx_async_client": async_client},  # type: ignore[arg-type]
     )
+    yield client
+    await async_client.aclose()
 
 
 GEMINI_EMBED_MODEL = "gemini-embedding-001"

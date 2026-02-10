@@ -15,6 +15,9 @@ _original_async_messages_stream = None
 # Originals for the beta path, keyed by method name.
 _beta_originals: Dict[str, Any] = {}
 
+# Originals for response-ID patches.
+_response_id_originals: Dict[str, Any] = {}
+
 _BETA_MODULE = "anthropic.resources.beta.messages.messages"
 
 _ATTR_RESPONSE_ID = "gen_ai.response.id"
@@ -42,6 +45,7 @@ def uninstrument_anthropic() -> None:
         _original_async_messages_stream = None
 
     _uninstrument_beta_messages()
+    _uninstrument_response_id_patches()
 
 def _patch_stream_context_managers() -> None:
     try:
@@ -298,6 +302,7 @@ def _patch_response_id_extraction() -> None:
         return
 
     _original = _wrappers._get_llm_model_name_from_response
+    _response_id_originals["_get_llm_model_name_from_response"] = _original
 
     def _patched(message):  # type: ignore[misc]
         yield from _original(message)
@@ -317,6 +322,7 @@ def _patch_streaming_response_id_extraction() -> None:
         return
 
     _original_get_extra = _MessageResponseExtractor.get_extra_attributes
+    _response_id_originals["get_extra_attributes"] = _original_get_extra
 
     def _get_extra_with_response_id(self):  # type: ignore[misc]
         yield from _original_get_extra(self)
@@ -329,6 +335,31 @@ def _patch_streaming_response_id_extraction() -> None:
 
     _MessageResponseExtractor.get_extra_attributes = _get_extra_with_response_id  # type: ignore[method-assign]
     logger.debug("Patched _MessageResponseExtractor.get_extra_attributes for response IDs")
+
+
+def _uninstrument_response_id_patches() -> None:
+    """Restore original methods patched by _patch_response_id_extraction / _patch_streaming_response_id_extraction."""
+    if "_get_llm_model_name_from_response" in _response_id_originals:
+        try:
+            from openinference.instrumentation.anthropic import _wrappers
+
+            _wrappers._get_llm_model_name_from_response = _response_id_originals.pop(  # type: ignore[attr-defined]
+                "_get_llm_model_name_from_response"
+            )
+        except Exception:
+            pass
+
+    if "get_extra_attributes" in _response_id_originals:
+        try:
+            from openinference.instrumentation.anthropic._stream import _MessageResponseExtractor
+
+            _MessageResponseExtractor.get_extra_attributes = _response_id_originals.pop(  # type: ignore[method-assign]
+                "get_extra_attributes"
+            )
+        except Exception:
+            pass
+
+    _response_id_originals.clear()
 
 
 # ---------------------------------------------------------------------------
