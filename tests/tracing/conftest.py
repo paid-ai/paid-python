@@ -5,6 +5,7 @@ from typing import Any, Generator
 import pytest
 from anthropic import Anthropic, AsyncAnthropic
 from google import genai
+from google.genai import types as genai_types
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
@@ -57,32 +58,35 @@ def tracing_setup(
 ) -> Generator[InMemorySpanExporter, None, None]:
     yield in_memory_exporter
 
+    active = list(autoinstrumentation._initialized_instrumentors)
     ContextData.reset_context()
     autoinstrumentation._initialized_instrumentors.clear()
 
-    try:
-        from openinference.instrumentation.anthropic import AnthropicInstrumentor
-        AnthropicInstrumentor().uninstrument()
-    except Exception:
-        pass
+    if "anthropic" in active:
+        try:
+            from openinference.instrumentation.anthropic import AnthropicInstrumentor
+            AnthropicInstrumentor().uninstrument()
+        except Exception:
+            pass
 
-    try:
-        from paid.tracing.anthropic_patches import uninstrument_anthropic
-        uninstrument_anthropic()
-    except Exception:
-        pass
+        try:
+            from paid.tracing.anthropic_patches import uninstrument_anthropic
+            uninstrument_anthropic()
+        except Exception:
+            pass
 
-    try:
-        from openinference.instrumentation.google_genai import GoogleGenAIInstrumentor
-        GoogleGenAIInstrumentor().uninstrument()
-    except Exception:
-        pass
+    if "google-genai" in active:
+        try:
+            from openinference.instrumentation.google_genai import GoogleGenAIInstrumentor
+            GoogleGenAIInstrumentor().uninstrument()
+        except Exception:
+            pass
 
-    try:
-        from paid.tracing.gemini_patches import uninstrument_google_genai
-        uninstrument_google_genai()
-    except Exception:
-        pass
+        try:
+            from paid.tracing.gemini_patches import uninstrument_google_genai
+            uninstrument_google_genai()
+        except Exception:
+            pass
 
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "test-key-for-cassettes")
@@ -253,9 +257,9 @@ GEMINI_SYSTEM_PROMPT_PARAMS: dict[str, Any] = {
 GEMINI_MULTI_TURN_PARAMS: dict[str, Any] = {
     "model": GEMINI_MODEL,
     "contents": [
-        {"role": "user", "parts": [{"text": "My name is Alice."}]},
-        {"role": "model", "parts": [{"text": "Hello Alice! Nice to meet you."}]},
-        {"role": "user", "parts": [{"text": "What is my name?"}]},
+        genai_types.Content(role="user", parts=[genai_types.Part(text="My name is Alice.")]),
+        genai_types.Content(role="model", parts=[genai_types.Part(text="Hello Alice! Nice to meet you.")]),
+        genai_types.Content(role="user", parts=[genai_types.Part(text="What is my name?")]),
     ],
 }
 

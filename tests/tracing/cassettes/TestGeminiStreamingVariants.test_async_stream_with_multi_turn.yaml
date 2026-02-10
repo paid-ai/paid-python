@@ -27,9 +27,9 @@ interactions:
       string: "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"Your
         name is Alice.\"}],\"role\": \"model\"},\"finishReason\": \"STOP\",\"index\":
         0}],\"usageMetadata\": {\"promptTokenCount\": 21,\"candidatesTokenCount\":
-        5,\"totalTokenCount\": 60,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\":
-        21}],\"thoughtsTokenCount\": 34},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\":
-        \"7T6Lac_6J76C7M8P5Jj3gAU\"}\r\n\r\n"
+        5,\"totalTokenCount\": 51,\"promptTokensDetails\": [{\"modality\": \"TEXT\",\"tokenCount\":
+        21}],\"thoughtsTokenCount\": 25},\"modelVersion\": \"gemini-2.5-flash\",\"responseId\":
+        \"50yLafm0GNmUxN8P8s7W6Q4\"}\r\n\r\n"
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -38,11 +38,11 @@ interactions:
       Content-Type:
       - text/event-stream
       Date:
-      - Tue, 10 Feb 2026 14:21:34 GMT
+      - Tue, 10 Feb 2026 15:21:11 GMT
       Server:
       - scaffolding on HTTPServer2
       Server-Timing:
-      - gfet4t7; dur=627
+      - gfet4t7; dur=734
       Transfer-Encoding:
       - chunked
       Vary:
