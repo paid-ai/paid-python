@@ -449,13 +449,11 @@ def initialize_tracing(
 
         set_token(api_key)
 
-        resource = Resource(attributes={"api.key": api_key})
         # Create isolated tracer provider for Paid - don't use or modify global provider
         # Pass explicit sampler and span_limits to avoid inheriting from OTEL env vars
         # (OTEL_TRACES_SAMPLER=always_off or OTEL_SPAN_ATTRIBUTE_COUNT_LIMIT=1
         #  set by the client app would silently break this)
         paid_tracer_provider = TracerProvider(
-            resource=resource,
             sampler=ALWAYS_ON,
             span_limits=SpanLimits(
                 max_span_attributes=128,
@@ -486,7 +484,7 @@ def initialize_tracing(
         # client OTEL env vars (e.g. OTEL_EXPORTER_OTLP_HEADERS, OTEL_EXPORTER_OTLP_TIMEOUT)
         otlp_exporter = OTLPSpanExporter(
             endpoint=collector_endpoint,
-            headers={"_paid": "1"},  # Non-empty to prevent env var OTEL_EXPORTER_OTLP_HEADERS leak (empty dict is falsy)
+            headers={"Authorization": f"Bearer {api_key}"},
             timeout=10,  # Explicit timeout to prevent env var OTEL_EXPORTER_OTLP_TIMEOUT override
         )
 
