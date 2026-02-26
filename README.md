@@ -107,15 +107,6 @@ Your Paid API key for authentication. This is used as a fallback when you don't 
 export PAID_API_KEY="your_api_key_here"
 ```
 
-You can then initialize the client without passing the token:
-
-```python
-from paid import Paid
-
-# API key is read from PAID_API_KEY environment variable
-client = Paid()
-```
-
 ### `PAID_ENABLED`
 
 Controls whether Paid tracing is enabled. Set to `false` (case-insensitive) to disable all tracing functionality.
@@ -152,14 +143,19 @@ Defaults to `https://collector.agentpaid.io:4318/v1/traces`.
 
 The easiest way to add cost tracking is using the `@paid_tracing` decorator or context manager:
 
+> **Important:** Always call `initialize_tracing()` and `paid_autoinstrument()` once at startup before using `paid_tracing`. `initialize_tracing` also accepts optional arguments like OTEL collector endpoint and api key if you want to reroute your tracing somewhere else.
+
 #### As a Decorator
 
 ```python
-from paid.tracing import paid_tracing
+from paid.tracing import paid_tracing, initialize_tracing, paid_autoinstrument
+
+initialize_tracing()
+paid_autoinstrument()  # instruments all supported libraries by default
 
 @paid_tracing("<external_customer_id>", external_product_id="<optional_external_product_id>")
 def some_agent_workflow():  # your function
-    # Your logic - use any AI providers with Paid wrappers or send signals with signal().
+    # Your logic - use any AI providers and send signals with signal().
     # This function is typically an event processor that should lead to AI calls or events emitted as Paid signals
 ```
 
@@ -168,7 +164,10 @@ def some_agent_workflow():  # your function
 You can also use `paid_tracing` as a context manager with `with` statements:
 
 ```python
-from paid.tracing import paid_tracing
+from paid.tracing import paid_tracing, initialize_tracing, paid_autoinstrument
+
+initialize_tracing()
+paid_autoinstrument()  # instruments all supported libraries by default
 
 # Synchronous
 with paid_tracing("customer_123", external_product_id="product_456"):
@@ -181,52 +180,26 @@ async with paid_tracing("customer_123", external_product_id="product_456"):
 
 Both approaches:
 
-- Initialize tracing using your API key you provided to the Paid client, falls back to `PAID_API_KEY` environment variable.
 - Handle both sync and async functions/code blocks
 - Gracefully fall back to normal execution if tracing fails
 - Support the same parameters: `external_customer_id`, `external_product_id`, `tracing_token`, `store_prompt`, `metadata`
 
-* Note - if it happens that you're calling `paid_tracing` from non-main thread, then it's advised to initialize from main thread:
+### Using AI Provider SDKs
 
-```python
-from paid.tracing import initialize_tracing
-initialize_tracing()
-```
-
-- `initialize_tracing` also accepts optional arguments like OTEL collector endpoint and api key if you want to reroute your tracing somewhere else :)
-
-### Using the Paid wrappers
-
-You can track usage costs by using Paid wrappers around your AI provider's SDK.
-As of now, the following SDKs' APIs are wrapped:
-
-```
-openai
-openai-agents (as a hook)
-anthropic
-langchain (as a hook)
-bedrock (boto3)
-mistral
-gemini (google-genai)
-```
-
-Example usage:
+After calling `initialize_tracing()` and `paid_autoinstrument()`, use your AI provider SDKs directly — no wrapper classes needed:
 
 ```python
 from openai import OpenAI
-from paid.tracing import paid_tracing, initialize_tracing
-from paid.tracing.wrappers.openai import PaidOpenAI
+from paid.tracing import paid_tracing, initialize_tracing, paid_autoinstrument
 
 initialize_tracing()
+paid_autoinstrument(libraries=["openai"])
 
-openAIClient = PaidOpenAI(OpenAI(
-    # This is the default and can be omitted
-    api_key="<OPENAI_API_KEY>",
-))
+openai_client = OpenAI(api_key="<OPENAI_API_KEY>")
 
 @paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 def image_generate():
-    response = openAIClient.images.generate(
+    response = openai_client.images.generate(
         model="dall-e-3",
         prompt="A sunset over mountains",
         size="1024x1024",
@@ -247,13 +220,13 @@ You can attach custom metadata to your traces by passing a `metadata` dictionary
 <summary><strong>Python - Decorator</strong></summary>
 
 ```python
-from paid.tracing import paid_tracing, signal, initialize_tracing
-from paid.tracing.wrappers import PaidOpenAI
+from paid.tracing import paid_tracing, signal, initialize_tracing, paid_autoinstrument
 from openai import OpenAI
 
 initialize_tracing()
+paid_autoinstrument(libraries=["openai"])
 
-openai_client = PaidOpenAI(OpenAI(api_key="<OPENAI_API_KEY>"))
+openai_client = OpenAI(api_key="<OPENAI_API_KEY>")
 
 @paid_tracing(
     "customer_123",
@@ -283,13 +256,13 @@ process_event(incoming_event)
 <summary><strong>Python - Context Manager</strong></summary>
 
 ```python
-from paid.tracing import paid_tracing, signal, initialize_tracing
-from paid.tracing.wrappers import PaidOpenAI
+from paid.tracing import paid_tracing, signal, initialize_tracing, paid_autoinstrument
 from openai import OpenAI
 
 initialize_tracing()
+paid_autoinstrument(libraries=["openai"])
 
-openai_client = PaidOpenAI(OpenAI(api_key="<OPENAI_API_KEY>"))
+openai_client = OpenAI(api_key="<OPENAI_API_KEY>")
 
 def process_event(event):
     """Process event with custom metadata"""
@@ -340,14 +313,13 @@ For maximum convenience, you can use OpenTelemetry auto-instrumentation to autom
 
 ```python
 from paid import Paid
-from paid.tracing import paid_autoinstrument, initialize_tracing
+from paid.tracing import paid_autoinstrument, initialize_tracing, paid_tracing
 from openai import OpenAI
 
 # Initialize Paid SDK
 client = Paid(token="PAID_API_KEY")
 initialize_tracing()
-
-paid_autoinstrument()  # instruments all available: anthropic, gemini, openai, openai-agents, bedrock, langchain, instructor
+paid_autoinstrument(libraries=["openai"])
 
 # Now all OpenAI calls will be automatically traced
 openai_client = OpenAI(api_key="<OPENAI_API_KEY>")
@@ -404,7 +376,10 @@ Use the `signal()` function which must be called within an active `@paid_tracing
 Here's an example of how to use it:
 
 ```python
-from paid.tracing import paid_tracing, signal
+from paid.tracing import paid_tracing, signal, initialize_tracing, paid_autoinstrument
+
+initialize_tracing()
+paid_autoinstrument()
 
 @paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 def do_work():
@@ -420,7 +395,10 @@ do_work()
 Same approach with context manager:
 
 ```python
-from paid.tracing import paid_tracing, signal
+from paid.tracing import paid_tracing, signal, initialize_tracing, paid_autoinstrument
+
+initialize_tracing()
+paid_autoinstrument()
 
 def do_work():
     # ...do some work...
@@ -443,19 +421,22 @@ as the wrappers and hooks that recorded those costs.
 This will look something like this:
 
 ```python
-from paid.tracing import paid_tracing, signal
+from paid.tracing import paid_tracing, signal, initialize_tracing, paid_autoinstrument
+
+initialize_tracing()
+paid_autoinstrument()
 
 @paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 def do_work():
     # ... your workflow logic
-    # ... your AI calls made through Paid wrappers or hooks
+    # ... your AI calls (auto-instrumented)
     signal(
         event_name="<your_signal_name>",
         data={ }, # optional data (ex. manual cost tracking data)
         enable_cost_tracing=True, # set this flag to associate it with costs
     )
     # ... your workflow logic
-    # ... your AI calls made through Paid wrappers or hooks (can be sent after the signal too)
+    # ... your AI calls (auto-instrumented, can be sent after the signal too)
 
 do_work()
 ```
@@ -474,13 +455,13 @@ For such cases, you can pass a tracing token directly to `@paid_tracing()` or co
 The simplest way to implement distributed tracing is to pass the token directly to the decorator or context manager:
 
 ```python
-from paid.tracing import paid_tracing, signal, generate_tracing_token, initialize_tracing
-from paid.tracing.wrappers.openai import PaidOpenAI
+from paid.tracing import paid_tracing, signal, generate_tracing_token, initialize_tracing, paid_autoinstrument
 from openai import OpenAI
 
 initialize_tracing()
+paid_autoinstrument(libraries=["openai"])
 
-openai_client = PaidOpenAI(OpenAI(api_key="<OPENAI_API_KEY>"))
+openai_client = OpenAI(api_key="<OPENAI_API_KEY>")
 
 # Process 1: Generate token and do initial work
 token = generate_tracing_token()
@@ -521,14 +502,13 @@ process_part_2()
 Using context manager instead of decorator:
 
 ```python
-from paid.tracing import paid_tracing, signal, generate_tracing_token, initialize_tracing
-from paid.tracing.wrappers.openai import PaidOpenAI
+from paid.tracing import paid_tracing, signal, generate_tracing_token, initialize_tracing, paid_autoinstrument
 from openai import OpenAI
 
 initialize_tracing()
+paid_autoinstrument(libraries=["openai"])
 
-# Initialize
-openai_client = PaidOpenAI(OpenAI(api_key="<OPENAI_API_KEY>"))
+openai_client = OpenAI(api_key="<OPENAI_API_KEY>")
 
 # Process 1: Generate token and do initial work
 token = generate_tracing_token()
@@ -584,7 +564,10 @@ client.signals.create_signals(signals=[signal])
 Alternatively the same `costData` payload can be passed to OTLP signaling mechanism:
 
 ```python
-from paid.tracing import paid_tracing, signal
+from paid.tracing import paid_tracing, signal, initialize_tracing, paid_autoinstrument
+
+initialize_tracing()
+paid_autoinstrument()
 
 @paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 def do_work():
@@ -638,7 +621,10 @@ client.signals.create_signals(signals=[signal])
 Same but via OTEL signaling:
 
 ```python
-from paid.tracing import paid_tracing, signal
+from paid.tracing import paid_tracing, signal, initialize_tracing, paid_autoinstrument
+
+initialize_tracing()
+paid_autoinstrument()
 
 @paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 def do_work():
@@ -684,13 +670,12 @@ The `@paid_tracing` decorator automatically handles both sync and async function
 
 ```python
 from openai import AsyncOpenAI
-from paid.tracing import paid_tracing, initialize_tracing
-from paid.tracing.wrappers.openai import PaidAsyncOpenAI
+from paid.tracing import paid_tracing, initialize_tracing, paid_autoinstrument
 
 initialize_tracing()
+paid_autoinstrument(libraries=["openai"])
 
-# Wrap the async OpenAI client
-openai_client = PaidAsyncOpenAI(AsyncOpenAI(api_key="<OPENAI_API_KEY>"))
+openai_client = AsyncOpenAI(api_key="<OPENAI_API_KEY>")
 
 @paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 async def generate_image():
@@ -712,13 +697,13 @@ await generate_image()
 The `signal()` function works seamlessly in async contexts:
 
 ```python
-from paid.tracing import paid_tracing, signal, initialize_tracing
-from paid.tracing.wrappers.openai import PaidAsyncOpenAI
+from paid.tracing import paid_tracing, signal, initialize_tracing, paid_autoinstrument
 from openai import AsyncOpenAI
 
 initialize_tracing()
+paid_autoinstrument(libraries=["openai"])
 
-openai_client = PaidAsyncOpenAI(AsyncOpenAI(api_key="<OPENAI_API_KEY>"))
+openai_client = AsyncOpenAI(api_key="<OPENAI_API_KEY>")
 
 @paid_tracing("your_external_customer_id", external_product_id="your_external_product_id")
 async def do_work():
