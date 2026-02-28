@@ -1,0 +1,140 @@
+interactions:
+- request:
+    body: '{"contents": [{"parts": [{"text": "What is the weather in Paris?"}], "role":
+      "user"}], "tools": [{"functionDeclarations": [{"description": "Get the current
+      weather for a location.", "name": "get_weather", "parameters": {"properties":
+      {"location": {"description": "City and state, e.g. San Francisco, CA", "type":
+      "STRING"}}, "required": ["location"], "type": "OBJECT"}}]}], "toolConfig": {"functionCallingConfig":
+      {"mode": "ANY"}}, "generationConfig": {}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '455'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/21U25KiSBB9768weJoNe0YU8DJvCt7aVhEviBsbGyUUUAhVUFUo0NH/Pqhtt/Yu
+        DwTkOXmprDz59lSpCDbADnIAh0z4Xfm7tFQqb5f3GSOYQ8xL4GYqjTGg/It7fd7uvkuKm2KbI4JV
+        EIYPzh84BhEs7YIH+b8nCLgPqfD8nQSox/7HuURCYoNz+HMIHVDEnisDCrANhW/c94f/98cUAvdJ
+        6vl8iTwMeEovFakx07p7udo5crMx96zqqaZMJox3C2cW5XlX66wtb+CKA6slKpvXEE/Ghl9Ejiqn
+        qJ935HAzGC7rYzQIEdMbst+xPXOS16g4nsxBr3Y46LJjalNo2T3riFio0iJKijw4hbobnEat/mw3
+        G3cOrQmUDyMTOIa658N18JLNcLP2Ysekqq3t9lJtDZt2W1rXOisSiFsUHxZUas9IMti1Fhh6ftXT
+        N8E06M3UQD3t+3M722ULUwK5q7xsNCP0zbpRlA5wRKJU1JTu8EhfOOtLQX2HXnM3i4maNQ/JOobW
+        ZNblvZwqq4YjI0QyFudTaS6BYm14R1oDq3DjdfcJ2w2OnS0MMhBj3YoXq4VsjG3HkrvYMDOLKVEt
+        U1zDLZpB55ghLsaLYTV/lZC+7G8aatgERWvOPI30+4dY4hCKYu6no6TowohTOfWPIzGeWvaxuRgN
+        aUz9XVWLJI5XFjvVzaHtDNMsdwuiH93DshWGkT4DvX0gG+JA8ylEpi41xkmBk6Wt6MY+PNrBdlmf
+        jqV+3FEs2G6L9gudtTYWcdNaYuy2G5OMtHlvoaNk8wozCubIo1iXl2vTv5+0ryn752vCBErCy0RF
+        xIHhjf45goKLMGK+AQG7zvFyNdc/NSAg7MCsNIvf+FPIGPAucafnuBUPYkhL8TqVm+Yqdim6H+yv
+        X9ec5+IuZQnp2XMKOSjFDj6FJcSURDFfkQPEKkkvYlc617R3u+EBr7c+cE44CB+hpvL8n7hMK7Oi
+        8H5p3O2TskEgRDw/H2rV367uNkGZ4KGsWxef7pp9k/Fjie0z99Lt6wVsIGUfG8ODUdnLn41fyk83
+        BMy/5BMoZDHBDI6dM2e3gC7YITRmutNoE524KCHdsfD0/vQHvX7OKDUFAAA=
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Wed, 25 Feb 2026 14:29:58 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=1085
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"contents": [{"parts": [{"text": "What is the weather in Paris?"}], "role":
+      "user"}, {"parts": [{"functionCall": {"args": {"location": "Paris, France"},
+      "name": "get_weather"}}], "role": "model"}, {"parts": [{"functionResponse":
+      {"name": "get_weather", "response": {"result": "18\u00b0C and sunny"}}}], "role":
+      "user"}], "tools": [{"functionDeclarations": [{"description": "Get the current
+      weather for a location.", "name": "get_weather", "parameters": {"properties":
+      {"location": {"description": "City and state, e.g. San Francisco, CA", "type":
+      "STRING"}}, "required": ["location"], "type": "OBJECT"}}]}], "generationConfig":
+      {}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '632'
+      Content-Type:
+      - application/json
+      Host:
+      - generativelanguage.googleapis.com
+      user-agent:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+      x-goog-api-client:
+      - google-genai-sdk/1.62.0 gl-python/3.13.12
+    method: POST
+    uri: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAC/2WQ0U6DMBSG73mKk16zRUxm1DszNVkMkSgxOrOYEzhAI7SkLbqF8E4+g09mgcEg
+        9qI9Of/f/7Rf7QCwCEXMYzSk2TW82w5A3e2tJoUhYawwtGyzRGVO3n7Vk9paDO3bSyzMCL4JTUYK
+        uIAAFdcu3CsUEQHX4F3+/qzBPgB0JcRhySYxzVjv3NNwJXNqkwsZUz7Ym8HAEi64zp4ItRSt7Tl8
+        DNiochHT3rbPnGFAF80qjSn5ZNBiwPGzrFSyKE0oP0msZdVhuLrowybUZrq3OupGGsznkue5/3L1
+        rZ3K8ynOCWn7Scy5OXQo715DNgFh5s8aSHTnzjky6TG9kNK855FSYQktzperRZKjzrpEpkiXUmja
+        xK1nm1KCUcAftsnbV7wJPvzA5zc+cxrnD0MY6jIxAgAA
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Wed, 25 Feb 2026 14:29:59 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Server-Timing:
+      - gfet4t7; dur=848
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

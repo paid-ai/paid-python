@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any, Dict
 
 from opentelemetry import trace as trace_api
@@ -9,6 +10,7 @@ from wrapt import ObjectProxy, wrap_function_wrapper  # type: ignore[import-unty
 
 from paid.logger import logger
 from paid.tracing import tracing
+from paid.tracing.tool_spans import emit_tool_call_span, emit_tool_execution_span
 
 _original_async_messages_stream = None
 
@@ -18,9 +20,14 @@ _beta_originals: Dict[str, Any] = {}
 # Originals for response-ID patches.
 _response_id_originals: Dict[str, Any] = {}
 
+# Originals for tool-span patches.
+_tool_span_originals: Dict[str, Any] = {}
+
 _BETA_MODULE = "anthropic.resources.beta.messages.messages"
 
 _ATTR_RESPONSE_ID = "gen_ai.response.id"
+
+_GEN_AI_SYSTEM = "anthropic"
 
 
 def instrument_anthropic() -> None:
@@ -31,6 +38,7 @@ def instrument_anthropic() -> None:
     _patch_response_accumulator_for_beta()
     _patch_response_id_extraction()
     _patch_streaming_response_id_extraction()
+    _patch_tool_call_spans()
     _wrap_beta_messages()
 
 
@@ -46,6 +54,7 @@ def uninstrument_anthropic() -> None:
 
     _uninstrument_beta_messages()
     _uninstrument_response_id_patches()
+    _uninstrument_tool_call_spans()
 
 def _patch_stream_context_managers() -> None:
     try:
@@ -335,6 +344,182 @@ def _patch_streaming_response_id_extraction() -> None:
 
     _MessageResponseExtractor.get_extra_attributes = _get_extra_with_response_id  # type: ignore[method-assign]
     logger.debug("Patched _MessageResponseExtractor.get_extra_attributes for response IDs")
+
+
+def _patch_tool_call_spans() -> None:
+    """Emit child TOOL spans for tool_use blocks in non-streaming and streaming responses.
+
+    Non-streaming: extends the existing _get_llm_model_name_from_response patch by also
+    scanning the response's content blocks for tool_use and emitting a span per call, plus
+    one span per tool_result block in the *request* messages.
+
+    Streaming: extends _MessageResponseExtractor.get_extra_attributes to emit tool-call
+    spans from accumulated streaming data after the stream completes.
+
+    Tool-execution spans (tool_result in request) are emitted at request time via a
+    separate patch on the _MessagesWrapper call chain.
+    """
+    _patch_tool_call_spans_non_streaming()
+    _patch_tool_call_spans_streaming()
+    _patch_tool_execution_spans()
+
+
+def _patch_tool_call_spans_non_streaming() -> None:
+    """Extend the non-streaming response processing to emit tool-call child spans."""
+    try:
+        from openinference.instrumentation.anthropic import _wrappers
+    except ImportError:
+        logger.debug("Could not import anthropic _wrappers for tool-call span patch, skipping")
+        return
+
+    _original = _wrappers._get_llm_model_name_from_response
+    _tool_span_originals["_get_llm_model_name_from_response_tool"] = _original
+
+    def _patched_with_tool_spans(message):  # type: ignore[misc]
+        yield from _original(message)
+        try:
+            content = getattr(message, "content", None) or []
+            for block in content:
+                if getattr(block, "type", None) == "tool_use":
+                    tool_name = getattr(block, "name", "") or ""
+                    tool_id = getattr(block, "id", "") or ""
+                    raw_input = getattr(block, "input", None)
+                    args_json = json.dumps(raw_input) if raw_input is not None else ""
+                    emit_tool_call_span(
+                        tool_name=tool_name,
+                        tool_call_id=tool_id,
+                        arguments_json=args_json,
+                        gen_ai_system=_GEN_AI_SYSTEM,
+                    )
+        except Exception:
+            logger.debug("Failed to emit Anthropic tool-call spans (non-streaming)", exc_info=True)
+
+    _wrappers._get_llm_model_name_from_response = _patched_with_tool_spans  # type: ignore[attr-defined]
+    logger.debug("Patched _get_llm_model_name_from_response to emit tool-call spans")
+
+
+def _patch_tool_call_spans_streaming() -> None:
+    """Extend streaming response processing to emit tool-call child spans."""
+    try:
+        from openinference.instrumentation.anthropic._stream import _MessageResponseExtractor
+    except ImportError:
+        logger.debug("Could not import _MessageResponseExtractor for tool-call span patch, skipping")
+        return
+
+    _original_get_extra = _MessageResponseExtractor.get_extra_attributes
+    _tool_span_originals["get_extra_attributes_tool"] = _original_get_extra
+
+    def _get_extra_with_tool_spans(self):  # type: ignore[misc]
+        yield from _original_get_extra(self)
+        try:
+            result = self._response_accumulator._result()
+            if not result:
+                return
+            messages = result.get("messages") or {}
+            # The accumulator stores content blocks nested under messages.{idx}.content.{idx}
+            # We walk all message entries looking for tool_use blocks.
+            for _msg_key, msg_val in messages.items():
+                if not isinstance(msg_val, dict):
+                    continue
+                content_map = msg_val.get("content") or {}
+                for _blk_key, blk_val in content_map.items():
+                    if not isinstance(blk_val, dict):
+                        continue
+                    if blk_val.get("type") == "tool_use":
+                        tool_name = blk_val.get("tool_name") or ""
+                        raw_input = blk_val.get("tool_input") or ""
+                        emit_tool_call_span(
+                            tool_name=tool_name,
+                            tool_call_id="",
+                            arguments_json=raw_input if isinstance(raw_input, str) else json.dumps(raw_input),
+                            gen_ai_system=_GEN_AI_SYSTEM,
+                        )
+        except Exception:
+            logger.debug("Failed to emit Anthropic tool-call spans (streaming)", exc_info=True)
+
+    _MessageResponseExtractor.get_extra_attributes = _get_extra_with_tool_spans  # type: ignore[method-assign]
+    logger.debug("Patched _MessageResponseExtractor.get_extra_attributes to emit tool-call spans")
+
+
+def _patch_tool_execution_spans() -> None:
+    """Emit tool-execution spans by patching _get_llm_input_messages to detect tool_result blocks."""
+    try:
+        from openinference.instrumentation.anthropic import _wrappers
+    except ImportError:
+        logger.debug("Could not import anthropic _wrappers for tool-execution span patch, skipping")
+        return
+
+    _original_get_llm_input_messages = _wrappers._get_llm_input_messages
+    _tool_span_originals["_get_llm_input_messages_tool"] = _original_get_llm_input_messages
+
+    def _patched_get_llm_input_messages(messages):  # type: ignore[misc]
+        yield from _original_get_llm_input_messages(messages)
+        try:
+            for msg in messages or []:
+                content = msg.get("content") if isinstance(msg, dict) else getattr(msg, "content", None)
+                if not content or isinstance(content, str):
+                    continue
+                for block in content:
+                    if isinstance(block, dict):
+                        block_type = block.get("type")
+                    else:
+                        block_type = getattr(block, "type", None)
+                    if block_type != "tool_result":
+                        continue
+                    if isinstance(block, dict):
+                        tool_id = block.get("tool_use_id") or ""
+                        raw_content = block.get("content")
+                    else:
+                        tool_id = getattr(block, "tool_use_id", None) or ""
+                        raw_content = getattr(block, "content", None)
+                    output_str = ""
+                    if isinstance(raw_content, str):
+                        output_str = raw_content
+                    elif raw_content is not None:
+                        output_str = json.dumps(raw_content)
+                    emit_tool_execution_span(
+                        tool_name=str(tool_id) or "tool_result",
+                        tool_call_id=str(tool_id),
+                        output_value=output_str,
+                        gen_ai_system=_GEN_AI_SYSTEM,
+                    )
+        except Exception:
+            logger.debug("Failed to emit Anthropic tool-execution spans", exc_info=True)
+
+    _wrappers._get_llm_input_messages = _patched_get_llm_input_messages  # type: ignore[attr-defined]
+    logger.debug("Patched _get_llm_input_messages to emit tool-execution spans")
+
+
+def _uninstrument_tool_call_spans() -> None:
+    """Restore original methods patched by _patch_tool_call_spans."""
+    if "_get_llm_model_name_from_response_tool" in _tool_span_originals:
+        try:
+            from openinference.instrumentation.anthropic import _wrappers
+            _wrappers._get_llm_model_name_from_response = _tool_span_originals.pop(  # type: ignore[attr-defined]
+                "_get_llm_model_name_from_response_tool"
+            )
+        except Exception:
+            pass
+
+    if "get_extra_attributes_tool" in _tool_span_originals:
+        try:
+            from openinference.instrumentation.anthropic._stream import _MessageResponseExtractor
+            _MessageResponseExtractor.get_extra_attributes = _tool_span_originals.pop(  # type: ignore[method-assign]
+                "get_extra_attributes_tool"
+            )
+        except Exception:
+            pass
+
+    if "_get_llm_input_messages_tool" in _tool_span_originals:
+        try:
+            from openinference.instrumentation.anthropic import _wrappers
+            _wrappers._get_llm_input_messages = _tool_span_originals.pop(  # type: ignore[attr-defined]
+                "_get_llm_input_messages_tool"
+            )
+        except Exception:
+            pass
+
+    _tool_span_originals.clear()
 
 
 def _uninstrument_response_id_patches() -> None:
