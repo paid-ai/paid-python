@@ -41,7 +41,7 @@ def test_cost_attributed_signal_uses_rest_client(monkeypatch):
     sent_signal = calls[0]["signals"][0]
     assert sent_signal.event_name == "invoice.created"
     assert sent_signal.idempotency_key == "idem-1"
-    assert sent_signal.data == {"k": "v", "paid": {"enable_cost_tracing": True, "paid_scope_id": 1001}}
+    assert sent_signal.data == {"k": "v", "paid": {"paid_scope_id": 1001}}
     assert isinstance(sent_signal.customer, CustomerByExternalId)
     assert sent_signal.customer.external_customer_id == "cust-ext-123"
     assert isinstance(sent_signal.attribution, ProductByExternalId)

@@ -1,3 +1,4 @@
+import copy
 import json
 import random
 import typing
@@ -125,12 +126,10 @@ def cost_attributed_signal(
             + "external_customer_id, external_product_id, and paid_scope_id set"
         )
 
-    payload_data = dict(data) if data is not None else {}
+    payload_data = copy.deepcopy(data) if data is not None else {}
     paid_data = payload_data.get("paid")
-    if isinstance(paid_data, dict):
-        paid_data["enable_cost_tracing"] = True
-    else:
-        payload_data["paid"] = {"enable_cost_tracing": True}
+    if not isinstance(paid_data, dict):
+        payload_data["paid"] = {}
 
     # costs will be attributed to this signal because their paid_scope_id will match
     payload_data["paid"]["paid_scope_id"] = paid_scope_id
