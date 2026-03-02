@@ -11,6 +11,7 @@ class ContextData:
     _TRACE_ID = contextvars.ContextVar[Optional[int]]("trace_id", default=None)
     _STORE_PROMPT = contextvars.ContextVar[Optional[bool]]("store_prompt", default=False)
     _USER_METADATA = contextvars.ContextVar[Optional[dict[str, Any]]]("user_metadata", default=None)
+    _PAID_SCOPE_ID = contextvars.ContextVar[Optional[int]]("paid_scope_id", default=None)
 
     _context: dict[str, contextvars.ContextVar] = {
         "external_customer_id": _EXTERNAL_CUSTOMER_ID,
@@ -18,6 +19,7 @@ class ContextData:
         "trace_id": _TRACE_ID,
         "store_prompt": _STORE_PROMPT,
         "user_metadata": _USER_METADATA,
+        "paid_scope_id": _PAID_SCOPE_ID,
     }
 
     # Use ContextVar for reset tokens to avoid race conditions in async/concurrent scenarios

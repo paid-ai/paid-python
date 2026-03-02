@@ -6,14 +6,13 @@ Record cassettes: GEMINI_API_KEY=... poetry run pytest tests/tracing/test_pydant
 from dataclasses import dataclass
 
 import pytest
+from .conftest import GEMINI_PYDANTIC_MODEL
 from pydantic import BaseModel
 from pydantic_ai import Agent
 from pydantic_ai.models.instrumented import InstrumentationSettings
 
 from paid.tracing.autoinstrumentation import paid_autoinstrument
 from paid.tracing.tracing import PydanticProcessorSettings, get_paid_tracer_provider_pydantic, trace_sync_
-
-from .conftest import GEMINI_PYDANTIC_MODEL
 
 ATTR_OPERATION = "gen_ai.operation.name"
 ATTR_GEN_SYSTEM = "gen_ai.system"

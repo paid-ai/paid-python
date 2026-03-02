@@ -2,12 +2,11 @@ import asyncio
 import functools
 from typing import Any, Callable, Dict, Optional
 
-from . import distributed_tracing, tracing
+from . import tracing
 from .context_data import ContextData
 from .tracing import get_paid_tracer, get_token, initialize_tracing, trace_async_, trace_sync_
-from opentelemetry import trace
 from opentelemetry.context import Context
-from opentelemetry.trace import NonRecordingSpan, Span, SpanContext, Status, StatusCode, TraceFlags
+from opentelemetry.trace import Span, Status, StatusCode
 
 from paid.logger import logger
 
@@ -82,8 +81,10 @@ class paid_tracing:
 
         logger.debug(
             "[paid:ctx] paid_tracing.__init__: customer_id=%s, product_id=%s, tracing_token=%s, store_prompt=%s",
-            external_customer_id, external_product_id,
-            "present" if tracing_token else "none", store_prompt,
+            external_customer_id,
+            external_product_id,
+            "present" if tracing_token else "none",
+            store_prompt,
         )
 
         if not get_token():
@@ -92,35 +93,13 @@ class paid_tracing:
 
     def _setup_context(self) -> Optional[Context]:
         """Set up context variables and return OTEL context if needed."""
-
-        # Set context variables
-        ContextData.set_context_key("external_customer_id", self.external_customer_id)
-        ContextData.set_context_key("external_agent_id", self.external_agent_id)
-        ContextData.set_context_key("store_prompt", self.store_prompt)
-        ContextData.set_context_key("user_metadata", self.metadata)
-
-        # Handle distributed tracing token
-        override_trace_id = self.tracing_token
-        if not override_trace_id:
-            override_trace_id = ContextData.get_context_key("trace_id")
-
-        ctx: Optional[Context] = None
-        if override_trace_id is not None:
-            span_context = SpanContext(
-                trace_id=override_trace_id,
-                span_id=distributed_tracing.otel_id_generator.generate_span_id(),
-                is_remote=True,
-                trace_flags=TraceFlags(TraceFlags.SAMPLED),
-            )
-            ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
-            token_source = "explicit" if self.tracing_token else "context-inherited"
-            logger.debug("[paid:distributed] _setup_context: trace_id=%s (source=%s)",
-                         format(override_trace_id, '032x') if isinstance(override_trace_id, int) else str(override_trace_id),
-                         token_source)
-        else:
-            logger.debug("[paid:distributed] _setup_context: no override trace_id, using auto-generated")
-
-        return ctx
+        return tracing.setup_tracing_context(
+            external_customer_id=self.external_customer_id,
+            external_agent_id=self.external_agent_id,
+            tracing_token=self.tracing_token,
+            store_prompt=self.store_prompt,
+            metadata=self.metadata,
+        )
 
     def _cleanup_context(self):
         """Reset all context variables."""
@@ -146,8 +125,12 @@ class paid_tracing:
         logger.debug("[paid:ctx] _enter_ctx: creating parent_span for customer_id=%s", self.external_customer_id)
         self.span_ctx = tracer.start_as_current_span("parent_span", context=ctx)
         self.span = self.span_ctx.__enter__()
-        logger.debug("[paid:ctx] _enter_ctx: span created, trace_id=%s",
-                     format(self.span.get_span_context().trace_id, '032x') if isinstance(self.span.get_span_context().trace_id, int) else str(self.span.get_span_context().trace_id))
+        logger.debug(
+            "[paid:ctx] _enter_ctx: span created, trace_id=%s",
+            format(self.span.get_span_context().trace_id, "032x")
+            if isinstance(self.span.get_span_context().trace_id, int)
+            else str(self.span.get_span_context().trace_id),
+        )
         return self
 
     def _exit_ctx(self, exc_type, exc_val, exc_tb):
@@ -173,7 +156,11 @@ class paid_tracing:
     # Decorator functionality
     def __call__(self, func: Callable[..., Any]) -> Callable[..., Any]:
         """Use as a decorator."""
-        logger.debug("[paid:ctx] __call__: wrapping fn=%s (async=%s)", getattr(func, '__name__', repr(func)), asyncio.iscoroutinefunction(func))
+        logger.debug(
+            "[paid:ctx] __call__: wrapping fn=%s (async=%s)",
+            getattr(func, "__name__", repr(func)),
+            asyncio.iscoroutinefunction(func),
+        )
         if asyncio.iscoroutinefunction(func):
 
             @functools.wraps(func)

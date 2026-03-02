@@ -3,17 +3,12 @@ from unittest.mock import patch
 
 import pytest
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
-from opentelemetry.sdk.trace.sampling import ALWAYS_ON
 from opentelemetry.trace import NoOpTracerProvider
 
 from paid.tracing import tracing
 from paid.tracing.context_data import ContextData
 from paid.tracing.tracing import (
-    PaidSpanProcessor,
     PydanticProcessorSettings,
-    PydanticSpanProcessor,
     _PydanticSettingsRegistry,
     _TokenStore,
     get_paid_tracer,
