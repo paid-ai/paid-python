@@ -553,7 +553,8 @@ signal = Signal(
                 "amount": 0.002,
                 "currency": "USD"
             },
-            "gen_ai.response.model": "<ai_model_name>",
+            "gen_ai.response.model": "<ai_model_name>", # optional, but will be displayed on UI
+            "start_time": "2024-01-01T11:45:00.000Z",  # optional, affects where trace is on the timeline
         }
     }
 )
@@ -581,7 +582,8 @@ def do_work():
                     "amount": 0.002,
                     "currency": "USD"
                 },
-                "gen_ai.response.model": "<ai_model_name>",
+                "gen_ai.response.model": "<ai_model_name>", # optional, but will be displayed on UI
+                "start_time": "2024-01-01T11:45:00.000Z",  # optional, affects where trace is on the timeline
             }
         }
     )
