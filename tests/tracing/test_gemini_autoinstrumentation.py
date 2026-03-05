@@ -5,11 +5,6 @@ Record cassettes:
 """
 
 import pytest
-from google import genai
-
-from paid.tracing.autoinstrumentation import paid_autoinstrument
-from paid.tracing.tracing import trace_async_, trace_sync_
-
 from .conftest import (
     GEMINI_COUNT_TOKENS_PARAMS,
     GEMINI_EMBED_PARAMS,
@@ -22,6 +17,10 @@ from .conftest import (
     GEMINI_THINKING_PARAMS,
     GEMINI_TOOL_USE_PARAMS,
 )
+from google import genai
+
+from paid.tracing.autoinstrumentation import paid_autoinstrument
+from paid.tracing.tracing import trace_async_, trace_sync_
 
 ATTR_MODEL = "llm.model_name"
 ATTR_TOKENS_PROMPT = "llm.token_count.prompt"

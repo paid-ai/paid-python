@@ -6,14 +6,13 @@ Record cassettes: ANTHROPIC_API_KEY=sk-... poetry run pytest tests/tracing/ --re
 from dataclasses import dataclass
 
 import pytest
+from .conftest import ANTHROPIC_MODEL
 from pydantic import BaseModel
 from pydantic_ai import Agent
 from pydantic_ai.models.instrumented import InstrumentationSettings
 
 from paid.tracing.autoinstrumentation import paid_autoinstrument
 from paid.tracing.tracing import PydanticProcessorSettings, get_paid_tracer_provider_pydantic, trace_sync_
-
-from .conftest import ANTHROPIC_MODEL
 
 ATTR_OPERATION = "gen_ai.operation.name"
 ATTR_GEN_SYSTEM = "gen_ai.system"

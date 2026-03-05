@@ -6,7 +6,7 @@ from .distributed_tracing import (
     set_tracing_token,
     unset_tracing_token,
 )
-from .signal import signal
+from .signal import cost_attributed_signal, signal
 from .tracing import (
     ProcessorSettings,
     PydanticProcessorSettings,
@@ -29,4 +29,5 @@ __all__ = [
     "set_tracing_token",
     "unset_tracing_token",
     "signal",
+    "cost_attributed_signal",
 ]

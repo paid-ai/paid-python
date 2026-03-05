@@ -2,6 +2,7 @@
 import asyncio
 import atexit
 import os
+import random
 import signal
 from dataclasses import dataclass
 from typing import Any, Awaitable, Callable, Dict, Optional, Tuple, TypeVar, Union
@@ -11,7 +12,6 @@ from .context_data import ContextData
 from opentelemetry import trace
 from opentelemetry.context import Context
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import ReadableSpan, Span, SpanLimits, SpanProcessor, TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.sampling import ALWAYS_ON
@@ -154,6 +154,7 @@ def set_token(token: str) -> None:
 # Initialized at module load with defaults, never None (uses no-op provider if not initialized or API key isn't available)
 paid_tracer_provider: Union[TracerProvider, NoOpTracerProvider] = NoOpTracerProvider()
 
+
 def get_paid_tracer_provider() -> Optional[TracerProvider]:
     """Export the tracer provider to the user.
     Initialize tracing if not already. Never return NoOpTracerProvider.
@@ -170,6 +171,7 @@ def get_paid_tracer_provider() -> Optional[TracerProvider]:
         return None
 
     return paid_tracer_provider
+
 
 class PaidSpanProcessor(SpanProcessor):
     """
@@ -224,12 +226,18 @@ class PaidSpanProcessor(SpanProcessor):
         if agent_id:
             span.set_attribute("external_agent_id", agent_id)
 
+        paid_scope_id = ContextData.get_context_key("paid_scope_id")
+        if paid_scope_id:
+            span.set_attribute("paid_scope_id", paid_scope_id)
+
         # Always stamp the SDK version so the backend can identify the source
         span.set_attribute("paid.sdk.version", f"python-{_paid_version}")
 
         logger.debug(
             "[paid:span] on_start: name=%s, customer_id=%s, agent_id=%s",
-            span.name, customer_id, agent_id,
+            span.name,
+            customer_id,
+            agent_id,
         )
 
         metadata = ContextData.get_context_key("user_metadata")
@@ -244,10 +252,7 @@ class PaidSpanProcessor(SpanProcessor):
                 if isinstance(v, _OTEL_SAFE_TYPES):
                     return v
                 if isinstance(v, (list, tuple)):
-                    return [
-                        el if isinstance(el, _OTEL_SAFE_TYPES) else str(el)
-                        for el in v
-                    ]
+                    return [el if isinstance(el, _OTEL_SAFE_TYPES) else str(el) for el in v]
                 return str(v)
 
             def flatten_dict(d: dict[str, Any], parent_key: str = "") -> None:
@@ -270,7 +275,7 @@ class PaidSpanProcessor(SpanProcessor):
         if span.name and not span.name.startswith(self.SPAN_NAME_PREFIX):
             # Note: ReadableSpan is immutable, need to use internal attribute
             object.__setattr__(span, "_name", f"{self.SPAN_NAME_PREFIX}{span.name}")
-            
+
         """Filter out prompt and response contents unless explicitly asked to store"""
         store_prompt = ContextData.get_context_key("store_prompt")
         if store_prompt:
@@ -290,7 +295,8 @@ class PaidSpanProcessor(SpanProcessor):
             if filtered_count > 0:
                 logger.debug(
                     "[paid:span] on_end: name=%s, filtered %d prompt attribute(s)",
-                    span.name, filtered_count,
+                    span.name,
+                    filtered_count,
                 )
             # This works because the exporter reads attributes during serialization
             object.__setattr__(span, "_attributes", filtered_attrs)
@@ -333,7 +339,9 @@ class PydanticSpanProcessor(SpanProcessor):
         settings = _PydanticSettingsRegistry.get(scope_name)
         if settings is None or settings.track_usage:
             # No filtering needed - keep usage/cost data
-            logger.debug("[paid:span] PydanticSpanProcessor on_end: scope=%s, track_usage=True, keeping usage data", scope_name)
+            logger.debug(
+                "[paid:span] PydanticSpanProcessor on_end: scope=%s, track_usage=True, keeping usage data", scope_name
+            )
             return
 
         original_attributes = span.attributes
@@ -348,7 +356,8 @@ class PydanticSpanProcessor(SpanProcessor):
         filtered_count = len(original_attributes) - len(filtered_attrs)
         logger.debug(
             "[paid:span] PydanticSpanProcessor on_end: scope=%s, filtered %d usage/cost attribute(s)",
-            scope_name, filtered_count,
+            scope_name,
+            filtered_count,
         )
         # This works because the exporter reads attributes during serialization
         object.__setattr__(span, "_attributes", filtered_attrs)
@@ -422,8 +431,11 @@ def initialize_tracing(
     if not collector_endpoint:
         collector_endpoint = DEFAULT_COLLECTOR_ENDPOINT
 
-    logger.debug("[paid:init] initialize_tracing called, endpoint=%s, api_key=%s",
-                 collector_endpoint, "provided" if api_key else "not provided (will check env)")
+    logger.debug(
+        "[paid:init] initialize_tracing called, endpoint=%s, api_key=%s",
+        collector_endpoint,
+        "provided" if api_key else "not provided (will check env)",
+    )
 
     try:
         # Check if tracing is disabled via environment variable
@@ -521,7 +533,6 @@ def get_paid_tracer() -> trace.Tracer:
     return paid_tracer_provider.get_tracer("paid.python")
 
 
-
 def get_paid_tracer_provider_pydantic(
     settings: Optional[PydanticProcessorSettings] = None,
 ) -> PydanticTracerProvider:
@@ -598,41 +609,33 @@ def trace_sync_(
     args = args or ()
     kwargs = kwargs or {}
 
-    # Set context variables for access by nested spans
-    ContextData.set_context_key("external_customer_id", external_customer_id)
-    ContextData.set_context_key("external_agent_id", external_agent_id)
-    ContextData.set_context_key("store_prompt", store_prompt)
-    ContextData.set_context_key("user_metadata", metadata)
-
-    # If user set trace context manually
-    override_trace_id = tracing_token
-    if not override_trace_id:
-        override_trace_id = ContextData.get_context_key("trace_id")
-    ctx: Optional[Context] = None
-    if override_trace_id is not None:
-        span_context = SpanContext(
-            trace_id=override_trace_id,
-            span_id=distributed_tracing.otel_id_generator.generate_span_id(),
-            is_remote=True,
-            trace_flags=TraceFlags(TraceFlags.SAMPLED),
-        )
-        ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
-        logger.debug("[paid:distributed] trace_sync_ using override trace_id=%s",
-                     format(override_trace_id, '032x') if isinstance(override_trace_id, int) else str(override_trace_id))
-    else:
-        logger.debug("[paid:distributed] trace_sync_ no override trace_id, using auto-generated")
+    ctx = setup_tracing_context(
+        external_customer_id=external_customer_id,
+        external_agent_id=external_agent_id,
+        tracing_token=tracing_token,
+        store_prompt=store_prompt,
+        metadata=metadata,
+    )
 
     try:
         tracer = get_paid_tracer()
-        logger.debug("[paid:span] trace_sync_ creating parent_span for customer_id=%s, agent_id=%s, fn=%s",
-                      external_customer_id, external_agent_id, getattr(fn, '__name__', repr(fn)))
+        logger.debug(
+            "[paid:span] trace_sync_ creating parent_span for customer_id=%s, agent_id=%s, fn=%s",
+            external_customer_id,
+            external_agent_id,
+            getattr(fn, "__name__", repr(fn)),
+        )
         with tracer.start_as_current_span("parent_span", context=ctx) as span:
-            logger.debug("[paid:span] trace_sync_ span created, trace_id=%s",
-                         format(span.get_span_context().trace_id, '032x') if isinstance(span.get_span_context().trace_id, int) else str(span.get_span_context().trace_id))
+            logger.debug(
+                "[paid:span] trace_sync_ span created, trace_id=%s",
+                format(span.get_span_context().trace_id, "032x")
+                if isinstance(span.get_span_context().trace_id, int)
+                else str(span.get_span_context().trace_id),
+            )
             try:
                 result = fn(*args, **kwargs)
                 span.set_status(Status(StatusCode.OK))
-                logger.debug("[paid:span] trace_sync_ fn=%s completed successfully", getattr(fn, '__name__', repr(fn)))
+                logger.debug("[paid:span] trace_sync_ fn=%s completed successfully", getattr(fn, "__name__", repr(fn)))
                 return result
             except Exception as error:
                 span.set_status(Status(StatusCode.ERROR, str(error)))
@@ -676,17 +679,62 @@ async def trace_async_(
     args = args or ()
     kwargs = kwargs or {}
 
-    # Set context variables for access by nested spans
+    ctx = setup_tracing_context(
+        external_customer_id=external_customer_id,
+        external_agent_id=external_agent_id,
+        tracing_token=tracing_token,
+        store_prompt=store_prompt,
+        metadata=metadata,
+    )
+
+    try:
+        tracer = get_paid_tracer()
+        logger.debug(
+            "[paid:span] trace_async_ creating parent_span for customer_id=%s, agent_id=%s, fn=%s",
+            external_customer_id,
+            external_agent_id,
+            getattr(fn, "__name__", repr(fn)),
+        )
+        with tracer.start_as_current_span("parent_span", context=ctx) as span:
+            logger.debug(
+                "[paid:span] trace_async_ span created, trace_id=%s",
+                format(span.get_span_context().trace_id, "032x")
+                if isinstance(span.get_span_context().trace_id, int)
+                else str(span.get_span_context().trace_id),
+            )
+            try:
+                if asyncio.iscoroutinefunction(fn):
+                    result = await fn(*args, **kwargs)
+                else:
+                    result = fn(*args, **kwargs)
+                span.set_status(Status(StatusCode.OK))
+                logger.debug("[paid:span] trace_async_ fn=%s completed successfully", getattr(fn, "__name__", repr(fn)))
+                return result
+            except Exception as error:
+                span.set_status(Status(StatusCode.ERROR, str(error)))
+                raise
+    finally:
+        ContextData.reset_context()
+
+
+def setup_tracing_context(
+    external_customer_id: Optional[str],
+    external_agent_id: Optional[str] = None,
+    tracing_token: Optional[int] = None,
+    store_prompt: bool = False,
+    metadata: Optional[Dict[str, Any]] = None,
+) -> Optional[Context]:
+    """Set tracing context data and return an OTEL context for distributed tracing if needed."""
     ContextData.set_context_key("external_customer_id", external_customer_id)
     ContextData.set_context_key("external_agent_id", external_agent_id)
     ContextData.set_context_key("store_prompt", store_prompt)
     ContextData.set_context_key("user_metadata", metadata)
+    ContextData.set_context_key("paid_scope_id", random.randint(1, 2**31 - 1))
 
-    # If user set trace context manually
     override_trace_id = tracing_token
     if not override_trace_id:
         override_trace_id = ContextData.get_context_key("trace_id")
-    ctx: Optional[Context] = None
+
     if override_trace_id is not None:
         span_context = SpanContext(
             trace_id=override_trace_id,
@@ -694,29 +742,13 @@ async def trace_async_(
             is_remote=True,
             trace_flags=TraceFlags(TraceFlags.SAMPLED),
         )
-        ctx = trace.set_span_in_context(NonRecordingSpan(span_context))
-        logger.debug("[paid:distributed] trace_async_ using override trace_id=%s",
-                     format(override_trace_id, '032x') if isinstance(override_trace_id, int) else str(override_trace_id))
-    else:
-        logger.debug("[paid:distributed] trace_async_ no override trace_id, using auto-generated")
+        token_source = "explicit" if tracing_token else "context-inherited"
+        logger.debug(
+            "[paid:distributed] setup_tracing_context: trace_id=%s (source=%s)",
+            format(override_trace_id, "032x") if isinstance(override_trace_id, int) else str(override_trace_id),
+            token_source,
+        )
+        return trace.set_span_in_context(NonRecordingSpan(span_context))
 
-    try:
-        tracer = get_paid_tracer()
-        logger.debug("[paid:span] trace_async_ creating parent_span for customer_id=%s, agent_id=%s, fn=%s",
-                      external_customer_id, external_agent_id, getattr(fn, '__name__', repr(fn)))
-        with tracer.start_as_current_span("parent_span", context=ctx) as span:
-            logger.debug("[paid:span] trace_async_ span created, trace_id=%s",
-                         format(span.get_span_context().trace_id, '032x') if isinstance(span.get_span_context().trace_id, int) else str(span.get_span_context().trace_id))
-            try:
-                if asyncio.iscoroutinefunction(fn):
-                    result = await fn(*args, **kwargs)
-                else:
-                    result = fn(*args, **kwargs)
-                span.set_status(Status(StatusCode.OK))
-                logger.debug("[paid:span] trace_async_ fn=%s completed successfully", getattr(fn, '__name__', repr(fn)))
-                return result
-            except Exception as error:
-                span.set_status(Status(StatusCode.ERROR, str(error)))
-                raise
-    finally:
-        ContextData.reset_context()
+    logger.debug("[paid:distributed] setup_tracing_context: no override trace_id, using auto-generated")
+    return None
