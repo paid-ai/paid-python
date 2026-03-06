@@ -11,6 +11,9 @@ if typing.TYPE_CHECKING:
     from .contact import Contact
     from .contact_billing_address import ContactBillingAddress
     from .contact_list_response import ContactListResponse
+    from .contact_roles_item import ContactRolesItem
+    from .create_order_line_attribute_request import CreateOrderLineAttributeRequest
+    from .create_order_line_request import CreateOrderLineRequest
     from .customer import Customer
     from .customer_attribution import CustomerAttribution
     from .customer_billing_address import CustomerBillingAddress
@@ -41,6 +44,7 @@ if typing.TYPE_CHECKING:
     from .product_list_response import ProductListResponse
     from .signal import Signal
     from .update_contact_request import UpdateContactRequest
+    from .update_contact_request_roles_item import UpdateContactRequestRolesItem
     from .update_customer_request import UpdateCustomerRequest
     from .update_product_request import UpdateProductRequest
 _dynamic_imports: typing.Dict[str, str] = {
@@ -49,6 +53,9 @@ _dynamic_imports: typing.Dict[str, str] = {
     "Contact": ".contact",
     "ContactBillingAddress": ".contact_billing_address",
     "ContactListResponse": ".contact_list_response",
+    "ContactRolesItem": ".contact_roles_item",
+    "CreateOrderLineAttributeRequest": ".create_order_line_attribute_request",
+    "CreateOrderLineRequest": ".create_order_line_request",
     "Customer": ".customer",
     "CustomerAttribution": ".customer_attribution",
     "CustomerBillingAddress": ".customer_billing_address",
@@ -79,6 +86,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ProductListResponse": ".product_list_response",
     "Signal": ".signal",
     "UpdateContactRequest": ".update_contact_request",
+    "UpdateContactRequestRolesItem": ".update_contact_request_roles_item",
     "UpdateCustomerRequest": ".update_customer_request",
     "UpdateProductRequest": ".update_product_request",
 }
@@ -111,6 +119,9 @@ __all__ = [
     "Contact",
     "ContactBillingAddress",
     "ContactListResponse",
+    "ContactRolesItem",
+    "CreateOrderLineAttributeRequest",
+    "CreateOrderLineRequest",
     "Customer",
     "CustomerAttribution",
     "CustomerBillingAddress",
@@ -141,6 +152,7 @@ __all__ = [
     "ProductListResponse",
     "Signal",
     "UpdateContactRequest",
+    "UpdateContactRequestRolesItem",
     "UpdateCustomerRequest",
     "UpdateProductRequest",
 ]

@@ -31,5 +31,5 @@
       "vcrpy": ">=6.0.0"
     }
   },
-  "sdkVersion": "1.0.3"
+  "sdkVersion": "1.2.0"
 }

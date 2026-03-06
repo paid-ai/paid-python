@@ -80,6 +80,7 @@ class CustomersClient:
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        default_currency: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
@@ -106,6 +107,8 @@ class CustomersClient:
         vat_number : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
+
+        default_currency : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -137,6 +140,7 @@ class CustomersClient:
             creation_state=creation_state,
             vat_number=vat_number,
             metadata=metadata,
+            default_currency=default_currency,
             request_options=request_options,
         )
         return _response.data
@@ -504,6 +508,7 @@ class AsyncCustomersClient:
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        default_currency: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
@@ -530,6 +535,8 @@ class AsyncCustomersClient:
         vat_number : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
+
+        default_currency : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -569,6 +576,7 @@ class AsyncCustomersClient:
             creation_state=creation_state,
             vat_number=vat_number,
             metadata=metadata,
+            default_currency=default_currency,
             request_options=request_options,
         )
         return _response.data

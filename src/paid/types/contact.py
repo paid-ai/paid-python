@@ -8,6 +8,7 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .contact_billing_address import ContactBillingAddress
+from .contact_roles_item import ContactRolesItem
 
 
 class Contact(UniversalBaseModel):
@@ -25,6 +26,7 @@ class Contact(UniversalBaseModel):
     external_id: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="externalId"), pydantic.Field(alias="externalId")
     ] = None
+    roles: typing.List[ContactRolesItem]
     created_at: typing_extensions.Annotated[
         dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")
     ]
