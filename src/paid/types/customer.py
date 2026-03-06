@@ -38,6 +38,9 @@ class Customer(UniversalBaseModel):
         typing.Optional[str], FieldMetadata(alias="vatNumber"), pydantic.Field(alias="vatNumber")
     ] = None
     metadata: typing.Optional[typing.Dict[str, typing.Any]] = None
+    default_currency: typing_extensions.Annotated[
+        str, FieldMetadata(alias="defaultCurrency"), pydantic.Field(alias="defaultCurrency")
+    ]
     created_at: typing_extensions.Annotated[
         dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")
     ]

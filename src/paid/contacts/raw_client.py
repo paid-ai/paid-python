@@ -19,6 +19,8 @@ from ..types.contact_billing_address import ContactBillingAddress
 from ..types.contact_list_response import ContactListResponse
 from ..types.empty_response import EmptyResponse
 from ..types.error_response import ErrorResponse
+from ..types.update_contact_request_roles_item import UpdateContactRequestRolesItem
+from .types.create_contact_request_roles_item import CreateContactRequestRolesItem
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -113,12 +115,13 @@ class RawContactsClient:
         self,
         *,
         customer_id: str,
-        first_name: str,
-        last_name: str,
         email: str,
+        first_name: typing.Optional[str] = OMIT,
+        last_name: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[ContactBillingAddress] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[CreateContactRequestRolesItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Contact]:
         """
@@ -128,17 +131,19 @@ class RawContactsClient:
         ----------
         customer_id : str
 
-        first_name : str
-
-        last_name : str
-
         email : str
+
+        first_name : typing.Optional[str]
+
+        last_name : typing.Optional[str]
 
         phone : typing.Optional[str]
 
         billing_address : typing.Optional[ContactBillingAddress]
 
         external_id : typing.Optional[str]
+
+        roles : typing.Optional[typing.Sequence[CreateContactRequestRolesItem]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -161,6 +166,7 @@ class RawContactsClient:
                     object_=billing_address, annotation=typing.Optional[ContactBillingAddress], direction="write"
                 ),
                 "externalId": external_id,
+                "roles": roles,
             },
             headers={
                 "content-type": "application/json",
@@ -298,6 +304,7 @@ class RawContactsClient:
         phone: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[ContactBillingAddress] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Contact]:
         """
@@ -321,6 +328,8 @@ class RawContactsClient:
 
         external_id : typing.Optional[str]
 
+        roles : typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -342,6 +351,7 @@ class RawContactsClient:
                     object_=billing_address, annotation=typing.Optional[ContactBillingAddress], direction="write"
                 ),
                 "externalId": external_id,
+                "roles": roles,
             },
             headers={
                 "content-type": "application/json",
@@ -561,6 +571,7 @@ class RawContactsClient:
         phone: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[ContactBillingAddress] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Contact]:
         """
@@ -584,6 +595,8 @@ class RawContactsClient:
 
         external_id : typing.Optional[str]
 
+        roles : typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -605,6 +618,7 @@ class RawContactsClient:
                     object_=billing_address, annotation=typing.Optional[ContactBillingAddress], direction="write"
                 ),
                 "externalId": external_id,
+                "roles": roles,
             },
             headers={
                 "content-type": "application/json",
@@ -832,12 +846,13 @@ class AsyncRawContactsClient:
         self,
         *,
         customer_id: str,
-        first_name: str,
-        last_name: str,
         email: str,
+        first_name: typing.Optional[str] = OMIT,
+        last_name: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[ContactBillingAddress] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[CreateContactRequestRolesItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Contact]:
         """
@@ -847,17 +862,19 @@ class AsyncRawContactsClient:
         ----------
         customer_id : str
 
-        first_name : str
-
-        last_name : str
-
         email : str
+
+        first_name : typing.Optional[str]
+
+        last_name : typing.Optional[str]
 
         phone : typing.Optional[str]
 
         billing_address : typing.Optional[ContactBillingAddress]
 
         external_id : typing.Optional[str]
+
+        roles : typing.Optional[typing.Sequence[CreateContactRequestRolesItem]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -880,6 +897,7 @@ class AsyncRawContactsClient:
                     object_=billing_address, annotation=typing.Optional[ContactBillingAddress], direction="write"
                 ),
                 "externalId": external_id,
+                "roles": roles,
             },
             headers={
                 "content-type": "application/json",
@@ -1017,6 +1035,7 @@ class AsyncRawContactsClient:
         phone: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[ContactBillingAddress] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Contact]:
         """
@@ -1040,6 +1059,8 @@ class AsyncRawContactsClient:
 
         external_id : typing.Optional[str]
 
+        roles : typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1061,6 +1082,7 @@ class AsyncRawContactsClient:
                     object_=billing_address, annotation=typing.Optional[ContactBillingAddress], direction="write"
                 ),
                 "externalId": external_id,
+                "roles": roles,
             },
             headers={
                 "content-type": "application/json",
@@ -1280,6 +1302,7 @@ class AsyncRawContactsClient:
         phone: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[ContactBillingAddress] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Contact]:
         """
@@ -1303,6 +1326,8 @@ class AsyncRawContactsClient:
 
         external_id : typing.Optional[str]
 
+        roles : typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1324,6 +1349,7 @@ class AsyncRawContactsClient:
                     object_=billing_address, annotation=typing.Optional[ContactBillingAddress], direction="write"
                 ),
                 "externalId": external_id,
+                "roles": roles,
             },
             headers={
                 "content-type": "application/json",

@@ -8,7 +8,9 @@ from ..types.contact import Contact
 from ..types.contact_billing_address import ContactBillingAddress
 from ..types.contact_list_response import ContactListResponse
 from ..types.empty_response import EmptyResponse
+from ..types.update_contact_request_roles_item import UpdateContactRequestRolesItem
 from .raw_client import AsyncRawContactsClient, RawContactsClient
+from .types.create_contact_request_roles_item import CreateContactRequestRolesItem
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -69,12 +71,13 @@ class ContactsClient:
         self,
         *,
         customer_id: str,
-        first_name: str,
-        last_name: str,
         email: str,
+        first_name: typing.Optional[str] = OMIT,
+        last_name: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[ContactBillingAddress] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[CreateContactRequestRolesItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
@@ -84,17 +87,19 @@ class ContactsClient:
         ----------
         customer_id : str
 
-        first_name : str
-
-        last_name : str
-
         email : str
+
+        first_name : typing.Optional[str]
+
+        last_name : typing.Optional[str]
 
         phone : typing.Optional[str]
 
         billing_address : typing.Optional[ContactBillingAddress]
 
         external_id : typing.Optional[str]
+
+        roles : typing.Optional[typing.Sequence[CreateContactRequestRolesItem]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -113,19 +118,18 @@ class ContactsClient:
         )
         client.contacts.create_contact(
             customer_id="customerId",
-            first_name="firstName",
-            last_name="lastName",
             email="email",
         )
         """
         _response = self._raw_client.create_contact(
             customer_id=customer_id,
+            email=email,
             first_name=first_name,
             last_name=last_name,
-            email=email,
             phone=phone,
             billing_address=billing_address,
             external_id=external_id,
+            roles=roles,
             request_options=request_options,
         )
         return _response.data
@@ -171,6 +175,7 @@ class ContactsClient:
         phone: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[ContactBillingAddress] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
@@ -193,6 +198,8 @@ class ContactsClient:
         billing_address : typing.Optional[ContactBillingAddress]
 
         external_id : typing.Optional[str]
+
+        roles : typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -222,6 +229,7 @@ class ContactsClient:
             phone=phone,
             billing_address=billing_address,
             external_id=external_id,
+            roles=roles,
             request_options=request_options,
         )
         return _response.data
@@ -301,6 +309,7 @@ class ContactsClient:
         phone: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[ContactBillingAddress] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
@@ -323,6 +332,8 @@ class ContactsClient:
         billing_address : typing.Optional[ContactBillingAddress]
 
         external_id : typing.Optional[str]
+
+        roles : typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -352,6 +363,7 @@ class ContactsClient:
             phone=phone,
             billing_address=billing_address,
             external_id=external_id,
+            roles=roles,
             request_options=request_options,
         )
         return _response.data
@@ -452,12 +464,13 @@ class AsyncContactsClient:
         self,
         *,
         customer_id: str,
-        first_name: str,
-        last_name: str,
         email: str,
+        first_name: typing.Optional[str] = OMIT,
+        last_name: typing.Optional[str] = OMIT,
         phone: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[ContactBillingAddress] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[CreateContactRequestRolesItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
@@ -467,17 +480,19 @@ class AsyncContactsClient:
         ----------
         customer_id : str
 
-        first_name : str
-
-        last_name : str
-
         email : str
+
+        first_name : typing.Optional[str]
+
+        last_name : typing.Optional[str]
 
         phone : typing.Optional[str]
 
         billing_address : typing.Optional[ContactBillingAddress]
 
         external_id : typing.Optional[str]
+
+        roles : typing.Optional[typing.Sequence[CreateContactRequestRolesItem]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -501,8 +516,6 @@ class AsyncContactsClient:
         async def main() -> None:
             await client.contacts.create_contact(
                 customer_id="customerId",
-                first_name="firstName",
-                last_name="lastName",
                 email="email",
             )
 
@@ -511,12 +524,13 @@ class AsyncContactsClient:
         """
         _response = await self._raw_client.create_contact(
             customer_id=customer_id,
+            email=email,
             first_name=first_name,
             last_name=last_name,
-            email=email,
             phone=phone,
             billing_address=billing_address,
             external_id=external_id,
+            roles=roles,
             request_options=request_options,
         )
         return _response.data
@@ -570,6 +584,7 @@ class AsyncContactsClient:
         phone: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[ContactBillingAddress] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
@@ -592,6 +607,8 @@ class AsyncContactsClient:
         billing_address : typing.Optional[ContactBillingAddress]
 
         external_id : typing.Optional[str]
+
+        roles : typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -629,6 +646,7 @@ class AsyncContactsClient:
             phone=phone,
             billing_address=billing_address,
             external_id=external_id,
+            roles=roles,
             request_options=request_options,
         )
         return _response.data
@@ -724,6 +742,7 @@ class AsyncContactsClient:
         phone: typing.Optional[str] = OMIT,
         billing_address: typing.Optional[ContactBillingAddress] = OMIT,
         external_id: typing.Optional[str] = OMIT,
+        roles: typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
@@ -746,6 +765,8 @@ class AsyncContactsClient:
         billing_address : typing.Optional[ContactBillingAddress]
 
         external_id : typing.Optional[str]
+
+        roles : typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -783,6 +804,7 @@ class AsyncContactsClient:
             phone=phone,
             billing_address=billing_address,
             external_id=external_id,
+            roles=roles,
             request_options=request_options,
         )
         return _response.data
