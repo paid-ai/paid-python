@@ -7,3 +7,4 @@ assets/
 src/paid/tracing/
 src/paid/logger.py
 .github/workflows/ci.yml
+tests/tracing
