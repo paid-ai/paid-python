@@ -124,6 +124,7 @@ class RawCustomersClient:
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        default_currency: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Customer]:
         """
@@ -151,6 +152,8 @@ class RawCustomersClient:
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
+        default_currency : typing.Optional[str]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -175,6 +178,7 @@ class RawCustomersClient:
                 "creationState": creation_state,
                 "vatNumber": vat_number,
                 "metadata": metadata,
+                "defaultCurrency": default_currency,
             },
             headers={
                 "content-type": "application/json",
@@ -887,6 +891,7 @@ class AsyncRawCustomersClient:
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        default_currency: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Customer]:
         """
@@ -914,6 +919,8 @@ class AsyncRawCustomersClient:
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
+        default_currency : typing.Optional[str]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -938,6 +945,7 @@ class AsyncRawCustomersClient:
                 "creationState": creation_state,
                 "vatNumber": vat_number,
                 "metadata": metadata,
+                "defaultCurrency": default_currency,
             },
             headers={
                 "content-type": "application/json",

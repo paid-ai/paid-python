@@ -12,6 +12,9 @@ if typing.TYPE_CHECKING:
         Contact,
         ContactBillingAddress,
         ContactListResponse,
+        ContactRolesItem,
+        CreateOrderLineAttributeRequest,
+        CreateOrderLineRequest,
         Customer,
         CustomerAttribution,
         CustomerBillingAddress,
@@ -42,12 +45,14 @@ if typing.TYPE_CHECKING:
         ProductListResponse,
         Signal,
         UpdateContactRequest,
+        UpdateContactRequestRolesItem,
         UpdateCustomerRequest,
         UpdateProductRequest,
     )
     from .errors import BadRequestError, ForbiddenError, InternalServerError, NotFoundError
     from . import contacts, customers, invoices, orders, products, signals
     from .client import AsyncPaid, Paid
+    from .contacts import CreateContactRequestRolesItem
     from .environment import PaidEnvironment
     from .version import __version__
 _dynamic_imports: typing.Dict[str, str] = {
@@ -58,6 +63,10 @@ _dynamic_imports: typing.Dict[str, str] = {
     "Contact": ".types",
     "ContactBillingAddress": ".types",
     "ContactListResponse": ".types",
+    "ContactRolesItem": ".types",
+    "CreateContactRequestRolesItem": ".contacts",
+    "CreateOrderLineAttributeRequest": ".types",
+    "CreateOrderLineRequest": ".types",
     "Customer": ".types",
     "CustomerAttribution": ".types",
     "CustomerBillingAddress": ".types",
@@ -93,6 +102,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ProductListResponse": ".types",
     "Signal": ".types",
     "UpdateContactRequest": ".types",
+    "UpdateContactRequestRolesItem": ".types",
     "UpdateCustomerRequest": ".types",
     "UpdateProductRequest": ".types",
     "__version__": ".version",
@@ -134,6 +144,10 @@ __all__ = [
     "Contact",
     "ContactBillingAddress",
     "ContactListResponse",
+    "ContactRolesItem",
+    "CreateContactRequestRolesItem",
+    "CreateOrderLineAttributeRequest",
+    "CreateOrderLineRequest",
     "Customer",
     "CustomerAttribution",
     "CustomerBillingAddress",
@@ -169,6 +183,7 @@ __all__ = [
     "ProductListResponse",
     "Signal",
     "UpdateContactRequest",
+    "UpdateContactRequestRolesItem",
     "UpdateCustomerRequest",
     "UpdateProductRequest",
     "__version__",

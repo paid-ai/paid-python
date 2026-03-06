@@ -7,6 +7,7 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .contact_billing_address import ContactBillingAddress
+from .update_contact_request_roles_item import UpdateContactRequestRolesItem
 
 
 class UpdateContactRequest(UniversalBaseModel):
@@ -29,6 +30,7 @@ class UpdateContactRequest(UniversalBaseModel):
     external_id: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="externalId"), pydantic.Field(alias="externalId")
     ] = None
+    roles: typing.Optional[typing.List[UpdateContactRequestRolesItem]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

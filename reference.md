@@ -769,6 +769,14 @@ client.customers.create_customer(
 <dl>
 <dd>
 
+**default_currency:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -1488,8 +1496,6 @@ client = Paid(
 )
 client.contacts.create_contact(
     customer_id="customerId",
-    first_name="firstName",
-    last_name="lastName",
     email="email",
 )
 
@@ -1515,23 +1521,23 @@ client.contacts.create_contact(
 <dl>
 <dd>
 
-**first_name:** `str` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**last_name:** `str` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
 **email:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**first_name:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**last_name:** `typing.Optional[str]` 
     
 </dd>
 </dl>
@@ -1556,6 +1562,14 @@ client.contacts.create_contact(
 <dd>
 
 **external_id:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**roles:** `typing.Optional[typing.Sequence[CreateContactRequestRolesItem]]` 
     
 </dd>
 </dl>
@@ -1752,6 +1766,14 @@ client.contacts.update_contact_by_id(
 <dd>
 
 **external_id:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**roles:** `typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]]` 
     
 </dd>
 </dl>
@@ -2018,6 +2040,14 @@ client.contacts.update_contact_by_external_id(
 <dd>
 
 **external_id:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**roles:** `typing.Optional[typing.Sequence[UpdateContactRequestRolesItem]]` 
     
 </dd>
 </dl>
@@ -2298,7 +2328,7 @@ client.orders.create_order(
 <dl>
 <dd>
 
-**billing_anchor:** `typing.Optional[float]` 
+**billing_anchor:** `typing.Optional[int]` — Day of month for billing anchor (1-31). Defaults to start date day if not provided.
     
 </dd>
 </dl>
@@ -2323,6 +2353,14 @@ client.orders.create_order(
 <dd>
 
 **metadata:** `typing.Optional[typing.Dict[str, typing.Any]]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**lines:** `typing.Optional[typing.Sequence[CreateOrderLineRequest]]` 
     
 </dd>
 </dl>
@@ -2510,7 +2548,7 @@ client.orders.update_order_by_id(
 <dl>
 <dd>
 
-**billing_anchor:** `typing.Optional[float]` 
+**billing_anchor:** `typing.Optional[int]` — Day of month for billing anchor (1-31). Defaults to start date day if not provided.
     
 </dd>
 </dl>

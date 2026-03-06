@@ -10,7 +10,7 @@
       "opentelemetry-sdk": ">=1.23.0",
       "opentelemetry-exporter-otlp-proto-http": ">=1.23.0",
       "mutagen": ">=1.47.0",
-      "openinference-instrumentation-anthropic": ">=0.1.20",
+      "openinference-instrumentation-anthropic": ">=0.1.20,<1.0.0",
       "openinference-instrumentation-openai": ">=0.1.40",
       "openinference-instrumentation-langchain": ">=0.1.55",
       "openinference-instrumentation-openai-agents": ">=1.0.0",
@@ -31,5 +31,5 @@
       "vcrpy": ">=6.0.0"
     }
   },
-  "sdkVersion": "1.0.3"
+  "sdkVersion": "1.2.0"
 }
