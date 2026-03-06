@@ -10,10 +10,12 @@ from ..core.http_response import AsyncHttpResponse, HttpResponse
 from ..core.jsonable_encoder import jsonable_encoder
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
+from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
+from ..types.create_order_line_request import CreateOrderLineRequest
 from ..types.empty_response import EmptyResponse
 from ..types.error_response import ErrorResponse
 from ..types.order import Order
@@ -121,10 +123,11 @@ class RawOrdersClient:
         end_date: typing.Optional[dt.datetime] = OMIT,
         subscription_terms: typing.Optional[int] = OMIT,
         creation_state: typing.Optional[OrderCreationState] = OMIT,
-        billing_anchor: typing.Optional[float] = OMIT,
+        billing_anchor: typing.Optional[int] = OMIT,
         payment_terms: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        lines: typing.Optional[typing.Sequence[CreateOrderLineRequest]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Order]:
         """
@@ -148,13 +151,16 @@ class RawOrdersClient:
 
         creation_state : typing.Optional[OrderCreationState]
 
-        billing_anchor : typing.Optional[float]
+        billing_anchor : typing.Optional[int]
+            Day of month for billing anchor (1-31). Defaults to start date day if not provided.
 
         payment_terms : typing.Optional[str]
 
         external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
+
+        lines : typing.Optional[typing.Sequence[CreateOrderLineRequest]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -180,6 +186,9 @@ class RawOrdersClient:
                 "paymentTerms": payment_terms,
                 "externalId": external_id,
                 "metadata": metadata,
+                "lines": convert_and_respect_annotation_metadata(
+                    object_=lines, annotation=typing.Sequence[CreateOrderLineRequest], direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -315,7 +324,7 @@ class RawOrdersClient:
         end_date: typing.Optional[dt.datetime] = OMIT,
         subscription_terms: typing.Optional[int] = OMIT,
         creation_state: typing.Optional[OrderCreationState] = OMIT,
-        billing_anchor: typing.Optional[float] = OMIT,
+        billing_anchor: typing.Optional[int] = OMIT,
         payment_terms: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
@@ -340,7 +349,8 @@ class RawOrdersClient:
 
         creation_state : typing.Optional[OrderCreationState]
 
-        billing_anchor : typing.Optional[float]
+        billing_anchor : typing.Optional[int]
+            Day of month for billing anchor (1-31). Defaults to start date day if not provided.
 
         payment_terms : typing.Optional[str]
 
@@ -693,10 +703,11 @@ class AsyncRawOrdersClient:
         end_date: typing.Optional[dt.datetime] = OMIT,
         subscription_terms: typing.Optional[int] = OMIT,
         creation_state: typing.Optional[OrderCreationState] = OMIT,
-        billing_anchor: typing.Optional[float] = OMIT,
+        billing_anchor: typing.Optional[int] = OMIT,
         payment_terms: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        lines: typing.Optional[typing.Sequence[CreateOrderLineRequest]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Order]:
         """
@@ -720,13 +731,16 @@ class AsyncRawOrdersClient:
 
         creation_state : typing.Optional[OrderCreationState]
 
-        billing_anchor : typing.Optional[float]
+        billing_anchor : typing.Optional[int]
+            Day of month for billing anchor (1-31). Defaults to start date day if not provided.
 
         payment_terms : typing.Optional[str]
 
         external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
+
+        lines : typing.Optional[typing.Sequence[CreateOrderLineRequest]]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -752,6 +766,9 @@ class AsyncRawOrdersClient:
                 "paymentTerms": payment_terms,
                 "externalId": external_id,
                 "metadata": metadata,
+                "lines": convert_and_respect_annotation_metadata(
+                    object_=lines, annotation=typing.Sequence[CreateOrderLineRequest], direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -887,7 +904,7 @@ class AsyncRawOrdersClient:
         end_date: typing.Optional[dt.datetime] = OMIT,
         subscription_terms: typing.Optional[int] = OMIT,
         creation_state: typing.Optional[OrderCreationState] = OMIT,
-        billing_anchor: typing.Optional[float] = OMIT,
+        billing_anchor: typing.Optional[int] = OMIT,
         payment_terms: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
@@ -912,7 +929,8 @@ class AsyncRawOrdersClient:
 
         creation_state : typing.Optional[OrderCreationState]
 
-        billing_anchor : typing.Optional[float]
+        billing_anchor : typing.Optional[int]
+            Day of month for billing anchor (1-31). Defaults to start date day if not provided.
 
         payment_terms : typing.Optional[str]
 
