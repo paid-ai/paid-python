@@ -180,16 +180,22 @@ def _instrument_anthropic() -> None:
 
 def _instrument_openai() -> None:
     """
-    Instrument the OpenAI library using opentelemetry-instrumentation-openai.
+    Instrument the OpenAI library using openinference-instrumentation-openai.
+
+    Applies tool-call and tool-execution span patches on top of the base instrumentor —
+    see ``paid.tracing.openai_patches`` for full details.
     """
     if not OPENAI_AVAILABLE:
         logger.warning("OpenAI library not available, skipping instrumentation")
         return
 
+    from .openai_patches import instrument_openai
+
     logger.debug("[paid:autoinstrument] Instrumenting openai with OpenAIInstrumentor, provider=%s",
                  type(tracing.paid_tracer_provider).__name__)
-    # Instrument OpenAI with Paid's tracer provider
     OpenAIInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
+
+    instrument_openai()
 
     _initialized_instrumentors.append("openai")
     logger.info("OpenAI auto-instrumentation enabled")

@@ -88,10 +88,27 @@ def tracing_setup(
         except Exception:
             pass
 
+    if "openai" in active:
+        try:
+            from openinference.instrumentation.openai import OpenAIInstrumentor
+            OpenAIInstrumentor().uninstrument()
+        except Exception:
+            pass
+
+        try:
+            from paid.tracing.openai_patches import uninstrument_openai
+            uninstrument_openai()
+        except Exception:
+            pass
+
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "test-key-for-cassettes")
 if "ANTHROPIC_API_KEY" not in os.environ:
     os.environ["ANTHROPIC_API_KEY"] = ANTHROPIC_API_KEY
+
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "test-key-for-cassettes")
+if "OPENAI_API_KEY" not in os.environ:
+    os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
 
 @pytest.fixture()
