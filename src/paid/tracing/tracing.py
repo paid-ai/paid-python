@@ -508,12 +508,7 @@ def initialize_tracing(
 
         span_processor: SpanProcessor
 
-        if processor_settings.export_mode == "simple":
-            # SimpleSpanProcessor exports inline. Keep it as an opt-in for short-lived
-            # environments where losing spans on process exit is worse than blocking.
-            span_processor = SimpleSpanProcessor(otlp_exporter)
-            logger.debug("[paid:init] Using SimpleSpanProcessor for immediate span export")
-        else:
+        if processor_settings.export_mode == "batch":
             # BatchSpanProcessor exports from a worker thread so collector outages do not
             # block user logic on span end.
             span_processor = BatchSpanProcessor(
@@ -521,9 +516,14 @@ def initialize_tracing(
                 schedule_delay_millis=500,
                 max_export_batch_size=64,
                 max_queue_size=2048,
-                export_timeout_millis=5000,
+                export_timeout_millis=10_000,
             )
             logger.debug("[paid:init] Using BatchSpanProcessor for non-blocking span export")
+        else:
+            # SimpleSpanProcessor exports inline. Keep it as an opt-in for short-lived
+            # environments where losing spans on process exit is worse than blocking.
+            span_processor = SimpleSpanProcessor(otlp_exporter)
+            logger.debug("[paid:init] Using SimpleSpanProcessor for immediate span export")
 
         paid_tracer_provider.add_span_processor(span_processor)
         logger.debug(
