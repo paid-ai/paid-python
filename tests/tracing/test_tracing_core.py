@@ -83,15 +83,15 @@ class TestInitializeTracing:
         assert isinstance(tracing.paid_tracer_provider, TracerProvider)
 
     @patch.dict(os.environ, {"PAID_API_KEY": "test-api-key-123"}, clear=False)
-    def test_initialize_defaults_to_batch_exporter(self):
+    def test_initialize_defaults_to_simple_processor(self):
         tracing.paid_tracer_provider = NoOpTracerProvider()
         _TokenStore._TokenStore__token = None
 
         initialize_tracing()
 
         processors = tracing.paid_tracer_provider._active_span_processor._span_processors
-        assert any(isinstance(processor, BatchSpanProcessor) for processor in processors)
-        assert not any(isinstance(processor, SimpleSpanProcessor) for processor in processors)
+        assert any(isinstance(processor, SimpleSpanProcessor) for processor in processors)
+        assert not any(isinstance(processor, BatchSpanProcessor) for processor in processors)
 
     @patch.dict(os.environ, {"PAID_API_KEY": "test-api-key-123"}, clear=False)
     def test_initialize_uses_simple_exporter_when_requested(self):

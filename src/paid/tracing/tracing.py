@@ -43,7 +43,7 @@ class ProcessorSettings:
     pydantic: Optional[PydanticProcessorSettings] = None
     """Settings for Pydantic AI span processing. If provided, enables Pydantic-specific filtering."""
 
-    export_mode: Literal["batch", "simple"] = "batch"
+    export_mode: Literal["batch", "simple"] = "simple"
     """Span export strategy. Defaults to batch to avoid blocking user logic on span end."""
 
 
@@ -204,6 +204,10 @@ class PaidSpanProcessor(SpanProcessor):
         "logfire.json_schema",
     }
 
+    def __init__(self, span_processor_mode: Literal["batch", "simple"] = "simple") -> None:
+        """Initialize processor with the export mode used by the OTLP span processor."""
+        self._span_processor_mode = span_processor_mode
+
     def on_start(self, span: Span, parent_context: Optional[Context] = None) -> None:
         """Called when a span is started. Prefix the span name and add attributes."""
 
@@ -235,6 +239,7 @@ class PaidSpanProcessor(SpanProcessor):
 
         # Always stamp the SDK version so the backend can identify the source
         span.set_attribute("paid.sdk.version", f"python-{_paid_version}")
+        span.set_attribute("paid_span_processor_mode", self._span_processor_mode)
 
         logger.debug(
             "[paid:span] on_start: name=%s, customer_id=%s, agent_id=%s",
@@ -483,8 +488,10 @@ def initialize_tracing(
         paid_tracer_provider._disabled = False
         logger.debug("[paid:init] TracerProvider created (sampler=ALWAYS_ON, OTEL_SDK_DISABLED overridden)")
 
+        processor_settings = processor_settings or ProcessorSettings()
+
         # Add span processor to prefix span names and add customer/agent ID attributes
-        paid_tracer_provider.add_span_processor(PaidSpanProcessor())
+        paid_tracer_provider.add_span_processor(PaidSpanProcessor(span_processor_mode=processor_settings.export_mode))
         logger.debug("[paid:init] Added PaidSpanProcessor")
 
         # Add Pydantic span processor - it self-filters by scope using the settings registry
@@ -503,8 +510,6 @@ def initialize_tracing(
             headers={"Authorization": f"Bearer {api_key}"},
             timeout=10,  # Explicit timeout to prevent env var OTEL_EXPORTER_OTLP_TIMEOUT override
         )
-
-        processor_settings = processor_settings or ProcessorSettings()
 
         span_processor: SpanProcessor
 
