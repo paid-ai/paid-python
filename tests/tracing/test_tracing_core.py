@@ -3,11 +3,13 @@ from unittest.mock import patch
 
 import pytest
 from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 from opentelemetry.trace import NoOpTracerProvider
 
 from paid.tracing import tracing
 from paid.tracing.context_data import ContextData
 from paid.tracing.tracing import (
+    ProcessorSettings,
     PydanticProcessorSettings,
     _PydanticSettingsRegistry,
     _TokenStore,
@@ -79,6 +81,28 @@ class TestInitializeTracing:
         initialize_tracing(api_key="explicit-key")
         assert _TokenStore.get() == "explicit-key"
         assert isinstance(tracing.paid_tracer_provider, TracerProvider)
+
+    @patch.dict(os.environ, {"PAID_API_KEY": "test-api-key-123"}, clear=False)
+    def test_initialize_defaults_to_batch_exporter(self):
+        tracing.paid_tracer_provider = NoOpTracerProvider()
+        _TokenStore._TokenStore__token = None
+
+        initialize_tracing()
+
+        processors = tracing.paid_tracer_provider._active_span_processor._span_processors
+        assert any(isinstance(processor, BatchSpanProcessor) for processor in processors)
+        assert not any(isinstance(processor, SimpleSpanProcessor) for processor in processors)
+
+    @patch.dict(os.environ, {"PAID_API_KEY": "test-api-key-123"}, clear=False)
+    def test_initialize_uses_simple_exporter_when_requested(self):
+        tracing.paid_tracer_provider = NoOpTracerProvider()
+        _TokenStore._TokenStore__token = None
+
+        initialize_tracing(processor_settings=ProcessorSettings(export_mode="simple"))
+
+        processors = tracing.paid_tracer_provider._active_span_processor._span_processors
+        assert any(isinstance(processor, SimpleSpanProcessor) for processor in processors)
+        assert not any(isinstance(processor, BatchSpanProcessor) for processor in processors)
 
 
 class TestPaidSpanProcessor:

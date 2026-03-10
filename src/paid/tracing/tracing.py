@@ -5,7 +5,7 @@ import os
 import random
 import signal
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable, Dict, Optional, Tuple, TypeVar, Union
+from typing import Any, Awaitable, Callable, Dict, Literal, Optional, Tuple, TypeVar, Union
 
 from . import distributed_tracing
 from .context_data import ContextData
@@ -13,7 +13,7 @@ from opentelemetry import trace
 from opentelemetry.context import Context
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.trace import ReadableSpan, Span, SpanLimits, SpanProcessor, TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 from opentelemetry.sdk.trace.sampling import ALWAYS_ON
 from opentelemetry.trace import NonRecordingSpan, NoOpTracerProvider, SpanContext, Status, StatusCode, TraceFlags
 from opentelemetry.util.types import Attributes
@@ -42,6 +42,9 @@ class ProcessorSettings:
 
     pydantic: Optional[PydanticProcessorSettings] = None
     """Settings for Pydantic AI span processing. If provided, enables Pydantic-specific filtering."""
+
+    export_mode: Literal["batch", "simple"] = "batch"
+    """Span export strategy. Defaults to batch to avoid blocking user logic on span end."""
 
 
 # Scope name constants for library-specific tracers
@@ -419,7 +422,8 @@ def initialize_tracing(
     Args:
         api_key: The API key for authentication. If not provided, will try to get from PAID_API_KEY environment variable.
         collector_endpoint: The OTLP collector endpoint URL.
-        processor_settings: Optional configuration for span processors (deprecated for Pydantic - use get_paid_tracer_pydantic instead).
+        processor_settings: Optional configuration for span processors. Pydantic settings here are deprecated;
+            use get_paid_tracer_pydantic instead.
 
     Example:
         # Basic initialization
@@ -500,12 +504,33 @@ def initialize_tracing(
             timeout=10,  # Explicit timeout to prevent env var OTEL_EXPORTER_OTLP_TIMEOUT override
         )
 
-        # Use SimpleSpanProcessor for immediate span export.
-        # There are problems with BatchSpanProcessor in some environments - ex. Airflow.
-        # Airflow terminates processes before the batch is sent, losing traces.
-        span_processor = SimpleSpanProcessor(otlp_exporter)
+        processor_settings = processor_settings or ProcessorSettings()
+
+        span_processor: SpanProcessor
+
+        if processor_settings.export_mode == "simple":
+            # SimpleSpanProcessor exports inline. Keep it as an opt-in for short-lived
+            # environments where losing spans on process exit is worse than blocking.
+            span_processor = SimpleSpanProcessor(otlp_exporter)
+            logger.debug("[paid:init] Using SimpleSpanProcessor for immediate span export")
+        else:
+            # BatchSpanProcessor exports from a worker thread so collector outages do not
+            # block user logic on span end.
+            span_processor = BatchSpanProcessor(
+                otlp_exporter,
+                schedule_delay_millis=500,
+                max_export_batch_size=64,
+                max_queue_size=2048,
+                export_timeout_millis=5000,
+            )
+            logger.debug("[paid:init] Using BatchSpanProcessor for non-blocking span export")
+
         paid_tracer_provider.add_span_processor(span_processor)
-        logger.debug("[paid:init] Added SimpleSpanProcessor with OTLPSpanExporter -> %s", collector_endpoint)
+        logger.debug(
+            "[paid:init] Added %s with OTLPSpanExporter -> %s",
+            type(span_processor).__name__,
+            collector_endpoint,
+        )
 
         setup_graceful_termination(paid_tracer_provider)  # doesn't throw
 
