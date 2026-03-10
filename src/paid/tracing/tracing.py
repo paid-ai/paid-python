@@ -44,7 +44,7 @@ class ProcessorSettings:
     """Settings for Pydantic AI span processing. If provided, enables Pydantic-specific filtering."""
 
     export_mode: Literal["batch", "simple"] = "simple"
-    """Span export strategy. Defaults to batch to avoid blocking user logic on span end."""
+    """Span export strategy. Defaults to simple."""
 
 
 # Scope name constants for library-specific tracers
