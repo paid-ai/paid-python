@@ -203,10 +203,13 @@ def _instrument_openai_agents() -> None:
         logger.warning("OpenAI Agents library not available, skipping instrumentation")
         return
 
+    from .openai_agents_patches import instrument_openai_agents
+
     logger.debug("[paid:autoinstrument] Instrumenting openai-agents with OpenAIAgentsInstrumentor, provider=%s",
                  type(tracing.paid_tracer_provider).__name__)
     # Instrument OpenAI Agents with Paid's tracer provider
     OpenAIAgentsInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
+    instrument_openai_agents()
 
     _initialized_instrumentors.append("openai-agents")
     logger.info("OpenAI Agents auto-instrumentation enabled")

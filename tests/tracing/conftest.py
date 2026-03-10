@@ -88,6 +88,19 @@ def tracing_setup(
         except Exception:
             pass
 
+    if "openai-agents" in active:
+        try:
+            from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
+            OpenAIAgentsInstrumentor().uninstrument()
+        except Exception:
+            pass
+
+        try:
+            from paid.tracing.openai_agents_patches import uninstrument_openai_agents
+            uninstrument_openai_agents()
+        except Exception:
+            pass
+
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "test-key-for-cassettes")
 if "ANTHROPIC_API_KEY" not in os.environ:

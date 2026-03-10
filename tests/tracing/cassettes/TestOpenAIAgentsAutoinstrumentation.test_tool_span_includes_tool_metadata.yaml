@@ -1,0 +1,111 @@
+interactions:
+- request:
+    body: '{"include":[],"input":[{"content":"What''s the weather in London?","role":"user"}],"instructions":"Use
+      the get_weather tool for the user''s city and stop after using it.","model":"gpt-4.1-nano-2025-04-14","tools":[{"name":"get_weather","parameters":{"properties":{"city":{"title":"City","type":"string"}},"required":["city"],"title":"get_weather_args","type":"object","additionalProperties":false},"strict":true,"type":"function","description":"Get
+      the current weather for a city."}]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '482'
+      Content-Type:
+      - application/json
+      Host:
+      - api.openai.com
+      User-Agent:
+      - Agents/Python 0.10.5
+      X-Stainless-Arch:
+      - arm64
+      X-Stainless-Async:
+      - async:asyncio
+      X-Stainless-Lang:
+      - python
+      X-Stainless-OS:
+      - MacOS
+      X-Stainless-Package-Version:
+      - 2.26.0
+      X-Stainless-Runtime:
+      - CPython
+      X-Stainless-Runtime-Version:
+      - 3.10.18
+      x-stainless-read-timeout:
+      - '600'
+      x-stainless-retry-count:
+      - '0'
+    method: POST
+    uri: https://api.openai.com/v1/responses
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAA/31VTW/jNhC951cIuvQSB/qw7Hhv7RZYoCmKXooWbRYCJY4cbihSSw7TNQL/9w4p
+        S6K8SS+GNY98mnnzZvR6kySp4OmHJDVghzqrWLbfNduCVwWrdm2W7Q5NlkFXHapse58fykPB9hVn
+        Rdk2PCubPL31FLr5Ai1ONFpZGOOtAYbAa+axfL8v8211v60CZpGhs/5Oq/tBAp0bLzWsfT4a7ZTP
+        q2PSwhgWUgp1pNgrPVJgYCcw/j6HF5B6oAcCzuOLJ8qrV+8CCsZof1M5KUOgM/DVgWpP9QCKSTwR
+        mN1lARNqIqs5IBPSxjeFsmhci4KK9rn8YSHBJ0iOgPW/VPwTmAS1lkmnTQCcBfODTVqBp4QpnljU
+        Q8I6pHPOUn2JwLtRh559q7XDwWGN+hnU6r0e9Lx1y+Q6o15zkD6V44Cb7V2+UUzpTZEV1SbbbvLt
+        pWOBmI79E8QcJZ3N0LXvW2G3LYpgBbYvyQZVebiHPK/2VSAOJHgaINA4FZQJSS7we50PIDNH14PC
+        gL8+pl6ox/TDY/qrVlyrx/S8nPW09Zhx+Pvwkxj4n39//Fl/+foXfHr45eHH37JDOSw3FOtDZlF7
+        0oCd6fdzUGZghrhAruWlJo82HMjh5BR4wykEvQjtbD0NwZjb3JnBULlIlO0T1M9wehczJInywsUn
+        aJSsVqsJgI5chdEhL67re2Ym7nkgLOsAT5SQJ+4ErOxPlnwRVBKKaaA65iSmlznVBmIFEHqaNWph
+        COeX4hG+4ZIZ5dWz5TnyRDg3Sn7J+AVMo60IUqY9cOH6ZZDHJjxpSs/DzKFOZ8B+799r6y2t52Bb
+        I4aLrOknwDCPrTOGNEmmYfVzysJ43v2/bWbQG6anjhkb1Tu2lHQiTddx79ux2DjmUxcow1s+evj2
+        CrzURdvGWyACz/P/83In9QtNGOCzQvGr58Dn6Mb8+qjImqbRpvGhSxqXhR8hjHPhtWXy97jusL9v
+        rvILVYTvhTfV1fzRPqylPpJ6jSfI5uAQu81Qf9nUSy4sa+T0/XCWHWGxolCrDbovbr+PR5v9dVku
+        NIp8uZitTHu9mMv8LeAt3nmO36NGjUwuYJ6V8zT4j8dq1xM9Z8g8//nm/B9wE3DNzwcAAA==
+    headers:
+      CF-RAY:
+      - 9da2551c0fc12aca-LHR
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 10 Mar 2026 12:30:46 GMT
+      Server:
+      - cloudflare
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      openai-organization:
+      - agentpaid
+      openai-processing-ms:
+      - '809'
+      openai-project:
+      - proj_g54CtVh9wETqz1duiA1cw9Kw
+      openai-version:
+      - '2020-10-01'
+      set-cookie:
+      - __cf_bm=JGgWD1T1Lguk7u_rbfuf36BeFTDrvdO_VOtSCt9r1sM-1773145845.126583-1.0.1.1-ELK.GFFIV2s_OtTOhlDK_TwFlAemhVqxChxPvDEi2oUoHoBeIe2YTIedaZpisXt.ur6QXVuildQNMG3OWQNZ_HBqWmO.hAwpdwD3Mvb3.sJDbuOYWz6LquzBTsjBrUaU;
+        HttpOnly; Secure; Path=/; Domain=api.openai.com; Expires=Tue, 10 Mar 2026
+        13:00:46 GMT
+      x-ratelimit-limit-requests:
+      - '500'
+      x-ratelimit-limit-tokens:
+      - '200000'
+      x-ratelimit-remaining-requests:
+      - '499'
+      x-ratelimit-remaining-tokens:
+      - '199711'
+      x-ratelimit-reset-requests:
+      - 120ms
+      x-ratelimit-reset-tokens:
+      - 86ms
+      x-request-id:
+      - req_6fa5e16546874f698b454f13128b6d85
+    status:
+      code: 200
+      message: OK
+version: 1
