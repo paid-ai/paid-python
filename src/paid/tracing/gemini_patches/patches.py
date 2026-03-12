@@ -54,8 +54,7 @@ def _patch_response_id_extraction() -> None:
         )
     except ImportError:
         logger.debug(
-            "Could not import openinference google_genai _response_attributes_extractor, "
-            "skipping response ID patch"
+            "Could not import openinference google_genai _response_attributes_extractor, skipping response ID patch"
         )
         return
 
@@ -68,10 +67,7 @@ def _patch_response_id_extraction() -> None:
             yield _ATTR_RESPONSE_ID, response_id
 
     mod._ResponseAttributesExtractor._get_attributes_from_generate_content = _patched  # type: ignore[method-assign]
-    logger.debug(
-        "Patched _ResponseAttributesExtractor._get_attributes_from_generate_content "
-        "to also yield response ID"
-    )
+    logger.debug("Patched _ResponseAttributesExtractor._get_attributes_from_generate_content to also yield response ID")
 
 
 def _patch_streaming_response_id_extraction() -> None:
@@ -79,10 +75,7 @@ def _patch_streaming_response_id_extraction() -> None:
     try:
         from openinference.instrumentation.google_genai import _stream as stream_mod
     except ImportError:
-        logger.debug(
-            "Could not import openinference google_genai _stream, "
-            "skipping streaming response ID patch"
-        )
+        logger.debug("Could not import openinference google_genai _stream, skipping streaming response ID patch")
         return
 
     _original_get_extra = stream_mod._ResponseExtractor.get_extra_attributes

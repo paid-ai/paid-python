@@ -39,6 +39,7 @@ def uninstrument_anthropic() -> None:
     if _original_async_messages_stream is not None:
         try:
             from anthropic.resources.messages import AsyncMessages
+
             AsyncMessages.stream = _original_async_messages_stream  # type: ignore[method-assign]
         except Exception:
             pass
@@ -46,6 +47,7 @@ def uninstrument_anthropic() -> None:
 
     _uninstrument_beta_messages()
     _uninstrument_response_id_patches()
+
 
 def _patch_stream_context_managers() -> None:
     try:
@@ -96,6 +98,7 @@ def _patch_stream_context_managers() -> None:
 # losing the high-level MessageStream (.text_stream, .get_final_message()).
 # We delegate to the real __enter__ instead, then wrap in _MessagesStream for tracing.
 
+
 def _patch_message_stream_manager() -> None:
     try:
         from openinference.instrumentation.anthropic._stream import _MessagesStream
@@ -121,6 +124,7 @@ def _patch_message_stream_manager() -> None:
 
 
 # Fix 3: openinference only wraps sync Messages.stream, not AsyncMessages.stream.
+
 
 class _AsyncMessageStreamManagerProxy(ObjectProxy):  # type: ignore[misc]
     """Wraps AsyncMessageStreamManager with span lifecycle management."""
@@ -193,8 +197,6 @@ def _wrap_async_messages_stream() -> None:
 
     wrap_function_wrapper(module="anthropic.resources.messages", name="AsyncMessages.stream", wrapper=_wrapper)
     logger.debug("Wrapped AsyncMessages.stream for instrumentation")
-
-
 
 
 def _patch_response_accumulator_for_beta() -> None:
@@ -428,9 +430,7 @@ def _wrap_beta_messages() -> None:
 
     def _beta_async_stream_wrapper(wrapped, instance, args, kwargs):  # type: ignore[misc]
         beta_tracer = tracing.paid_tracer_provider.get_tracer("paid.anthropic")
-        span = beta_tracer.start_span(
-            name="AsyncMessagesStream", record_exception=False, set_status_on_exception=False
-        )
+        span = beta_tracer.start_span(name="AsyncMessagesStream", record_exception=False, set_status_on_exception=False)
 
         try:
             if kwargs.get("model"):

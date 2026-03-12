@@ -65,12 +65,14 @@ def tracing_setup(
     if "anthropic" in active:
         try:
             from openinference.instrumentation.anthropic import AnthropicInstrumentor
+
             AnthropicInstrumentor().uninstrument()
         except Exception:
             pass
 
         try:
             from paid.tracing.anthropic_patches import uninstrument_anthropic
+
             uninstrument_anthropic()
         except Exception:
             pass
@@ -78,12 +80,14 @@ def tracing_setup(
     if "google-genai" in active:
         try:
             from openinference.instrumentation.google_genai import GoogleGenAIInstrumentor
+
             GoogleGenAIInstrumentor().uninstrument()
         except Exception:
             pass
 
         try:
             from paid.tracing.gemini_patches import uninstrument_google_genai
+
             uninstrument_google_genai()
         except Exception:
             pass
@@ -91,13 +95,23 @@ def tracing_setup(
     if "openai-agents" in active:
         try:
             from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
+
             OpenAIAgentsInstrumentor().uninstrument()
         except Exception:
             pass
 
         try:
             from paid.tracing.openai_agents_patches import uninstrument_openai_agents
+
             uninstrument_openai_agents()
+        except Exception:
+            pass
+
+    if "claude-agent-sdk" in active:
+        try:
+            from openinference.instrumentation.claude_agent_sdk import ClaudeAgentSDKInstrumentor
+
+            ClaudeAgentSDKInstrumentor().uninstrument()
         except Exception:
             pass
 
@@ -133,9 +147,7 @@ TOOL_USE_PARAMS: dict[str, Any] = {
             "description": "Get the weather for a location",
             "input_schema": {
                 "type": "object",
-                "properties": {
-                    "location": {"type": "string", "description": "City and state, e.g. San Francisco, CA"}
-                },
+                "properties": {"location": {"type": "string", "description": "City and state, e.g. San Francisco, CA"}},
                 "required": ["location"],
             },
         }
@@ -187,9 +199,7 @@ ANTHROPIC_TOOL_CHOICE_ANY_PARAMS: dict[str, Any] = {
             "description": "Get the weather for a location",
             "input_schema": {
                 "type": "object",
-                "properties": {
-                    "location": {"type": "string", "description": "City and state, e.g. San Francisco, CA"}
-                },
+                "properties": {"location": {"type": "string", "description": "City and state, e.g. San Francisco, CA"}},
                 "required": ["location"],
             },
         }
@@ -207,9 +217,7 @@ ANTHROPIC_TOOL_CHOICE_SPECIFIC_PARAMS: dict[str, Any] = {
             "description": "Get the weather for a location",
             "input_schema": {
                 "type": "object",
-                "properties": {
-                    "location": {"type": "string", "description": "City and state, e.g. London, UK"}
-                },
+                "properties": {"location": {"type": "string", "description": "City and state, e.g. London, UK"}},
                 "required": ["location"],
             },
         }

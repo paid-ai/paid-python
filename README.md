@@ -344,6 +344,7 @@ anthropic          - Anthropic SDK
 gemini             - Google Generative AI (google-generativeai)
 openai             - OpenAI Python SDK
 openai-agents      - OpenAI Agents SDK
+claude-agent-sdk   - Claude Agent SDK
 bedrock            - AWS Bedrock (boto3)
 langchain          - LangChain framework
 instructor         - Instructor

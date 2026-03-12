@@ -21,7 +21,6 @@ from paid.tracing.tracing import (
 
 
 class TestInitializeTracing:
-
     def setup_method(self):
         self._original_provider = tracing.paid_tracer_provider
         self._original_token = _TokenStore.get()
@@ -106,7 +105,6 @@ class TestInitializeTracing:
 
 
 class TestPaidSpanProcessor:
-
     def test_span_name_prefixed(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
         tracer = tracing_provider.get_tracer("test")
@@ -213,7 +211,6 @@ class TestPaidSpanProcessor:
 
 
 class TestPydanticSpanProcessor:
-
     def test_usage_attributes_filtered_when_track_usage_false(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
         scope_name = "test.pydantic.scope"
@@ -255,7 +252,6 @@ class TestPydanticSpanProcessor:
 
 
 class TestTraceSync:
-
     def test_trace_sync_creates_parent_span(self, tracing_setup):
         exporter = tracing_setup
         result = trace_sync_(external_customer_id="cust-1", fn=lambda: "hello", external_agent_id="agent-1")
@@ -290,7 +286,6 @@ class TestTraceSync:
 
 
 class TestTraceAsync:
-
     async def test_trace_async_creates_parent_span(self, tracing_setup):
         exporter = tracing_setup
 
@@ -336,7 +331,6 @@ class TestTraceAsync:
 
 
 class TestTraceWithMetadata:
-
     def test_trace_sync_with_metadata(self, tracing_setup):
         exporter = tracing_setup
         trace_sync_(external_customer_id="cust", fn=lambda: "ok", metadata={"env": "test", "nested": {"key": "val"}})

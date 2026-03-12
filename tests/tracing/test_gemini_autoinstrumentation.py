@@ -35,18 +35,15 @@ ATTR_RESPONSE_ID = "gen_ai.response.id"
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _get_generate_content_spans(exporter):
     """Get spans related to GenerateContent (non-streaming)."""
-    return [
-        s for s in exporter.get_finished_spans()
-        if "GenerateContent" in s.name and "Stream" not in s.name
-    ]
+    return [s for s in exporter.get_finished_spans() if "GenerateContent" in s.name and "Stream" not in s.name]
 
 
 def _get_stream_spans(exporter):
     """Get spans related to GenerateContentStream."""
     return [s for s in exporter.get_finished_spans() if "GenerateContentStream" in s.name]
-
 
 
 def _setup(tracing_setup):
@@ -76,9 +73,8 @@ def _assert_span_matches_response(span, response):
         if response.usage_metadata.prompt_token_count:
             assert attrs.get(ATTR_TOKENS_PROMPT) == response.usage_metadata.prompt_token_count
         # Completion tokens = candidates + thoughts (reasoning) tokens
-        expected_completion = (
-            (response.usage_metadata.candidates_token_count or 0)
-            + (response.usage_metadata.thoughts_token_count or 0)
+        expected_completion = (response.usage_metadata.candidates_token_count or 0) + (
+            response.usage_metadata.thoughts_token_count or 0
         )
         if expected_completion:
             assert attrs.get(ATTR_TOKENS_COMPLETION) == expected_completion
@@ -106,8 +102,8 @@ def _assert_streaming_span_has_token_counts(span):
 # Sync generate_content
 # ===========================================================================
 
-class TestSyncGenerateContent:
 
+class TestSyncGenerateContent:
     @pytest.mark.vcr()
     def test_basic_generate_content(self, tracing_setup, gemini_client: genai.Client):
         exporter = _setup(tracing_setup)
@@ -151,8 +147,8 @@ class TestSyncGenerateContent:
 # Async generate_content
 # ===========================================================================
 
-class TestAsyncGenerateContent:
 
+class TestAsyncGenerateContent:
     @pytest.mark.vcr()
     async def test_basic_generate_content(self, tracing_setup, gemini_client: genai.Client):
         exporter = _setup(tracing_setup)
@@ -196,8 +192,8 @@ class TestAsyncGenerateContent:
 # Sync generate_content_stream
 # ===========================================================================
 
-class TestSyncGenerateContentStream:
 
+class TestSyncGenerateContentStream:
     @pytest.mark.vcr()
     def test_stream_iteration(self, tracing_setup, gemini_client: genai.Client):
         exporter = _setup(tracing_setup)
@@ -227,8 +223,8 @@ class TestSyncGenerateContentStream:
 # Async generate_content_stream
 # ===========================================================================
 
-class TestAsyncGenerateContentStream:
 
+class TestAsyncGenerateContentStream:
     @pytest.mark.vcr()
     async def test_stream_iteration(self, tracing_setup, gemini_client: genai.Client):
         exporter = _setup(tracing_setup)
@@ -259,8 +255,8 @@ class TestAsyncGenerateContentStream:
 # Streaming variants (different param combinations)
 # ===========================================================================
 
-class TestGeminiStreamingVariants:
 
+class TestGeminiStreamingVariants:
     @pytest.mark.vcr()
     def test_sync_stream_with_system_prompt(self, tracing_setup, gemini_client: genai.Client):
         exporter = _setup(tracing_setup)
@@ -295,8 +291,8 @@ class TestGeminiStreamingVariants:
 # Context propagation
 # ===========================================================================
 
-class TestGeminiContextPropagation:
 
+class TestGeminiContextPropagation:
     @pytest.mark.vcr()
     def test_spans_have_customer_id(self, tracing_setup, gemini_client: genai.Client):
         exporter = _setup(tracing_setup)
@@ -353,8 +349,8 @@ class TestGeminiContextPropagation:
 # Prompt filtering
 # ===========================================================================
 
-class TestGeminiPromptFiltering:
 
+class TestGeminiPromptFiltering:
     @pytest.mark.vcr()
     def test_prompt_filtered_by_default(self, tracing_setup, gemini_client: genai.Client):
         exporter = _setup(tracing_setup)
@@ -386,8 +382,8 @@ class TestGeminiPromptFiltering:
 # Count tokens
 # ===========================================================================
 
-class TestGeminiCountTokens:
 
+class TestGeminiCountTokens:
     @pytest.mark.vcr()
     def test_sync_count_tokens(self, tracing_setup, gemini_client: genai.Client):
         _setup(tracing_setup)
@@ -405,8 +401,8 @@ class TestGeminiCountTokens:
 # Embed content
 # ===========================================================================
 
-class TestGeminiEmbedContent:
 
+class TestGeminiEmbedContent:
     @pytest.mark.vcr()
     def test_sync_embed_content(self, tracing_setup, gemini_client: genai.Client):
         _setup(tracing_setup)
@@ -428,14 +424,15 @@ class TestGeminiEmbedContent:
 # Structured output (JSON mode)
 # ===========================================================================
 
-class TestGeminiStructuredOutput:
 
+class TestGeminiStructuredOutput:
     @pytest.mark.vcr()
     def test_sync_json_mode(self, tracing_setup, gemini_client: genai.Client):
         exporter = _setup(tracing_setup)
         response = gemini_client.models.generate_content(**GEMINI_STRUCTURED_OUTPUT_PARAMS)
         assert response.text
         import json
+
         parsed = json.loads(response.text)
         assert "capital" in parsed and "country" in parsed
         spans = _get_generate_content_spans(exporter)
@@ -448,6 +445,7 @@ class TestGeminiStructuredOutput:
         response = await gemini_client.aio.models.generate_content(**GEMINI_STRUCTURED_OUTPUT_PARAMS)
         assert response.text
         import json
+
         parsed = json.loads(response.text)
         assert "capital" in parsed and "country" in parsed
         spans = _get_generate_content_spans(exporter)
@@ -464,6 +462,7 @@ class TestGeminiStructuredOutput:
         full_text = "".join(text_parts)
         assert len(full_text) > 0
         import json
+
         parsed = json.loads(full_text)
         assert "capital" in parsed and "country" in parsed
         spans = _get_stream_spans(exporter)
@@ -475,8 +474,8 @@ class TestGeminiStructuredOutput:
 # Thinking config
 # ===========================================================================
 
-class TestGeminiThinkingConfig:
 
+class TestGeminiThinkingConfig:
     @pytest.mark.vcr()
     def test_sync_with_thinking_budget(self, tracing_setup, gemini_client: genai.Client):
         exporter = _setup(tracing_setup)
@@ -490,9 +489,8 @@ class TestGeminiThinkingConfig:
         _assert_span_matches_response(spans[0], response)
         # Explicitly verify thinking tokens contribute to completion count
         attrs = dict(spans[0].attributes) if spans[0].attributes else {}
-        expected_completion = (
-            (response.usage_metadata.candidates_token_count or 0)
-            + (response.usage_metadata.thoughts_token_count or 0)
+        expected_completion = (response.usage_metadata.candidates_token_count or 0) + (
+            response.usage_metadata.thoughts_token_count or 0
         )
         assert attrs.get(ATTR_TOKENS_COMPLETION) == expected_completion
 
@@ -512,8 +510,8 @@ class TestGeminiThinkingConfig:
 # Forced tool use (tool_config mode=ANY)
 # ===========================================================================
 
-class TestGeminiForcedToolUse:
 
+class TestGeminiForcedToolUse:
     @pytest.mark.vcr()
     def test_sync_forced_tool_call(self, tracing_setup, gemini_client: genai.Client):
         exporter = _setup(tracing_setup)
@@ -522,7 +520,9 @@ class TestGeminiForcedToolUse:
         # With mode=ANY, the model must call a function
         content = response.candidates[0].content
         assert content and content.parts
-        assert any(p.function_call is not None for p in content.parts), "Expected a function_call part with tool_config mode=ANY"
+        assert any(p.function_call is not None for p in content.parts), (
+            "Expected a function_call part with tool_config mode=ANY"
+        )
         spans = _get_generate_content_spans(exporter)
         assert len(spans) >= 1
         _assert_span_matches_response(spans[0], response)
@@ -534,7 +534,9 @@ class TestGeminiForcedToolUse:
         assert response.candidates
         content = response.candidates[0].content
         assert content and content.parts
-        assert any(p.function_call is not None for p in content.parts), "Expected a function_call part with tool_config mode=ANY"
+        assert any(p.function_call is not None for p in content.parts), (
+            "Expected a function_call part with tool_config mode=ANY"
+        )
         spans = _get_generate_content_spans(exporter)
         assert len(spans) >= 1
         _assert_span_matches_response(spans[0], response)
@@ -544,8 +546,8 @@ class TestGeminiForcedToolUse:
 # Stop sequences
 # ===========================================================================
 
-class TestGeminiStopSequences:
 
+class TestGeminiStopSequences:
     @pytest.mark.vcr()
     def test_sync_stop_sequences(self, tracing_setup, gemini_client: genai.Client):
         exporter = _setup(tracing_setup)
