@@ -61,7 +61,9 @@ def _assert_span_matches_response(span, response):
         f"Expected response ID '{response.id}', got '{attrs.get(ATTR_RESPONSE_ID)}'"
     )
 
-    expected_prompt = usage.input_tokens + (usage.cache_creation_input_tokens or 0) + (usage.cache_read_input_tokens or 0)
+    expected_prompt = (
+        usage.input_tokens + (usage.cache_creation_input_tokens or 0) + (usage.cache_read_input_tokens or 0)
+    )
     assert attrs.get(ATTR_TOKENS_PROMPT) == expected_prompt
     assert attrs.get(ATTR_TOKENS_COMPLETION) == usage.output_tokens
     if attrs.get(ATTR_TOKENS_TOTAL) is not None:
@@ -87,7 +89,6 @@ def _assert_streaming_span_has_token_counts(span, expect_response_id: bool = Tru
 
 
 class TestSyncMessagesCreate:
-
     @pytest.mark.vcr()
     def test_basic_create(self, tracing_setup, anthropic_client: Anthropic):
         exporter = _setup(tracing_setup)
@@ -109,7 +110,6 @@ class TestSyncMessagesCreate:
 
 
 class TestSyncMessagesCreateStream:
-
     @pytest.mark.vcr()
     def test_stream_iteration(self, tracing_setup, anthropic_client: Anthropic):
         exporter = _setup(tracing_setup)
@@ -131,7 +131,6 @@ class TestSyncMessagesCreateStream:
 
 
 class TestSyncMessagesStream:
-
     @pytest.mark.vcr()
     def test_stream_text_stream(self, tracing_setup, anthropic_client: Anthropic):
         exporter = _setup(tracing_setup)
@@ -152,7 +151,6 @@ class TestSyncMessagesStream:
 
 
 class TestAsyncMessagesCreate:
-
     @pytest.mark.vcr()
     async def test_basic_create(self, tracing_setup, async_anthropic_client: AsyncAnthropic):
         exporter = _setup(tracing_setup)
@@ -174,7 +172,6 @@ class TestAsyncMessagesCreate:
 
 
 class TestAsyncMessagesCreateStream:
-
     @pytest.mark.vcr()
     async def test_stream_iteration(self, tracing_setup, async_anthropic_client: AsyncAnthropic):
         exporter = _setup(tracing_setup)
@@ -198,7 +195,6 @@ class TestAsyncMessagesCreateStream:
 
 
 class TestAsyncMessagesStream:
-
     @pytest.mark.vcr()
     async def test_stream_text_stream(self, tracing_setup, async_anthropic_client: AsyncAnthropic):
         exporter = _setup(tracing_setup)
@@ -219,11 +215,12 @@ class TestAsyncMessagesStream:
 
 
 class TestContextPropagation:
-
     @pytest.mark.vcr()
     def test_autoinstrumented_spans_have_customer_id(self, tracing_setup, anthropic_client: Anthropic):
         exporter = _setup(tracing_setup)
-        result = trace_sync_(external_customer_id="cust-autoinstr", fn=lambda: anthropic_client.messages.create(**SIMPLE_MESSAGE_PARAMS))
+        result = trace_sync_(
+            external_customer_id="cust-autoinstr", fn=lambda: anthropic_client.messages.create(**SIMPLE_MESSAGE_PARAMS)
+        )
         assert result.content
         for span in exporter.get_finished_spans():
             assert span.attributes.get("external_customer_id") == "cust-autoinstr"
@@ -231,13 +228,19 @@ class TestContextPropagation:
     @pytest.mark.vcr()
     def test_autoinstrumented_spans_have_agent_id(self, tracing_setup, anthropic_client: Anthropic):
         exporter = _setup(tracing_setup)
-        result = trace_sync_(external_customer_id="cust", fn=lambda: anthropic_client.messages.create(**SIMPLE_MESSAGE_PARAMS), external_agent_id="agent-007")
+        result = trace_sync_(
+            external_customer_id="cust",
+            fn=lambda: anthropic_client.messages.create(**SIMPLE_MESSAGE_PARAMS),
+            external_agent_id="agent-007",
+        )
         assert result.content
         for span in exporter.get_finished_spans():
             assert span.attributes.get("external_agent_id") == "agent-007"
 
     @pytest.mark.vcr()
-    async def test_async_autoinstrumented_spans_have_customer_id(self, tracing_setup, async_anthropic_client: AsyncAnthropic):
+    async def test_async_autoinstrumented_spans_have_customer_id(
+        self, tracing_setup, async_anthropic_client: AsyncAnthropic
+    ):
         exporter = _setup(tracing_setup)
 
         async def call():
@@ -250,28 +253,36 @@ class TestContextPropagation:
 
 
 class TestPromptFiltering:
-
     @pytest.mark.vcr()
     def test_prompt_filtered_by_default(self, tracing_setup, anthropic_client: Anthropic):
         exporter = _setup(tracing_setup)
-        response = trace_sync_(external_customer_id="cust", fn=lambda: anthropic_client.messages.create(**SIMPLE_MESSAGE_PARAMS))
+        response = trace_sync_(
+            external_customer_id="cust", fn=lambda: anthropic_client.messages.create(**SIMPLE_MESSAGE_PARAMS)
+        )
         spans = _get_message_spans(exporter)
         assert len(spans) == 1
         attrs = dict(spans[0].attributes)
         for key in attrs:
             assert "input.value" not in key and "output.value" not in key
-        assert attrs.get(ATTR_TOKENS_PROMPT) == (response.usage.input_tokens + (response.usage.cache_creation_input_tokens or 0) + (response.usage.cache_read_input_tokens or 0))
+        assert attrs.get(ATTR_TOKENS_PROMPT) == (
+            response.usage.input_tokens
+            + (response.usage.cache_creation_input_tokens or 0)
+            + (response.usage.cache_read_input_tokens or 0)
+        )
 
     @pytest.mark.vcr()
     def test_prompt_kept_with_store_prompt(self, tracing_setup, anthropic_client: Anthropic):
         exporter = _setup(tracing_setup)
-        trace_sync_(external_customer_id="cust", fn=lambda: anthropic_client.messages.create(**SIMPLE_MESSAGE_PARAMS), store_prompt=True)
+        trace_sync_(
+            external_customer_id="cust",
+            fn=lambda: anthropic_client.messages.create(**SIMPLE_MESSAGE_PARAMS),
+            store_prompt=True,
+        )
         attrs = dict(_get_message_spans(exporter)[0].attributes)
         assert any("input.value" in k or "output.value" in k for k in attrs)
 
 
 class TestCountTokens:
-
     @pytest.mark.vcr()
     def test_sync_count_tokens(self, tracing_setup, anthropic_client: Anthropic):
         _setup(tracing_setup)
@@ -284,7 +295,6 @@ class TestCountTokens:
 
 
 class TestSystemPrompt:
-
     @pytest.mark.vcr()
     def test_sync_system_prompt(self, tracing_setup, anthropic_client: Anthropic):
         exporter = _setup(tracing_setup)
@@ -301,7 +311,6 @@ class TestSystemPrompt:
 
 
 class TestMultiTurn:
-
     @pytest.mark.vcr()
     def test_sync_multi_turn(self, tracing_setup, anthropic_client: Anthropic):
         exporter = _setup(tracing_setup)
@@ -318,7 +327,6 @@ class TestMultiTurn:
 
 
 class TestPromptCaching:
-
     @pytest.mark.vcr()
     def test_sync_cache_control(self, tracing_setup, anthropic_client: Anthropic):
         exporter = _setup(tracing_setup)
@@ -335,7 +343,6 @@ class TestPromptCaching:
 
 
 class TestStreamingVariants:
-
     @pytest.mark.vcr()
     def test_sync_stream_with_system_prompt(self, tracing_setup, anthropic_client: Anthropic):
         exporter = _setup(tracing_setup)
@@ -353,7 +360,6 @@ class TestStreamingVariants:
 
 
 class TestBetaMessages:
-
     @pytest.mark.vcr()
     def test_sync_beta_messages_create(self, tracing_setup, anthropic_client: Anthropic):
         exporter = _setup(tracing_setup)
@@ -384,7 +390,9 @@ class TestBetaMessages:
     @pytest.mark.vcr()
     async def test_async_beta_messages_create_stream(self, tracing_setup, async_anthropic_client: AsyncAnthropic):
         exporter = _setup(tracing_setup)
-        events = [e async for e in await async_anthropic_client.beta.messages.create(**SIMPLE_MESSAGE_PARAMS, stream=True)]
+        events = [
+            e async for e in await async_anthropic_client.beta.messages.create(**SIMPLE_MESSAGE_PARAMS, stream=True)
+        ]
         assert len(events) > 0 and "message_start" in {e.type for e in events}
         spans = _get_message_spans(exporter)
         assert len(spans) == 1
@@ -392,7 +400,6 @@ class TestBetaMessages:
 
 
 class TestToolChoice:
-
     @pytest.mark.vcr()
     def test_sync_tool_choice_any(self, tracing_setup, anthropic_client: Anthropic):
         exporter = _setup(tracing_setup)
@@ -442,7 +449,6 @@ class TestToolChoice:
 
 
 class TestStopSequences:
-
     @pytest.mark.vcr()
     def test_sync_stop_sequences(self, tracing_setup, anthropic_client: Anthropic):
         exporter = _setup(tracing_setup)

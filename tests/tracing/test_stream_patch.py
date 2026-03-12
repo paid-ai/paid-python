@@ -90,7 +90,6 @@ class TestPatchIdempotent:
 
 
 class TestMessagesStreamAsyncContextManager:
-
     async def test_aenter_returns_proxy_not_wrapped(self):
         mock_stream = MockAsyncStream()
         proxy = _MessagesStream(mock_stream, MockWithSpan())
@@ -120,7 +119,6 @@ class TestMessagesStreamAsyncContextManager:
 
 
 class TestMessagesStreamSyncContextManager:
-
     def test_enter_returns_proxy_not_wrapped(self):
         mock_stream = MockSyncStream()
         proxy = _MessagesStream(mock_stream, MockWithSpan())
@@ -143,7 +141,6 @@ class TestMessagesStreamSyncContextManager:
 
 
 class TestStreamAsyncContextManager:
-
     async def test_aenter_returns_proxy(self):
         mock_stream = MockAsyncStream()
         proxy = _Stream(mock_stream, MockWithSpan())
@@ -159,7 +156,6 @@ class TestStreamAsyncContextManager:
 
 
 class TestStreamSyncContextManager:
-
     def test_full_sync_with_round_trip(self):
         mock_stream = MockSyncStream()
         proxy = _Stream(mock_stream, MockWithSpan())
@@ -170,7 +166,6 @@ class TestStreamSyncContextManager:
 
 
 class TestGracefulDegradationNoContextManager:
-
     async def test_aenter_works_without_wrapped_aenter(self):
         proxy = _MessagesStream(object(), MockWithSpan())
         assert await proxy.__aenter__() is proxy

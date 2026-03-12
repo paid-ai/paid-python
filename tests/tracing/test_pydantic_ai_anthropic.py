@@ -26,7 +26,9 @@ def _instr(provider):
 
 
 def _instr_no_usage(provider):
-    return InstrumentationSettings(tracer_provider=get_paid_tracer_provider_pydantic(PydanticProcessorSettings(track_usage=False)))
+    return InstrumentationSettings(
+        tracer_provider=get_paid_tracer_provider_pydantic(PydanticProcessorSettings(track_usage=False))
+    )
 
 
 def _gen_ai_spans(exporter):
@@ -46,7 +48,6 @@ def _assert_span_matches(span, result):
 
 
 class TestBasicRuns:
-
     @pytest.mark.vcr()
     def test_run_sync(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
@@ -104,7 +105,6 @@ class CityInfo(BaseModel):
 
 
 class TestStructuredOutput:
-
     @pytest.mark.vcr()
     def test_structured_output_pydantic_model(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
@@ -125,11 +125,14 @@ class TestStructuredOutput:
 
 
 class TestToolCalling:
-
     @pytest.mark.vcr()
     def test_tool_plain(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
-        agent = Agent(ANTHROPIC_MODEL, system_prompt="Use the get_temperature tool to answer.", instrument=_instr(tracing_provider))
+        agent = Agent(
+            ANTHROPIC_MODEL,
+            system_prompt="Use the get_temperature tool to answer.",
+            instrument=_instr(tracing_provider),
+        )
 
         @agent.tool_plain
         def get_temperature(city: str) -> str:
@@ -152,7 +155,9 @@ class TestToolCalling:
             user_name: str
 
         exporter = tracing_setup
-        agent = Agent(ANTHROPIC_MODEL, deps_type=MyDeps, system_prompt="Use the greet tool.", instrument=_instr(tracing_provider))
+        agent = Agent(
+            ANTHROPIC_MODEL, deps_type=MyDeps, system_prompt="Use the greet tool.", instrument=_instr(tracing_provider)
+        )
 
         @agent.tool
         def greet(ctx: RunContext[MyDeps]) -> str:
@@ -166,7 +171,11 @@ class TestToolCalling:
     @pytest.mark.vcr()
     def test_multiple_tool_calls(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
-        agent = Agent(ANTHROPIC_MODEL, system_prompt="Always use both tools to answer completely.", instrument=_instr(tracing_provider))
+        agent = Agent(
+            ANTHROPIC_MODEL,
+            system_prompt="Always use both tools to answer completely.",
+            instrument=_instr(tracing_provider),
+        )
 
         @agent.tool_plain
         def get_population(city: str) -> str:
@@ -184,11 +193,14 @@ class TestToolCalling:
 
 
 class TestSystemPrompts:
-
     @pytest.mark.vcr()
     def test_static_system_prompt(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
-        agent = Agent(ANTHROPIC_MODEL, system_prompt="You are a pirate. Always respond in pirate speak.", instrument=_instr(tracing_provider))
+        agent = Agent(
+            ANTHROPIC_MODEL,
+            system_prompt="You are a pirate. Always respond in pirate speak.",
+            instrument=_instr(tracing_provider),
+        )
         result = agent.run_sync("Say hello.")
         assert isinstance(result.output, str) and result.usage().input_tokens > 0
         _assert_span_matches(_gen_ai_spans(exporter)[0], result)
@@ -214,7 +226,6 @@ class TestSystemPrompts:
 
 
 class TestMultiTurn:
-
     @pytest.mark.vcr()
     def test_multi_turn_with_history(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
@@ -226,7 +237,6 @@ class TestMultiTurn:
 
 
 class TestPydanticSpanProcessor:
-
     @pytest.mark.vcr()
     def test_track_usage_true(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
@@ -247,7 +257,6 @@ class TestPydanticSpanProcessor:
 
 
 class TestContextPropagation:
-
     @pytest.mark.vcr()
     def test_spans_have_customer_id(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
@@ -261,14 +270,15 @@ class TestContextPropagation:
     def test_spans_have_agent_id(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
         agent = Agent(ANTHROPIC_MODEL, instrument=_instr(tracing_provider))
-        result = trace_sync_(external_customer_id="cust", fn=lambda: agent.run_sync("Say hello."), external_agent_id="agent-pydantic")
+        result = trace_sync_(
+            external_customer_id="cust", fn=lambda: agent.run_sync("Say hello."), external_agent_id="agent-pydantic"
+        )
         assert result.output
         for span in exporter.get_finished_spans():
             assert span.attributes.get("external_agent_id") == "agent-pydantic"
 
 
 class TestPromptFiltering:
-
     @pytest.mark.vcr()
     def test_prompt_content_filtered_by_default(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
@@ -285,11 +295,13 @@ class TestPromptFiltering:
         agent = Agent(ANTHROPIC_MODEL, instrument=_instr(tracing_provider))
         trace_sync_(external_customer_id="cust", fn=lambda: agent.run_sync("Say hello."), store_prompt=True)
         attrs = dict(_gen_ai_spans(exporter)[0].attributes)
-        assert any("gen_ai.input.messages" in k or "gen_ai.output.messages" in k or "model_request_parameters" in k for k in attrs)
+        assert any(
+            "gen_ai.input.messages" in k or "gen_ai.output.messages" in k or "model_request_parameters" in k
+            for k in attrs
+        )
 
 
 class TestCombinedInstrumentation:
-
     @pytest.mark.vcr()
     def test_pydantic_and_anthropic_autoinstrumentation(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
@@ -313,8 +325,5 @@ class TestCombinedInstrumentation:
         assert len(gen_ai) >= 1
         # Anthropic-level LLM spans from beta path instrumentation
         all_spans = exporter.get_finished_spans()
-        anthropic_spans = [
-            s for s in all_spans
-            if s.attributes and s.attributes.get("llm.provider") == "anthropic"
-        ]
+        anthropic_spans = [s for s in all_spans if s.attributes and s.attributes.get("llm.provider") == "anthropic"]
         assert len(anthropic_spans) >= 1, "Expected anthropic-level spans from beta path instrumentation"

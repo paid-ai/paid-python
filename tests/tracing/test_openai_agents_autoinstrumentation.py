@@ -27,7 +27,6 @@ def _find_span(spans, *, kind: str, name: str | None = None):
 
 
 class TestOpenAIAgentsAutoinstrumentation:
-
     @pytest.mark.vcr()
     def test_tool_span_includes_tool_metadata(self, tracing_setup):
         exporter = _setup(tracing_setup)

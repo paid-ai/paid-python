@@ -26,7 +26,9 @@ def _instr(provider):
 
 
 def _instr_no_usage(provider):
-    return InstrumentationSettings(tracer_provider=get_paid_tracer_provider_pydantic(PydanticProcessorSettings(track_usage=False)))
+    return InstrumentationSettings(
+        tracer_provider=get_paid_tracer_provider_pydantic(PydanticProcessorSettings(track_usage=False))
+    )
 
 
 def _gen_ai_spans(exporter):
@@ -46,7 +48,6 @@ def _assert_span_matches(span, result):
 
 
 class TestGeminiBasicRuns:
-
     @pytest.mark.vcr()
     def test_run_sync(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
@@ -104,7 +105,6 @@ class CityInfo(BaseModel):
 
 
 class TestGeminiStructuredOutput:
-
     @pytest.mark.vcr()
     def test_structured_output_pydantic_model(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
@@ -125,11 +125,14 @@ class TestGeminiStructuredOutput:
 
 
 class TestGeminiToolCalling:
-
     @pytest.mark.vcr()
     def test_tool_plain(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
-        agent = Agent(GEMINI_PYDANTIC_MODEL, system_prompt="Use the get_temperature tool to answer.", instrument=_instr(tracing_provider))
+        agent = Agent(
+            GEMINI_PYDANTIC_MODEL,
+            system_prompt="Use the get_temperature tool to answer.",
+            instrument=_instr(tracing_provider),
+        )
 
         @agent.tool_plain
         def get_temperature(city: str) -> str:
@@ -152,7 +155,12 @@ class TestGeminiToolCalling:
             user_name: str
 
         exporter = tracing_setup
-        agent = Agent(GEMINI_PYDANTIC_MODEL, deps_type=MyDeps, system_prompt="Use the greet tool.", instrument=_instr(tracing_provider))
+        agent = Agent(
+            GEMINI_PYDANTIC_MODEL,
+            deps_type=MyDeps,
+            system_prompt="Use the greet tool.",
+            instrument=_instr(tracing_provider),
+        )
 
         @agent.tool
         def greet(ctx: RunContext[MyDeps]) -> str:
@@ -166,7 +174,11 @@ class TestGeminiToolCalling:
     @pytest.mark.vcr()
     def test_multiple_tool_calls(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
-        agent = Agent(GEMINI_PYDANTIC_MODEL, system_prompt="Always use both tools to answer completely.", instrument=_instr(tracing_provider))
+        agent = Agent(
+            GEMINI_PYDANTIC_MODEL,
+            system_prompt="Always use both tools to answer completely.",
+            instrument=_instr(tracing_provider),
+        )
 
         @agent.tool_plain
         def get_population(city: str) -> str:
@@ -184,11 +196,14 @@ class TestGeminiToolCalling:
 
 
 class TestGeminiSystemPrompts:
-
     @pytest.mark.vcr()
     def test_static_system_prompt(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
-        agent = Agent(GEMINI_PYDANTIC_MODEL, system_prompt="You are a pirate. Always respond in pirate speak.", instrument=_instr(tracing_provider))
+        agent = Agent(
+            GEMINI_PYDANTIC_MODEL,
+            system_prompt="You are a pirate. Always respond in pirate speak.",
+            instrument=_instr(tracing_provider),
+        )
         result = agent.run_sync("Say hello.")
         assert isinstance(result.output, str) and result.usage().input_tokens > 0
         _assert_span_matches(_gen_ai_spans(exporter)[0], result)
@@ -214,7 +229,6 @@ class TestGeminiSystemPrompts:
 
 
 class TestGeminiMultiTurn:
-
     @pytest.mark.vcr()
     def test_multi_turn_with_history(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
@@ -226,7 +240,6 @@ class TestGeminiMultiTurn:
 
 
 class TestGeminiPydanticSpanProcessor:
-
     @pytest.mark.vcr()
     def test_track_usage_true(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
@@ -247,7 +260,6 @@ class TestGeminiPydanticSpanProcessor:
 
 
 class TestGeminiContextPropagation:
-
     @pytest.mark.vcr()
     def test_spans_have_customer_id(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
@@ -261,14 +273,15 @@ class TestGeminiContextPropagation:
     def test_spans_have_agent_id(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
         agent = Agent(GEMINI_PYDANTIC_MODEL, instrument=_instr(tracing_provider))
-        result = trace_sync_(external_customer_id="cust", fn=lambda: agent.run_sync("Say hello."), external_agent_id="agent-pydantic")
+        result = trace_sync_(
+            external_customer_id="cust", fn=lambda: agent.run_sync("Say hello."), external_agent_id="agent-pydantic"
+        )
         assert result.output
         for span in exporter.get_finished_spans():
             assert span.attributes.get("external_agent_id") == "agent-pydantic"
 
 
 class TestGeminiPromptFiltering:
-
     @pytest.mark.vcr()
     def test_prompt_content_filtered_by_default(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
@@ -285,11 +298,13 @@ class TestGeminiPromptFiltering:
         agent = Agent(GEMINI_PYDANTIC_MODEL, instrument=_instr(tracing_provider))
         trace_sync_(external_customer_id="cust", fn=lambda: agent.run_sync("Say hello."), store_prompt=True)
         attrs = dict(_gen_ai_spans(exporter)[0].attributes)
-        assert any("gen_ai.input.messages" in k or "gen_ai.output.messages" in k or "model_request_parameters" in k for k in attrs)
+        assert any(
+            "gen_ai.input.messages" in k or "gen_ai.output.messages" in k or "model_request_parameters" in k
+            for k in attrs
+        )
 
 
 class TestGeminiCombinedInstrumentation:
-
     @pytest.mark.vcr()
     def test_pydantic_and_google_genai_autoinstrumentation(self, tracing_setup, tracing_provider):
         exporter = tracing_setup
@@ -313,8 +328,5 @@ class TestGeminiCombinedInstrumentation:
         assert len(gen_ai) >= 1
         # Google GenAI-level spans from autoinstrumentation
         all_spans = exporter.get_finished_spans()
-        google_spans = [
-            s for s in all_spans
-            if s.name and "GenerateContent" in s.name
-        ]
+        google_spans = [s for s in all_spans if s.name and "GenerateContent" in s.name]
         assert len(google_spans) >= 1, "Expected google-genai-level spans from autoinstrumentation"
