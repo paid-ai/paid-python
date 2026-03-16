@@ -43,7 +43,7 @@ class ProcessorSettings:
     pydantic: Optional[PydanticProcessorSettings] = None
     """Settings for Pydantic AI span processing. If provided, enables Pydantic-specific filtering."""
 
-    export_mode: Literal["batch", "simple"] = "simple"
+    export_mode: Literal["batch", "simple"] = "batch"
     """Span export strategy. Defaults to simple."""
 
 
@@ -204,7 +204,7 @@ class PaidSpanProcessor(SpanProcessor):
         "logfire.json_schema",
     }
 
-    def __init__(self, span_processor_mode: Literal["batch", "simple"] = "simple") -> None:
+    def __init__(self, span_processor_mode: Literal["batch", "simple"] = "batch") -> None:
         """Initialize processor with the export mode used by the OTLP span processor."""
         self._span_processor_mode = span_processor_mode
 
@@ -513,7 +513,12 @@ def initialize_tracing(
 
         span_processor: SpanProcessor
 
-        if processor_settings.export_mode == "batch":
+        if processor_settings.export_mode == "simple":
+            # SimpleSpanProcessor exports inline. Keep it as an opt-in for short-lived
+            # environments where losing spans on process exit is worse than blocking.
+            span_processor = SimpleSpanProcessor(otlp_exporter)
+            logger.debug("[paid:init] Using impleSpanProcessor for immediate span export")
+        else:
             # BatchSpanProcessor exports from a worker thread so collector outages do not
             # block user logic on span end.
             span_processor = BatchSpanProcessor(
@@ -524,11 +529,6 @@ def initialize_tracing(
                 export_timeout_millis=10_000,
             )
             logger.debug("[paid:init] Using BatchSpanProcessor for non-blocking span export")
-        else:
-            # SimpleSpanProcessor exports inline. Keep it as an opt-in for short-lived
-            # environments where losing spans on process exit is worse than blocking.
-            span_processor = SimpleSpanProcessor(otlp_exporter)
-            logger.debug("[paid:init] Using SimpleSpanProcessor for immediate span export")
 
         paid_tracer_provider.add_span_processor(span_processor)
         logger.debug(
