@@ -107,6 +107,21 @@ def tracing_setup(
         except Exception:
             pass
 
+    if "openai" in active:
+        try:
+            from openinference.instrumentation.openai import OpenAIInstrumentor
+
+            OpenAIInstrumentor().uninstrument()
+        except Exception:
+            pass
+
+        try:
+            from paid.tracing.openai_patches import uninstrument_openai
+
+            uninstrument_openai()
+        except Exception:
+            pass
+
     if "claude-agent-sdk" in active:
         try:
             from openinference.instrumentation.claude_agent_sdk import ClaudeAgentSDKInstrumentor
