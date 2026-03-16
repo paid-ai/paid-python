@@ -5,6 +5,7 @@ This module provides automatic instrumentation for supported AI libraries,
 sending traces to the Paid collector endpoint.
 """
 
+from importlib.util import find_spec
 from typing import List, Optional
 
 from . import tracing
@@ -13,11 +14,15 @@ from opentelemetry.trace import NoOpTracerProvider
 
 from paid.logger import logger
 
+
+def _module_available(module_name: str) -> bool:
+    return find_spec(module_name) is not None
+
 # Safe imports for instrumentation libraries
 try:
     from openinference.instrumentation.anthropic import AnthropicInstrumentor
 
-    ANTHROPIC_AVAILABLE = True
+    ANTHROPIC_AVAILABLE = _module_available("anthropic")
 except Exception:
     logger.debug("Anthropic instrumentation library not available, skipping instrumentation")
     ANTHROPIC_AVAILABLE = False
@@ -25,7 +30,7 @@ except Exception:
 try:
     from openinference.instrumentation.openai import OpenAIInstrumentor
 
-    OPENAI_AVAILABLE = True
+    OPENAI_AVAILABLE = _module_available("openai")
 except Exception:
     logger.debug("OpenAI instrumentation library not available, skipping instrumentation")
     OPENAI_AVAILABLE = False
@@ -33,7 +38,7 @@ except Exception:
 try:
     from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
 
-    OPENAI_AGENTS_AVAILABLE = True
+    OPENAI_AGENTS_AVAILABLE = _module_available("agents")
 except Exception:
     logger.debug("OpenAI Agents instrumentation library not available, skipping instrumentation")
     OPENAI_AGENTS_AVAILABLE = False
@@ -41,7 +46,7 @@ except Exception:
 try:
     from openinference.instrumentation.claude_agent_sdk import ClaudeAgentSDKInstrumentor
 
-    CLAUDE_AGENT_SDK_AVAILABLE = True
+    CLAUDE_AGENT_SDK_AVAILABLE = _module_available("claude_agent_sdk")
 except Exception:
     logger.debug("Claude Agent SDK instrumentation library not available, skipping instrumentation")
     CLAUDE_AGENT_SDK_AVAILABLE = False
@@ -49,7 +54,7 @@ except Exception:
 try:
     from openinference.instrumentation.bedrock import BedrockInstrumentor
 
-    BEDROCK_AVAILABLE = True
+    BEDROCK_AVAILABLE = _module_available("boto3") and _module_available("botocore")
 except Exception:
     logger.debug("Bedrock instrumentation library not available, skipping instrumentation")
     BEDROCK_AVAILABLE = False
@@ -57,7 +62,7 @@ except Exception:
 try:
     from openinference.instrumentation.langchain import LangChainInstrumentor
 
-    LANGCHAIN_AVAILABLE = True
+    LANGCHAIN_AVAILABLE = _module_available("langchain_core")
 except Exception:
     logger.debug("LangChain instrumentation library not available, skipping instrumentation")
     LANGCHAIN_AVAILABLE = False
@@ -65,7 +70,7 @@ except Exception:
 try:
     from openinference.instrumentation.google_genai import GoogleGenAIInstrumentor
 
-    GOOGLE_GENAI_AVAILABLE = True
+    GOOGLE_GENAI_AVAILABLE = _module_available("google.genai")
 except Exception:
     logger.debug("Google GenAI instrumentation library not available, skipping instrumentation")
     GOOGLE_GENAI_AVAILABLE = False
@@ -73,7 +78,7 @@ except Exception:
 try:
     from openinference.instrumentation.instructor import InstructorInstrumentor
 
-    INSTRUCTOR_AVAILABLE = True
+    INSTRUCTOR_AVAILABLE = _module_available("instructor")
 except Exception:
     logger.debug("Instructor instrumentation library not available, skipping instrumentation")
     INSTRUCTOR_AVAILABLE = False

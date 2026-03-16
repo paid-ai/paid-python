@@ -7,9 +7,11 @@ while preserving the rest of the embedding metadata.
 
 from __future__ import annotations
 
+from typing import Any
+
 from paid.logger import logger
 
-_originals: dict[str, object] = {}
+_originals: dict[str, Any] = {}
 
 
 def instrument_openai() -> None:

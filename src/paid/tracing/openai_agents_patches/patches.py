@@ -10,7 +10,6 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Optional
 
-from agents.tracing.span_data import FunctionSpanData, ResponseSpanData
 from openai.types.responses import FunctionTool, Response
 from openinference.instrumentation import safe_json_dumps
 from opentelemetry.context import detach
@@ -50,6 +49,7 @@ def uninstrument_openai_agents() -> None:
 
 def _patch_tracing_processor() -> None:
     try:
+        from agents.tracing.span_data import FunctionSpanData, ResponseSpanData
         from openinference.instrumentation.openai_agents import _processor as processor_mod
     except ImportError:
         logger.debug("Could not import openai-agents tracing processor, skipping patch")
