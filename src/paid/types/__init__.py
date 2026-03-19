@@ -19,6 +19,11 @@ if typing.TYPE_CHECKING:
     from .contact_roles_item import ContactRolesItem
     from .create_order_line_attribute_request import CreateOrderLineAttributeRequest
     from .create_order_line_request import CreateOrderLineRequest
+    from .credit_balance import CreditBalance
+    from .credit_balance_list_response import CreditBalanceListResponse
+    from .credit_balance_recipient import CreditBalanceRecipient
+    from .credit_currency import CreditCurrency
+    from .credit_currency_list_response import CreditCurrencyListResponse
     from .customer import Customer
     from .customer_attribution import CustomerAttribution
     from .customer_billing_address import CustomerBillingAddress
@@ -66,6 +71,11 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ContactRolesItem": ".contact_roles_item",
     "CreateOrderLineAttributeRequest": ".create_order_line_attribute_request",
     "CreateOrderLineRequest": ".create_order_line_request",
+    "CreditBalance": ".credit_balance",
+    "CreditBalanceListResponse": ".credit_balance_list_response",
+    "CreditBalanceRecipient": ".credit_balance_recipient",
+    "CreditCurrency": ".credit_currency",
+    "CreditCurrencyListResponse": ".credit_currency_list_response",
     "Customer": ".customer",
     "CustomerAttribution": ".customer_attribution",
     "CustomerBillingAddress": ".customer_billing_address",
@@ -137,6 +147,11 @@ __all__ = [
     "ContactRolesItem",
     "CreateOrderLineAttributeRequest",
     "CreateOrderLineRequest",
+    "CreditBalance",
+    "CreditBalanceListResponse",
+    "CreditBalanceRecipient",
+    "CreditCurrency",
+    "CreditCurrencyListResponse",
     "Customer",
     "CustomerAttribution",
     "CustomerBillingAddress",

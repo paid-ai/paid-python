@@ -5,6 +5,7 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.credit_balance_list_response import CreditBalanceListResponse
 from ..types.customer import Customer
 from ..types.customer_billing_address import CustomerBillingAddress
 from ..types.customer_creation_state import CustomerCreationState
@@ -433,6 +434,72 @@ class CustomersClient:
         )
         """
         _response = self._raw_client.delete_customer_by_external_id(external_id, request_options=request_options)
+        return _response.data
+
+    def get_customer_credit_balances(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> CreditBalanceListResponse:
+        """
+        Get current customer credit balances grouped by currency
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreditBalanceListResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.get_customer_credit_balances(
+            id="id",
+        )
+        """
+        _response = self._raw_client.get_customer_credit_balances(id, request_options=request_options)
+        return _response.data
+
+    def get_customer_credit_balances_by_external_id(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> CreditBalanceListResponse:
+        """
+        Get current customer credit balances grouped by currency, looked up by external ID
+
+        Parameters
+        ----------
+        external_id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreditBalanceListResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.get_customer_credit_balances_by_external_id(
+            external_id="externalId",
+        )
+        """
+        _response = self._raw_client.get_customer_credit_balances_by_external_id(
+            external_id, request_options=request_options
+        )
         return _response.data
 
 
@@ -917,4 +984,86 @@ class AsyncCustomersClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.delete_customer_by_external_id(external_id, request_options=request_options)
+        return _response.data
+
+    async def get_customer_credit_balances(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> CreditBalanceListResponse:
+        """
+        Get current customer credit balances grouped by currency
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreditBalanceListResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.get_customer_credit_balances(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_customer_credit_balances(id, request_options=request_options)
+        return _response.data
+
+    async def get_customer_credit_balances_by_external_id(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> CreditBalanceListResponse:
+        """
+        Get current customer credit balances grouped by currency, looked up by external ID
+
+        Parameters
+        ----------
+        external_id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreditBalanceListResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.get_customer_credit_balances_by_external_id(
+                external_id="externalId",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_customer_credit_balances_by_external_id(
+            external_id, request_options=request_options
+        )
         return _response.data
