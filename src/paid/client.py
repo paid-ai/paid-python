@@ -9,6 +9,7 @@ from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .environment import PaidEnvironment
 
 if typing.TYPE_CHECKING:
+    from .checkouts.client import AsyncCheckoutsClient, CheckoutsClient
     from .contacts.client import AsyncContactsClient, ContactsClient
     from .customers.client import AsyncCustomersClient, CustomersClient
     from .invoices.client import AsyncInvoicesClient, InvoicesClient
@@ -88,6 +89,7 @@ class Paid:
         self._orders: typing.Optional[OrdersClient] = None
         self._invoices: typing.Optional[InvoicesClient] = None
         self._signals: typing.Optional[SignalsClient] = None
+        self._checkouts: typing.Optional[CheckoutsClient] = None
 
     @property
     def products(self):
@@ -136,6 +138,14 @@ class Paid:
 
             self._signals = SignalsClient(client_wrapper=self._client_wrapper)
         return self._signals
+
+    @property
+    def checkouts(self):
+        if self._checkouts is None:
+            from .checkouts.client import CheckoutsClient  # noqa: E402
+
+            self._checkouts = CheckoutsClient(client_wrapper=self._client_wrapper)
+        return self._checkouts
 
 
 class AsyncPaid:
@@ -209,6 +219,7 @@ class AsyncPaid:
         self._orders: typing.Optional[AsyncOrdersClient] = None
         self._invoices: typing.Optional[AsyncInvoicesClient] = None
         self._signals: typing.Optional[AsyncSignalsClient] = None
+        self._checkouts: typing.Optional[AsyncCheckoutsClient] = None
 
     @property
     def products(self):
@@ -257,6 +268,14 @@ class AsyncPaid:
 
             self._signals = AsyncSignalsClient(client_wrapper=self._client_wrapper)
         return self._signals
+
+    @property
+    def checkouts(self):
+        if self._checkouts is None:
+            from .checkouts.client import AsyncCheckoutsClient  # noqa: E402
+
+            self._checkouts = AsyncCheckoutsClient(client_wrapper=self._client_wrapper)
+        return self._checkouts
 
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidEnvironment) -> str:
