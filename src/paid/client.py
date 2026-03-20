@@ -11,6 +11,7 @@ from .environment import PaidEnvironment
 if typing.TYPE_CHECKING:
     from .checkouts.client import AsyncCheckoutsClient, CheckoutsClient
     from .contacts.client import AsyncContactsClient, ContactsClient
+    from .credits.client import AsyncCreditsClient, CreditsClient
     from .customers.client import AsyncCustomersClient, CustomersClient
     from .invoices.client import AsyncInvoicesClient, InvoicesClient
     from .orders.client import AsyncOrdersClient, OrdersClient
@@ -89,6 +90,7 @@ class Paid:
         self._orders: typing.Optional[OrdersClient] = None
         self._invoices: typing.Optional[InvoicesClient] = None
         self._signals: typing.Optional[SignalsClient] = None
+        self._credits: typing.Optional[CreditsClient] = None
         self._checkouts: typing.Optional[CheckoutsClient] = None
 
     @property
@@ -138,6 +140,14 @@ class Paid:
 
             self._signals = SignalsClient(client_wrapper=self._client_wrapper)
         return self._signals
+
+    @property
+    def credits(self):
+        if self._credits is None:
+            from .credits.client import CreditsClient  # noqa: E402
+
+            self._credits = CreditsClient(client_wrapper=self._client_wrapper)
+        return self._credits
 
     @property
     def checkouts(self):
@@ -219,6 +229,7 @@ class AsyncPaid:
         self._orders: typing.Optional[AsyncOrdersClient] = None
         self._invoices: typing.Optional[AsyncInvoicesClient] = None
         self._signals: typing.Optional[AsyncSignalsClient] = None
+        self._credits: typing.Optional[AsyncCreditsClient] = None
         self._checkouts: typing.Optional[AsyncCheckoutsClient] = None
 
     @property
@@ -268,6 +279,14 @@ class AsyncPaid:
 
             self._signals = AsyncSignalsClient(client_wrapper=self._client_wrapper)
         return self._signals
+
+    @property
+    def credits(self):
+        if self._credits is None:
+            from .credits.client import AsyncCreditsClient  # noqa: E402
+
+            self._credits = AsyncCreditsClient(client_wrapper=self._client_wrapper)
+        return self._credits
 
     @property
     def checkouts(self):

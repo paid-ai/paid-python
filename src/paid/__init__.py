@@ -20,6 +20,11 @@ if typing.TYPE_CHECKING:
         ContactRolesItem,
         CreateOrderLineAttributeRequest,
         CreateOrderLineRequest,
+        CreditBalance,
+        CreditBalanceListResponse,
+        CreditBalanceRecipient,
+        CreditCurrency,
+        CreditCurrencyListResponse,
         Customer,
         CustomerAttribution,
         CustomerBillingAddress,
@@ -55,7 +60,7 @@ if typing.TYPE_CHECKING:
         UpdateProductRequest,
     )
     from .errors import BadRequestError, ForbiddenError, InternalServerError, NotFoundError
-    from . import checkouts, contacts, customers, invoices, orders, products, signals
+    from . import checkouts, contacts, credits, customers, invoices, orders, products, signals
     from .checkouts import ListCheckoutsRequestStatus
     from .client import AsyncPaid, Paid
     from .contacts import CreateContactRequestRolesItem
@@ -78,6 +83,11 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CreateContactRequestRolesItem": ".contacts",
     "CreateOrderLineAttributeRequest": ".types",
     "CreateOrderLineRequest": ".types",
+    "CreditBalance": ".types",
+    "CreditBalanceListResponse": ".types",
+    "CreditBalanceRecipient": ".types",
+    "CreditCurrency": ".types",
+    "CreditCurrencyListResponse": ".types",
     "Customer": ".types",
     "CustomerAttribution": ".types",
     "CustomerBillingAddress": ".types",
@@ -120,6 +130,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "__version__": ".version",
     "checkouts": ".checkouts",
     "contacts": ".contacts",
+    "credits": ".credits",
     "customers": ".customers",
     "invoices": ".invoices",
     "orders": ".orders",
@@ -166,6 +177,11 @@ __all__ = [
     "CreateContactRequestRolesItem",
     "CreateOrderLineAttributeRequest",
     "CreateOrderLineRequest",
+    "CreditBalance",
+    "CreditBalanceListResponse",
+    "CreditBalanceRecipient",
+    "CreditCurrency",
+    "CreditCurrencyListResponse",
     "Customer",
     "CustomerAttribution",
     "CustomerBillingAddress",
@@ -208,6 +224,7 @@ __all__ = [
     "__version__",
     "checkouts",
     "contacts",
+    "credits",
     "customers",
     "invoices",
     "orders",
