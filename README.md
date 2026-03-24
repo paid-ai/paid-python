@@ -613,6 +613,7 @@ signal = Signal(
                 "gen_ai.usage.input_tokens": 100,
                 "gen_ai.usage.output_tokens": 300,
                 "gen_ai.usage.cached_input_tokens": 600,
+                "gen_ai.usage.cache_creation_input_tokens": 200,
             },
         }
     }
@@ -642,6 +643,7 @@ def do_work():
                     "gen_ai.usage.input_tokens": 100,
                     "gen_ai.usage.output_tokens": 300,
                     "gen_ai.usage.cached_input_tokens": 600,
+                    "gen_ai.usage.cache_creation_input_tokens": 200,
                 },
             }
         }
