@@ -127,6 +127,7 @@ class RawOrdersClient:
         payment_terms: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        currency: typing.Optional[str] = OMIT,
         lines: typing.Optional[typing.Sequence[CreateOrderLineRequest]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Order]:
@@ -160,6 +161,8 @@ class RawOrdersClient:
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
+        currency : typing.Optional[str]
+
         lines : typing.Optional[typing.Sequence[CreateOrderLineRequest]]
 
         request_options : typing.Optional[RequestOptions]
@@ -186,6 +189,7 @@ class RawOrdersClient:
                 "paymentTerms": payment_terms,
                 "externalId": external_id,
                 "metadata": metadata,
+                "currency": currency,
                 "lines": convert_and_respect_annotation_metadata(
                     object_=lines, annotation=typing.Sequence[CreateOrderLineRequest], direction="write"
                 ),
@@ -707,6 +711,7 @@ class AsyncRawOrdersClient:
         payment_terms: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        currency: typing.Optional[str] = OMIT,
         lines: typing.Optional[typing.Sequence[CreateOrderLineRequest]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Order]:
@@ -740,6 +745,8 @@ class AsyncRawOrdersClient:
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
+        currency : typing.Optional[str]
+
         lines : typing.Optional[typing.Sequence[CreateOrderLineRequest]]
 
         request_options : typing.Optional[RequestOptions]
@@ -766,6 +773,7 @@ class AsyncRawOrdersClient:
                 "paymentTerms": payment_terms,
                 "externalId": external_id,
                 "metadata": metadata,
+                "currency": currency,
                 "lines": convert_and_respect_annotation_metadata(
                     object_=lines, annotation=typing.Sequence[CreateOrderLineRequest], direction="write"
                 ),

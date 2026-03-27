@@ -18,6 +18,46 @@ if typing.TYPE_CHECKING:
     from .contact_list_response import ContactListResponse
     from .contact_roles_item import ContactRolesItem
     from .create_order_line_attribute_request import CreateOrderLineAttributeRequest
+    from .create_order_line_attribute_request_pricing import CreateOrderLineAttributeRequestPricing
+    from .create_order_line_attribute_request_pricing_billing_frequency import (
+        CreateOrderLineAttributeRequestPricingBillingFrequency,
+    )
+    from .create_order_line_attribute_request_pricing_billing_type import (
+        CreateOrderLineAttributeRequestPricingBillingType,
+    )
+    from .create_order_line_attribute_request_pricing_charge_type import (
+        CreateOrderLineAttributeRequestPricingChargeType,
+    )
+    from .create_order_line_attribute_request_pricing_credit_benefits_item import (
+        CreateOrderLineAttributeRequestPricingCreditBenefitsItem,
+    )
+    from .create_order_line_attribute_request_pricing_credit_benefits_item_allocation_cadence import (
+        CreateOrderLineAttributeRequestPricingCreditBenefitsItemAllocationCadence,
+    )
+    from .create_order_line_attribute_request_pricing_credit_benefits_item_credit_grant_timing import (
+        CreateOrderLineAttributeRequestPricingCreditBenefitsItemCreditGrantTiming,
+    )
+    from .create_order_line_attribute_request_pricing_credit_benefits_item_recipient import (
+        CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient,
+    )
+    from .create_order_line_attribute_request_pricing_credit_benefits_item_rollover_duration_unit import (
+        CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit,
+    )
+    from .create_order_line_attribute_request_pricing_price_points import (
+        CreateOrderLineAttributeRequestPricingPricePoints,
+    )
+    from .create_order_line_attribute_request_pricing_price_points_tiers_item import (
+        CreateOrderLineAttributeRequestPricingPricePointsTiersItem,
+    )
+    from .create_order_line_attribute_request_pricing_price_points_tiers_item_tier_billing_type import (
+        CreateOrderLineAttributeRequestPricingPricePointsTiersItemTierBillingType,
+    )
+    from .create_order_line_attribute_request_pricing_pricing_model import (
+        CreateOrderLineAttributeRequestPricingPricingModel,
+    )
+    from .create_order_line_attribute_request_pricing_signal_type import (
+        CreateOrderLineAttributeRequestPricingSignalType,
+    )
     from .create_order_line_request import CreateOrderLineRequest
     from .credit_balance import CreditBalance
     from .credit_balance_list_response import CreditBalanceListResponse
@@ -31,6 +71,8 @@ if typing.TYPE_CHECKING:
     from .customer_by_id import CustomerById
     from .customer_creation_state import CustomerCreationState
     from .customer_list_response import CustomerListResponse
+    from .customer_portal import CustomerPortal
+    from .customer_portal_status import CustomerPortalStatus
     from .empty_response import EmptyResponse
     from .error_response import ErrorResponse
     from .invoice import Invoice
@@ -70,6 +112,20 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ContactListResponse": ".contact_list_response",
     "ContactRolesItem": ".contact_roles_item",
     "CreateOrderLineAttributeRequest": ".create_order_line_attribute_request",
+    "CreateOrderLineAttributeRequestPricing": ".create_order_line_attribute_request_pricing",
+    "CreateOrderLineAttributeRequestPricingBillingFrequency": ".create_order_line_attribute_request_pricing_billing_frequency",
+    "CreateOrderLineAttributeRequestPricingBillingType": ".create_order_line_attribute_request_pricing_billing_type",
+    "CreateOrderLineAttributeRequestPricingChargeType": ".create_order_line_attribute_request_pricing_charge_type",
+    "CreateOrderLineAttributeRequestPricingCreditBenefitsItem": ".create_order_line_attribute_request_pricing_credit_benefits_item",
+    "CreateOrderLineAttributeRequestPricingCreditBenefitsItemAllocationCadence": ".create_order_line_attribute_request_pricing_credit_benefits_item_allocation_cadence",
+    "CreateOrderLineAttributeRequestPricingCreditBenefitsItemCreditGrantTiming": ".create_order_line_attribute_request_pricing_credit_benefits_item_credit_grant_timing",
+    "CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient": ".create_order_line_attribute_request_pricing_credit_benefits_item_recipient",
+    "CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit": ".create_order_line_attribute_request_pricing_credit_benefits_item_rollover_duration_unit",
+    "CreateOrderLineAttributeRequestPricingPricePoints": ".create_order_line_attribute_request_pricing_price_points",
+    "CreateOrderLineAttributeRequestPricingPricePointsTiersItem": ".create_order_line_attribute_request_pricing_price_points_tiers_item",
+    "CreateOrderLineAttributeRequestPricingPricePointsTiersItemTierBillingType": ".create_order_line_attribute_request_pricing_price_points_tiers_item_tier_billing_type",
+    "CreateOrderLineAttributeRequestPricingPricingModel": ".create_order_line_attribute_request_pricing_pricing_model",
+    "CreateOrderLineAttributeRequestPricingSignalType": ".create_order_line_attribute_request_pricing_signal_type",
     "CreateOrderLineRequest": ".create_order_line_request",
     "CreditBalance": ".credit_balance",
     "CreditBalanceListResponse": ".credit_balance_list_response",
@@ -83,6 +139,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CustomerById": ".customer_by_id",
     "CustomerCreationState": ".customer_creation_state",
     "CustomerListResponse": ".customer_list_response",
+    "CustomerPortal": ".customer_portal",
+    "CustomerPortalStatus": ".customer_portal_status",
     "EmptyResponse": ".empty_response",
     "ErrorResponse": ".error_response",
     "Invoice": ".invoice",
@@ -146,6 +204,20 @@ __all__ = [
     "ContactListResponse",
     "ContactRolesItem",
     "CreateOrderLineAttributeRequest",
+    "CreateOrderLineAttributeRequestPricing",
+    "CreateOrderLineAttributeRequestPricingBillingFrequency",
+    "CreateOrderLineAttributeRequestPricingBillingType",
+    "CreateOrderLineAttributeRequestPricingChargeType",
+    "CreateOrderLineAttributeRequestPricingCreditBenefitsItem",
+    "CreateOrderLineAttributeRequestPricingCreditBenefitsItemAllocationCadence",
+    "CreateOrderLineAttributeRequestPricingCreditBenefitsItemCreditGrantTiming",
+    "CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient",
+    "CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit",
+    "CreateOrderLineAttributeRequestPricingPricePoints",
+    "CreateOrderLineAttributeRequestPricingPricePointsTiersItem",
+    "CreateOrderLineAttributeRequestPricingPricePointsTiersItemTierBillingType",
+    "CreateOrderLineAttributeRequestPricingPricingModel",
+    "CreateOrderLineAttributeRequestPricingSignalType",
     "CreateOrderLineRequest",
     "CreditBalance",
     "CreditBalanceListResponse",
@@ -159,6 +231,8 @@ __all__ = [
     "CustomerById",
     "CustomerCreationState",
     "CustomerListResponse",
+    "CustomerPortal",
+    "CustomerPortalStatus",
     "EmptyResponse",
     "ErrorResponse",
     "Invoice",

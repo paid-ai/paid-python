@@ -4,12 +4,13 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .create_order_line_attribute_request_pricing import CreateOrderLineAttributeRequestPricing
 
 
 class CreateOrderLineAttributeRequest(UniversalBaseModel):
     name: str
     quantity: typing.Optional[int] = None
-    pricing: typing.Dict[str, typing.Any]
+    pricing: CreateOrderLineAttributeRequestPricing
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

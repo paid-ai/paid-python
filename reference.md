@@ -2500,6 +2500,14 @@ client.orders.create_order(
 <dl>
 <dd>
 
+**currency:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **lines:** `typing.Optional[typing.Sequence[CreateOrderLineRequest]]` 
     
 </dd>
@@ -3675,6 +3683,99 @@ client.checkouts.archive_checkout(
 <dd>
 
 **id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## CustomerPortals
+<details><summary><code>client.customer_portals.<a href="src/paid/customer_portals/client.py">create_customer_portal</a>(...) -&gt; AsyncHttpResponse[CustomerPortal]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a portal session for the customer. Returns a short-lived URL to the customer portal.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customer_portals.create_customer_portal()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**customer_id:** `typing.Optional[str]` — The Paid customer ID (display ID or UUID). Either this or externalCustomerId must be provided.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_id:** `typing.Optional[str]` — Your external customer ID. Either this or customerId must be provided.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**return_url:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**expires_at:** `typing.Optional[dt.datetime]` 
     
 </dd>
 </dl>
