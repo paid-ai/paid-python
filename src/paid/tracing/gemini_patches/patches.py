@@ -33,13 +33,13 @@ def uninstrument_google_genai() -> None:
         except Exception:
             pass
 
-    if "stream_get_extra_attributes" in _originals:
+    _stream_key = "stream_get_attributes" if "stream_get_attributes" in _originals else "stream_get_extra_attributes"
+    if _stream_key in _originals:
         try:
             from openinference.instrumentation.google_genai import _stream as stream_mod
 
-            stream_mod._ResponseExtractor.get_extra_attributes = _originals.pop(  # type: ignore[method-assign]
-                "stream_get_extra_attributes"
-            )
+            _method_name = "get_attributes" if hasattr(stream_mod._ResponseExtractor, "get_attributes") else "get_extra_attributes"
+            setattr(stream_mod._ResponseExtractor, _method_name, _originals.pop(_stream_key))  # type: ignore[method-assign]
         except Exception:
             pass
 
@@ -78,8 +78,9 @@ def _patch_streaming_response_id_extraction() -> None:
         logger.debug("Could not import openinference google_genai _stream, skipping streaming response ID patch")
         return
 
-    _original_get_extra = stream_mod._ResponseExtractor.get_extra_attributes
-    _originals["stream_get_extra_attributes"] = _original_get_extra
+    _method_name = "get_attributes" if hasattr(stream_mod._ResponseExtractor, "get_attributes") else "get_extra_attributes"
+    _original_get_extra = getattr(stream_mod._ResponseExtractor, _method_name)
+    _originals["stream_get_attributes"] = _original_get_extra
 
     def _get_extra_with_response_id(self):  # type: ignore[misc]
         yield from _original_get_extra(self)
@@ -90,5 +91,5 @@ def _patch_streaming_response_id_extraction() -> None:
         except Exception:
             pass
 
-    stream_mod._ResponseExtractor.get_extra_attributes = _get_extra_with_response_id  # type: ignore[method-assign]
+    setattr(stream_mod._ResponseExtractor, _method_name, _get_extra_with_response_id)  # type: ignore[method-assign]
     logger.debug("Patched _ResponseExtractor.get_extra_attributes for response IDs")
