@@ -83,6 +83,7 @@ class OrdersClient:
         payment_terms: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        currency: typing.Optional[str] = OMIT,
         lines: typing.Optional[typing.Sequence[CreateOrderLineRequest]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
@@ -115,6 +116,8 @@ class OrdersClient:
         external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
+
+        currency : typing.Optional[str]
 
         lines : typing.Optional[typing.Sequence[CreateOrderLineRequest]]
 
@@ -150,6 +153,7 @@ class OrdersClient:
             payment_terms=payment_terms,
             external_id=external_id,
             metadata=metadata,
+            currency=currency,
             lines=lines,
             request_options=request_options,
         )
@@ -414,6 +418,7 @@ class AsyncOrdersClient:
         payment_terms: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        currency: typing.Optional[str] = OMIT,
         lines: typing.Optional[typing.Sequence[CreateOrderLineRequest]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
@@ -446,6 +451,8 @@ class AsyncOrdersClient:
         external_id : typing.Optional[str]
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
+
+        currency : typing.Optional[str]
 
         lines : typing.Optional[typing.Sequence[CreateOrderLineRequest]]
 
@@ -489,6 +496,7 @@ class AsyncOrdersClient:
             payment_terms=payment_terms,
             external_id=external_id,
             metadata=metadata,
+            currency=currency,
             lines=lines,
             request_options=request_options,
         )

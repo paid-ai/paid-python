@@ -12,6 +12,7 @@ if typing.TYPE_CHECKING:
     from .checkouts.client import AsyncCheckoutsClient, CheckoutsClient
     from .contacts.client import AsyncContactsClient, ContactsClient
     from .credits.client import AsyncCreditsClient, CreditsClient
+    from .customer_portals.client import AsyncCustomerPortalsClient, CustomerPortalsClient
     from .customers.client import AsyncCustomersClient, CustomersClient
     from .invoices.client import AsyncInvoicesClient, InvoicesClient
     from .orders.client import AsyncOrdersClient, OrdersClient
@@ -92,6 +93,7 @@ class Paid:
         self._signals: typing.Optional[SignalsClient] = None
         self._credits: typing.Optional[CreditsClient] = None
         self._checkouts: typing.Optional[CheckoutsClient] = None
+        self._customer_portals: typing.Optional[CustomerPortalsClient] = None
 
     @property
     def products(self):
@@ -156,6 +158,14 @@ class Paid:
 
             self._checkouts = CheckoutsClient(client_wrapper=self._client_wrapper)
         return self._checkouts
+
+    @property
+    def customer_portals(self):
+        if self._customer_portals is None:
+            from .customer_portals.client import CustomerPortalsClient  # noqa: E402
+
+            self._customer_portals = CustomerPortalsClient(client_wrapper=self._client_wrapper)
+        return self._customer_portals
 
 
 class AsyncPaid:
@@ -231,6 +241,7 @@ class AsyncPaid:
         self._signals: typing.Optional[AsyncSignalsClient] = None
         self._credits: typing.Optional[AsyncCreditsClient] = None
         self._checkouts: typing.Optional[AsyncCheckoutsClient] = None
+        self._customer_portals: typing.Optional[AsyncCustomerPortalsClient] = None
 
     @property
     def products(self):
@@ -295,6 +306,14 @@ class AsyncPaid:
 
             self._checkouts = AsyncCheckoutsClient(client_wrapper=self._client_wrapper)
         return self._checkouts
+
+    @property
+    def customer_portals(self):
+        if self._customer_portals is None:
+            from .customer_portals.client import AsyncCustomerPortalsClient  # noqa: E402
+
+            self._customer_portals = AsyncCustomerPortalsClient(client_wrapper=self._client_wrapper)
+        return self._customer_portals
 
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidEnvironment) -> str:
