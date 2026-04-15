@@ -78,9 +78,13 @@ class CheckoutsClient:
         products: typing.Sequence[CheckoutProductInput],
         success_url: str,
         customer_id: typing.Optional[str] = OMIT,
+        external_customer_id: typing.Optional[str] = OMIT,
         cancel_url: typing.Optional[str] = OMIT,
         expires_at: typing.Optional[dt.datetime] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        collect_address: typing.Optional[bool] = OMIT,
+        collect_phone: typing.Optional[bool] = OMIT,
+        single_use: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Checkout:
         """
@@ -94,11 +98,20 @@ class CheckoutsClient:
 
         customer_id : typing.Optional[str]
 
+        external_customer_id : typing.Optional[str]
+            External customer identifier. Creates the customer on first use, resolves to the existing customer on subsequent uses.
+
         cancel_url : typing.Optional[str]
 
         expires_at : typing.Optional[dt.datetime]
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
+
+        collect_address : typing.Optional[bool]
+
+        collect_phone : typing.Optional[bool]
+
+        single_use : typing.Optional[bool]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -128,9 +141,13 @@ class CheckoutsClient:
             products=products,
             success_url=success_url,
             customer_id=customer_id,
+            external_customer_id=external_customer_id,
             cancel_url=cancel_url,
             expires_at=expires_at,
             metadata=metadata,
+            collect_address=collect_address,
+            collect_phone=collect_phone,
+            single_use=single_use,
             request_options=request_options,
         )
         return _response.data
@@ -266,9 +283,13 @@ class AsyncCheckoutsClient:
         products: typing.Sequence[CheckoutProductInput],
         success_url: str,
         customer_id: typing.Optional[str] = OMIT,
+        external_customer_id: typing.Optional[str] = OMIT,
         cancel_url: typing.Optional[str] = OMIT,
         expires_at: typing.Optional[dt.datetime] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        collect_address: typing.Optional[bool] = OMIT,
+        collect_phone: typing.Optional[bool] = OMIT,
+        single_use: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Checkout:
         """
@@ -282,11 +303,20 @@ class AsyncCheckoutsClient:
 
         customer_id : typing.Optional[str]
 
+        external_customer_id : typing.Optional[str]
+            External customer identifier. Creates the customer on first use, resolves to the existing customer on subsequent uses.
+
         cancel_url : typing.Optional[str]
 
         expires_at : typing.Optional[dt.datetime]
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
+
+        collect_address : typing.Optional[bool]
+
+        collect_phone : typing.Optional[bool]
+
+        single_use : typing.Optional[bool]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -324,9 +354,13 @@ class AsyncCheckoutsClient:
             products=products,
             success_url=success_url,
             customer_id=customer_id,
+            external_customer_id=external_customer_id,
             cancel_url=cancel_url,
             expires_at=expires_at,
             metadata=metadata,
+            collect_address=collect_address,
+            collect_phone=collect_phone,
+            single_use=single_use,
             request_options=request_options,
         )
         return _response.data

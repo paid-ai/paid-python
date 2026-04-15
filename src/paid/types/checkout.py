@@ -19,6 +19,9 @@ class Checkout(UniversalBaseModel):
     customer_id: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="customerId"), pydantic.Field(alias="customerId")
     ] = None
+    external_customer_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="externalCustomerId"), pydantic.Field(alias="externalCustomerId")
+    ] = None
     success_url: typing_extensions.Annotated[str, FieldMetadata(alias="successUrl"), pydantic.Field(alias="successUrl")]
     cancel_url: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="cancelUrl"), pydantic.Field(alias="cancelUrl")
@@ -27,6 +30,13 @@ class Checkout(UniversalBaseModel):
         typing.Optional[dt.datetime], FieldMetadata(alias="expiresAt"), pydantic.Field(alias="expiresAt")
     ] = None
     metadata: typing.Optional[typing.Dict[str, typing.Any]] = None
+    collect_address: typing_extensions.Annotated[
+        bool, FieldMetadata(alias="collectAddress"), pydantic.Field(alias="collectAddress")
+    ]
+    collect_phone: typing_extensions.Annotated[
+        bool, FieldMetadata(alias="collectPhone"), pydantic.Field(alias="collectPhone")
+    ]
+    single_use: typing_extensions.Annotated[bool, FieldMetadata(alias="singleUse"), pydantic.Field(alias="singleUse")]
     created_at: typing_extensions.Annotated[
         dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")
     ]
