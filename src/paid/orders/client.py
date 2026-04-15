@@ -84,6 +84,9 @@ class OrdersClient:
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         currency: typing.Optional[str] = OMIT,
+        auto_post_invoices: typing.Optional[bool] = OMIT,
+        auto_send_billing_emails: typing.Optional[bool] = OMIT,
+        auto_send_payment_emails: typing.Optional[bool] = OMIT,
         lines: typing.Optional[typing.Sequence[CreateOrderLineRequest]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
@@ -118,6 +121,12 @@ class OrdersClient:
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         currency : typing.Optional[str]
+
+        auto_post_invoices : typing.Optional[bool]
+
+        auto_send_billing_emails : typing.Optional[bool]
+
+        auto_send_payment_emails : typing.Optional[bool]
 
         lines : typing.Optional[typing.Sequence[CreateOrderLineRequest]]
 
@@ -154,6 +163,9 @@ class OrdersClient:
             external_id=external_id,
             metadata=metadata,
             currency=currency,
+            auto_post_invoices=auto_post_invoices,
+            auto_send_billing_emails=auto_send_billing_emails,
+            auto_send_payment_emails=auto_send_payment_emails,
             lines=lines,
             request_options=request_options,
         )
@@ -204,6 +216,9 @@ class OrdersClient:
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         billing_customer_id: typing.Optional[str] = OMIT,
         billing_contact_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        auto_post_invoices: typing.Optional[bool] = OMIT,
+        auto_send_billing_emails: typing.Optional[bool] = OMIT,
+        auto_send_payment_emails: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
@@ -235,6 +250,12 @@ class OrdersClient:
         billing_customer_id : typing.Optional[str]
 
         billing_contact_ids : typing.Optional[typing.Sequence[str]]
+
+        auto_post_invoices : typing.Optional[bool]
+
+        auto_send_billing_emails : typing.Optional[bool]
+
+        auto_send_payment_emails : typing.Optional[bool]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -268,6 +289,9 @@ class OrdersClient:
             metadata=metadata,
             billing_customer_id=billing_customer_id,
             billing_contact_ids=billing_contact_ids,
+            auto_post_invoices=auto_post_invoices,
+            auto_send_billing_emails=auto_send_billing_emails,
+            auto_send_payment_emails=auto_send_payment_emails,
             request_options=request_options,
         )
         return _response.data
@@ -419,6 +443,9 @@ class AsyncOrdersClient:
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         currency: typing.Optional[str] = OMIT,
+        auto_post_invoices: typing.Optional[bool] = OMIT,
+        auto_send_billing_emails: typing.Optional[bool] = OMIT,
+        auto_send_payment_emails: typing.Optional[bool] = OMIT,
         lines: typing.Optional[typing.Sequence[CreateOrderLineRequest]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
@@ -453,6 +480,12 @@ class AsyncOrdersClient:
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         currency : typing.Optional[str]
+
+        auto_post_invoices : typing.Optional[bool]
+
+        auto_send_billing_emails : typing.Optional[bool]
+
+        auto_send_payment_emails : typing.Optional[bool]
 
         lines : typing.Optional[typing.Sequence[CreateOrderLineRequest]]
 
@@ -497,6 +530,9 @@ class AsyncOrdersClient:
             external_id=external_id,
             metadata=metadata,
             currency=currency,
+            auto_post_invoices=auto_post_invoices,
+            auto_send_billing_emails=auto_send_billing_emails,
+            auto_send_payment_emails=auto_send_payment_emails,
             lines=lines,
             request_options=request_options,
         )
@@ -555,6 +591,9 @@ class AsyncOrdersClient:
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         billing_customer_id: typing.Optional[str] = OMIT,
         billing_contact_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        auto_post_invoices: typing.Optional[bool] = OMIT,
+        auto_send_billing_emails: typing.Optional[bool] = OMIT,
+        auto_send_payment_emails: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
@@ -586,6 +625,12 @@ class AsyncOrdersClient:
         billing_customer_id : typing.Optional[str]
 
         billing_contact_ids : typing.Optional[typing.Sequence[str]]
+
+        auto_post_invoices : typing.Optional[bool]
+
+        auto_send_billing_emails : typing.Optional[bool]
+
+        auto_send_payment_emails : typing.Optional[bool]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -627,6 +672,9 @@ class AsyncOrdersClient:
             metadata=metadata,
             billing_customer_id=billing_customer_id,
             billing_contact_ids=billing_contact_ids,
+            auto_post_invoices=auto_post_invoices,
+            auto_send_billing_emails=auto_send_billing_emails,
+            auto_send_payment_emails=auto_send_payment_emails,
             request_options=request_options,
         )
         return _response.data

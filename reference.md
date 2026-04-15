@@ -2508,6 +2508,30 @@ client.orders.create_order(
 <dl>
 <dd>
 
+**auto_post_invoices:** `typing.Optional[bool]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**auto_send_billing_emails:** `typing.Optional[bool]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**auto_send_payment_emails:** `typing.Optional[bool]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **lines:** `typing.Optional[typing.Sequence[CreateOrderLineRequest]]` 
     
 </dd>
@@ -2737,6 +2761,30 @@ client.orders.update_order_by_id(
 <dd>
 
 **billing_contact_ids:** `typing.Optional[typing.Sequence[str]]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**auto_post_invoices:** `typing.Optional[bool]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**auto_send_billing_emails:** `typing.Optional[bool]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**auto_send_payment_emails:** `typing.Optional[bool]` 
     
 </dd>
 </dl>
@@ -3526,6 +3574,14 @@ client.checkouts.create_checkout(
 <dl>
 <dd>
 
+**external_customer_id:** `typing.Optional[str]` — External customer identifier. Creates the customer on first use, resolves to the existing customer on subsequent uses.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **cancel_url:** `typing.Optional[str]` 
     
 </dd>
@@ -3543,6 +3599,30 @@ client.checkouts.create_checkout(
 <dd>
 
 **metadata:** `typing.Optional[typing.Dict[str, typing.Any]]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**collect_address:** `typing.Optional[bool]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**collect_phone:** `typing.Optional[bool]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**single_use:** `typing.Optional[bool]` 
     
 </dd>
 </dl>

@@ -128,6 +128,9 @@ class RawOrdersClient:
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         currency: typing.Optional[str] = OMIT,
+        auto_post_invoices: typing.Optional[bool] = OMIT,
+        auto_send_billing_emails: typing.Optional[bool] = OMIT,
+        auto_send_payment_emails: typing.Optional[bool] = OMIT,
         lines: typing.Optional[typing.Sequence[CreateOrderLineRequest]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Order]:
@@ -163,6 +166,12 @@ class RawOrdersClient:
 
         currency : typing.Optional[str]
 
+        auto_post_invoices : typing.Optional[bool]
+
+        auto_send_billing_emails : typing.Optional[bool]
+
+        auto_send_payment_emails : typing.Optional[bool]
+
         lines : typing.Optional[typing.Sequence[CreateOrderLineRequest]]
 
         request_options : typing.Optional[RequestOptions]
@@ -190,6 +199,9 @@ class RawOrdersClient:
                 "externalId": external_id,
                 "metadata": metadata,
                 "currency": currency,
+                "autoPostInvoices": auto_post_invoices,
+                "autoSendBillingEmails": auto_send_billing_emails,
+                "autoSendPaymentEmails": auto_send_payment_emails,
                 "lines": convert_and_respect_annotation_metadata(
                     object_=lines, annotation=typing.Sequence[CreateOrderLineRequest], direction="write"
                 ),
@@ -334,6 +346,9 @@ class RawOrdersClient:
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         billing_customer_id: typing.Optional[str] = OMIT,
         billing_contact_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        auto_post_invoices: typing.Optional[bool] = OMIT,
+        auto_send_billing_emails: typing.Optional[bool] = OMIT,
+        auto_send_payment_emails: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Order]:
         """
@@ -366,6 +381,12 @@ class RawOrdersClient:
 
         billing_contact_ids : typing.Optional[typing.Sequence[str]]
 
+        auto_post_invoices : typing.Optional[bool]
+
+        auto_send_billing_emails : typing.Optional[bool]
+
+        auto_send_payment_emails : typing.Optional[bool]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -389,6 +410,9 @@ class RawOrdersClient:
                 "metadata": metadata,
                 "billingCustomerId": billing_customer_id,
                 "billingContactIds": billing_contact_ids,
+                "autoPostInvoices": auto_post_invoices,
+                "autoSendBillingEmails": auto_send_billing_emails,
+                "autoSendPaymentEmails": auto_send_payment_emails,
             },
             headers={
                 "content-type": "application/json",
@@ -712,6 +736,9 @@ class AsyncRawOrdersClient:
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         currency: typing.Optional[str] = OMIT,
+        auto_post_invoices: typing.Optional[bool] = OMIT,
+        auto_send_billing_emails: typing.Optional[bool] = OMIT,
+        auto_send_payment_emails: typing.Optional[bool] = OMIT,
         lines: typing.Optional[typing.Sequence[CreateOrderLineRequest]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Order]:
@@ -747,6 +774,12 @@ class AsyncRawOrdersClient:
 
         currency : typing.Optional[str]
 
+        auto_post_invoices : typing.Optional[bool]
+
+        auto_send_billing_emails : typing.Optional[bool]
+
+        auto_send_payment_emails : typing.Optional[bool]
+
         lines : typing.Optional[typing.Sequence[CreateOrderLineRequest]]
 
         request_options : typing.Optional[RequestOptions]
@@ -774,6 +807,9 @@ class AsyncRawOrdersClient:
                 "externalId": external_id,
                 "metadata": metadata,
                 "currency": currency,
+                "autoPostInvoices": auto_post_invoices,
+                "autoSendBillingEmails": auto_send_billing_emails,
+                "autoSendPaymentEmails": auto_send_payment_emails,
                 "lines": convert_and_respect_annotation_metadata(
                     object_=lines, annotation=typing.Sequence[CreateOrderLineRequest], direction="write"
                 ),
@@ -918,6 +954,9 @@ class AsyncRawOrdersClient:
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         billing_customer_id: typing.Optional[str] = OMIT,
         billing_contact_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        auto_post_invoices: typing.Optional[bool] = OMIT,
+        auto_send_billing_emails: typing.Optional[bool] = OMIT,
+        auto_send_payment_emails: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Order]:
         """
@@ -950,6 +989,12 @@ class AsyncRawOrdersClient:
 
         billing_contact_ids : typing.Optional[typing.Sequence[str]]
 
+        auto_post_invoices : typing.Optional[bool]
+
+        auto_send_billing_emails : typing.Optional[bool]
+
+        auto_send_payment_emails : typing.Optional[bool]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -973,6 +1018,9 @@ class AsyncRawOrdersClient:
                 "metadata": metadata,
                 "billingCustomerId": billing_customer_id,
                 "billingContactIds": billing_contact_ids,
+                "autoPostInvoices": auto_post_invoices,
+                "autoSendBillingEmails": auto_send_billing_emails,
+                "autoSendPaymentEmails": auto_send_payment_emails,
             },
             headers={
                 "content-type": "application/json",

@@ -68,6 +68,19 @@ class Order(UniversalBaseModel):
     show_bank_details: typing_extensions.Annotated[
         typing.Optional[bool], FieldMetadata(alias="showBankDetails"), pydantic.Field(alias="showBankDetails")
     ] = None
+    auto_post_invoices: typing_extensions.Annotated[
+        typing.Optional[bool], FieldMetadata(alias="autoPostInvoices"), pydantic.Field(alias="autoPostInvoices")
+    ] = None
+    auto_send_billing_emails: typing_extensions.Annotated[
+        typing.Optional[bool],
+        FieldMetadata(alias="autoSendBillingEmails"),
+        pydantic.Field(alias="autoSendBillingEmails"),
+    ] = None
+    auto_send_payment_emails: typing_extensions.Annotated[
+        typing.Optional[bool],
+        FieldMetadata(alias="autoSendPaymentEmails"),
+        pydantic.Field(alias="autoSendPaymentEmails"),
+    ] = None
     version: int
 
     if IS_PYDANTIC_V2:

@@ -121,9 +121,13 @@ class RawCheckoutsClient:
         products: typing.Sequence[CheckoutProductInput],
         success_url: str,
         customer_id: typing.Optional[str] = OMIT,
+        external_customer_id: typing.Optional[str] = OMIT,
         cancel_url: typing.Optional[str] = OMIT,
         expires_at: typing.Optional[dt.datetime] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        collect_address: typing.Optional[bool] = OMIT,
+        collect_phone: typing.Optional[bool] = OMIT,
+        single_use: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Checkout]:
         """
@@ -137,11 +141,20 @@ class RawCheckoutsClient:
 
         customer_id : typing.Optional[str]
 
+        external_customer_id : typing.Optional[str]
+            External customer identifier. Creates the customer on first use, resolves to the existing customer on subsequent uses.
+
         cancel_url : typing.Optional[str]
 
         expires_at : typing.Optional[dt.datetime]
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
+
+        collect_address : typing.Optional[bool]
+
+        collect_phone : typing.Optional[bool]
+
+        single_use : typing.Optional[bool]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -159,10 +172,14 @@ class RawCheckoutsClient:
                     object_=products, annotation=typing.Sequence[CheckoutProductInput], direction="write"
                 ),
                 "customerId": customer_id,
+                "externalCustomerId": external_customer_id,
                 "successUrl": success_url,
                 "cancelUrl": cancel_url,
                 "expiresAt": expires_at,
                 "metadata": metadata,
+                "collectAddress": collect_address,
+                "collectPhone": collect_phone,
+                "singleUse": single_use,
             },
             headers={
                 "content-type": "application/json",
@@ -467,9 +484,13 @@ class AsyncRawCheckoutsClient:
         products: typing.Sequence[CheckoutProductInput],
         success_url: str,
         customer_id: typing.Optional[str] = OMIT,
+        external_customer_id: typing.Optional[str] = OMIT,
         cancel_url: typing.Optional[str] = OMIT,
         expires_at: typing.Optional[dt.datetime] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        collect_address: typing.Optional[bool] = OMIT,
+        collect_phone: typing.Optional[bool] = OMIT,
+        single_use: typing.Optional[bool] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Checkout]:
         """
@@ -483,11 +504,20 @@ class AsyncRawCheckoutsClient:
 
         customer_id : typing.Optional[str]
 
+        external_customer_id : typing.Optional[str]
+            External customer identifier. Creates the customer on first use, resolves to the existing customer on subsequent uses.
+
         cancel_url : typing.Optional[str]
 
         expires_at : typing.Optional[dt.datetime]
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
+
+        collect_address : typing.Optional[bool]
+
+        collect_phone : typing.Optional[bool]
+
+        single_use : typing.Optional[bool]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -505,10 +535,14 @@ class AsyncRawCheckoutsClient:
                     object_=products, annotation=typing.Sequence[CheckoutProductInput], direction="write"
                 ),
                 "customerId": customer_id,
+                "externalCustomerId": external_customer_id,
                 "successUrl": success_url,
                 "cancelUrl": cancel_url,
                 "expiresAt": expires_at,
                 "metadata": metadata,
+                "collectAddress": collect_address,
+                "collectPhone": collect_phone,
+                "singleUse": single_use,
             },
             headers={
                 "content-type": "application/json",
