@@ -10,36 +10,31 @@ from ..core.http_response import AsyncHttpResponse, HttpResponse
 from ..core.jsonable_encoder import jsonable_encoder
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
-from ..core.serialization import convert_and_respect_annotation_metadata
-from ..errors.bad_request_error import BadRequestError
-from ..errors.forbidden_error import ForbiddenError
 from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
-from ..types.checkout import Checkout
-from ..types.checkout_list_response import CheckoutListResponse
-from ..types.checkout_product_input import CheckoutProductInput
-from ..types.empty_response import EmptyResponse
 from ..types.error_response import ErrorResponse
-from .types.list_checkouts_request_status import ListCheckoutsRequestStatus
+from ..types.value_receipt_detail import ValueReceiptDetail
+from ..types.value_receipt_list_response import ValueReceiptListResponse
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
 
 
-class RawCheckoutsClient:
+class RawValueReceiptsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list_checkouts(
+    def list_value_receipts(
         self,
         *,
         limit: typing.Optional[int] = None,
         offset: typing.Optional[int] = None,
-        status: typing.Optional[ListCheckoutsRequestStatus] = None,
+        customer_id: typing.Optional[str] = None,
+        order_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[CheckoutListResponse]:
+    ) -> HttpResponse[ValueReceiptListResponse]:
         """
-        Get a list of checkouts for the organization
+        List value receipts for the organization
 
         Parameters
         ----------
@@ -47,38 +42,41 @@ class RawCheckoutsClient:
 
         offset : typing.Optional[int]
 
-        status : typing.Optional[ListCheckoutsRequestStatus]
+        customer_id : typing.Optional[str]
+
+        order_id : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[CheckoutListResponse]
+        HttpResponse[ValueReceiptListResponse]
             200
         """
         _response = self._client_wrapper.httpx_client.request(
-            "checkouts/",
+            "value-receipts/",
             method="GET",
             params={
                 "limit": limit,
                 "offset": offset,
-                "status": status,
+                "customerId": customer_id,
+                "orderId": order_id,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    CheckoutListResponse,
+                    ValueReceiptListResponse,
                     parse_obj_as(
-                        type_=CheckoutListResponse,  # type: ignore
+                        type_=ValueReceiptListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
+            if _response.status_code == 500:
+                raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -88,8 +86,46 @@ class RawCheckoutsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 403:
-                raise ForbiddenError(
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def get_value_receipt_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[ValueReceiptDetail]:
+        """
+        Get a value receipt by ID, including its publish/share state.
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[ValueReceiptDetail]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"value-receipts/{jsonable_encoder(id)}",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ValueReceiptDetail,
+                    parse_obj_as(
+                        type_=ValueReceiptDetail,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 404:
+                raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -115,76 +151,35 @@ class RawCheckoutsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create_checkout(
+    def publish_value_receipt(
         self,
+        id: str,
         *,
-        products: typing.Sequence[CheckoutProductInput],
-        success_url: str,
-        customer_id: typing.Optional[str] = OMIT,
-        external_customer_id: typing.Optional[str] = OMIT,
-        cancel_url: typing.Optional[str] = OMIT,
-        expires_at: typing.Optional[dt.datetime] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
-        collect_address: typing.Optional[bool] = OMIT,
-        collect_phone: typing.Optional[bool] = OMIT,
-        single_use: typing.Optional[bool] = OMIT,
-        currency: typing.Optional[str] = OMIT,
+        publish_expires_at: typing.Optional[dt.datetime] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Checkout]:
+    ) -> HttpResponse[ValueReceiptDetail]:
         """
-        Creates a checkout link that generates a URL for a customer to complete a purchase
+        Make a value receipt publicly accessible via URL.
 
         Parameters
         ----------
-        products : typing.Sequence[CheckoutProductInput]
+        id : str
 
-        success_url : str
-
-        customer_id : typing.Optional[str]
-
-        external_customer_id : typing.Optional[str]
-            External customer identifier. Creates the customer on first use, resolves to the existing customer on subsequent uses.
-
-        cancel_url : typing.Optional[str]
-
-        expires_at : typing.Optional[dt.datetime]
-
-        metadata : typing.Optional[typing.Dict[str, typing.Any]]
-
-        collect_address : typing.Optional[bool]
-
-        collect_phone : typing.Optional[bool]
-
-        single_use : typing.Optional[bool]
-
-        currency : typing.Optional[str]
-            Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans.
+        publish_expires_at : typing.Optional[dt.datetime]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[Checkout]
-            201
+        HttpResponse[ValueReceiptDetail]
+            200
         """
         _response = self._client_wrapper.httpx_client.request(
-            "checkouts/",
+            f"value-receipts/{jsonable_encoder(id)}/publish",
             method="POST",
             json={
-                "products": convert_and_respect_annotation_metadata(
-                    object_=products, annotation=typing.Sequence[CheckoutProductInput], direction="write"
-                ),
-                "customerId": customer_id,
-                "externalCustomerId": external_customer_id,
-                "successUrl": success_url,
-                "cancelUrl": cancel_url,
-                "expiresAt": expires_at,
-                "metadata": metadata,
-                "collectAddress": collect_address,
-                "collectPhone": collect_phone,
-                "singleUse": single_use,
-                "currency": currency,
+                "publishExpiresAt": publish_expires_at,
             },
             headers={
                 "content-type": "application/json",
@@ -195,35 +190,13 @@ class RawCheckoutsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Checkout,
+                    ValueReceiptDetail,
                     parse_obj_as(
-                        type_=Checkout,  # type: ignore
+                        type_=ValueReceiptDetail,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -251,11 +224,11 @@ class RawCheckoutsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def get_checkout(
+    def unpublish_value_receipt(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[Checkout]:
+    ) -> HttpResponse[ValueReceiptDetail]:
         """
-        Get a checkout by ID
+        Revoke public access to a value receipt.
 
         Parameters
         ----------
@@ -266,106 +239,29 @@ class RawCheckoutsClient:
 
         Returns
         -------
-        HttpResponse[Checkout]
+        HttpResponse[ValueReceiptDetail]
             200
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"checkouts/{jsonable_encoder(id)}",
-            method="GET",
+            f"value-receipts/{jsonable_encoder(id)}/unpublish",
+            method="POST",
+            json={},
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
+            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Checkout,
+                    ValueReceiptDetail,
                     parse_obj_as(
-                        type_=Checkout,  # type: ignore
+                        type_=ValueReceiptDetail,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 500:
-                raise InternalServerError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    def archive_checkout(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[EmptyResponse]:
-        """
-        Archive a checkout by ID
-
-        Parameters
-        ----------
-        id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[EmptyResponse]
-            200
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"checkouts/{jsonable_encoder(id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    EmptyResponse,
-                    parse_obj_as(
-                        type_=EmptyResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -394,20 +290,21 @@ class RawCheckoutsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
 
-class AsyncRawCheckoutsClient:
+class AsyncRawValueReceiptsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list_checkouts(
+    async def list_value_receipts(
         self,
         *,
         limit: typing.Optional[int] = None,
         offset: typing.Optional[int] = None,
-        status: typing.Optional[ListCheckoutsRequestStatus] = None,
+        customer_id: typing.Optional[str] = None,
+        order_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[CheckoutListResponse]:
+    ) -> AsyncHttpResponse[ValueReceiptListResponse]:
         """
-        Get a list of checkouts for the organization
+        List value receipts for the organization
 
         Parameters
         ----------
@@ -415,38 +312,41 @@ class AsyncRawCheckoutsClient:
 
         offset : typing.Optional[int]
 
-        status : typing.Optional[ListCheckoutsRequestStatus]
+        customer_id : typing.Optional[str]
+
+        order_id : typing.Optional[str]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[CheckoutListResponse]
+        AsyncHttpResponse[ValueReceiptListResponse]
             200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "checkouts/",
+            "value-receipts/",
             method="GET",
             params={
                 "limit": limit,
                 "offset": offset,
-                "status": status,
+                "customerId": customer_id,
+                "orderId": order_id,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    CheckoutListResponse,
+                    ValueReceiptListResponse,
                     parse_obj_as(
-                        type_=CheckoutListResponse,  # type: ignore
+                        type_=ValueReceiptListResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
+            if _response.status_code == 500:
+                raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -456,8 +356,46 @@ class AsyncRawCheckoutsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 403:
-                raise ForbiddenError(
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def get_value_receipt_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[ValueReceiptDetail]:
+        """
+        Get a value receipt by ID, including its publish/share state.
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[ValueReceiptDetail]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"value-receipts/{jsonable_encoder(id)}",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ValueReceiptDetail,
+                    parse_obj_as(
+                        type_=ValueReceiptDetail,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 404:
+                raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -483,76 +421,35 @@ class AsyncRawCheckoutsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create_checkout(
+    async def publish_value_receipt(
         self,
+        id: str,
         *,
-        products: typing.Sequence[CheckoutProductInput],
-        success_url: str,
-        customer_id: typing.Optional[str] = OMIT,
-        external_customer_id: typing.Optional[str] = OMIT,
-        cancel_url: typing.Optional[str] = OMIT,
-        expires_at: typing.Optional[dt.datetime] = OMIT,
-        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
-        collect_address: typing.Optional[bool] = OMIT,
-        collect_phone: typing.Optional[bool] = OMIT,
-        single_use: typing.Optional[bool] = OMIT,
-        currency: typing.Optional[str] = OMIT,
+        publish_expires_at: typing.Optional[dt.datetime] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Checkout]:
+    ) -> AsyncHttpResponse[ValueReceiptDetail]:
         """
-        Creates a checkout link that generates a URL for a customer to complete a purchase
+        Make a value receipt publicly accessible via URL.
 
         Parameters
         ----------
-        products : typing.Sequence[CheckoutProductInput]
+        id : str
 
-        success_url : str
-
-        customer_id : typing.Optional[str]
-
-        external_customer_id : typing.Optional[str]
-            External customer identifier. Creates the customer on first use, resolves to the existing customer on subsequent uses.
-
-        cancel_url : typing.Optional[str]
-
-        expires_at : typing.Optional[dt.datetime]
-
-        metadata : typing.Optional[typing.Dict[str, typing.Any]]
-
-        collect_address : typing.Optional[bool]
-
-        collect_phone : typing.Optional[bool]
-
-        single_use : typing.Optional[bool]
-
-        currency : typing.Optional[str]
-            Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans.
+        publish_expires_at : typing.Optional[dt.datetime]
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[Checkout]
-            201
+        AsyncHttpResponse[ValueReceiptDetail]
+            200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            "checkouts/",
+            f"value-receipts/{jsonable_encoder(id)}/publish",
             method="POST",
             json={
-                "products": convert_and_respect_annotation_metadata(
-                    object_=products, annotation=typing.Sequence[CheckoutProductInput], direction="write"
-                ),
-                "customerId": customer_id,
-                "externalCustomerId": external_customer_id,
-                "successUrl": success_url,
-                "cancelUrl": cancel_url,
-                "expiresAt": expires_at,
-                "metadata": metadata,
-                "collectAddress": collect_address,
-                "collectPhone": collect_phone,
-                "singleUse": single_use,
-                "currency": currency,
+                "publishExpiresAt": publish_expires_at,
             },
             headers={
                 "content-type": "application/json",
@@ -563,35 +460,13 @@ class AsyncRawCheckoutsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Checkout,
+                    ValueReceiptDetail,
                     parse_obj_as(
-                        type_=Checkout,  # type: ignore
+                        type_=ValueReceiptDetail,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -619,11 +494,11 @@ class AsyncRawCheckoutsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def get_checkout(
+    async def unpublish_value_receipt(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[Checkout]:
+    ) -> AsyncHttpResponse[ValueReceiptDetail]:
         """
-        Get a checkout by ID
+        Revoke public access to a value receipt.
 
         Parameters
         ----------
@@ -634,106 +509,29 @@ class AsyncRawCheckoutsClient:
 
         Returns
         -------
-        AsyncHttpResponse[Checkout]
+        AsyncHttpResponse[ValueReceiptDetail]
             200
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"checkouts/{jsonable_encoder(id)}",
-            method="GET",
+            f"value-receipts/{jsonable_encoder(id)}/unpublish",
+            method="POST",
+            json={},
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
+            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Checkout,
+                    ValueReceiptDetail,
                     parse_obj_as(
-                        type_=Checkout,  # type: ignore
+                        type_=ValueReceiptDetail,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 500:
-                raise InternalServerError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def archive_checkout(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[EmptyResponse]:
-        """
-        Archive a checkout by ID
-
-        Parameters
-        ----------
-        id : str
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[EmptyResponse]
-            200
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"checkouts/{jsonable_encoder(id)}",
-            method="DELETE",
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    EmptyResponse,
-                    parse_obj_as(
-                        type_=EmptyResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),

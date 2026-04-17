@@ -99,6 +99,9 @@ if typing.TYPE_CHECKING:
     from .update_contact_request_roles_item import UpdateContactRequestRolesItem
     from .update_customer_request import UpdateCustomerRequest
     from .update_product_request import UpdateProductRequest
+    from .value_receipt_detail import ValueReceiptDetail
+    from .value_receipt_list_response import ValueReceiptListResponse
+    from .value_receipt_summary import ValueReceiptSummary
 _dynamic_imports: typing.Dict[str, str] = {
     "Attribution": ".attribution",
     "BulkSignalsResponse": ".bulk_signals_response",
@@ -167,6 +170,9 @@ _dynamic_imports: typing.Dict[str, str] = {
     "UpdateContactRequestRolesItem": ".update_contact_request_roles_item",
     "UpdateCustomerRequest": ".update_customer_request",
     "UpdateProductRequest": ".update_product_request",
+    "ValueReceiptDetail": ".value_receipt_detail",
+    "ValueReceiptListResponse": ".value_receipt_list_response",
+    "ValueReceiptSummary": ".value_receipt_summary",
 }
 
 
@@ -259,4 +265,7 @@ __all__ = [
     "UpdateContactRequestRolesItem",
     "UpdateCustomerRequest",
     "UpdateProductRequest",
+    "ValueReceiptDetail",
+    "ValueReceiptListResponse",
+    "ValueReceiptSummary",
 ]

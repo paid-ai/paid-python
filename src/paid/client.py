@@ -18,6 +18,7 @@ if typing.TYPE_CHECKING:
     from .orders.client import AsyncOrdersClient, OrdersClient
     from .products.client import AsyncProductsClient, ProductsClient
     from .signals.client import AsyncSignalsClient, SignalsClient
+    from .value_receipts.client import AsyncValueReceiptsClient, ValueReceiptsClient
 
 
 class Paid:
@@ -94,6 +95,7 @@ class Paid:
         self._credits: typing.Optional[CreditsClient] = None
         self._checkouts: typing.Optional[CheckoutsClient] = None
         self._customer_portals: typing.Optional[CustomerPortalsClient] = None
+        self._value_receipts: typing.Optional[ValueReceiptsClient] = None
 
     @property
     def products(self):
@@ -166,6 +168,14 @@ class Paid:
 
             self._customer_portals = CustomerPortalsClient(client_wrapper=self._client_wrapper)
         return self._customer_portals
+
+    @property
+    def value_receipts(self):
+        if self._value_receipts is None:
+            from .value_receipts.client import ValueReceiptsClient  # noqa: E402
+
+            self._value_receipts = ValueReceiptsClient(client_wrapper=self._client_wrapper)
+        return self._value_receipts
 
 
 class AsyncPaid:
@@ -242,6 +252,7 @@ class AsyncPaid:
         self._credits: typing.Optional[AsyncCreditsClient] = None
         self._checkouts: typing.Optional[AsyncCheckoutsClient] = None
         self._customer_portals: typing.Optional[AsyncCustomerPortalsClient] = None
+        self._value_receipts: typing.Optional[AsyncValueReceiptsClient] = None
 
     @property
     def products(self):
@@ -314,6 +325,14 @@ class AsyncPaid:
 
             self._customer_portals = AsyncCustomerPortalsClient(client_wrapper=self._client_wrapper)
         return self._customer_portals
+
+    @property
+    def value_receipts(self):
+        if self._value_receipts is None:
+            from .value_receipts.client import AsyncValueReceiptsClient  # noqa: E402
+
+            self._value_receipts = AsyncValueReceiptsClient(client_wrapper=self._client_wrapper)
+        return self._value_receipts
 
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidEnvironment) -> str:

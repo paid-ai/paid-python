@@ -37,6 +37,9 @@ class Checkout(UniversalBaseModel):
         bool, FieldMetadata(alias="collectPhone"), pydantic.Field(alias="collectPhone")
     ]
     single_use: typing_extensions.Annotated[bool, FieldMetadata(alias="singleUse"), pydantic.Field(alias="singleUse")]
+    allowed_currencies: typing_extensions.Annotated[
+        typing.List[str], FieldMetadata(alias="allowedCurrencies"), pydantic.Field(alias="allowedCurrencies")
+    ]
     created_at: typing_extensions.Annotated[
         dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")
     ]

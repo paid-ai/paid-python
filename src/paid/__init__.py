@@ -74,9 +74,23 @@ if typing.TYPE_CHECKING:
         UpdateContactRequestRolesItem,
         UpdateCustomerRequest,
         UpdateProductRequest,
+        ValueReceiptDetail,
+        ValueReceiptListResponse,
+        ValueReceiptSummary,
     )
     from .errors import BadRequestError, ForbiddenError, InternalServerError, NotFoundError
-    from . import checkouts, contacts, credits, customer_portals, customers, invoices, orders, products, signals
+    from . import (
+        checkouts,
+        contacts,
+        credits,
+        customer_portals,
+        customers,
+        invoices,
+        orders,
+        products,
+        signals,
+        value_receipts,
+    )
     from .checkouts import ListCheckoutsRequestStatus
     from .client import AsyncPaid, Paid
     from .contacts import CreateContactRequestRolesItem
@@ -159,6 +173,9 @@ _dynamic_imports: typing.Dict[str, str] = {
     "UpdateContactRequestRolesItem": ".types",
     "UpdateCustomerRequest": ".types",
     "UpdateProductRequest": ".types",
+    "ValueReceiptDetail": ".types",
+    "ValueReceiptListResponse": ".types",
+    "ValueReceiptSummary": ".types",
     "__version__": ".version",
     "checkouts": ".checkouts",
     "contacts": ".contacts",
@@ -169,6 +186,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "orders": ".orders",
     "products": ".products",
     "signals": ".signals",
+    "value_receipts": ".value_receipts",
 }
 
 
@@ -270,6 +288,9 @@ __all__ = [
     "UpdateContactRequestRolesItem",
     "UpdateCustomerRequest",
     "UpdateProductRequest",
+    "ValueReceiptDetail",
+    "ValueReceiptListResponse",
+    "ValueReceiptSummary",
     "__version__",
     "checkouts",
     "contacts",
@@ -280,4 +301,5 @@ __all__ = [
     "orders",
     "products",
     "signals",
+    "value_receipts",
 ]
