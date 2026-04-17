@@ -85,6 +85,7 @@ class CheckoutsClient:
         collect_address: typing.Optional[bool] = OMIT,
         collect_phone: typing.Optional[bool] = OMIT,
         single_use: typing.Optional[bool] = OMIT,
+        currency: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Checkout:
         """
@@ -112,6 +113,9 @@ class CheckoutsClient:
         collect_phone : typing.Optional[bool]
 
         single_use : typing.Optional[bool]
+
+        currency : typing.Optional[str]
+            Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -148,6 +152,7 @@ class CheckoutsClient:
             collect_address=collect_address,
             collect_phone=collect_phone,
             single_use=single_use,
+            currency=currency,
             request_options=request_options,
         )
         return _response.data
@@ -290,6 +295,7 @@ class AsyncCheckoutsClient:
         collect_address: typing.Optional[bool] = OMIT,
         collect_phone: typing.Optional[bool] = OMIT,
         single_use: typing.Optional[bool] = OMIT,
+        currency: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Checkout:
         """
@@ -317,6 +323,9 @@ class AsyncCheckoutsClient:
         collect_phone : typing.Optional[bool]
 
         single_use : typing.Optional[bool]
+
+        currency : typing.Optional[str]
+            Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -361,6 +370,7 @@ class AsyncCheckoutsClient:
             collect_address=collect_address,
             collect_phone=collect_phone,
             single_use=single_use,
+            currency=currency,
             request_options=request_options,
         )
         return _response.data
