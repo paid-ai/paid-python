@@ -10,6 +10,8 @@ from ..types.customer import Customer
 from ..types.customer_billing_address import CustomerBillingAddress
 from ..types.customer_creation_state import CustomerCreationState
 from ..types.customer_list_response import CustomerListResponse
+from ..types.customer_user import CustomerUser
+from ..types.customer_user_status import CustomerUserStatus
 from ..types.empty_response import EmptyResponse
 from .raw_client import AsyncRawCustomersClient, RawCustomersClient
 
@@ -499,6 +501,65 @@ class CustomersClient:
         """
         _response = self._raw_client.get_customer_credit_balances_by_external_id(
             external_id, request_options=request_options
+        )
+        return _response.data
+
+    def upsert_customer_user_by_external_id(
+        self,
+        customer_external_id: str,
+        user_external_id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        status: typing.Optional[CustomerUserStatus] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUser:
+        """
+        Create or update a customer user using customer and user external IDs
+
+        Parameters
+        ----------
+        customer_external_id : str
+
+        user_external_id : str
+
+        name : typing.Optional[str]
+
+        email : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
+
+        status : typing.Optional[CustomerUserStatus]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUser
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.upsert_customer_user_by_external_id(
+            customer_external_id="customerExternalId",
+            user_external_id="userExternalId",
+        )
+        """
+        _response = self._raw_client.upsert_customer_user_by_external_id(
+            customer_external_id,
+            user_external_id,
+            name=name,
+            email=email,
+            metadata=metadata,
+            status=status,
+            request_options=request_options,
         )
         return _response.data
 
@@ -1065,5 +1126,72 @@ class AsyncCustomersClient:
         """
         _response = await self._raw_client.get_customer_credit_balances_by_external_id(
             external_id, request_options=request_options
+        )
+        return _response.data
+
+    async def upsert_customer_user_by_external_id(
+        self,
+        customer_external_id: str,
+        user_external_id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        status: typing.Optional[CustomerUserStatus] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUser:
+        """
+        Create or update a customer user using customer and user external IDs
+
+        Parameters
+        ----------
+        customer_external_id : str
+
+        user_external_id : str
+
+        name : typing.Optional[str]
+
+        email : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
+
+        status : typing.Optional[CustomerUserStatus]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUser
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.upsert_customer_user_by_external_id(
+                customer_external_id="customerExternalId",
+                user_external_id="userExternalId",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.upsert_customer_user_by_external_id(
+            customer_external_id,
+            user_external_id,
+            name=name,
+            email=email,
+            metadata=metadata,
+            status=status,
+            request_options=request_options,
         )
         return _response.data

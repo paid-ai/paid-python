@@ -7,8 +7,10 @@ from importlib import import_module
 
 if typing.TYPE_CHECKING:
     from .attribution import Attribution
+    from .batch_seat_assignments_response import BatchSeatAssignmentsResponse
     from .bulk_signals_response import BulkSignalsResponse
     from .checkout import Checkout
+    from .checkout_details import CheckoutDetails
     from .checkout_list_response import CheckoutListResponse
     from .checkout_product import CheckoutProduct
     from .checkout_product_input import CheckoutProductInput
@@ -73,6 +75,8 @@ if typing.TYPE_CHECKING:
     from .customer_list_response import CustomerListResponse
     from .customer_portal import CustomerPortal
     from .customer_portal_status import CustomerPortalStatus
+    from .customer_user import CustomerUser
+    from .customer_user_status import CustomerUserStatus
     from .empty_response import EmptyResponse
     from .error_response import ErrorResponse
     from .invoice import Invoice
@@ -89,11 +93,15 @@ if typing.TYPE_CHECKING:
     from .order_line import OrderLine
     from .order_lines_response import OrderLinesResponse
     from .order_list_response import OrderListResponse
+    from .order_seat import OrderSeat
+    from .order_seat_list_response import OrderSeatListResponse
     from .pagination import Pagination
     from .product import Product
     from .product_by_external_id import ProductByExternalId
     from .product_by_id import ProductById
     from .product_list_response import ProductListResponse
+    from .seat_assignee import SeatAssignee
+    from .seat_assignment_status import SeatAssignmentStatus
     from .signal import Signal
     from .update_contact_request import UpdateContactRequest
     from .update_contact_request_roles_item import UpdateContactRequestRolesItem
@@ -102,10 +110,17 @@ if typing.TYPE_CHECKING:
     from .value_receipt_detail import ValueReceiptDetail
     from .value_receipt_list_response import ValueReceiptListResponse
     from .value_receipt_summary import ValueReceiptSummary
+    from .webhook import Webhook
+    from .webhook_delivery_status import WebhookDeliveryStatus
+    from .webhook_list_response import WebhookListResponse
+    from .webhook_name import WebhookName
+    from .webhook_test_response import WebhookTestResponse
 _dynamic_imports: typing.Dict[str, str] = {
     "Attribution": ".attribution",
+    "BatchSeatAssignmentsResponse": ".batch_seat_assignments_response",
     "BulkSignalsResponse": ".bulk_signals_response",
     "Checkout": ".checkout",
+    "CheckoutDetails": ".checkout_details",
     "CheckoutListResponse": ".checkout_list_response",
     "CheckoutProduct": ".checkout_product",
     "CheckoutProductInput": ".checkout_product_input",
@@ -144,6 +159,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CustomerListResponse": ".customer_list_response",
     "CustomerPortal": ".customer_portal",
     "CustomerPortalStatus": ".customer_portal_status",
+    "CustomerUser": ".customer_user",
+    "CustomerUserStatus": ".customer_user_status",
     "EmptyResponse": ".empty_response",
     "ErrorResponse": ".error_response",
     "Invoice": ".invoice",
@@ -160,11 +177,15 @@ _dynamic_imports: typing.Dict[str, str] = {
     "OrderLine": ".order_line",
     "OrderLinesResponse": ".order_lines_response",
     "OrderListResponse": ".order_list_response",
+    "OrderSeat": ".order_seat",
+    "OrderSeatListResponse": ".order_seat_list_response",
     "Pagination": ".pagination",
     "Product": ".product",
     "ProductByExternalId": ".product_by_external_id",
     "ProductById": ".product_by_id",
     "ProductListResponse": ".product_list_response",
+    "SeatAssignee": ".seat_assignee",
+    "SeatAssignmentStatus": ".seat_assignment_status",
     "Signal": ".signal",
     "UpdateContactRequest": ".update_contact_request",
     "UpdateContactRequestRolesItem": ".update_contact_request_roles_item",
@@ -173,6 +194,11 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ValueReceiptDetail": ".value_receipt_detail",
     "ValueReceiptListResponse": ".value_receipt_list_response",
     "ValueReceiptSummary": ".value_receipt_summary",
+    "Webhook": ".webhook",
+    "WebhookDeliveryStatus": ".webhook_delivery_status",
+    "WebhookListResponse": ".webhook_list_response",
+    "WebhookName": ".webhook_name",
+    "WebhookTestResponse": ".webhook_test_response",
 }
 
 
@@ -199,8 +225,10 @@ def __dir__():
 
 __all__ = [
     "Attribution",
+    "BatchSeatAssignmentsResponse",
     "BulkSignalsResponse",
     "Checkout",
+    "CheckoutDetails",
     "CheckoutListResponse",
     "CheckoutProduct",
     "CheckoutProductInput",
@@ -239,6 +267,8 @@ __all__ = [
     "CustomerListResponse",
     "CustomerPortal",
     "CustomerPortalStatus",
+    "CustomerUser",
+    "CustomerUserStatus",
     "EmptyResponse",
     "ErrorResponse",
     "Invoice",
@@ -255,11 +285,15 @@ __all__ = [
     "OrderLine",
     "OrderLinesResponse",
     "OrderListResponse",
+    "OrderSeat",
+    "OrderSeatListResponse",
     "Pagination",
     "Product",
     "ProductByExternalId",
     "ProductById",
     "ProductListResponse",
+    "SeatAssignee",
+    "SeatAssignmentStatus",
     "Signal",
     "UpdateContactRequest",
     "UpdateContactRequestRolesItem",
@@ -268,4 +302,9 @@ __all__ = [
     "ValueReceiptDetail",
     "ValueReceiptListResponse",
     "ValueReceiptSummary",
+    "Webhook",
+    "WebhookDeliveryStatus",
+    "WebhookListResponse",
+    "WebhookName",
+    "WebhookTestResponse",
 ]
