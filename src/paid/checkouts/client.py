@@ -6,6 +6,7 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.checkout import Checkout
+from ..types.checkout_details import CheckoutDetails
 from ..types.checkout_list_response import CheckoutListResponse
 from ..types.checkout_product_input import CheckoutProductInput
 from ..types.empty_response import EmptyResponse
@@ -157,7 +158,7 @@ class CheckoutsClient:
         )
         return _response.data
 
-    def get_checkout(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Checkout:
+    def get_checkout(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> CheckoutDetails:
         """
         Get a checkout by ID
 
@@ -170,7 +171,7 @@ class CheckoutsClient:
 
         Returns
         -------
-        Checkout
+        CheckoutDetails
             200
 
         Examples
@@ -375,7 +376,9 @@ class AsyncCheckoutsClient:
         )
         return _response.data
 
-    async def get_checkout(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Checkout:
+    async def get_checkout(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> CheckoutDetails:
         """
         Get a checkout by ID
 
@@ -388,7 +391,7 @@ class AsyncCheckoutsClient:
 
         Returns
         -------
-        Checkout
+        CheckoutDetails
             200
 
         Examples

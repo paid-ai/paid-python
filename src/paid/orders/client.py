@@ -5,13 +5,18 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.batch_seat_assignments_response import BatchSeatAssignmentsResponse
 from ..types.create_order_line_request import CreateOrderLineRequest
 from ..types.empty_response import EmptyResponse
 from ..types.order import Order
 from ..types.order_creation_state import OrderCreationState
 from ..types.order_lines_response import OrderLinesResponse
 from ..types.order_list_response import OrderListResponse
+from ..types.order_seat import OrderSeat
+from ..types.order_seat_list_response import OrderSeatListResponse
 from .raw_client import AsyncRawOrdersClient, RawOrdersClient
+from .types.batch_seat_assignments_request_assignments_item import BatchSeatAssignmentsRequestAssignmentsItem
+from .types.list_order_seats_request_status import ListOrderSeatsRequestStatus
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -365,6 +370,150 @@ class OrdersClient:
         )
         """
         _response = self._raw_client.get_order_lines(id, limit=limit, offset=offset, request_options=request_options)
+        return _response.data
+
+    def list_order_seats(
+        self,
+        id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        product_external_id: typing.Optional[str] = None,
+        status: typing.Optional[ListOrderSeatsRequestStatus] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> OrderSeatListResponse:
+        """
+        List seats for an order
+
+        Parameters
+        ----------
+        id : str
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        product_external_id : typing.Optional[str]
+
+        status : typing.Optional[ListOrderSeatsRequestStatus]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        OrderSeatListResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.orders.list_order_seats(
+            id="id",
+        )
+        """
+        _response = self._raw_client.list_order_seats(
+            id,
+            limit=limit,
+            offset=offset,
+            product_external_id=product_external_id,
+            status=status,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def update_order_seat_assignment(
+        self,
+        id: str,
+        seat_id: str,
+        *,
+        user_external_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> OrderSeat:
+        """
+        Assign or unassign a single seat on an order
+
+        Parameters
+        ----------
+        id : str
+
+        seat_id : str
+
+        user_external_id : typing.Optional[str]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        OrderSeat
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.orders.update_order_seat_assignment(
+            id="id",
+            seat_id="seatId",
+        )
+        """
+        _response = self._raw_client.update_order_seat_assignment(
+            id, seat_id, user_external_id=user_external_id, request_options=request_options
+        )
+        return _response.data
+
+    def batch_order_seat_assignments(
+        self,
+        id: str,
+        *,
+        assignments: typing.Sequence[BatchSeatAssignmentsRequestAssignmentsItem],
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> BatchSeatAssignmentsResponse:
+        """
+        Assign or unassign seats in batch for an order
+
+        Parameters
+        ----------
+        id : str
+
+        assignments : typing.Sequence[BatchSeatAssignmentsRequestAssignmentsItem]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        BatchSeatAssignmentsResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+        from paid.orders import BatchSeatAssignmentsRequestAssignmentsItem
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.orders.batch_order_seat_assignments(
+            id="id",
+            assignments=[
+                BatchSeatAssignmentsRequestAssignmentsItem(
+                    seat_id="seatId",
+                )
+            ],
+        )
+        """
+        _response = self._raw_client.batch_order_seat_assignments(
+            id, assignments=assignments, request_options=request_options
+        )
         return _response.data
 
 
@@ -767,5 +916,173 @@ class AsyncOrdersClient:
         """
         _response = await self._raw_client.get_order_lines(
             id, limit=limit, offset=offset, request_options=request_options
+        )
+        return _response.data
+
+    async def list_order_seats(
+        self,
+        id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        product_external_id: typing.Optional[str] = None,
+        status: typing.Optional[ListOrderSeatsRequestStatus] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> OrderSeatListResponse:
+        """
+        List seats for an order
+
+        Parameters
+        ----------
+        id : str
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        product_external_id : typing.Optional[str]
+
+        status : typing.Optional[ListOrderSeatsRequestStatus]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        OrderSeatListResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.orders.list_order_seats(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list_order_seats(
+            id,
+            limit=limit,
+            offset=offset,
+            product_external_id=product_external_id,
+            status=status,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def update_order_seat_assignment(
+        self,
+        id: str,
+        seat_id: str,
+        *,
+        user_external_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> OrderSeat:
+        """
+        Assign or unassign a single seat on an order
+
+        Parameters
+        ----------
+        id : str
+
+        seat_id : str
+
+        user_external_id : typing.Optional[str]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        OrderSeat
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.orders.update_order_seat_assignment(
+                id="id",
+                seat_id="seatId",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.update_order_seat_assignment(
+            id, seat_id, user_external_id=user_external_id, request_options=request_options
+        )
+        return _response.data
+
+    async def batch_order_seat_assignments(
+        self,
+        id: str,
+        *,
+        assignments: typing.Sequence[BatchSeatAssignmentsRequestAssignmentsItem],
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> BatchSeatAssignmentsResponse:
+        """
+        Assign or unassign seats in batch for an order
+
+        Parameters
+        ----------
+        id : str
+
+        assignments : typing.Sequence[BatchSeatAssignmentsRequestAssignmentsItem]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        BatchSeatAssignmentsResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+        from paid.orders import BatchSeatAssignmentsRequestAssignmentsItem
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.orders.batch_order_seat_assignments(
+                id="id",
+                assignments=[
+                    BatchSeatAssignmentsRequestAssignmentsItem(
+                        seat_id="seatId",
+                    )
+                ],
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.batch_order_seat_assignments(
+            id, assignments=assignments, request_options=request_options
         )
         return _response.data

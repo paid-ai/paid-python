@@ -6,10 +6,11 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .types import BatchSeatAssignmentsRequestAssignmentsItem, ListOrderSeatsRequestStatus
+    from .batch_seat_assignments_request_assignments_item import BatchSeatAssignmentsRequestAssignmentsItem
+    from .list_order_seats_request_status import ListOrderSeatsRequestStatus
 _dynamic_imports: typing.Dict[str, str] = {
-    "BatchSeatAssignmentsRequestAssignmentsItem": ".types",
-    "ListOrderSeatsRequestStatus": ".types",
+    "BatchSeatAssignmentsRequestAssignmentsItem": ".batch_seat_assignments_request_assignments_item",
+    "ListOrderSeatsRequestStatus": ".list_order_seats_request_status",
 }
 
 

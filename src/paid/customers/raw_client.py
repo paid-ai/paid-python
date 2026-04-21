@@ -20,6 +20,8 @@ from ..types.customer import Customer
 from ..types.customer_billing_address import CustomerBillingAddress
 from ..types.customer_creation_state import CustomerCreationState
 from ..types.customer_list_response import CustomerListResponse
+from ..types.customer_user import CustomerUser
+from ..types.customer_user_status import CustomerUserStatus
 from ..types.empty_response import EmptyResponse
 from ..types.error_response import ErrorResponse
 
@@ -957,6 +959,116 @@ class RawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def upsert_customer_user_by_external_id(
+        self,
+        customer_external_id: str,
+        user_external_id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        status: typing.Optional[CustomerUserStatus] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[CustomerUser]:
+        """
+        Create or update a customer user using customer and user external IDs
+
+        Parameters
+        ----------
+        customer_external_id : str
+
+        user_external_id : str
+
+        name : typing.Optional[str]
+
+        email : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
+
+        status : typing.Optional[CustomerUserStatus]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[CustomerUser]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"customers/{jsonable_encoder(customer_external_id)}/users/{jsonable_encoder(user_external_id)}",
+            method="PUT",
+            json={
+                "name": name,
+                "email": email,
+                "metadata": metadata,
+                "status": status,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CustomerUser,
+                    parse_obj_as(
+                        type_=CustomerUser,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
 
 class AsyncRawCustomersClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -1850,6 +1962,116 @@ class AsyncRawCustomersClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def upsert_customer_user_by_external_id(
+        self,
+        customer_external_id: str,
+        user_external_id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        email: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        status: typing.Optional[CustomerUserStatus] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[CustomerUser]:
+        """
+        Create or update a customer user using customer and user external IDs
+
+        Parameters
+        ----------
+        customer_external_id : str
+
+        user_external_id : str
+
+        name : typing.Optional[str]
+
+        email : typing.Optional[str]
+
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
+
+        status : typing.Optional[CustomerUserStatus]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[CustomerUser]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"customers/{jsonable_encoder(customer_external_id)}/users/{jsonable_encoder(user_external_id)}",
+            method="PUT",
+            json={
+                "name": name,
+                "email": email,
+                "metadata": metadata,
+                "status": status,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CustomerUser,
+                    parse_obj_as(
+                        type_=CustomerUser,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 403:
                 raise ForbiddenError(
                     headers=dict(_response.headers),

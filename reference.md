@@ -1525,6 +1525,117 @@ client.customers.get_customer_credit_balances_by_external_id(
 </dl>
 </details>
 
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">upsert_customer_user_by_external_id</a>(...) -&gt; AsyncHttpResponse[CustomerUser]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Create or update a customer user using customer and user external IDs
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.upsert_customer_user_by_external_id(
+    customer_external_id="customerExternalId",
+    user_external_id="userExternalId",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**customer_external_id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**user_external_id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**email:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**metadata:** `typing.Optional[typing.Dict[str, typing.Any]]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[CustomerUserStatus]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Contacts
 <details><summary><code>client.contacts.<a href="src/paid/contacts/client.py">list_contacts</a>(...) -&gt; AsyncHttpResponse[ContactListResponse]</code></summary>
 <dl>
@@ -2960,6 +3071,279 @@ client.orders.get_order_lines(
 </dl>
 </details>
 
+<details><summary><code>client.orders.<a href="src/paid/orders/client.py">list_order_seats</a>(...) -&gt; AsyncHttpResponse[OrderSeatListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+List seats for an order
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.orders.list_order_seats(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**product_external_id:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[ListOrderSeatsRequestStatus]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.orders.<a href="src/paid/orders/client.py">update_order_seat_assignment</a>(...) -&gt; AsyncHttpResponse[OrderSeat]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Assign or unassign a single seat on an order
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.orders.update_order_seat_assignment(
+    id="id",
+    seat_id="seatId",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**seat_id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**user_external_id:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.orders.<a href="src/paid/orders/client.py">batch_order_seat_assignments</a>(...) -&gt; AsyncHttpResponse[BatchSeatAssignmentsResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Assign or unassign seats in batch for an order
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+from paid.orders import BatchSeatAssignmentsRequestAssignmentsItem
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.orders.batch_order_seat_assignments(
+    id="id",
+    assignments=[
+        BatchSeatAssignmentsRequestAssignmentsItem(
+            seat_id="seatId",
+        )
+    ],
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**assignments:** `typing.Sequence[BatchSeatAssignmentsRequestAssignmentsItem]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Invoices
 <details><summary><code>client.invoices.<a href="src/paid/invoices/client.py">list_invoices</a>(...) -&gt; AsyncHttpResponse[InvoiceListResponse]</code></summary>
 <dl>
@@ -3650,7 +4034,7 @@ client.checkouts.create_checkout(
 </dl>
 </details>
 
-<details><summary><code>client.checkouts.<a href="src/paid/checkouts/client.py">get_checkout</a>(...) -&gt; AsyncHttpResponse[Checkout]</code></summary>
+<details><summary><code>client.checkouts.<a href="src/paid/checkouts/client.py">get_checkout</a>(...) -&gt; AsyncHttpResponse[CheckoutDetails]</code></summary>
 <dl>
 <dd>
 
@@ -4175,6 +4559,223 @@ client.value_receipts.unpublish_value_receipt(
 <dd>
 
 **id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Webhooks
+<details><summary><code>client.webhooks.<a href="src/paid/webhooks/client.py">list_webhooks</a>() -&gt; AsyncHttpResponse[WebhookListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+List customer-facing billing webhooks for the authenticated organization.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.webhooks.list_webhooks()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.webhooks.<a href="src/paid/webhooks/client.py">update_webhook</a>(...) -&gt; AsyncHttpResponse[Webhook]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Enable or disable a webhook and configure the destination URL for the authenticated organization.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.webhooks.update_webhook(
+    webhook_name="billing-invoice-created",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**webhook_name:** `UpdateWebhookRequestWebhookName` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**enabled:** `typing.Optional[bool]` — Whether the webhook is enabled for delivery.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**url:** `typing.Optional[str]` — The HTTPS endpoint Paid should deliver this webhook to. Set to null to clear it while disabled.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.webhooks.<a href="src/paid/webhooks/client.py">test_webhook</a>(...) -&gt; AsyncHttpResponse[WebhookTestResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Send a synthetic webhook delivery to the configured destination for this webhook.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.webhooks.test_webhook(
+    webhook_name="billing-invoice-created",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**webhook_name:** `TestWebhookRequestWebhookName` 
     
 </dd>
 </dl>

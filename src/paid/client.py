@@ -19,6 +19,7 @@ if typing.TYPE_CHECKING:
     from .products.client import AsyncProductsClient, ProductsClient
     from .signals.client import AsyncSignalsClient, SignalsClient
     from .value_receipts.client import AsyncValueReceiptsClient, ValueReceiptsClient
+    from .webhooks.client import AsyncWebhooksClient, WebhooksClient
 
 
 class Paid:
@@ -96,6 +97,7 @@ class Paid:
         self._checkouts: typing.Optional[CheckoutsClient] = None
         self._customer_portals: typing.Optional[CustomerPortalsClient] = None
         self._value_receipts: typing.Optional[ValueReceiptsClient] = None
+        self._webhooks: typing.Optional[WebhooksClient] = None
 
     @property
     def products(self):
@@ -177,6 +179,14 @@ class Paid:
             self._value_receipts = ValueReceiptsClient(client_wrapper=self._client_wrapper)
         return self._value_receipts
 
+    @property
+    def webhooks(self):
+        if self._webhooks is None:
+            from .webhooks.client import WebhooksClient  # noqa: E402
+
+            self._webhooks = WebhooksClient(client_wrapper=self._client_wrapper)
+        return self._webhooks
+
 
 class AsyncPaid:
     """
@@ -253,6 +263,7 @@ class AsyncPaid:
         self._checkouts: typing.Optional[AsyncCheckoutsClient] = None
         self._customer_portals: typing.Optional[AsyncCustomerPortalsClient] = None
         self._value_receipts: typing.Optional[AsyncValueReceiptsClient] = None
+        self._webhooks: typing.Optional[AsyncWebhooksClient] = None
 
     @property
     def products(self):
@@ -333,6 +344,14 @@ class AsyncPaid:
 
             self._value_receipts = AsyncValueReceiptsClient(client_wrapper=self._client_wrapper)
         return self._value_receipts
+
+    @property
+    def webhooks(self):
+        if self._webhooks is None:
+            from .webhooks.client import AsyncWebhooksClient  # noqa: E402
+
+            self._webhooks = AsyncWebhooksClient(client_wrapper=self._client_wrapper)
+        return self._webhooks
 
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidEnvironment) -> str:
