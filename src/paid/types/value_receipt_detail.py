@@ -31,6 +31,9 @@ class ValueReceiptDetail(UniversalBaseModel):
     order_id: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="orderId"), pydantic.Field(alias="orderId")
     ] = None
+    product_id: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="productId"), pydantic.Field(alias="productId")
+    ] = None
     currency: str
     start_date: typing_extensions.Annotated[
         typing.Optional[dt.datetime], FieldMetadata(alias="startDate"), pydantic.Field(alias="startDate")
@@ -40,6 +43,9 @@ class ValueReceiptDetail(UniversalBaseModel):
     ] = None
     total_delivered_value: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="totalDeliveredValue"), pydantic.Field(alias="totalDeliveredValue")
+    ] = None
+    archived_at: typing_extensions.Annotated[
+        typing.Optional[dt.datetime], FieldMetadata(alias="archivedAt"), pydantic.Field(alias="archivedAt")
     ] = None
     created_at: typing_extensions.Annotated[
         dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")

@@ -6,10 +6,11 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from .types import ListValueReceiptsRequestArchived, SyncValueReceiptRequestProduct
+    from .list_value_receipts_request_archived import ListValueReceiptsRequestArchived
+    from .sync_value_receipt_request_product import SyncValueReceiptRequestProduct
 _dynamic_imports: typing.Dict[str, str] = {
-    "ListValueReceiptsRequestArchived": ".types",
-    "SyncValueReceiptRequestProduct": ".types",
+    "ListValueReceiptsRequestArchived": ".list_value_receipts_request_archived",
+    "SyncValueReceiptRequestProduct": ".sync_value_receipt_request_product",
 }
 
 

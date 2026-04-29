@@ -5,9 +5,13 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.success_response import SuccessResponse
 from ..types.value_receipt_detail import ValueReceiptDetail
 from ..types.value_receipt_list_response import ValueReceiptListResponse
+from ..types.value_receipt_sync_response import ValueReceiptSyncResponse
 from .raw_client import AsyncRawValueReceiptsClient, RawValueReceiptsClient
+from .types.list_value_receipts_request_archived import ListValueReceiptsRequestArchived
+from .types.sync_value_receipt_request_product import SyncValueReceiptRequestProduct
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -28,13 +32,85 @@ class ValueReceiptsClient:
         """
         return self._raw_client
 
+    def sync_value_receipt(
+        self,
+        *,
+        start_date: dt.datetime,
+        end_date: dt.datetime,
+        customer_id: typing.Optional[str] = OMIT,
+        external_customer_id: typing.Optional[str] = OMIT,
+        product: typing.Optional[SyncValueReceiptRequestProduct] = OMIT,
+        order_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ValueReceiptSyncResponse:
+        """
+        Find or create a value receipt by natural key (customer + product/order + dates), then populate it with current data inline. Returns the ID, status, and public URL. Posted (sealed) VRs are returned as-is without re-populating.
+
+        Parameters
+        ----------
+        start_date : dt.datetime
+
+        end_date : dt.datetime
+
+        customer_id : typing.Optional[str]
+            Mutually exclusive with externalCustomerId. Exactly one is required.
+
+        external_customer_id : typing.Optional[str]
+            Mutually exclusive with customerId. Exactly one is required.
+
+        product : typing.Optional[SyncValueReceiptRequestProduct]
+            Mutually exclusive with orderId. Provide at most one.
+
+        order_id : typing.Optional[str]
+            Mutually exclusive with product. Provide at most one.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ValueReceiptSyncResponse
+            200
+
+        Examples
+        --------
+        import datetime
+
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.value_receipts.sync_value_receipt(
+            start_date=datetime.datetime.fromisoformat(
+                "2024-01-15 09:30:00+00:00",
+            ),
+            end_date=datetime.datetime.fromisoformat(
+                "2024-01-15 09:30:00+00:00",
+            ),
+        )
+        """
+        _response = self._raw_client.sync_value_receipt(
+            start_date=start_date,
+            end_date=end_date,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            product=product,
+            order_id=order_id,
+            request_options=request_options,
+        )
+        return _response.data
+
     def list_value_receipts(
         self,
         *,
         limit: typing.Optional[int] = None,
         offset: typing.Optional[int] = None,
         customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
         order_id: typing.Optional[str] = None,
+        product_id: typing.Optional[str] = None,
+        archived: typing.Optional[ListValueReceiptsRequestArchived] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ValueReceiptListResponse:
         """
@@ -47,8 +123,17 @@ class ValueReceiptsClient:
         offset : typing.Optional[int]
 
         customer_id : typing.Optional[str]
+            Filter by customer display ID.
+
+        external_customer_id : typing.Optional[str]
+            Filter by customer external ID.
 
         order_id : typing.Optional[str]
+
+        product_id : typing.Optional[str]
+
+        archived : typing.Optional[ListValueReceiptsRequestArchived]
+            Include archived value receipts. Defaults to false.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -68,7 +153,14 @@ class ValueReceiptsClient:
         client.value_receipts.list_value_receipts()
         """
         _response = self._raw_client.list_value_receipts(
-            limit=limit, offset=offset, customer_id=customer_id, order_id=order_id, request_options=request_options
+            limit=limit,
+            offset=offset,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            order_id=order_id,
+            product_id=product_id,
+            archived=archived,
+            request_options=request_options,
         )
         return _response.data
 
@@ -102,6 +194,134 @@ class ValueReceiptsClient:
         )
         """
         _response = self._raw_client.get_value_receipt_by_id(id, request_options=request_options)
+        return _response.data
+
+    def refresh_value_receipt(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> ValueReceiptSyncResponse:
+        """
+        Re-populate an existing draft value receipt with current data inline. Returns the slim sync response. Sealed VRs cannot be refreshed.
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ValueReceiptSyncResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.value_receipts.refresh_value_receipt(
+            id="id",
+        )
+        """
+        _response = self._raw_client.refresh_value_receipt(id, request_options=request_options)
+        return _response.data
+
+    def seal_value_receipt(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> SuccessResponse:
+        """
+        Transition a draft value receipt to sealed (posted) status. Sealed VRs are immutable — they cannot be updated or re-populated.
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SuccessResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.value_receipts.seal_value_receipt(
+            id="id",
+        )
+        """
+        _response = self._raw_client.seal_value_receipt(id, request_options=request_options)
+        return _response.data
+
+    def archive_value_receipt(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> SuccessResponse:
+        """
+        Soft-archive a value receipt. Archived VRs are hidden from list by default.
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SuccessResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.value_receipts.archive_value_receipt(
+            id="id",
+        )
+        """
+        _response = self._raw_client.archive_value_receipt(id, request_options=request_options)
+        return _response.data
+
+    def unarchive_value_receipt(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> SuccessResponse:
+        """
+        Restore an archived value receipt.
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SuccessResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.value_receipts.unarchive_value_receipt(
+            id="id",
+        )
+        """
+        _response = self._raw_client.unarchive_value_receipt(id, request_options=request_options)
         return _response.data
 
     def publish_value_receipt(
@@ -192,13 +412,92 @@ class AsyncValueReceiptsClient:
         """
         return self._raw_client
 
+    async def sync_value_receipt(
+        self,
+        *,
+        start_date: dt.datetime,
+        end_date: dt.datetime,
+        customer_id: typing.Optional[str] = OMIT,
+        external_customer_id: typing.Optional[str] = OMIT,
+        product: typing.Optional[SyncValueReceiptRequestProduct] = OMIT,
+        order_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ValueReceiptSyncResponse:
+        """
+        Find or create a value receipt by natural key (customer + product/order + dates), then populate it with current data inline. Returns the ID, status, and public URL. Posted (sealed) VRs are returned as-is without re-populating.
+
+        Parameters
+        ----------
+        start_date : dt.datetime
+
+        end_date : dt.datetime
+
+        customer_id : typing.Optional[str]
+            Mutually exclusive with externalCustomerId. Exactly one is required.
+
+        external_customer_id : typing.Optional[str]
+            Mutually exclusive with customerId. Exactly one is required.
+
+        product : typing.Optional[SyncValueReceiptRequestProduct]
+            Mutually exclusive with orderId. Provide at most one.
+
+        order_id : typing.Optional[str]
+            Mutually exclusive with product. Provide at most one.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ValueReceiptSyncResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+        import datetime
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.value_receipts.sync_value_receipt(
+                start_date=datetime.datetime.fromisoformat(
+                    "2024-01-15 09:30:00+00:00",
+                ),
+                end_date=datetime.datetime.fromisoformat(
+                    "2024-01-15 09:30:00+00:00",
+                ),
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.sync_value_receipt(
+            start_date=start_date,
+            end_date=end_date,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            product=product,
+            order_id=order_id,
+            request_options=request_options,
+        )
+        return _response.data
+
     async def list_value_receipts(
         self,
         *,
         limit: typing.Optional[int] = None,
         offset: typing.Optional[int] = None,
         customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
         order_id: typing.Optional[str] = None,
+        product_id: typing.Optional[str] = None,
+        archived: typing.Optional[ListValueReceiptsRequestArchived] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ValueReceiptListResponse:
         """
@@ -211,8 +510,17 @@ class AsyncValueReceiptsClient:
         offset : typing.Optional[int]
 
         customer_id : typing.Optional[str]
+            Filter by customer display ID.
+
+        external_customer_id : typing.Optional[str]
+            Filter by customer external ID.
 
         order_id : typing.Optional[str]
+
+        product_id : typing.Optional[str]
+
+        archived : typing.Optional[ListValueReceiptsRequestArchived]
+            Include archived value receipts. Defaults to false.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -240,7 +548,14 @@ class AsyncValueReceiptsClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.list_value_receipts(
-            limit=limit, offset=offset, customer_id=customer_id, order_id=order_id, request_options=request_options
+            limit=limit,
+            offset=offset,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            order_id=order_id,
+            product_id=product_id,
+            archived=archived,
+            request_options=request_options,
         )
         return _response.data
 
@@ -282,6 +597,166 @@ class AsyncValueReceiptsClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.get_value_receipt_by_id(id, request_options=request_options)
+        return _response.data
+
+    async def refresh_value_receipt(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> ValueReceiptSyncResponse:
+        """
+        Re-populate an existing draft value receipt with current data inline. Returns the slim sync response. Sealed VRs cannot be refreshed.
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ValueReceiptSyncResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.value_receipts.refresh_value_receipt(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.refresh_value_receipt(id, request_options=request_options)
+        return _response.data
+
+    async def seal_value_receipt(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> SuccessResponse:
+        """
+        Transition a draft value receipt to sealed (posted) status. Sealed VRs are immutable — they cannot be updated or re-populated.
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SuccessResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.value_receipts.seal_value_receipt(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.seal_value_receipt(id, request_options=request_options)
+        return _response.data
+
+    async def archive_value_receipt(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> SuccessResponse:
+        """
+        Soft-archive a value receipt. Archived VRs are hidden from list by default.
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SuccessResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.value_receipts.archive_value_receipt(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.archive_value_receipt(id, request_options=request_options)
+        return _response.data
+
+    async def unarchive_value_receipt(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> SuccessResponse:
+        """
+        Restore an archived value receipt.
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SuccessResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.value_receipts.unarchive_value_receipt(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.unarchive_value_receipt(id, request_options=request_options)
         return _response.data
 
     async def publish_value_receipt(

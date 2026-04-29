@@ -78,6 +78,7 @@ if typing.TYPE_CHECKING:
         SeatAssignee,
         SeatAssignmentStatus,
         Signal,
+        SuccessResponse,
         UpdateContactRequest,
         UpdateContactRequestRolesItem,
         UpdateCustomerRequest,
@@ -85,6 +86,7 @@ if typing.TYPE_CHECKING:
         ValueReceiptDetail,
         ValueReceiptListResponse,
         ValueReceiptSummary,
+        ValueReceiptSyncResponse,
         Webhook,
         WebhookDeliveryStatus,
         WebhookListResponse,
@@ -110,6 +112,7 @@ if typing.TYPE_CHECKING:
     from .contacts import CreateContactRequestRolesItem
     from .environment import PaidEnvironment
     from .orders import BatchSeatAssignmentsRequestAssignmentsItem, ListOrderSeatsRequestStatus
+    from .value_receipts import ListValueReceiptsRequestArchived, SyncValueReceiptRequestProduct
     from .version import __version__
     from .webhooks import TestWebhookRequestWebhookName, UpdateWebhookRequestWebhookName
 _dynamic_imports: typing.Dict[str, str] = {
@@ -178,6 +181,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "InvoiceTaxStatus": ".types",
     "ListCheckoutsRequestStatus": ".checkouts",
     "ListOrderSeatsRequestStatus": ".orders",
+    "ListValueReceiptsRequestArchived": ".value_receipts",
     "NotFoundError": ".errors",
     "Order": ".types",
     "OrderCreationState": ".types",
@@ -196,6 +200,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "SeatAssignee": ".types",
     "SeatAssignmentStatus": ".types",
     "Signal": ".types",
+    "SuccessResponse": ".types",
+    "SyncValueReceiptRequestProduct": ".value_receipts",
     "TestWebhookRequestWebhookName": ".webhooks",
     "UpdateContactRequest": ".types",
     "UpdateContactRequestRolesItem": ".types",
@@ -205,6 +211,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ValueReceiptDetail": ".types",
     "ValueReceiptListResponse": ".types",
     "ValueReceiptSummary": ".types",
+    "ValueReceiptSyncResponse": ".types",
     "Webhook": ".types",
     "WebhookDeliveryStatus": ".types",
     "WebhookListResponse": ".types",
@@ -312,6 +319,7 @@ __all__ = [
     "InvoiceTaxStatus",
     "ListCheckoutsRequestStatus",
     "ListOrderSeatsRequestStatus",
+    "ListValueReceiptsRequestArchived",
     "NotFoundError",
     "Order",
     "OrderCreationState",
@@ -330,6 +338,8 @@ __all__ = [
     "SeatAssignee",
     "SeatAssignmentStatus",
     "Signal",
+    "SuccessResponse",
+    "SyncValueReceiptRequestProduct",
     "TestWebhookRequestWebhookName",
     "UpdateContactRequest",
     "UpdateContactRequestRolesItem",
@@ -339,6 +349,7 @@ __all__ = [
     "ValueReceiptDetail",
     "ValueReceiptListResponse",
     "ValueReceiptSummary",
+    "ValueReceiptSyncResponse",
     "Webhook",
     "WebhookDeliveryStatus",
     "WebhookListResponse",
