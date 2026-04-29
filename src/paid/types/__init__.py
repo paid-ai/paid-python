@@ -103,6 +103,7 @@ if typing.TYPE_CHECKING:
     from .seat_assignee import SeatAssignee
     from .seat_assignment_status import SeatAssignmentStatus
     from .signal import Signal
+    from .success_response import SuccessResponse
     from .update_contact_request import UpdateContactRequest
     from .update_contact_request_roles_item import UpdateContactRequestRolesItem
     from .update_customer_request import UpdateCustomerRequest
@@ -110,6 +111,7 @@ if typing.TYPE_CHECKING:
     from .value_receipt_detail import ValueReceiptDetail
     from .value_receipt_list_response import ValueReceiptListResponse
     from .value_receipt_summary import ValueReceiptSummary
+    from .value_receipt_sync_response import ValueReceiptSyncResponse
     from .webhook import Webhook
     from .webhook_delivery_status import WebhookDeliveryStatus
     from .webhook_list_response import WebhookListResponse
@@ -187,6 +189,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "SeatAssignee": ".seat_assignee",
     "SeatAssignmentStatus": ".seat_assignment_status",
     "Signal": ".signal",
+    "SuccessResponse": ".success_response",
     "UpdateContactRequest": ".update_contact_request",
     "UpdateContactRequestRolesItem": ".update_contact_request_roles_item",
     "UpdateCustomerRequest": ".update_customer_request",
@@ -194,6 +197,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ValueReceiptDetail": ".value_receipt_detail",
     "ValueReceiptListResponse": ".value_receipt_list_response",
     "ValueReceiptSummary": ".value_receipt_summary",
+    "ValueReceiptSyncResponse": ".value_receipt_sync_response",
     "Webhook": ".webhook",
     "WebhookDeliveryStatus": ".webhook_delivery_status",
     "WebhookListResponse": ".webhook_list_response",
@@ -295,6 +299,7 @@ __all__ = [
     "SeatAssignee",
     "SeatAssignmentStatus",
     "Signal",
+    "SuccessResponse",
     "UpdateContactRequest",
     "UpdateContactRequestRolesItem",
     "UpdateCustomerRequest",
@@ -302,6 +307,7 @@ __all__ = [
     "ValueReceiptDetail",
     "ValueReceiptListResponse",
     "ValueReceiptSummary",
+    "ValueReceiptSyncResponse",
     "Webhook",
     "WebhookDeliveryStatus",
     "WebhookListResponse",
