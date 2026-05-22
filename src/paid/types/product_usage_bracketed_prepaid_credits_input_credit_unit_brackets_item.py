@@ -8,15 +8,13 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 
 
-class CustomerBillingAddress(UniversalBaseModel):
-    line1: typing.Optional[str] = None
-    line2: typing.Optional[str] = None
-    city: typing.Optional[str] = None
-    state: typing.Optional[str] = None
-    zip_code: typing_extensions.Annotated[
-        typing.Optional[str], FieldMetadata(alias="zipCode"), pydantic.Field(alias="zipCode")
+class ProductUsageBracketedPrepaidCreditsInputCreditUnitBracketsItem(UniversalBaseModel):
+    up_to: typing_extensions.Annotated[
+        typing.Optional[int], FieldMetadata(alias="upTo"), pydantic.Field(alias="upTo")
     ] = None
-    country: typing.Optional[str] = None
+    credit_units: typing_extensions.Annotated[
+        int, FieldMetadata(alias="creditUnits"), pydantic.Field(alias="creditUnits")
+    ]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

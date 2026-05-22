@@ -14,7 +14,13 @@ from .create_order_line_attribute_request_pricing_charge_type import CreateOrder
 from .create_order_line_attribute_request_pricing_credit_benefits_item import (
     CreateOrderLineAttributeRequestPricingCreditBenefitsItem,
 )
+from .create_order_line_attribute_request_pricing_credit_unit_brackets_item import (
+    CreateOrderLineAttributeRequestPricingCreditUnitBracketsItem,
+)
 from .create_order_line_attribute_request_pricing_price_points import CreateOrderLineAttributeRequestPricingPricePoints
+from .create_order_line_attribute_request_pricing_pricing_input import (
+    CreateOrderLineAttributeRequestPricingPricingInput,
+)
 from .create_order_line_attribute_request_pricing_pricing_model import (
     CreateOrderLineAttributeRequestPricingPricingModel,
 )
@@ -36,10 +42,10 @@ class CreateOrderLineAttributeRequestPricing(UniversalBaseModel):
         pydantic.Field(alias="pricePoints"),
     ]
     pricing_model: typing_extensions.Annotated[
-        typing.Optional[CreateOrderLineAttributeRequestPricingPricingModel],
+        CreateOrderLineAttributeRequestPricingPricingModel,
         FieldMetadata(alias="pricingModel"),
         pydantic.Field(alias="pricingModel"),
-    ] = None
+    ]
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[CreateOrderLineAttributeRequestPricingBillingFrequency],
         FieldMetadata(alias="billingFrequency"),
@@ -69,10 +75,25 @@ class CreateOrderLineAttributeRequestPricing(UniversalBaseModel):
     overage_unit_price: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
     ] = None
+    credit_rollover_amount: typing_extensions.Annotated[
+        typing.Optional[float],
+        FieldMetadata(alias="creditRolloverAmount"),
+        pydantic.Field(alias="creditRolloverAmount"),
+    ] = None
     credit_benefits: typing_extensions.Annotated[
         typing.Optional[typing.List[CreateOrderLineAttributeRequestPricingCreditBenefitsItem]],
         FieldMetadata(alias="creditBenefits"),
         pydantic.Field(alias="creditBenefits"),
+    ] = None
+    pricing_input: typing_extensions.Annotated[
+        typing.Optional[CreateOrderLineAttributeRequestPricingPricingInput],
+        FieldMetadata(alias="pricingInput"),
+        pydantic.Field(alias="pricingInput"),
+    ] = None
+    credit_unit_brackets: typing_extensions.Annotated[
+        typing.Optional[typing.List[CreateOrderLineAttributeRequestPricingCreditUnitBracketsItem]],
+        FieldMetadata(alias="creditUnitBrackets"),
+        pydantic.Field(alias="creditUnitBrackets"),
     ] = None
 
     if IS_PYDANTIC_V2:

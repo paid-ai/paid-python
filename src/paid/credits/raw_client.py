@@ -6,12 +6,21 @@ from json.decoder import JSONDecodeError
 from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.http_response import AsyncHttpResponse, HttpResponse
+from ..core.jsonable_encoder import jsonable_encoder
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
+from ..errors.bad_request_error import BadRequestError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.internal_server_error import InternalServerError
+from ..errors.not_found_error import NotFoundError
+from ..types.credit_currency import CreditCurrency
 from ..types.credit_currency_list_response import CreditCurrencyListResponse
 from ..types.error_response import ErrorResponse
+from .types.list_credit_currencies_request_status import ListCreditCurrenciesRequestStatus
+from .types.update_credit_currency_request_status import UpdateCreditCurrencyRequestStatus
+
+# this is used as the default value for optional parameters
+OMIT = typing.cast(typing.Any, ...)
 
 
 class RawCreditsClient:
@@ -19,13 +28,19 @@ class RawCreditsClient:
         self._client_wrapper = client_wrapper
 
     def list_credit_currencies(
-        self, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        status: typing.Optional[ListCreditCurrenciesRequestStatus] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreditCurrencyListResponse]:
         """
-        List credit currencies for the organization
+        List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
 
         Parameters
         ----------
+        status : typing.Optional[ListCreditCurrenciesRequestStatus]
+            Filter credit currencies by status. Defaults to `all` so archived currencies remain readable after they are archived.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -37,6 +52,9 @@ class RawCreditsClient:
         _response = self._client_wrapper.httpx_client.request(
             "credits/currencies",
             method="GET",
+            params={
+                "status": status,
+            },
             request_options=request_options,
         )
         try:
@@ -76,19 +94,219 @@ class RawCreditsClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def create_credit_currency(
+        self,
+        *,
+        name: str,
+        key: str,
+        description: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[CreditCurrency]:
+        """
+        Creates a credit currency for the organization.
+
+        Parameters
+        ----------
+        name : str
+            Human-readable name shown for this credit currency.
+
+        key : str
+            Stable machine-readable key for this credit currency. Use lowercase letters, numbers, underscores, and hyphens. Keys are unique within an organization.
+
+        description : typing.Optional[str]
+            Optional description for this credit currency.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[CreditCurrency]
+            201
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "credits/currencies",
+            method="POST",
+            json={
+                "name": name,
+                "key": key,
+                "description": description,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CreditCurrency,
+                    parse_obj_as(
+                        type_=CreditCurrency,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def update_credit_currency_by_id(
+        self,
+        id: str,
+        *,
+        description: typing.Optional[str] = OMIT,
+        status: typing.Optional[UpdateCreditCurrencyRequestStatus] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[CreditCurrency]:
+        """
+        Update a credit currency description or set its active/archive status.
+
+        Parameters
+        ----------
+        id : str
+            Credit currency ID.
+
+        description : typing.Optional[str]
+            Updated description for this credit currency. Use null to clear the description.
+
+        status : typing.Optional[UpdateCreditCurrencyRequestStatus]
+            Set to `archived` to archive this credit currency, or `active` to restore it.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[CreditCurrency]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"credits/currencies/{jsonable_encoder(id)}",
+            method="PUT",
+            json={
+                "description": description,
+                "status": status,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CreditCurrency,
+                    parse_obj_as(
+                        type_=CreditCurrency,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
 
 class AsyncRawCreditsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
     async def list_credit_currencies(
-        self, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        status: typing.Optional[ListCreditCurrenciesRequestStatus] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreditCurrencyListResponse]:
         """
-        List credit currencies for the organization
+        List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
 
         Parameters
         ----------
+        status : typing.Optional[ListCreditCurrenciesRequestStatus]
+            Filter credit currencies by status. Defaults to `all` so archived currencies remain readable after they are archived.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -100,6 +318,9 @@ class AsyncRawCreditsClient:
         _response = await self._client_wrapper.httpx_client.request(
             "credits/currencies",
             method="GET",
+            params={
+                "status": status,
+            },
             request_options=request_options,
         )
         try:
@@ -114,6 +335,200 @@ class AsyncRawCreditsClient:
                 return AsyncHttpResponse(response=_response, data=_data)
             if _response.status_code == 403:
                 raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def create_credit_currency(
+        self,
+        *,
+        name: str,
+        key: str,
+        description: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[CreditCurrency]:
+        """
+        Creates a credit currency for the organization.
+
+        Parameters
+        ----------
+        name : str
+            Human-readable name shown for this credit currency.
+
+        key : str
+            Stable machine-readable key for this credit currency. Use lowercase letters, numbers, underscores, and hyphens. Keys are unique within an organization.
+
+        description : typing.Optional[str]
+            Optional description for this credit currency.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[CreditCurrency]
+            201
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "credits/currencies",
+            method="POST",
+            json={
+                "name": name,
+                "key": key,
+                "description": description,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CreditCurrency,
+                    parse_obj_as(
+                        type_=CreditCurrency,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def update_credit_currency_by_id(
+        self,
+        id: str,
+        *,
+        description: typing.Optional[str] = OMIT,
+        status: typing.Optional[UpdateCreditCurrencyRequestStatus] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[CreditCurrency]:
+        """
+        Update a credit currency description or set its active/archive status.
+
+        Parameters
+        ----------
+        id : str
+            Credit currency ID.
+
+        description : typing.Optional[str]
+            Updated description for this credit currency. Use null to clear the description.
+
+        status : typing.Optional[UpdateCreditCurrencyRequestStatus]
+            Set to `archived` to archive this credit currency, or `active` to restore it.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[CreditCurrency]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"credits/currencies/{jsonable_encoder(id)}",
+            method="PUT",
+            json={
+                "description": description,
+                "status": status,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CreditCurrency,
+                    parse_obj_as(
+                        type_=CreditCurrency,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,

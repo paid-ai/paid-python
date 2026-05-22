@@ -7,9 +7,10 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.credit_balance_list_response import CreditBalanceListResponse
 from ..types.customer import Customer
-from ..types.customer_billing_address import CustomerBillingAddress
+from ..types.customer_billing_address_input import CustomerBillingAddressInput
 from ..types.customer_creation_state import CustomerCreationState
 from ..types.customer_list_response import CustomerListResponse
+from ..types.customer_state import CustomerState
 from ..types.customer_user import CustomerUser
 from ..types.customer_user_status import CustomerUserStatus
 from ..types.empty_response import EmptyResponse
@@ -79,7 +80,7 @@ class CustomersClient:
         phone: typing.Optional[str] = OMIT,
         website: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddressInput] = OMIT,
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
@@ -103,7 +104,7 @@ class CustomersClient:
 
         external_id : typing.Optional[str]
 
-        billing_address : typing.Optional[CustomerBillingAddress]
+        billing_address : typing.Optional[CustomerBillingAddressInput]
 
         creation_state : typing.Optional[CustomerCreationState]
 
@@ -150,11 +151,12 @@ class CustomersClient:
 
     def get_customer_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Customer:
         """
-        Get a customer by ID
+        Get a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `GET /api/v2/customers/external/{externalId}`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -172,7 +174,7 @@ class CustomersClient:
             token="YOUR_TOKEN",
         )
         client.customers.get_customer_by_id(
-            id="id",
+            id="cus_abc123",
         )
         """
         _response = self._raw_client.get_customer_by_id(id, request_options=request_options)
@@ -188,7 +190,7 @@ class CustomersClient:
         phone: typing.Optional[str] = OMIT,
         website: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddressInput] = OMIT,
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         churn_date: typing.Optional[dt.datetime] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
@@ -196,11 +198,12 @@ class CustomersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
-        Update a customer by ID
+        Update a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `PUT /api/v2/customers/external/{externalId}`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         name : typing.Optional[str]
 
@@ -214,7 +217,7 @@ class CustomersClient:
 
         external_id : typing.Optional[str]
 
-        billing_address : typing.Optional[CustomerBillingAddress]
+        billing_address : typing.Optional[CustomerBillingAddressInput]
 
         creation_state : typing.Optional[CustomerCreationState]
 
@@ -240,7 +243,7 @@ class CustomersClient:
             token="YOUR_TOKEN",
         )
         client.customers.update_customer_by_id(
-            id="id",
+            id="cus_abc123",
         )
         """
         _response = self._raw_client.update_customer_by_id(
@@ -264,11 +267,12 @@ class CustomersClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a customer by ID
+        Delete a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `DELETE /api/v2/customers/external/{externalId}`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -286,10 +290,43 @@ class CustomersClient:
             token="YOUR_TOKEN",
         )
         client.customers.delete_customer_by_id(
-            id="id",
+            id="cus_abc123",
         )
         """
         _response = self._raw_client.delete_customer_by_id(id, request_options=request_options)
+        return _response.data
+
+    def get_customer_state_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> CustomerState:
+        """
+        Get the current customer state by Paid display ID
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerState
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.get_customer_state_by_id(
+            id="cus_abc123",
+        )
+        """
+        _response = self._raw_client.get_customer_state_by_id(id, request_options=request_options)
         return _response.data
 
     def get_customer_by_external_id(
@@ -301,6 +338,7 @@ class CustomersClient:
         Parameters
         ----------
         external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -318,7 +356,7 @@ class CustomersClient:
             token="YOUR_TOKEN",
         )
         client.customers.get_customer_by_external_id(
-            external_id="externalId",
+            external_id="customer_123",
         )
         """
         _response = self._raw_client.get_customer_by_external_id(external_id, request_options=request_options)
@@ -334,7 +372,7 @@ class CustomersClient:
         phone: typing.Optional[str] = OMIT,
         website: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddressInput] = OMIT,
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         churn_date: typing.Optional[dt.datetime] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
@@ -347,6 +385,7 @@ class CustomersClient:
         Parameters
         ----------
         external_id_ : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         name : typing.Optional[str]
 
@@ -360,7 +399,7 @@ class CustomersClient:
 
         external_id : typing.Optional[str]
 
-        billing_address : typing.Optional[CustomerBillingAddress]
+        billing_address : typing.Optional[CustomerBillingAddressInput]
 
         creation_state : typing.Optional[CustomerCreationState]
 
@@ -386,7 +425,7 @@ class CustomersClient:
             token="YOUR_TOKEN",
         )
         client.customers.update_customer_by_external_id(
-            external_id_="externalId",
+            external_id_="customer_123",
         )
         """
         _response = self._raw_client.update_customer_by_external_id(
@@ -415,6 +454,7 @@ class CustomersClient:
         Parameters
         ----------
         external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -432,21 +472,55 @@ class CustomersClient:
             token="YOUR_TOKEN",
         )
         client.customers.delete_customer_by_external_id(
-            external_id="externalId",
+            external_id="customer_123",
         )
         """
         _response = self._raw_client.delete_customer_by_external_id(external_id, request_options=request_options)
+        return _response.data
+
+    def get_customer_state_by_external_id(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> CustomerState:
+        """
+        Primary integration endpoint for agents and programmatic clients using their own customer IDs. Use the value you stored on `customer.externalId`, for example `customer_123`.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerState
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.get_customer_state_by_external_id(
+            external_id="customer_123",
+        )
+        """
+        _response = self._raw_client.get_customer_state_by_external_id(external_id, request_options=request_options)
         return _response.data
 
     def get_customer_credit_balances(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> CreditBalanceListResponse:
         """
-        Get current customer credit balances grouped by currency
+        Get current customer credit balances grouped by currency for a Paid customer display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `/api/v2/customers/external/{externalId}/credits/balances`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -464,7 +538,7 @@ class CustomersClient:
             token="YOUR_TOKEN",
         )
         client.customers.get_customer_credit_balances(
-            id="id",
+            id="cus_abc123",
         )
         """
         _response = self._raw_client.get_customer_credit_balances(id, request_options=request_options)
@@ -479,6 +553,7 @@ class CustomersClient:
         Parameters
         ----------
         external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -496,7 +571,7 @@ class CustomersClient:
             token="YOUR_TOKEN",
         )
         client.customers.get_customer_credit_balances_by_external_id(
-            external_id="externalId",
+            external_id="customer_123",
         )
         """
         _response = self._raw_client.get_customer_credit_balances_by_external_id(
@@ -632,7 +707,7 @@ class AsyncCustomersClient:
         phone: typing.Optional[str] = OMIT,
         website: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddressInput] = OMIT,
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
@@ -656,7 +731,7 @@ class AsyncCustomersClient:
 
         external_id : typing.Optional[str]
 
-        billing_address : typing.Optional[CustomerBillingAddress]
+        billing_address : typing.Optional[CustomerBillingAddressInput]
 
         creation_state : typing.Optional[CustomerCreationState]
 
@@ -711,11 +786,12 @@ class AsyncCustomersClient:
 
     async def get_customer_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Customer:
         """
-        Get a customer by ID
+        Get a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `GET /api/v2/customers/external/{externalId}`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -738,7 +814,7 @@ class AsyncCustomersClient:
 
         async def main() -> None:
             await client.customers.get_customer_by_id(
-                id="id",
+                id="cus_abc123",
             )
 
 
@@ -757,7 +833,7 @@ class AsyncCustomersClient:
         phone: typing.Optional[str] = OMIT,
         website: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddressInput] = OMIT,
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         churn_date: typing.Optional[dt.datetime] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
@@ -765,11 +841,12 @@ class AsyncCustomersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Customer:
         """
-        Update a customer by ID
+        Update a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `PUT /api/v2/customers/external/{externalId}`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         name : typing.Optional[str]
 
@@ -783,7 +860,7 @@ class AsyncCustomersClient:
 
         external_id : typing.Optional[str]
 
-        billing_address : typing.Optional[CustomerBillingAddress]
+        billing_address : typing.Optional[CustomerBillingAddressInput]
 
         creation_state : typing.Optional[CustomerCreationState]
 
@@ -814,7 +891,7 @@ class AsyncCustomersClient:
 
         async def main() -> None:
             await client.customers.update_customer_by_id(
-                id="id",
+                id="cus_abc123",
             )
 
 
@@ -841,11 +918,12 @@ class AsyncCustomersClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a customer by ID
+        Delete a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `DELETE /api/v2/customers/external/{externalId}`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -868,13 +946,54 @@ class AsyncCustomersClient:
 
         async def main() -> None:
             await client.customers.delete_customer_by_id(
-                id="id",
+                id="cus_abc123",
             )
 
 
         asyncio.run(main())
         """
         _response = await self._raw_client.delete_customer_by_id(id, request_options=request_options)
+        return _response.data
+
+    async def get_customer_state_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> CustomerState:
+        """
+        Get the current customer state by Paid display ID
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerState
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.get_customer_state_by_id(
+                id="cus_abc123",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_customer_state_by_id(id, request_options=request_options)
         return _response.data
 
     async def get_customer_by_external_id(
@@ -886,6 +1005,7 @@ class AsyncCustomersClient:
         Parameters
         ----------
         external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -908,7 +1028,7 @@ class AsyncCustomersClient:
 
         async def main() -> None:
             await client.customers.get_customer_by_external_id(
-                external_id="externalId",
+                external_id="customer_123",
             )
 
 
@@ -927,7 +1047,7 @@ class AsyncCustomersClient:
         phone: typing.Optional[str] = OMIT,
         website: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddressInput] = OMIT,
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         churn_date: typing.Optional[dt.datetime] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
@@ -940,6 +1060,7 @@ class AsyncCustomersClient:
         Parameters
         ----------
         external_id_ : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         name : typing.Optional[str]
 
@@ -953,7 +1074,7 @@ class AsyncCustomersClient:
 
         external_id : typing.Optional[str]
 
-        billing_address : typing.Optional[CustomerBillingAddress]
+        billing_address : typing.Optional[CustomerBillingAddressInput]
 
         creation_state : typing.Optional[CustomerCreationState]
 
@@ -984,7 +1105,7 @@ class AsyncCustomersClient:
 
         async def main() -> None:
             await client.customers.update_customer_by_external_id(
-                external_id_="externalId",
+                external_id_="customer_123",
             )
 
 
@@ -1016,6 +1137,7 @@ class AsyncCustomersClient:
         Parameters
         ----------
         external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1038,7 +1160,7 @@ class AsyncCustomersClient:
 
         async def main() -> None:
             await client.customers.delete_customer_by_external_id(
-                external_id="externalId",
+                external_id="customer_123",
             )
 
 
@@ -1047,15 +1169,59 @@ class AsyncCustomersClient:
         _response = await self._raw_client.delete_customer_by_external_id(external_id, request_options=request_options)
         return _response.data
 
+    async def get_customer_state_by_external_id(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> CustomerState:
+        """
+        Primary integration endpoint for agents and programmatic clients using their own customer IDs. Use the value you stored on `customer.externalId`, for example `customer_123`.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerState
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.get_customer_state_by_external_id(
+                external_id="customer_123",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_customer_state_by_external_id(
+            external_id, request_options=request_options
+        )
+        return _response.data
+
     async def get_customer_credit_balances(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> CreditBalanceListResponse:
         """
-        Get current customer credit balances grouped by currency
+        Get current customer credit balances grouped by currency for a Paid customer display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `/api/v2/customers/external/{externalId}/credits/balances`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1078,7 +1244,7 @@ class AsyncCustomersClient:
 
         async def main() -> None:
             await client.customers.get_customer_credit_balances(
-                id="id",
+                id="cus_abc123",
             )
 
 
@@ -1096,6 +1262,7 @@ class AsyncCustomersClient:
         Parameters
         ----------
         external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1118,7 +1285,7 @@ class AsyncCustomersClient:
 
         async def main() -> None:
             await client.customers.get_customer_credit_balances_by_external_id(
-                external_id="externalId",
+                external_id="customer_123",
             )
 
 

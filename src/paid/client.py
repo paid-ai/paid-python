@@ -11,11 +11,13 @@ from .environment import PaidEnvironment
 if typing.TYPE_CHECKING:
     from .checkouts.client import AsyncCheckoutsClient, CheckoutsClient
     from .contacts.client import AsyncContactsClient, ContactsClient
+    from .costs.client import AsyncCostsClient, CostsClient
     from .credits.client import AsyncCreditsClient, CreditsClient
     from .customer_portals.client import AsyncCustomerPortalsClient, CustomerPortalsClient
     from .customers.client import AsyncCustomersClient, CustomersClient
     from .invoices.client import AsyncInvoicesClient, InvoicesClient
     from .orders.client import AsyncOrdersClient, OrdersClient
+    from .pricing.client import AsyncPricingClient, PricingClient
     from .products.client import AsyncProductsClient, ProductsClient
     from .signals.client import AsyncSignalsClient, SignalsClient
     from .value_receipts.client import AsyncValueReceiptsClient, ValueReceiptsClient
@@ -98,6 +100,8 @@ class Paid:
         self._customer_portals: typing.Optional[CustomerPortalsClient] = None
         self._value_receipts: typing.Optional[ValueReceiptsClient] = None
         self._webhooks: typing.Optional[WebhooksClient] = None
+        self._pricing: typing.Optional[PricingClient] = None
+        self._costs: typing.Optional[CostsClient] = None
 
     @property
     def products(self):
@@ -187,6 +191,22 @@ class Paid:
             self._webhooks = WebhooksClient(client_wrapper=self._client_wrapper)
         return self._webhooks
 
+    @property
+    def pricing(self):
+        if self._pricing is None:
+            from .pricing.client import PricingClient  # noqa: E402
+
+            self._pricing = PricingClient(client_wrapper=self._client_wrapper)
+        return self._pricing
+
+    @property
+    def costs(self):
+        if self._costs is None:
+            from .costs.client import CostsClient  # noqa: E402
+
+            self._costs = CostsClient(client_wrapper=self._client_wrapper)
+        return self._costs
+
 
 class AsyncPaid:
     """
@@ -264,6 +284,8 @@ class AsyncPaid:
         self._customer_portals: typing.Optional[AsyncCustomerPortalsClient] = None
         self._value_receipts: typing.Optional[AsyncValueReceiptsClient] = None
         self._webhooks: typing.Optional[AsyncWebhooksClient] = None
+        self._pricing: typing.Optional[AsyncPricingClient] = None
+        self._costs: typing.Optional[AsyncCostsClient] = None
 
     @property
     def products(self):
@@ -352,6 +374,22 @@ class AsyncPaid:
 
             self._webhooks = AsyncWebhooksClient(client_wrapper=self._client_wrapper)
         return self._webhooks
+
+    @property
+    def pricing(self):
+        if self._pricing is None:
+            from .pricing.client import AsyncPricingClient  # noqa: E402
+
+            self._pricing = AsyncPricingClient(client_wrapper=self._client_wrapper)
+        return self._pricing
+
+    @property
+    def costs(self):
+        if self._costs is None:
+            from .costs.client import AsyncCostsClient  # noqa: E402
+
+            self._costs = AsyncCostsClient(client_wrapper=self._client_wrapper)
+        return self._costs
 
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidEnvironment) -> str:

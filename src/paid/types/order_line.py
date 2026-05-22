@@ -7,6 +7,7 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
+from .order_line_type import OrderLineType
 
 
 class OrderLine(UniversalBaseModel):
@@ -20,6 +21,9 @@ class OrderLine(UniversalBaseModel):
     end_date: typing_extensions.Annotated[
         typing.Optional[dt.datetime], FieldMetadata(alias="endDate"), pydantic.Field(alias="endDate")
     ] = None
+    line_type: typing_extensions.Annotated[
+        OrderLineType, FieldMetadata(alias="lineType"), pydantic.Field(alias="lineType")
+    ]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

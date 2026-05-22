@@ -7,6 +7,7 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
+from .order_billing_frequency_override import OrderBillingFrequencyOverride
 from .order_creation_state import OrderCreationState
 
 
@@ -82,6 +83,19 @@ class Order(UniversalBaseModel):
         pydantic.Field(alias="autoSendPaymentEmails"),
     ] = None
     version: int
+    billing_frequency_overridden: typing_extensions.Annotated[
+        bool, FieldMetadata(alias="billingFrequencyOverridden"), pydantic.Field(alias="billingFrequencyOverridden")
+    ]
+    billing_frequency_override: typing_extensions.Annotated[
+        typing.Optional[OrderBillingFrequencyOverride],
+        FieldMetadata(alias="billingFrequencyOverride"),
+        pydantic.Field(alias="billingFrequencyOverride"),
+    ] = None
+    purchase_order_reference: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="purchaseOrderReference"),
+        pydantic.Field(alias="purchaseOrderReference"),
+    ] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

@@ -5,6 +5,8 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.product import Product
+from ..types.product_attribute_upsert import ProductAttributeUpsert
+from ..types.product_detail import ProductDetail
 from ..types.product_list_response import ProductListResponse
 from .raw_client import AsyncRawProductsClient, RawProductsClient
 
@@ -121,9 +123,9 @@ class ProductsClient:
         )
         return _response.data
 
-    def get_product_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Product:
+    def get_product_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> ProductDetail:
         """
-        Get a product by ID
+        Get a product by ID, including its product attributes with pricing details
 
         Parameters
         ----------
@@ -134,7 +136,7 @@ class ProductsClient:
 
         Returns
         -------
-        Product
+        ProductDetail
             200
 
         Examples
@@ -161,10 +163,11 @@ class ProductsClient:
         product_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        product_attributes: typing.Optional[typing.Sequence[ProductAttributeUpsert]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Product:
+    ) -> ProductDetail:
         """
-        Update a product by ID
+        Update a product by ID. Optionally upsert product attributes with pricing.
 
         Parameters
         ----------
@@ -182,12 +185,14 @@ class ProductsClient:
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
+        product_attributes : typing.Optional[typing.Sequence[ProductAttributeUpsert]]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Product
+        ProductDetail
             200
 
         Examples
@@ -209,15 +214,16 @@ class ProductsClient:
             product_code=product_code,
             external_id=external_id,
             metadata=metadata,
+            product_attributes=product_attributes,
             request_options=request_options,
         )
         return _response.data
 
     def get_product_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> Product:
+    ) -> ProductDetail:
         """
-        Get a product by external ID
+        Get a product by external ID, including its product attributes with pricing details
 
         Parameters
         ----------
@@ -228,7 +234,7 @@ class ProductsClient:
 
         Returns
         -------
-        Product
+        ProductDetail
             200
 
         Examples
@@ -255,10 +261,11 @@ class ProductsClient:
         product_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        product_attributes: typing.Optional[typing.Sequence[ProductAttributeUpsert]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Product:
+    ) -> ProductDetail:
         """
-        Update a product by external ID
+        Update a product by external ID. Optionally upsert product attributes with pricing.
 
         Parameters
         ----------
@@ -276,12 +283,14 @@ class ProductsClient:
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
+        product_attributes : typing.Optional[typing.Sequence[ProductAttributeUpsert]]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Product
+        ProductDetail
             200
 
         Examples
@@ -303,6 +312,7 @@ class ProductsClient:
             product_code=product_code,
             external_id=external_id,
             metadata=metadata,
+            product_attributes=product_attributes,
             request_options=request_options,
         )
         return _response.data
@@ -433,9 +443,11 @@ class AsyncProductsClient:
         )
         return _response.data
 
-    async def get_product_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Product:
+    async def get_product_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> ProductDetail:
         """
-        Get a product by ID
+        Get a product by ID, including its product attributes with pricing details
 
         Parameters
         ----------
@@ -446,7 +458,7 @@ class AsyncProductsClient:
 
         Returns
         -------
-        Product
+        ProductDetail
             200
 
         Examples
@@ -481,10 +493,11 @@ class AsyncProductsClient:
         product_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        product_attributes: typing.Optional[typing.Sequence[ProductAttributeUpsert]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Product:
+    ) -> ProductDetail:
         """
-        Update a product by ID
+        Update a product by ID. Optionally upsert product attributes with pricing.
 
         Parameters
         ----------
@@ -502,12 +515,14 @@ class AsyncProductsClient:
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
+        product_attributes : typing.Optional[typing.Sequence[ProductAttributeUpsert]]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Product
+        ProductDetail
             200
 
         Examples
@@ -537,15 +552,16 @@ class AsyncProductsClient:
             product_code=product_code,
             external_id=external_id,
             metadata=metadata,
+            product_attributes=product_attributes,
             request_options=request_options,
         )
         return _response.data
 
     async def get_product_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> Product:
+    ) -> ProductDetail:
         """
-        Get a product by external ID
+        Get a product by external ID, including its product attributes with pricing details
 
         Parameters
         ----------
@@ -556,7 +572,7 @@ class AsyncProductsClient:
 
         Returns
         -------
-        Product
+        ProductDetail
             200
 
         Examples
@@ -591,10 +607,11 @@ class AsyncProductsClient:
         product_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        product_attributes: typing.Optional[typing.Sequence[ProductAttributeUpsert]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Product:
+    ) -> ProductDetail:
         """
-        Update a product by external ID
+        Update a product by external ID. Optionally upsert product attributes with pricing.
 
         Parameters
         ----------
@@ -612,12 +629,14 @@ class AsyncProductsClient:
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
+        product_attributes : typing.Optional[typing.Sequence[ProductAttributeUpsert]]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        Product
+        ProductDetail
             200
 
         Examples
@@ -647,6 +666,7 @@ class AsyncProductsClient:
             product_code=product_code,
             external_id=external_id,
             metadata=metadata,
+            product_attributes=product_attributes,
             request_options=request_options,
         )
         return _response.data

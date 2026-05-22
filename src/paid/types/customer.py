@@ -7,12 +7,17 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
-from .customer_billing_address import CustomerBillingAddress
+from .currency_code import CurrencyCode
+from .customer_billing_address_response import CustomerBillingAddressResponse
 from .customer_creation_state import CustomerCreationState
 
 
 class Customer(UniversalBaseModel):
-    id: str
+    id: str = pydantic.Field()
+    """
+    Stable Paid customer display ID. Use this value as the `{id}` path parameter for customer routes, for example `GET /api/v2/customers/cus_abc123/state`.
+    """
+
     name: str
     legal_name: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="legalName"), pydantic.Field(alias="legalName")
@@ -24,7 +29,7 @@ class Customer(UniversalBaseModel):
         typing.Optional[str], FieldMetadata(alias="externalId"), pydantic.Field(alias="externalId")
     ] = None
     billing_address: typing_extensions.Annotated[
-        typing.Optional[CustomerBillingAddress],
+        typing.Optional[CustomerBillingAddressResponse],
         FieldMetadata(alias="billingAddress"),
         pydantic.Field(alias="billingAddress"),
     ] = None
@@ -39,7 +44,7 @@ class Customer(UniversalBaseModel):
     ] = None
     metadata: typing.Optional[typing.Dict[str, typing.Any]] = None
     default_currency: typing_extensions.Annotated[
-        str, FieldMetadata(alias="defaultCurrency"), pydantic.Field(alias="defaultCurrency")
+        CurrencyCode, FieldMetadata(alias="defaultCurrency"), pydantic.Field(alias="defaultCurrency")
     ]
     created_at: typing_extensions.Annotated[
         dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")

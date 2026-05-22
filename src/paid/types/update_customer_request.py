@@ -7,7 +7,7 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
-from .customer_billing_address import CustomerBillingAddress
+from .customer_billing_address_input import CustomerBillingAddressInput
 from .customer_creation_state import CustomerCreationState
 
 
@@ -23,7 +23,7 @@ class UpdateCustomerRequest(UniversalBaseModel):
         typing.Optional[str], FieldMetadata(alias="externalId"), pydantic.Field(alias="externalId")
     ] = None
     billing_address: typing_extensions.Annotated[
-        typing.Optional[CustomerBillingAddress],
+        typing.Optional[CustomerBillingAddressInput],
         FieldMetadata(alias="billingAddress"),
         pydantic.Field(alias="billingAddress"),
     ] = None
