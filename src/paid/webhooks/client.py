@@ -4,9 +4,10 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.webhook import Webhook
+from ..types.rotate_webhook_secret_response import RotateWebhookSecretResponse
 from ..types.webhook_list_response import WebhookListResponse
 from ..types.webhook_test_response import WebhookTestResponse
+from ..types.webhook_update_response import WebhookUpdateResponse
 from .raw_client import AsyncRawWebhooksClient, RawWebhooksClient
 from .types.test_webhook_request_webhook_name import TestWebhookRequestWebhookName
 from .types.update_webhook_request_webhook_name import UpdateWebhookRequestWebhookName
@@ -32,7 +33,7 @@ class WebhooksClient:
 
     def list_webhooks(self, *, request_options: typing.Optional[RequestOptions] = None) -> WebhookListResponse:
         """
-        List customer-facing billing webhooks for the authenticated organization.
+        List customer-facing billing webhooks for the authenticated organization, along with whether the organization has generated a signing secret.
 
         Parameters
         ----------
@@ -63,7 +64,7 @@ class WebhooksClient:
         enabled: typing.Optional[bool] = OMIT,
         url: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Webhook:
+    ) -> WebhookUpdateResponse:
         """
         Enable or disable a webhook and configure the destination URL for the authenticated organization.
 
@@ -82,7 +83,7 @@ class WebhooksClient:
 
         Returns
         -------
-        Webhook
+        WebhookUpdateResponse
             200
 
         Examples
@@ -133,6 +134,34 @@ class WebhooksClient:
         _response = self._raw_client.test_webhook(webhook_name, request_options=request_options)
         return _response.data
 
+    def rotate_webhook_secret(
+        self, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> RotateWebhookSecretResponse:
+        """
+        Generate a new HMAC signing secret used by every webhook in this organization and return it exactly once. The previous secret is invalidated immediately on next delivery.
+
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        RotateWebhookSecretResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.webhooks.rotate_webhook_secret()
+        """
+        _response = self._raw_client.rotate_webhook_secret(request_options=request_options)
+        return _response.data
+
 
 class AsyncWebhooksClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -151,7 +180,7 @@ class AsyncWebhooksClient:
 
     async def list_webhooks(self, *, request_options: typing.Optional[RequestOptions] = None) -> WebhookListResponse:
         """
-        List customer-facing billing webhooks for the authenticated organization.
+        List customer-facing billing webhooks for the authenticated organization, along with whether the organization has generated a signing secret.
 
         Parameters
         ----------
@@ -190,7 +219,7 @@ class AsyncWebhooksClient:
         enabled: typing.Optional[bool] = OMIT,
         url: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Webhook:
+    ) -> WebhookUpdateResponse:
         """
         Enable or disable a webhook and configure the destination URL for the authenticated organization.
 
@@ -209,7 +238,7 @@ class AsyncWebhooksClient:
 
         Returns
         -------
-        Webhook
+        WebhookUpdateResponse
             200
 
         Examples
@@ -274,4 +303,40 @@ class AsyncWebhooksClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.test_webhook(webhook_name, request_options=request_options)
+        return _response.data
+
+    async def rotate_webhook_secret(
+        self, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> RotateWebhookSecretResponse:
+        """
+        Generate a new HMAC signing secret used by every webhook in this organization and return it exactly once. The previous secret is invalidated immediately on next delivery.
+
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        RotateWebhookSecretResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.webhooks.rotate_webhook_secret()
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.rotate_webhook_secret(request_options=request_options)
         return _response.data

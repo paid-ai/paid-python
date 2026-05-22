@@ -8,6 +8,7 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .credit_balance_recipient import CreditBalanceRecipient
+from .credit_grant import CreditGrant
 
 
 class CreditBalance(UniversalBaseModel):
@@ -20,19 +21,39 @@ class CreditBalance(UniversalBaseModel):
     currency_key: typing_extensions.Annotated[
         str, FieldMetadata(alias="currencyKey"), pydantic.Field(alias="currencyKey")
     ]
-    available: float
+    available: float = pydantic.Field()
+    """
+    Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available).
+    """
+
     used: float
     total: float
     period_start: typing_extensions.Annotated[
-        typing.Optional[dt.datetime], FieldMetadata(alias="periodStart"), pydantic.Field(alias="periodStart")
+        typing.Optional[dt.datetime],
+        FieldMetadata(alias="periodStart"),
+        pydantic.Field(
+            alias="periodStart",
+            description="Aggregate min(periodStart) across grants in this pool. Does not correspond to any real billing period when grants overlap. Use grants[].periodStart instead. Will be removed in a future API version.",
+        ),
     ] = None
     period_end: typing_extensions.Annotated[
-        typing.Optional[dt.datetime], FieldMetadata(alias="periodEnd"), pydantic.Field(alias="periodEnd")
+        typing.Optional[dt.datetime],
+        FieldMetadata(alias="periodEnd"),
+        pydantic.Field(
+            alias="periodEnd",
+            description="Aggregate max(periodEnd) across grants in this pool. Does not correspond to any real billing period when grants overlap. Use grants[].periodEnd or grants[].expiresAt instead. Will be removed in a future API version.",
+        ),
     ] = None
     rollover_end_date: typing_extensions.Annotated[
-        typing.Optional[dt.datetime], FieldMetadata(alias="rolloverEndDate"), pydantic.Field(alias="rolloverEndDate")
+        typing.Optional[dt.datetime],
+        FieldMetadata(alias="rolloverEndDate"),
+        pydantic.Field(
+            alias="rolloverEndDate",
+            description="Aggregate max(rolloverEndDate) across grants in this pool. Use grants[].rolloverEndDate or grants[].expiresAt instead. Will be removed in a future API version.",
+        ),
     ] = None
     recipient: CreditBalanceRecipient
+    grants: typing.List[CreditGrant]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

@@ -11,6 +11,10 @@ from .create_order_line_attribute_request import CreateOrderLineAttributeRequest
 
 
 class CreateOrderLineRequest(UniversalBaseModel):
+    """
+    When override `attributes` are omitted, the order will match the base product (or default plan if plans are configured).
+    """
+
     product_id: typing_extensions.Annotated[str, FieldMetadata(alias="productId"), pydantic.Field(alias="productId")]
     name: typing.Optional[str] = None
     description: typing.Optional[str] = None

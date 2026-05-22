@@ -3,12 +3,22 @@
 import typing
 
 import pydantic
+import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.serialization import FieldMetadata
 from .webhook import Webhook
 
 
 class WebhookListResponse(UniversalBaseModel):
     data: typing.List[Webhook]
+    signing_secret_configured: typing_extensions.Annotated[
+        bool,
+        FieldMetadata(alias="signingSecretConfigured"),
+        pydantic.Field(
+            alias="signingSecretConfigured",
+            description="True when the organization has generated a webhook signing secret at least once.",
+        ),
+    ]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

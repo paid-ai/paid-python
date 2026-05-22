@@ -186,7 +186,7 @@ client.products.create_product(
 </dl>
 </details>
 
-<details><summary><code>client.products.<a href="src/paid/products/client.py">get_product_by_id</a>(...) -&gt; AsyncHttpResponse[Product]</code></summary>
+<details><summary><code>client.products.<a href="src/paid/products/client.py">get_product_by_id</a>(...) -&gt; AsyncHttpResponse[ProductDetail]</code></summary>
 <dl>
 <dd>
 
@@ -198,7 +198,7 @@ client.products.create_product(
 <dl>
 <dd>
 
-Get a product by ID
+Get a product by ID, including its product attributes with pricing details
 </dd>
 </dl>
 </dd>
@@ -256,7 +256,7 @@ client.products.get_product_by_id(
 </dl>
 </details>
 
-<details><summary><code>client.products.<a href="src/paid/products/client.py">update_product_by_id</a>(...) -&gt; AsyncHttpResponse[Product]</code></summary>
+<details><summary><code>client.products.<a href="src/paid/products/client.py">update_product_by_id</a>(...) -&gt; AsyncHttpResponse[ProductDetail]</code></summary>
 <dl>
 <dd>
 
@@ -268,7 +268,7 @@ client.products.get_product_by_id(
 <dl>
 <dd>
 
-Update a product by ID
+Update a product by ID. Optionally upsert product attributes with pricing.
 </dd>
 </dl>
 </dd>
@@ -362,6 +362,14 @@ client.products.update_product_by_id(
 <dl>
 <dd>
 
+**product_attributes:** `typing.Optional[typing.Sequence[ProductAttributeUpsert]]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -374,7 +382,7 @@ client.products.update_product_by_id(
 </dl>
 </details>
 
-<details><summary><code>client.products.<a href="src/paid/products/client.py">get_product_by_external_id</a>(...) -&gt; AsyncHttpResponse[Product]</code></summary>
+<details><summary><code>client.products.<a href="src/paid/products/client.py">get_product_by_external_id</a>(...) -&gt; AsyncHttpResponse[ProductDetail]</code></summary>
 <dl>
 <dd>
 
@@ -386,7 +394,7 @@ client.products.update_product_by_id(
 <dl>
 <dd>
 
-Get a product by external ID
+Get a product by external ID, including its product attributes with pricing details
 </dd>
 </dl>
 </dd>
@@ -444,7 +452,7 @@ client.products.get_product_by_external_id(
 </dl>
 </details>
 
-<details><summary><code>client.products.<a href="src/paid/products/client.py">update_product_by_external_id</a>(...) -&gt; AsyncHttpResponse[Product]</code></summary>
+<details><summary><code>client.products.<a href="src/paid/products/client.py">update_product_by_external_id</a>(...) -&gt; AsyncHttpResponse[ProductDetail]</code></summary>
 <dl>
 <dd>
 
@@ -456,7 +464,7 @@ client.products.get_product_by_external_id(
 <dl>
 <dd>
 
-Update a product by external ID
+Update a product by external ID. Optionally upsert product attributes with pricing.
 </dd>
 </dl>
 </dd>
@@ -543,6 +551,14 @@ client.products.update_product_by_external_id(
 <dd>
 
 **metadata:** `typing.Optional[typing.Dict[str, typing.Any]]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**product_attributes:** `typing.Optional[typing.Sequence[ProductAttributeUpsert]]` 
     
 </dd>
 </dl>
@@ -737,7 +753,7 @@ client.customers.create_customer(
 <dl>
 <dd>
 
-**billing_address:** `typing.Optional[CustomerBillingAddress]` 
+**billing_address:** `typing.Optional[CustomerBillingAddressInput]` 
     
 </dd>
 </dl>
@@ -801,7 +817,7 @@ client.customers.create_customer(
 <dl>
 <dd>
 
-Get a customer by ID
+Get a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `GET /api/v2/customers/external/{externalId}`.
 </dd>
 </dl>
 </dd>
@@ -822,7 +838,7 @@ client = Paid(
     token="YOUR_TOKEN",
 )
 client.customers.get_customer_by_id(
-    id="id",
+    id="cus_abc123",
 )
 
 ```
@@ -839,7 +855,7 @@ client.customers.get_customer_by_id(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Paid customer display id
     
 </dd>
 </dl>
@@ -871,7 +887,7 @@ client.customers.get_customer_by_id(
 <dl>
 <dd>
 
-Update a customer by ID
+Update a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `PUT /api/v2/customers/external/{externalId}`.
 </dd>
 </dl>
 </dd>
@@ -892,7 +908,7 @@ client = Paid(
     token="YOUR_TOKEN",
 )
 client.customers.update_customer_by_id(
-    id="id",
+    id="cus_abc123",
 )
 
 ```
@@ -909,7 +925,7 @@ client.customers.update_customer_by_id(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Paid customer display id
     
 </dd>
 </dl>
@@ -965,7 +981,7 @@ client.customers.update_customer_by_id(
 <dl>
 <dd>
 
-**billing_address:** `typing.Optional[CustomerBillingAddress]` 
+**billing_address:** `typing.Optional[CustomerBillingAddressInput]` 
     
 </dd>
 </dl>
@@ -1029,7 +1045,7 @@ client.customers.update_customer_by_id(
 <dl>
 <dd>
 
-Delete a customer by ID
+Delete a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `DELETE /api/v2/customers/external/{externalId}`.
 </dd>
 </dl>
 </dd>
@@ -1050,7 +1066,7 @@ client = Paid(
     token="YOUR_TOKEN",
 )
 client.customers.delete_customer_by_id(
-    id="id",
+    id="cus_abc123",
 )
 
 ```
@@ -1067,7 +1083,77 @@ client.customers.delete_customer_by_id(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">get_customer_state_by_id</a>(...) -&gt; AsyncHttpResponse[CustomerState]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Get the current customer state by Paid display ID
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.get_customer_state_by_id(
+    id="cus_abc123",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Paid customer display id
     
 </dd>
 </dl>
@@ -1120,7 +1206,7 @@ client = Paid(
     token="YOUR_TOKEN",
 )
 client.customers.get_customer_by_external_id(
-    external_id="externalId",
+    external_id="customer_123",
 )
 
 ```
@@ -1137,7 +1223,7 @@ client.customers.get_customer_by_external_id(
 <dl>
 <dd>
 
-**external_id:** `str` 
+**external_id:** `str` — Customer ID from the integrator's system, stored on Paid as `externalId`.
     
 </dd>
 </dl>
@@ -1190,7 +1276,7 @@ client = Paid(
     token="YOUR_TOKEN",
 )
 client.customers.update_customer_by_external_id(
-    external_id_="externalId",
+    external_id_="customer_123",
 )
 
 ```
@@ -1207,7 +1293,7 @@ client.customers.update_customer_by_external_id(
 <dl>
 <dd>
 
-**external_id_:** `str` 
+**external_id_:** `str` — Customer ID from the integrator's system, stored on Paid as `externalId`.
     
 </dd>
 </dl>
@@ -1263,7 +1349,7 @@ client.customers.update_customer_by_external_id(
 <dl>
 <dd>
 
-**billing_address:** `typing.Optional[CustomerBillingAddress]` 
+**billing_address:** `typing.Optional[CustomerBillingAddressInput]` 
     
 </dd>
 </dl>
@@ -1348,7 +1434,7 @@ client = Paid(
     token="YOUR_TOKEN",
 )
 client.customers.delete_customer_by_external_id(
-    external_id="externalId",
+    external_id="customer_123",
 )
 
 ```
@@ -1365,7 +1451,77 @@ client.customers.delete_customer_by_external_id(
 <dl>
 <dd>
 
-**external_id:** `str` 
+**external_id:** `str` — Customer ID from the integrator's system, stored on Paid as `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">get_customer_state_by_external_id</a>(...) -&gt; AsyncHttpResponse[CustomerState]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Primary integration endpoint for agents and programmatic clients using their own customer IDs. Use the value you stored on `customer.externalId`, for example `customer_123`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.get_customer_state_by_external_id(
+    external_id="customer_123",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**external_id:** `str` — Customer ID from the integrator's system, stored on Paid as `externalId`.
     
 </dd>
 </dl>
@@ -1397,7 +1553,7 @@ client.customers.delete_customer_by_external_id(
 <dl>
 <dd>
 
-Get current customer credit balances grouped by currency
+Get current customer credit balances grouped by currency for a Paid customer display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `/api/v2/customers/external/{externalId}/credits/balances`.
 </dd>
 </dl>
 </dd>
@@ -1418,7 +1574,7 @@ client = Paid(
     token="YOUR_TOKEN",
 )
 client.customers.get_customer_credit_balances(
-    id="id",
+    id="cus_abc123",
 )
 
 ```
@@ -1435,7 +1591,7 @@ client.customers.get_customer_credit_balances(
 <dl>
 <dd>
 
-**id:** `str` 
+**id:** `str` — Paid customer display id
     
 </dd>
 </dl>
@@ -1488,7 +1644,7 @@ client = Paid(
     token="YOUR_TOKEN",
 )
 client.customers.get_customer_credit_balances_by_external_id(
-    external_id="externalId",
+    external_id="customer_123",
 )
 
 ```
@@ -1505,7 +1661,7 @@ client.customers.get_customer_credit_balances_by_external_id(
 <dl>
 <dd>
 
-**external_id:** `str` 
+**external_id:** `str` — Customer ID from the integrator's system, stored on Paid as `externalId`.
     
 </dd>
 </dl>
@@ -2651,6 +2807,22 @@ client.orders.create_order(
 <dl>
 <dd>
 
+**billing_frequency_override:** `typing.Optional[OrderBillingFrequencyOverride]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**purchase_order_reference:** `typing.Optional[str]` — Purchase order number printed on invoices generated from this order.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -2896,6 +3068,14 @@ client.orders.update_order_by_id(
 <dd>
 
 **auto_send_payment_emails:** `typing.Optional[bool]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**purchase_order_reference:** `typing.Optional[str]` — Purchase order number printed on invoices generated from this order.
     
 </dd>
 </dl>
@@ -5012,7 +5192,7 @@ client.value_receipts.unpublish_value_receipt(
 <dl>
 <dd>
 
-List customer-facing billing webhooks for the authenticated organization.
+List customer-facing billing webhooks for the authenticated organization, along with whether the organization has generated a signing secret.
 </dd>
 </dl>
 </dd>
@@ -5060,7 +5240,7 @@ client.webhooks.list_webhooks()
 </dl>
 </details>
 
-<details><summary><code>client.webhooks.<a href="src/paid/webhooks/client.py">update_webhook</a>(...) -&gt; AsyncHttpResponse[Webhook]</code></summary>
+<details><summary><code>client.webhooks.<a href="src/paid/webhooks/client.py">update_webhook</a>(...) -&gt; AsyncHttpResponse[WebhookUpdateResponse]</code></summary>
 <dl>
 <dd>
 
@@ -5197,6 +5377,381 @@ client.webhooks.test_webhook(
 <dd>
 
 **webhook_name:** `TestWebhookRequestWebhookName` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.webhooks.<a href="src/paid/webhooks/client.py">rotate_webhook_secret</a>() -&gt; AsyncHttpResponse[RotateWebhookSecretResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generate a new HMAC signing secret used by every webhook in this organization and return it exactly once. The previous secret is invalidated immediately on next delivery.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.webhooks.rotate_webhook_secret()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Pricing
+<details><summary><code>client.pricing.<a href="src/paid/pricing/client.py">list_pricing</a>(...) -&gt; AsyncHttpResponse[PricingListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns pricing for all product attributes of a product. Each entry includes the attribute's pricing configuration and credit benefits.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.pricing.list_pricing(
+    product_id="productId",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**product_id:** `str` — Product display ID or UUID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.pricing.<a href="src/paid/pricing/client.py">get_pricing</a>(...) -&gt; AsyncHttpResponse[PricingResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns pricing and credit benefits for a single product attribute.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.pricing.get_pricing(
+    product_attribute_id="productAttributeId",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**product_attribute_id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.pricing.<a href="src/paid/pricing/client.py">update_pricing</a>(...) -&gt; AsyncHttpResponse[PricingResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Updates pricing on an existing product attribute. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid, PricingInput_RecurringPerUnit, SimplePricePoint
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.pricing.update_pricing(
+    product_attribute_id="productAttributeId",
+    pricing=PricingInput_RecurringPerUnit(
+        billing_frequency="Monthly",
+        price_points=[
+            SimplePricePoint(
+                currency="currency",
+                unit_price=1.1,
+            )
+        ],
+    ),
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**product_attribute_id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**pricing:** `PricingInput` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**credit_benefits:** `typing.Optional[typing.Sequence[CreditBenefitInput]]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Costs
+<details><summary><code>client.costs.<a href="src/paid/costs/client.py">create_costs</a>(...) -&gt; AsyncHttpResponse[CostIngestResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Ingests a batch of cost records. Each record is either a pre-computed `cost` (caller supplies amount + currency) or a `usage` record (caller supplies vendor/model/token counts and Paid prices it server-side). The batch is all-or-nothing: if any record fails validation, the entire request is rejected with a 400 and nothing is persisted.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Cost_Cost, CustomerById, Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.costs.create_costs(
+    costs=[
+        Cost_Cost(
+            customer=CustomerById(
+                customer_id="customerId",
+            ),
+            amount=1.1,
+            currency="currency",
+        )
+    ],
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**costs:** `typing.Sequence[Cost]` 
     
 </dd>
 </dl>

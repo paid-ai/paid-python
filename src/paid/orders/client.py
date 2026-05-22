@@ -9,6 +9,7 @@ from ..types.batch_seat_assignments_response import BatchSeatAssignmentsResponse
 from ..types.create_order_line_request import CreateOrderLineRequest
 from ..types.empty_response import EmptyResponse
 from ..types.order import Order
+from ..types.order_billing_frequency_override import OrderBillingFrequencyOverride
 from ..types.order_creation_state import OrderCreationState
 from ..types.order_lines_response import OrderLinesResponse
 from ..types.order_list_response import OrderListResponse
@@ -93,6 +94,8 @@ class OrdersClient:
         auto_send_billing_emails: typing.Optional[bool] = OMIT,
         auto_send_payment_emails: typing.Optional[bool] = OMIT,
         lines: typing.Optional[typing.Sequence[CreateOrderLineRequest]] = OMIT,
+        billing_frequency_override: typing.Optional[OrderBillingFrequencyOverride] = OMIT,
+        purchase_order_reference: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
@@ -135,6 +138,11 @@ class OrdersClient:
 
         lines : typing.Optional[typing.Sequence[CreateOrderLineRequest]]
 
+        billing_frequency_override : typing.Optional[OrderBillingFrequencyOverride]
+
+        purchase_order_reference : typing.Optional[str]
+            Purchase order number printed on invoices generated from this order.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -172,6 +180,8 @@ class OrdersClient:
             auto_send_billing_emails=auto_send_billing_emails,
             auto_send_payment_emails=auto_send_payment_emails,
             lines=lines,
+            billing_frequency_override=billing_frequency_override,
+            purchase_order_reference=purchase_order_reference,
             request_options=request_options,
         )
         return _response.data
@@ -224,6 +234,7 @@ class OrdersClient:
         auto_post_invoices: typing.Optional[bool] = OMIT,
         auto_send_billing_emails: typing.Optional[bool] = OMIT,
         auto_send_payment_emails: typing.Optional[bool] = OMIT,
+        purchase_order_reference: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
@@ -262,6 +273,9 @@ class OrdersClient:
 
         auto_send_payment_emails : typing.Optional[bool]
 
+        purchase_order_reference : typing.Optional[str]
+            Purchase order number printed on invoices generated from this order.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -297,6 +311,7 @@ class OrdersClient:
             auto_post_invoices=auto_post_invoices,
             auto_send_billing_emails=auto_send_billing_emails,
             auto_send_payment_emails=auto_send_payment_emails,
+            purchase_order_reference=purchase_order_reference,
             request_options=request_options,
         )
         return _response.data
@@ -596,6 +611,8 @@ class AsyncOrdersClient:
         auto_send_billing_emails: typing.Optional[bool] = OMIT,
         auto_send_payment_emails: typing.Optional[bool] = OMIT,
         lines: typing.Optional[typing.Sequence[CreateOrderLineRequest]] = OMIT,
+        billing_frequency_override: typing.Optional[OrderBillingFrequencyOverride] = OMIT,
+        purchase_order_reference: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
@@ -637,6 +654,11 @@ class AsyncOrdersClient:
         auto_send_payment_emails : typing.Optional[bool]
 
         lines : typing.Optional[typing.Sequence[CreateOrderLineRequest]]
+
+        billing_frequency_override : typing.Optional[OrderBillingFrequencyOverride]
+
+        purchase_order_reference : typing.Optional[str]
+            Purchase order number printed on invoices generated from this order.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -683,6 +705,8 @@ class AsyncOrdersClient:
             auto_send_billing_emails=auto_send_billing_emails,
             auto_send_payment_emails=auto_send_payment_emails,
             lines=lines,
+            billing_frequency_override=billing_frequency_override,
+            purchase_order_reference=purchase_order_reference,
             request_options=request_options,
         )
         return _response.data
@@ -743,6 +767,7 @@ class AsyncOrdersClient:
         auto_post_invoices: typing.Optional[bool] = OMIT,
         auto_send_billing_emails: typing.Optional[bool] = OMIT,
         auto_send_payment_emails: typing.Optional[bool] = OMIT,
+        purchase_order_reference: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
@@ -780,6 +805,9 @@ class AsyncOrdersClient:
         auto_send_billing_emails : typing.Optional[bool]
 
         auto_send_payment_emails : typing.Optional[bool]
+
+        purchase_order_reference : typing.Optional[str]
+            Purchase order number printed on invoices generated from this order.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -824,6 +852,7 @@ class AsyncOrdersClient:
             auto_post_invoices=auto_post_invoices,
             auto_send_billing_emails=auto_send_billing_emails,
             auto_send_payment_emails=auto_send_payment_emails,
+            purchase_order_reference=purchase_order_reference,
             request_options=request_options,
         )
         return _response.data

@@ -17,9 +17,10 @@ from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
 from ..types.credit_balance_list_response import CreditBalanceListResponse
 from ..types.customer import Customer
-from ..types.customer_billing_address import CustomerBillingAddress
+from ..types.customer_billing_address_input import CustomerBillingAddressInput
 from ..types.customer_creation_state import CustomerCreationState
 from ..types.customer_list_response import CustomerListResponse
+from ..types.customer_state import CustomerState
 from ..types.customer_user import CustomerUser
 from ..types.customer_user_status import CustomerUserStatus
 from ..types.empty_response import EmptyResponse
@@ -123,7 +124,7 @@ class RawCustomersClient:
         phone: typing.Optional[str] = OMIT,
         website: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddressInput] = OMIT,
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
@@ -147,7 +148,7 @@ class RawCustomersClient:
 
         external_id : typing.Optional[str]
 
-        billing_address : typing.Optional[CustomerBillingAddress]
+        billing_address : typing.Optional[CustomerBillingAddressInput]
 
         creation_state : typing.Optional[CustomerCreationState]
 
@@ -176,7 +177,7 @@ class RawCustomersClient:
                 "website": website,
                 "externalId": external_id,
                 "billingAddress": convert_and_respect_annotation_metadata(
-                    object_=billing_address, annotation=typing.Optional[CustomerBillingAddress], direction="write"
+                    object_=billing_address, annotation=typing.Optional[CustomerBillingAddressInput], direction="write"
                 ),
                 "creationState": creation_state,
                 "vatNumber": vat_number,
@@ -241,11 +242,12 @@ class RawCustomersClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[Customer]:
         """
-        Get a customer by ID
+        Get a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `GET /api/v2/customers/external/{externalId}`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -318,7 +320,7 @@ class RawCustomersClient:
         phone: typing.Optional[str] = OMIT,
         website: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddressInput] = OMIT,
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         churn_date: typing.Optional[dt.datetime] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
@@ -326,11 +328,12 @@ class RawCustomersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Customer]:
         """
-        Update a customer by ID
+        Update a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `PUT /api/v2/customers/external/{externalId}`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         name : typing.Optional[str]
 
@@ -344,7 +347,7 @@ class RawCustomersClient:
 
         external_id : typing.Optional[str]
 
-        billing_address : typing.Optional[CustomerBillingAddress]
+        billing_address : typing.Optional[CustomerBillingAddressInput]
 
         creation_state : typing.Optional[CustomerCreationState]
 
@@ -373,7 +376,7 @@ class RawCustomersClient:
                 "website": website,
                 "externalId": external_id,
                 "billingAddress": convert_and_respect_annotation_metadata(
-                    object_=billing_address, annotation=typing.Optional[CustomerBillingAddress], direction="write"
+                    object_=billing_address, annotation=typing.Optional[CustomerBillingAddressInput], direction="write"
                 ),
                 "creationState": creation_state,
                 "churnDate": churn_date,
@@ -449,11 +452,12 @@ class RawCustomersClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[EmptyResponse]:
         """
-        Delete a customer by ID
+        Delete a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `DELETE /api/v2/customers/external/{externalId}`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -527,6 +531,78 @@ class RawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def get_customer_state_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[CustomerState]:
+        """
+        Get the current customer state by Paid display ID
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[CustomerState]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"customers/{jsonable_encoder(id)}/state",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CustomerState,
+                    parse_obj_as(
+                        type_=CustomerState,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     def get_customer_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[Customer]:
@@ -536,6 +612,7 @@ class RawCustomersClient:
         Parameters
         ----------
         external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -608,7 +685,7 @@ class RawCustomersClient:
         phone: typing.Optional[str] = OMIT,
         website: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddressInput] = OMIT,
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         churn_date: typing.Optional[dt.datetime] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
@@ -621,6 +698,7 @@ class RawCustomersClient:
         Parameters
         ----------
         external_id_ : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         name : typing.Optional[str]
 
@@ -634,7 +712,7 @@ class RawCustomersClient:
 
         external_id : typing.Optional[str]
 
-        billing_address : typing.Optional[CustomerBillingAddress]
+        billing_address : typing.Optional[CustomerBillingAddressInput]
 
         creation_state : typing.Optional[CustomerCreationState]
 
@@ -663,7 +741,7 @@ class RawCustomersClient:
                 "website": website,
                 "externalId": external_id,
                 "billingAddress": convert_and_respect_annotation_metadata(
-                    object_=billing_address, annotation=typing.Optional[CustomerBillingAddress], direction="write"
+                    object_=billing_address, annotation=typing.Optional[CustomerBillingAddressInput], direction="write"
                 ),
                 "creationState": creation_state,
                 "churnDate": churn_date,
@@ -744,6 +822,7 @@ class RawCustomersClient:
         Parameters
         ----------
         external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -817,15 +896,88 @@ class RawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def get_customer_state_by_external_id(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[CustomerState]:
+        """
+        Primary integration endpoint for agents and programmatic clients using their own customer IDs. Use the value you stored on `customer.externalId`, for example `customer_123`.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[CustomerState]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"customers/external/{jsonable_encoder(external_id)}/state",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CustomerState,
+                    parse_obj_as(
+                        type_=CustomerState,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     def get_customer_credit_balances(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[CreditBalanceListResponse]:
         """
-        Get current customer credit balances grouped by currency
+        Get current customer credit balances grouped by currency for a Paid customer display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `/api/v2/customers/external/{externalId}/credits/balances`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -897,6 +1049,7 @@ class RawCustomersClient:
         Parameters
         ----------
         external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1164,7 +1317,7 @@ class AsyncRawCustomersClient:
         phone: typing.Optional[str] = OMIT,
         website: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddressInput] = OMIT,
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
@@ -1188,7 +1341,7 @@ class AsyncRawCustomersClient:
 
         external_id : typing.Optional[str]
 
-        billing_address : typing.Optional[CustomerBillingAddress]
+        billing_address : typing.Optional[CustomerBillingAddressInput]
 
         creation_state : typing.Optional[CustomerCreationState]
 
@@ -1217,7 +1370,7 @@ class AsyncRawCustomersClient:
                 "website": website,
                 "externalId": external_id,
                 "billingAddress": convert_and_respect_annotation_metadata(
-                    object_=billing_address, annotation=typing.Optional[CustomerBillingAddress], direction="write"
+                    object_=billing_address, annotation=typing.Optional[CustomerBillingAddressInput], direction="write"
                 ),
                 "creationState": creation_state,
                 "vatNumber": vat_number,
@@ -1282,11 +1435,12 @@ class AsyncRawCustomersClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Customer]:
         """
-        Get a customer by ID
+        Get a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `GET /api/v2/customers/external/{externalId}`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1359,7 +1513,7 @@ class AsyncRawCustomersClient:
         phone: typing.Optional[str] = OMIT,
         website: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddressInput] = OMIT,
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         churn_date: typing.Optional[dt.datetime] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
@@ -1367,11 +1521,12 @@ class AsyncRawCustomersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Customer]:
         """
-        Update a customer by ID
+        Update a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `PUT /api/v2/customers/external/{externalId}`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         name : typing.Optional[str]
 
@@ -1385,7 +1540,7 @@ class AsyncRawCustomersClient:
 
         external_id : typing.Optional[str]
 
-        billing_address : typing.Optional[CustomerBillingAddress]
+        billing_address : typing.Optional[CustomerBillingAddressInput]
 
         creation_state : typing.Optional[CustomerCreationState]
 
@@ -1414,7 +1569,7 @@ class AsyncRawCustomersClient:
                 "website": website,
                 "externalId": external_id,
                 "billingAddress": convert_and_respect_annotation_metadata(
-                    object_=billing_address, annotation=typing.Optional[CustomerBillingAddress], direction="write"
+                    object_=billing_address, annotation=typing.Optional[CustomerBillingAddressInput], direction="write"
                 ),
                 "creationState": creation_state,
                 "churnDate": churn_date,
@@ -1490,11 +1645,12 @@ class AsyncRawCustomersClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[EmptyResponse]:
         """
-        Delete a customer by ID
+        Delete a customer by Paid display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `DELETE /api/v2/customers/external/{externalId}`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1568,6 +1724,78 @@ class AsyncRawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    async def get_customer_state_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[CustomerState]:
+        """
+        Get the current customer state by Paid display ID
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[CustomerState]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"customers/{jsonable_encoder(id)}/state",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CustomerState,
+                    parse_obj_as(
+                        type_=CustomerState,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     async def get_customer_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Customer]:
@@ -1577,6 +1805,7 @@ class AsyncRawCustomersClient:
         Parameters
         ----------
         external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1649,7 +1878,7 @@ class AsyncRawCustomersClient:
         phone: typing.Optional[str] = OMIT,
         website: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
-        billing_address: typing.Optional[CustomerBillingAddress] = OMIT,
+        billing_address: typing.Optional[CustomerBillingAddressInput] = OMIT,
         creation_state: typing.Optional[CustomerCreationState] = OMIT,
         churn_date: typing.Optional[dt.datetime] = OMIT,
         vat_number: typing.Optional[str] = OMIT,
@@ -1662,6 +1891,7 @@ class AsyncRawCustomersClient:
         Parameters
         ----------
         external_id_ : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         name : typing.Optional[str]
 
@@ -1675,7 +1905,7 @@ class AsyncRawCustomersClient:
 
         external_id : typing.Optional[str]
 
-        billing_address : typing.Optional[CustomerBillingAddress]
+        billing_address : typing.Optional[CustomerBillingAddressInput]
 
         creation_state : typing.Optional[CustomerCreationState]
 
@@ -1704,7 +1934,7 @@ class AsyncRawCustomersClient:
                 "website": website,
                 "externalId": external_id,
                 "billingAddress": convert_and_respect_annotation_metadata(
-                    object_=billing_address, annotation=typing.Optional[CustomerBillingAddress], direction="write"
+                    object_=billing_address, annotation=typing.Optional[CustomerBillingAddressInput], direction="write"
                 ),
                 "creationState": creation_state,
                 "churnDate": churn_date,
@@ -1785,6 +2015,7 @@ class AsyncRawCustomersClient:
         Parameters
         ----------
         external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1858,15 +2089,88 @@ class AsyncRawCustomersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    async def get_customer_state_by_external_id(
+        self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[CustomerState]:
+        """
+        Primary integration endpoint for agents and programmatic clients using their own customer IDs. Use the value you stored on `customer.externalId`, for example `customer_123`.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[CustomerState]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"customers/external/{jsonable_encoder(external_id)}/state",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CustomerState,
+                    parse_obj_as(
+                        type_=CustomerState,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     async def get_customer_credit_balances(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[CreditBalanceListResponse]:
         """
-        Get current customer credit balances grouped by currency
+        Get current customer credit balances grouped by currency for a Paid customer display ID. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `/api/v2/customers/external/{externalId}/credits/balances`.
 
         Parameters
         ----------
         id : str
+            Paid customer display id
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1938,6 +2242,7 @@ class AsyncRawCustomersClient:
         Parameters
         ----------
         external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

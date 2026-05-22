@@ -21,6 +21,7 @@ from ..types.create_order_line_request import CreateOrderLineRequest
 from ..types.empty_response import EmptyResponse
 from ..types.error_response import ErrorResponse
 from ..types.order import Order
+from ..types.order_billing_frequency_override import OrderBillingFrequencyOverride
 from ..types.order_creation_state import OrderCreationState
 from ..types.order_lines_response import OrderLinesResponse
 from ..types.order_list_response import OrderListResponse
@@ -138,6 +139,8 @@ class RawOrdersClient:
         auto_send_billing_emails: typing.Optional[bool] = OMIT,
         auto_send_payment_emails: typing.Optional[bool] = OMIT,
         lines: typing.Optional[typing.Sequence[CreateOrderLineRequest]] = OMIT,
+        billing_frequency_override: typing.Optional[OrderBillingFrequencyOverride] = OMIT,
+        purchase_order_reference: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Order]:
         """
@@ -180,6 +183,11 @@ class RawOrdersClient:
 
         lines : typing.Optional[typing.Sequence[CreateOrderLineRequest]]
 
+        billing_frequency_override : typing.Optional[OrderBillingFrequencyOverride]
+
+        purchase_order_reference : typing.Optional[str]
+            Purchase order number printed on invoices generated from this order.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -211,6 +219,10 @@ class RawOrdersClient:
                 "lines": convert_and_respect_annotation_metadata(
                     object_=lines, annotation=typing.Sequence[CreateOrderLineRequest], direction="write"
                 ),
+                "billingFrequencyOverride": convert_and_respect_annotation_metadata(
+                    object_=billing_frequency_override, annotation=OrderBillingFrequencyOverride, direction="write"
+                ),
+                "purchaseOrderReference": purchase_order_reference,
             },
             headers={
                 "content-type": "application/json",
@@ -355,6 +367,7 @@ class RawOrdersClient:
         auto_post_invoices: typing.Optional[bool] = OMIT,
         auto_send_billing_emails: typing.Optional[bool] = OMIT,
         auto_send_payment_emails: typing.Optional[bool] = OMIT,
+        purchase_order_reference: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Order]:
         """
@@ -393,6 +406,9 @@ class RawOrdersClient:
 
         auto_send_payment_emails : typing.Optional[bool]
 
+        purchase_order_reference : typing.Optional[str]
+            Purchase order number printed on invoices generated from this order.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -419,6 +435,7 @@ class RawOrdersClient:
                 "autoPostInvoices": auto_post_invoices,
                 "autoSendBillingEmails": auto_send_billing_emails,
                 "autoSendPaymentEmails": auto_send_payment_emails,
+                "purchaseOrderReference": purchase_order_reference,
             },
             headers={
                 "content-type": "application/json",
@@ -1068,6 +1085,8 @@ class AsyncRawOrdersClient:
         auto_send_billing_emails: typing.Optional[bool] = OMIT,
         auto_send_payment_emails: typing.Optional[bool] = OMIT,
         lines: typing.Optional[typing.Sequence[CreateOrderLineRequest]] = OMIT,
+        billing_frequency_override: typing.Optional[OrderBillingFrequencyOverride] = OMIT,
+        purchase_order_reference: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Order]:
         """
@@ -1110,6 +1129,11 @@ class AsyncRawOrdersClient:
 
         lines : typing.Optional[typing.Sequence[CreateOrderLineRequest]]
 
+        billing_frequency_override : typing.Optional[OrderBillingFrequencyOverride]
+
+        purchase_order_reference : typing.Optional[str]
+            Purchase order number printed on invoices generated from this order.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1141,6 +1165,10 @@ class AsyncRawOrdersClient:
                 "lines": convert_and_respect_annotation_metadata(
                     object_=lines, annotation=typing.Sequence[CreateOrderLineRequest], direction="write"
                 ),
+                "billingFrequencyOverride": convert_and_respect_annotation_metadata(
+                    object_=billing_frequency_override, annotation=OrderBillingFrequencyOverride, direction="write"
+                ),
+                "purchaseOrderReference": purchase_order_reference,
             },
             headers={
                 "content-type": "application/json",
@@ -1285,6 +1313,7 @@ class AsyncRawOrdersClient:
         auto_post_invoices: typing.Optional[bool] = OMIT,
         auto_send_billing_emails: typing.Optional[bool] = OMIT,
         auto_send_payment_emails: typing.Optional[bool] = OMIT,
+        purchase_order_reference: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Order]:
         """
@@ -1323,6 +1352,9 @@ class AsyncRawOrdersClient:
 
         auto_send_payment_emails : typing.Optional[bool]
 
+        purchase_order_reference : typing.Optional[str]
+            Purchase order number printed on invoices generated from this order.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1349,6 +1381,7 @@ class AsyncRawOrdersClient:
                 "autoPostInvoices": auto_post_invoices,
                 "autoSendBillingEmails": auto_send_billing_emails,
                 "autoSendPaymentEmails": auto_send_payment_emails,
+                "purchaseOrderReference": purchase_order_reference,
             },
             headers={
                 "content-type": "application/json",

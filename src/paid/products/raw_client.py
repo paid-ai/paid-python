@@ -9,12 +9,15 @@ from ..core.http_response import AsyncHttpResponse, HttpResponse
 from ..core.jsonable_encoder import jsonable_encoder
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
+from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
 from ..types.error_response import ErrorResponse
 from ..types.product import Product
+from ..types.product_attribute_upsert import ProductAttributeUpsert
+from ..types.product_detail import ProductDetail
 from ..types.product_list_response import ProductListResponse
 
 # this is used as the default value for optional parameters
@@ -209,9 +212,9 @@ class RawProductsClient:
 
     def get_product_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[Product]:
+    ) -> HttpResponse[ProductDetail]:
         """
-        Get a product by ID
+        Get a product by ID, including its product attributes with pricing details
 
         Parameters
         ----------
@@ -222,7 +225,7 @@ class RawProductsClient:
 
         Returns
         -------
-        HttpResponse[Product]
+        HttpResponse[ProductDetail]
             200
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -233,9 +236,9 @@ class RawProductsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Product,
+                    ProductDetail,
                     parse_obj_as(
-                        type_=Product,  # type: ignore
+                        type_=ProductDetail,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -288,10 +291,11 @@ class RawProductsClient:
         product_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        product_attributes: typing.Optional[typing.Sequence[ProductAttributeUpsert]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Product]:
+    ) -> HttpResponse[ProductDetail]:
         """
-        Update a product by ID
+        Update a product by ID. Optionally upsert product attributes with pricing.
 
         Parameters
         ----------
@@ -309,12 +313,14 @@ class RawProductsClient:
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
+        product_attributes : typing.Optional[typing.Sequence[ProductAttributeUpsert]]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[Product]
+        HttpResponse[ProductDetail]
             200
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -327,6 +333,9 @@ class RawProductsClient:
                 "productCode": product_code,
                 "externalId": external_id,
                 "metadata": metadata,
+                "productAttributes": convert_and_respect_annotation_metadata(
+                    object_=product_attributes, annotation=typing.Sequence[ProductAttributeUpsert], direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -337,9 +346,9 @@ class RawProductsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Product,
+                    ProductDetail,
                     parse_obj_as(
-                        type_=Product,  # type: ignore
+                        type_=ProductDetail,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -395,9 +404,9 @@ class RawProductsClient:
 
     def get_product_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[Product]:
+    ) -> HttpResponse[ProductDetail]:
         """
-        Get a product by external ID
+        Get a product by external ID, including its product attributes with pricing details
 
         Parameters
         ----------
@@ -408,7 +417,7 @@ class RawProductsClient:
 
         Returns
         -------
-        HttpResponse[Product]
+        HttpResponse[ProductDetail]
             200
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -419,9 +428,9 @@ class RawProductsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Product,
+                    ProductDetail,
                     parse_obj_as(
-                        type_=Product,  # type: ignore
+                        type_=ProductDetail,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -474,10 +483,11 @@ class RawProductsClient:
         product_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        product_attributes: typing.Optional[typing.Sequence[ProductAttributeUpsert]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Product]:
+    ) -> HttpResponse[ProductDetail]:
         """
-        Update a product by external ID
+        Update a product by external ID. Optionally upsert product attributes with pricing.
 
         Parameters
         ----------
@@ -495,12 +505,14 @@ class RawProductsClient:
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
+        product_attributes : typing.Optional[typing.Sequence[ProductAttributeUpsert]]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[Product]
+        HttpResponse[ProductDetail]
             200
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -513,6 +525,9 @@ class RawProductsClient:
                 "productCode": product_code,
                 "externalId": external_id,
                 "metadata": metadata,
+                "productAttributes": convert_and_respect_annotation_metadata(
+                    object_=product_attributes, annotation=typing.Sequence[ProductAttributeUpsert], direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -523,9 +538,9 @@ class RawProductsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Product,
+                    ProductDetail,
                     parse_obj_as(
-                        type_=Product,  # type: ignore
+                        type_=ProductDetail,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -768,9 +783,9 @@ class AsyncRawProductsClient:
 
     async def get_product_by_id(
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[Product]:
+    ) -> AsyncHttpResponse[ProductDetail]:
         """
-        Get a product by ID
+        Get a product by ID, including its product attributes with pricing details
 
         Parameters
         ----------
@@ -781,7 +796,7 @@ class AsyncRawProductsClient:
 
         Returns
         -------
-        AsyncHttpResponse[Product]
+        AsyncHttpResponse[ProductDetail]
             200
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -792,9 +807,9 @@ class AsyncRawProductsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Product,
+                    ProductDetail,
                     parse_obj_as(
-                        type_=Product,  # type: ignore
+                        type_=ProductDetail,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -847,10 +862,11 @@ class AsyncRawProductsClient:
         product_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        product_attributes: typing.Optional[typing.Sequence[ProductAttributeUpsert]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Product]:
+    ) -> AsyncHttpResponse[ProductDetail]:
         """
-        Update a product by ID
+        Update a product by ID. Optionally upsert product attributes with pricing.
 
         Parameters
         ----------
@@ -868,12 +884,14 @@ class AsyncRawProductsClient:
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
+        product_attributes : typing.Optional[typing.Sequence[ProductAttributeUpsert]]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[Product]
+        AsyncHttpResponse[ProductDetail]
             200
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -886,6 +904,9 @@ class AsyncRawProductsClient:
                 "productCode": product_code,
                 "externalId": external_id,
                 "metadata": metadata,
+                "productAttributes": convert_and_respect_annotation_metadata(
+                    object_=product_attributes, annotation=typing.Sequence[ProductAttributeUpsert], direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -896,9 +917,9 @@ class AsyncRawProductsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Product,
+                    ProductDetail,
                     parse_obj_as(
-                        type_=Product,  # type: ignore
+                        type_=ProductDetail,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -954,9 +975,9 @@ class AsyncRawProductsClient:
 
     async def get_product_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[Product]:
+    ) -> AsyncHttpResponse[ProductDetail]:
         """
-        Get a product by external ID
+        Get a product by external ID, including its product attributes with pricing details
 
         Parameters
         ----------
@@ -967,7 +988,7 @@ class AsyncRawProductsClient:
 
         Returns
         -------
-        AsyncHttpResponse[Product]
+        AsyncHttpResponse[ProductDetail]
             200
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -978,9 +999,9 @@ class AsyncRawProductsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Product,
+                    ProductDetail,
                     parse_obj_as(
-                        type_=Product,  # type: ignore
+                        type_=ProductDetail,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1033,10 +1054,11 @@ class AsyncRawProductsClient:
         product_code: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        product_attributes: typing.Optional[typing.Sequence[ProductAttributeUpsert]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Product]:
+    ) -> AsyncHttpResponse[ProductDetail]:
         """
-        Update a product by external ID
+        Update a product by external ID. Optionally upsert product attributes with pricing.
 
         Parameters
         ----------
@@ -1054,12 +1076,14 @@ class AsyncRawProductsClient:
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
+        product_attributes : typing.Optional[typing.Sequence[ProductAttributeUpsert]]
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[Product]
+        AsyncHttpResponse[ProductDetail]
             200
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1072,6 +1096,9 @@ class AsyncRawProductsClient:
                 "productCode": product_code,
                 "externalId": external_id,
                 "metadata": metadata,
+                "productAttributes": convert_and_respect_annotation_metadata(
+                    object_=product_attributes, annotation=typing.Sequence[ProductAttributeUpsert], direction="write"
+                ),
             },
             headers={
                 "content-type": "application/json",
@@ -1082,9 +1109,9 @@ class AsyncRawProductsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Product,
+                    ProductDetail,
                     parse_obj_as(
-                        type_=Product,  # type: ignore
+                        type_=ProductDetail,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
