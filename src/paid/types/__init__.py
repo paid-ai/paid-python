@@ -19,6 +19,9 @@ if typing.TYPE_CHECKING:
     from .contact_billing_address import ContactBillingAddress
     from .contact_list_response import ContactListResponse
     from .contact_roles_item import ContactRolesItem
+    from .cost import Cost, Cost_Cost, Cost_Usage
+    from .cost_ingest_response import CostIngestResponse
+    from .cost_override import CostOverride
     from .create_order_line_attribute_request import CreateOrderLineAttributeRequest
     from .create_order_line_attribute_request_pricing import CreateOrderLineAttributeRequestPricing
     from .create_order_line_attribute_request_pricing_billing_frequency import (
@@ -45,6 +48,9 @@ if typing.TYPE_CHECKING:
     from .create_order_line_attribute_request_pricing_credit_benefits_item_rollover_duration_unit import (
         CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit,
     )
+    from .create_order_line_attribute_request_pricing_credit_unit_brackets_item import (
+        CreateOrderLineAttributeRequestPricingCreditUnitBracketsItem,
+    )
     from .create_order_line_attribute_request_pricing_price_points import (
         CreateOrderLineAttributeRequestPricingPricePoints,
     )
@@ -53,6 +59,12 @@ if typing.TYPE_CHECKING:
     )
     from .create_order_line_attribute_request_pricing_price_points_tiers_item_tier_billing_type import (
         CreateOrderLineAttributeRequestPricingPricePointsTiersItemTierBillingType,
+    )
+    from .create_order_line_attribute_request_pricing_pricing_input import (
+        CreateOrderLineAttributeRequestPricingPricingInput,
+    )
+    from .create_order_line_attribute_request_pricing_pricing_input_kind import (
+        CreateOrderLineAttributeRequestPricingPricingInputKind,
     )
     from .create_order_line_attribute_request_pricing_pricing_model import (
         CreateOrderLineAttributeRequestPricingPricingModel,
@@ -64,17 +76,39 @@ if typing.TYPE_CHECKING:
     from .credit_balance import CreditBalance
     from .credit_balance_list_response import CreditBalanceListResponse
     from .credit_balance_recipient import CreditBalanceRecipient
+    from .credit_benefit_input import CreditBenefitInput
+    from .credit_benefit_input_allocation_cadence import CreditBenefitInputAllocationCadence
+    from .credit_benefit_input_credit_grant_timing import CreditBenefitInputCreditGrantTiming
+    from .credit_benefit_input_recipient import CreditBenefitInputRecipient
+    from .credit_benefit_output import CreditBenefitOutput
     from .credit_currency import CreditCurrency
     from .credit_currency_list_response import CreditCurrencyListResponse
+    from .credit_currency_status import CreditCurrencyStatus
+    from .credit_grant import CreditGrant
+    from .currency_code import CurrencyCode
     from .customer import Customer
     from .customer_attribution import CustomerAttribution
-    from .customer_billing_address import CustomerBillingAddress
+    from .customer_billing_address_input import CustomerBillingAddressInput
+    from .customer_billing_address_response import CustomerBillingAddressResponse
     from .customer_by_external_id import CustomerByExternalId
     from .customer_by_id import CustomerById
     from .customer_creation_state import CustomerCreationState
     from .customer_list_response import CustomerListResponse
     from .customer_portal import CustomerPortal
     from .customer_portal_status import CustomerPortalStatus
+    from .customer_state import CustomerState
+    from .customer_state_checkout_link import CustomerStateCheckoutLink
+    from .customer_state_checkout_link_status import CustomerStateCheckoutLinkStatus
+    from .customer_state_credit_balance import CustomerStateCreditBalance
+    from .customer_state_credit_summary import CustomerStateCreditSummary
+    from .customer_state_customer import CustomerStateCustomer
+    from .customer_state_order import CustomerStateOrder
+    from .customer_state_order_state import CustomerStateOrderState
+    from .customer_state_product_ref import CustomerStateProductRef
+    from .customer_state_seat import CustomerStateSeat
+    from .customer_state_seat_assignee import CustomerStateSeatAssignee
+    from .customer_state_seat_status import CustomerStateSeatStatus
+    from .customer_state_seats import CustomerStateSeats
     from .customer_user import CustomerUser
     from .customer_user_status import CustomerUserStatus
     from .empty_response import EmptyResponse
@@ -88,26 +122,218 @@ if typing.TYPE_CHECKING:
     from .invoice_source import InvoiceSource
     from .invoice_status import InvoiceStatus
     from .invoice_tax_status import InvoiceTaxStatus
+    from .one_time_per_unit_input import OneTimePerUnitInput
+    from .one_time_per_unit_input_billing_type import OneTimePerUnitInputBillingType
+    from .one_time_per_unit_input_fee_type import OneTimePerUnitInputFeeType
     from .order import Order
+    from .order_billing_frequency_override import OrderBillingFrequencyOverride
+    from .order_billing_frequency_override_frequency import OrderBillingFrequencyOverrideFrequency
     from .order_creation_state import OrderCreationState
     from .order_line import OrderLine
+    from .order_line_type import OrderLineType
     from .order_lines_response import OrderLinesResponse
     from .order_list_response import OrderListResponse
     from .order_seat import OrderSeat
     from .order_seat_list_response import OrderSeatListResponse
     from .pagination import Pagination
+    from .precomputed_cost import PrecomputedCost
+    from .pricing_input import (
+        PricingInput,
+        PricingInput_OneTimePerUnit,
+        PricingInput_RecurringGraduated,
+        PricingInput_RecurringPerUnit,
+        PricingInput_RecurringPercentOfTotal,
+        PricingInput_RecurringVolume,
+        PricingInput_SeatBasedGraduated,
+        PricingInput_SeatBasedPerUnit,
+        PricingInput_SeatBasedPrepaidCredits,
+        PricingInput_SeatBasedVolume,
+        PricingInput_UsageBracketedPrepaidCredits,
+        PricingInput_UsageCostPlus,
+        PricingInput_UsageGraduated,
+        PricingInput_UsagePerUnit,
+        PricingInput_UsagePrepaidCredits,
+        PricingInput_UsageVolume,
+    )
+    from .pricing_list_response import PricingListResponse
+    from .pricing_output import PricingOutput
+    from .pricing_output_pricing_type import PricingOutputPricingType
+    from .pricing_price_point_output import PricingPricePointOutput
+    from .pricing_price_point_output_tiers_item import PricingPricePointOutputTiersItem
+    from .pricing_price_point_output_tiers_item_tier_billing_type import PricingPricePointOutputTiersItemTierBillingType
+    from .pricing_response import PricingResponse
     from .product import Product
+    from .product_attribute_output import ProductAttributeOutput
+    from .product_attribute_upsert import ProductAttributeUpsert
+    from .product_attribution import ProductAttribution
     from .product_by_external_id import ProductByExternalId
     from .product_by_id import ProductById
+    from .product_credit_benefit_input import ProductCreditBenefitInput
+    from .product_credit_benefit_input_allocation_cadence import ProductCreditBenefitInputAllocationCadence
+    from .product_credit_benefit_input_credit_grant_timing import ProductCreditBenefitInputCreditGrantTiming
+    from .product_credit_benefit_input_recipient import ProductCreditBenefitInputRecipient
+    from .product_credit_benefit_output import ProductCreditBenefitOutput
+    from .product_detail import ProductDetail
     from .product_list_response import ProductListResponse
+    from .product_one_time_per_unit_input import ProductOneTimePerUnitInput
+    from .product_one_time_per_unit_input_billing_type import ProductOneTimePerUnitInputBillingType
+    from .product_one_time_per_unit_input_fee_type import ProductOneTimePerUnitInputFeeType
+    from .product_price_point_output import ProductPricePointOutput
+    from .product_price_point_output_tiers_item import ProductPricePointOutputTiersItem
+    from .product_price_point_output_tiers_item_tier_billing_type import ProductPricePointOutputTiersItemTierBillingType
+    from .product_pricing_input import (
+        ProductPricingInput,
+        ProductPricingInput_OneTimePerUnit,
+        ProductPricingInput_RecurringGraduated,
+        ProductPricingInput_RecurringPerUnit,
+        ProductPricingInput_RecurringPercentOfTotal,
+        ProductPricingInput_RecurringVolume,
+        ProductPricingInput_SeatBasedGraduated,
+        ProductPricingInput_SeatBasedPerUnit,
+        ProductPricingInput_SeatBasedPrepaidCredits,
+        ProductPricingInput_SeatBasedVolume,
+        ProductPricingInput_UsageBracketedPrepaidCredits,
+        ProductPricingInput_UsageCostPlus,
+        ProductPricingInput_UsageGraduated,
+        ProductPricingInput_UsagePerUnit,
+        ProductPricingInput_UsagePrepaidCredits,
+        ProductPricingInput_UsageVolume,
+    )
+    from .product_pricing_output import ProductPricingOutput
+    from .product_pricing_output_pricing_type import ProductPricingOutputPricingType
+    from .product_recurring_graduated_input import ProductRecurringGraduatedInput
+    from .product_recurring_graduated_input_billing_frequency import ProductRecurringGraduatedInputBillingFrequency
+    from .product_recurring_graduated_input_billing_type import ProductRecurringGraduatedInputBillingType
+    from .product_recurring_per_unit_input import ProductRecurringPerUnitInput
+    from .product_recurring_per_unit_input_billing_frequency import ProductRecurringPerUnitInputBillingFrequency
+    from .product_recurring_per_unit_input_billing_type import ProductRecurringPerUnitInputBillingType
+    from .product_recurring_percent_of_total_input import ProductRecurringPercentOfTotalInput
+    from .product_recurring_percent_of_total_input_billing_frequency import (
+        ProductRecurringPercentOfTotalInputBillingFrequency,
+    )
+    from .product_recurring_percent_of_total_input_billing_type import ProductRecurringPercentOfTotalInputBillingType
+    from .product_recurring_volume_input import ProductRecurringVolumeInput
+    from .product_recurring_volume_input_billing_frequency import ProductRecurringVolumeInputBillingFrequency
+    from .product_recurring_volume_input_billing_type import ProductRecurringVolumeInputBillingType
+    from .product_seat_based_graduated_input import ProductSeatBasedGraduatedInput
+    from .product_seat_based_graduated_input_billing_frequency import ProductSeatBasedGraduatedInputBillingFrequency
+    from .product_seat_based_graduated_input_billing_type import ProductSeatBasedGraduatedInputBillingType
+    from .product_seat_based_per_unit_input import ProductSeatBasedPerUnitInput
+    from .product_seat_based_per_unit_input_billing_frequency import ProductSeatBasedPerUnitInputBillingFrequency
+    from .product_seat_based_per_unit_input_billing_type import ProductSeatBasedPerUnitInputBillingType
+    from .product_seat_based_prepaid_credits_input import ProductSeatBasedPrepaidCreditsInput
+    from .product_seat_based_prepaid_credits_input_billing_frequency import (
+        ProductSeatBasedPrepaidCreditsInputBillingFrequency,
+    )
+    from .product_seat_based_prepaid_credits_input_billing_type import ProductSeatBasedPrepaidCreditsInputBillingType
+    from .product_seat_based_volume_input import ProductSeatBasedVolumeInput
+    from .product_seat_based_volume_input_billing_frequency import ProductSeatBasedVolumeInputBillingFrequency
+    from .product_seat_based_volume_input_billing_type import ProductSeatBasedVolumeInputBillingType
+    from .product_simple_price_point import ProductSimplePricePoint
+    from .product_simple_price_point_tiers_item import ProductSimplePricePointTiersItem
+    from .product_simple_price_point_tiers_item_tier_billing_type import ProductSimplePricePointTiersItemTierBillingType
+    from .product_tiered_price_point import ProductTieredPricePoint
+    from .product_tiered_price_point_tiers_item import ProductTieredPricePointTiersItem
+    from .product_tiered_price_point_tiers_item_tier_billing_type import ProductTieredPricePointTiersItemTierBillingType
+    from .product_usage_bracketed_prepaid_credits_input import ProductUsageBracketedPrepaidCreditsInput
+    from .product_usage_bracketed_prepaid_credits_input_billing_frequency import (
+        ProductUsageBracketedPrepaidCreditsInputBillingFrequency,
+    )
+    from .product_usage_bracketed_prepaid_credits_input_billing_type import (
+        ProductUsageBracketedPrepaidCreditsInputBillingType,
+    )
+    from .product_usage_bracketed_prepaid_credits_input_credit_unit_brackets_item import (
+        ProductUsageBracketedPrepaidCreditsInputCreditUnitBracketsItem,
+    )
+    from .product_usage_bracketed_prepaid_credits_input_pricing_input import (
+        ProductUsageBracketedPrepaidCreditsInputPricingInput,
+    )
+    from .product_usage_bracketed_prepaid_credits_input_pricing_input_kind import (
+        ProductUsageBracketedPrepaidCreditsInputPricingInputKind,
+    )
+    from .product_usage_cost_plus_input import ProductUsageCostPlusInput
+    from .product_usage_cost_plus_input_billing_frequency import ProductUsageCostPlusInputBillingFrequency
+    from .product_usage_cost_plus_input_billing_type import ProductUsageCostPlusInputBillingType
+    from .product_usage_graduated_input import ProductUsageGraduatedInput
+    from .product_usage_graduated_input_billing_frequency import ProductUsageGraduatedInputBillingFrequency
+    from .product_usage_graduated_input_billing_type import ProductUsageGraduatedInputBillingType
+    from .product_usage_per_unit_input import ProductUsagePerUnitInput
+    from .product_usage_per_unit_input_billing_frequency import ProductUsagePerUnitInputBillingFrequency
+    from .product_usage_per_unit_input_billing_type import ProductUsagePerUnitInputBillingType
+    from .product_usage_prepaid_credits_input import ProductUsagePrepaidCreditsInput
+    from .product_usage_prepaid_credits_input_billing_frequency import ProductUsagePrepaidCreditsInputBillingFrequency
+    from .product_usage_prepaid_credits_input_billing_type import ProductUsagePrepaidCreditsInputBillingType
+    from .product_usage_volume_input import ProductUsageVolumeInput
+    from .product_usage_volume_input_billing_frequency import ProductUsageVolumeInputBillingFrequency
+    from .product_usage_volume_input_billing_type import ProductUsageVolumeInputBillingType
+    from .recurring_graduated_input import RecurringGraduatedInput
+    from .recurring_graduated_input_billing_frequency import RecurringGraduatedInputBillingFrequency
+    from .recurring_graduated_input_billing_type import RecurringGraduatedInputBillingType
+    from .recurring_per_unit_input import RecurringPerUnitInput
+    from .recurring_per_unit_input_billing_frequency import RecurringPerUnitInputBillingFrequency
+    from .recurring_per_unit_input_billing_type import RecurringPerUnitInputBillingType
+    from .recurring_percent_of_total_input import RecurringPercentOfTotalInput
+    from .recurring_percent_of_total_input_billing_frequency import RecurringPercentOfTotalInputBillingFrequency
+    from .recurring_percent_of_total_input_billing_type import RecurringPercentOfTotalInputBillingType
+    from .recurring_volume_input import RecurringVolumeInput
+    from .recurring_volume_input_billing_frequency import RecurringVolumeInputBillingFrequency
+    from .recurring_volume_input_billing_type import RecurringVolumeInputBillingType
+    from .rotate_webhook_secret_response import RotateWebhookSecretResponse
     from .seat_assignee import SeatAssignee
     from .seat_assignment_status import SeatAssignmentStatus
+    from .seat_based_graduated_input import SeatBasedGraduatedInput
+    from .seat_based_graduated_input_billing_frequency import SeatBasedGraduatedInputBillingFrequency
+    from .seat_based_graduated_input_billing_type import SeatBasedGraduatedInputBillingType
+    from .seat_based_per_unit_input import SeatBasedPerUnitInput
+    from .seat_based_per_unit_input_billing_frequency import SeatBasedPerUnitInputBillingFrequency
+    from .seat_based_per_unit_input_billing_type import SeatBasedPerUnitInputBillingType
+    from .seat_based_prepaid_credits_input import SeatBasedPrepaidCreditsInput
+    from .seat_based_prepaid_credits_input_billing_frequency import SeatBasedPrepaidCreditsInputBillingFrequency
+    from .seat_based_prepaid_credits_input_billing_type import SeatBasedPrepaidCreditsInputBillingType
+    from .seat_based_volume_input import SeatBasedVolumeInput
+    from .seat_based_volume_input_billing_frequency import SeatBasedVolumeInputBillingFrequency
+    from .seat_based_volume_input_billing_type import SeatBasedVolumeInputBillingType
     from .signal import Signal
+    from .simple_price_point import SimplePricePoint
+    from .simple_price_point_tiers_item import SimplePricePointTiersItem
+    from .simple_price_point_tiers_item_tier_billing_type import SimplePricePointTiersItemTierBillingType
     from .success_response import SuccessResponse
+    from .tiered_price_point import TieredPricePoint
+    from .tiered_price_point_tiers_item import TieredPricePointTiersItem
+    from .tiered_price_point_tiers_item_tier_billing_type import TieredPricePointTiersItemTierBillingType
+    from .token_usage import TokenUsage
     from .update_contact_request import UpdateContactRequest
     from .update_contact_request_roles_item import UpdateContactRequestRolesItem
     from .update_customer_request import UpdateCustomerRequest
     from .update_product_request import UpdateProductRequest
+    from .usage_bracketed_prepaid_credits_input import UsageBracketedPrepaidCreditsInput
+    from .usage_bracketed_prepaid_credits_input_billing_frequency import (
+        UsageBracketedPrepaidCreditsInputBillingFrequency,
+    )
+    from .usage_bracketed_prepaid_credits_input_billing_type import UsageBracketedPrepaidCreditsInputBillingType
+    from .usage_bracketed_prepaid_credits_input_credit_unit_brackets_item import (
+        UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem,
+    )
+    from .usage_bracketed_prepaid_credits_input_pricing_input import UsageBracketedPrepaidCreditsInputPricingInput
+    from .usage_bracketed_prepaid_credits_input_pricing_input_kind import (
+        UsageBracketedPrepaidCreditsInputPricingInputKind,
+    )
+    from .usage_cost import UsageCost
+    from .usage_cost_plus_input import UsageCostPlusInput
+    from .usage_cost_plus_input_billing_frequency import UsageCostPlusInputBillingFrequency
+    from .usage_cost_plus_input_billing_type import UsageCostPlusInputBillingType
+    from .usage_graduated_input import UsageGraduatedInput
+    from .usage_graduated_input_billing_frequency import UsageGraduatedInputBillingFrequency
+    from .usage_graduated_input_billing_type import UsageGraduatedInputBillingType
+    from .usage_per_unit_input import UsagePerUnitInput
+    from .usage_per_unit_input_billing_frequency import UsagePerUnitInputBillingFrequency
+    from .usage_per_unit_input_billing_type import UsagePerUnitInputBillingType
+    from .usage_prepaid_credits_input import UsagePrepaidCreditsInput
+    from .usage_prepaid_credits_input_billing_frequency import UsagePrepaidCreditsInputBillingFrequency
+    from .usage_prepaid_credits_input_billing_type import UsagePrepaidCreditsInputBillingType
+    from .usage_volume_input import UsageVolumeInput
+    from .usage_volume_input_billing_frequency import UsageVolumeInputBillingFrequency
+    from .usage_volume_input_billing_type import UsageVolumeInputBillingType
     from .value_receipt_detail import ValueReceiptDetail
     from .value_receipt_list_response import ValueReceiptListResponse
     from .value_receipt_summary import ValueReceiptSummary
@@ -117,6 +343,9 @@ if typing.TYPE_CHECKING:
     from .webhook_list_response import WebhookListResponse
     from .webhook_name import WebhookName
     from .webhook_test_response import WebhookTestResponse
+    from .webhook_update_response import WebhookUpdateResponse
+    from .webhook_update_response_name import WebhookUpdateResponseName
+    from .writable_order_line_type import WritableOrderLineType
 _dynamic_imports: typing.Dict[str, str] = {
     "Attribution": ".attribution",
     "BatchSeatAssignmentsResponse": ".batch_seat_assignments_response",
@@ -131,6 +360,11 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ContactBillingAddress": ".contact_billing_address",
     "ContactListResponse": ".contact_list_response",
     "ContactRolesItem": ".contact_roles_item",
+    "Cost": ".cost",
+    "CostIngestResponse": ".cost_ingest_response",
+    "CostOverride": ".cost_override",
+    "Cost_Cost": ".cost",
+    "Cost_Usage": ".cost",
     "CreateOrderLineAttributeRequest": ".create_order_line_attribute_request",
     "CreateOrderLineAttributeRequestPricing": ".create_order_line_attribute_request_pricing",
     "CreateOrderLineAttributeRequestPricingBillingFrequency": ".create_order_line_attribute_request_pricing_billing_frequency",
@@ -141,26 +375,51 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CreateOrderLineAttributeRequestPricingCreditBenefitsItemCreditGrantTiming": ".create_order_line_attribute_request_pricing_credit_benefits_item_credit_grant_timing",
     "CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient": ".create_order_line_attribute_request_pricing_credit_benefits_item_recipient",
     "CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit": ".create_order_line_attribute_request_pricing_credit_benefits_item_rollover_duration_unit",
+    "CreateOrderLineAttributeRequestPricingCreditUnitBracketsItem": ".create_order_line_attribute_request_pricing_credit_unit_brackets_item",
     "CreateOrderLineAttributeRequestPricingPricePoints": ".create_order_line_attribute_request_pricing_price_points",
     "CreateOrderLineAttributeRequestPricingPricePointsTiersItem": ".create_order_line_attribute_request_pricing_price_points_tiers_item",
     "CreateOrderLineAttributeRequestPricingPricePointsTiersItemTierBillingType": ".create_order_line_attribute_request_pricing_price_points_tiers_item_tier_billing_type",
+    "CreateOrderLineAttributeRequestPricingPricingInput": ".create_order_line_attribute_request_pricing_pricing_input",
+    "CreateOrderLineAttributeRequestPricingPricingInputKind": ".create_order_line_attribute_request_pricing_pricing_input_kind",
     "CreateOrderLineAttributeRequestPricingPricingModel": ".create_order_line_attribute_request_pricing_pricing_model",
     "CreateOrderLineAttributeRequestPricingSignalType": ".create_order_line_attribute_request_pricing_signal_type",
     "CreateOrderLineRequest": ".create_order_line_request",
     "CreditBalance": ".credit_balance",
     "CreditBalanceListResponse": ".credit_balance_list_response",
     "CreditBalanceRecipient": ".credit_balance_recipient",
+    "CreditBenefitInput": ".credit_benefit_input",
+    "CreditBenefitInputAllocationCadence": ".credit_benefit_input_allocation_cadence",
+    "CreditBenefitInputCreditGrantTiming": ".credit_benefit_input_credit_grant_timing",
+    "CreditBenefitInputRecipient": ".credit_benefit_input_recipient",
+    "CreditBenefitOutput": ".credit_benefit_output",
     "CreditCurrency": ".credit_currency",
     "CreditCurrencyListResponse": ".credit_currency_list_response",
+    "CreditCurrencyStatus": ".credit_currency_status",
+    "CreditGrant": ".credit_grant",
+    "CurrencyCode": ".currency_code",
     "Customer": ".customer",
     "CustomerAttribution": ".customer_attribution",
-    "CustomerBillingAddress": ".customer_billing_address",
+    "CustomerBillingAddressInput": ".customer_billing_address_input",
+    "CustomerBillingAddressResponse": ".customer_billing_address_response",
     "CustomerByExternalId": ".customer_by_external_id",
     "CustomerById": ".customer_by_id",
     "CustomerCreationState": ".customer_creation_state",
     "CustomerListResponse": ".customer_list_response",
     "CustomerPortal": ".customer_portal",
     "CustomerPortalStatus": ".customer_portal_status",
+    "CustomerState": ".customer_state",
+    "CustomerStateCheckoutLink": ".customer_state_checkout_link",
+    "CustomerStateCheckoutLinkStatus": ".customer_state_checkout_link_status",
+    "CustomerStateCreditBalance": ".customer_state_credit_balance",
+    "CustomerStateCreditSummary": ".customer_state_credit_summary",
+    "CustomerStateCustomer": ".customer_state_customer",
+    "CustomerStateOrder": ".customer_state_order",
+    "CustomerStateOrderState": ".customer_state_order_state",
+    "CustomerStateProductRef": ".customer_state_product_ref",
+    "CustomerStateSeat": ".customer_state_seat",
+    "CustomerStateSeatAssignee": ".customer_state_seat_assignee",
+    "CustomerStateSeatStatus": ".customer_state_seat_status",
+    "CustomerStateSeats": ".customer_state_seats",
     "CustomerUser": ".customer_user",
     "CustomerUserStatus": ".customer_user_status",
     "EmptyResponse": ".empty_response",
@@ -174,26 +433,194 @@ _dynamic_imports: typing.Dict[str, str] = {
     "InvoiceSource": ".invoice_source",
     "InvoiceStatus": ".invoice_status",
     "InvoiceTaxStatus": ".invoice_tax_status",
+    "OneTimePerUnitInput": ".one_time_per_unit_input",
+    "OneTimePerUnitInputBillingType": ".one_time_per_unit_input_billing_type",
+    "OneTimePerUnitInputFeeType": ".one_time_per_unit_input_fee_type",
     "Order": ".order",
+    "OrderBillingFrequencyOverride": ".order_billing_frequency_override",
+    "OrderBillingFrequencyOverrideFrequency": ".order_billing_frequency_override_frequency",
     "OrderCreationState": ".order_creation_state",
     "OrderLine": ".order_line",
+    "OrderLineType": ".order_line_type",
     "OrderLinesResponse": ".order_lines_response",
     "OrderListResponse": ".order_list_response",
     "OrderSeat": ".order_seat",
     "OrderSeatListResponse": ".order_seat_list_response",
     "Pagination": ".pagination",
+    "PrecomputedCost": ".precomputed_cost",
+    "PricingInput": ".pricing_input",
+    "PricingInput_OneTimePerUnit": ".pricing_input",
+    "PricingInput_RecurringGraduated": ".pricing_input",
+    "PricingInput_RecurringPerUnit": ".pricing_input",
+    "PricingInput_RecurringPercentOfTotal": ".pricing_input",
+    "PricingInput_RecurringVolume": ".pricing_input",
+    "PricingInput_SeatBasedGraduated": ".pricing_input",
+    "PricingInput_SeatBasedPerUnit": ".pricing_input",
+    "PricingInput_SeatBasedPrepaidCredits": ".pricing_input",
+    "PricingInput_SeatBasedVolume": ".pricing_input",
+    "PricingInput_UsageBracketedPrepaidCredits": ".pricing_input",
+    "PricingInput_UsageCostPlus": ".pricing_input",
+    "PricingInput_UsageGraduated": ".pricing_input",
+    "PricingInput_UsagePerUnit": ".pricing_input",
+    "PricingInput_UsagePrepaidCredits": ".pricing_input",
+    "PricingInput_UsageVolume": ".pricing_input",
+    "PricingListResponse": ".pricing_list_response",
+    "PricingOutput": ".pricing_output",
+    "PricingOutputPricingType": ".pricing_output_pricing_type",
+    "PricingPricePointOutput": ".pricing_price_point_output",
+    "PricingPricePointOutputTiersItem": ".pricing_price_point_output_tiers_item",
+    "PricingPricePointOutputTiersItemTierBillingType": ".pricing_price_point_output_tiers_item_tier_billing_type",
+    "PricingResponse": ".pricing_response",
     "Product": ".product",
+    "ProductAttributeOutput": ".product_attribute_output",
+    "ProductAttributeUpsert": ".product_attribute_upsert",
+    "ProductAttribution": ".product_attribution",
     "ProductByExternalId": ".product_by_external_id",
     "ProductById": ".product_by_id",
+    "ProductCreditBenefitInput": ".product_credit_benefit_input",
+    "ProductCreditBenefitInputAllocationCadence": ".product_credit_benefit_input_allocation_cadence",
+    "ProductCreditBenefitInputCreditGrantTiming": ".product_credit_benefit_input_credit_grant_timing",
+    "ProductCreditBenefitInputRecipient": ".product_credit_benefit_input_recipient",
+    "ProductCreditBenefitOutput": ".product_credit_benefit_output",
+    "ProductDetail": ".product_detail",
     "ProductListResponse": ".product_list_response",
+    "ProductOneTimePerUnitInput": ".product_one_time_per_unit_input",
+    "ProductOneTimePerUnitInputBillingType": ".product_one_time_per_unit_input_billing_type",
+    "ProductOneTimePerUnitInputFeeType": ".product_one_time_per_unit_input_fee_type",
+    "ProductPricePointOutput": ".product_price_point_output",
+    "ProductPricePointOutputTiersItem": ".product_price_point_output_tiers_item",
+    "ProductPricePointOutputTiersItemTierBillingType": ".product_price_point_output_tiers_item_tier_billing_type",
+    "ProductPricingInput": ".product_pricing_input",
+    "ProductPricingInput_OneTimePerUnit": ".product_pricing_input",
+    "ProductPricingInput_RecurringGraduated": ".product_pricing_input",
+    "ProductPricingInput_RecurringPerUnit": ".product_pricing_input",
+    "ProductPricingInput_RecurringPercentOfTotal": ".product_pricing_input",
+    "ProductPricingInput_RecurringVolume": ".product_pricing_input",
+    "ProductPricingInput_SeatBasedGraduated": ".product_pricing_input",
+    "ProductPricingInput_SeatBasedPerUnit": ".product_pricing_input",
+    "ProductPricingInput_SeatBasedPrepaidCredits": ".product_pricing_input",
+    "ProductPricingInput_SeatBasedVolume": ".product_pricing_input",
+    "ProductPricingInput_UsageBracketedPrepaidCredits": ".product_pricing_input",
+    "ProductPricingInput_UsageCostPlus": ".product_pricing_input",
+    "ProductPricingInput_UsageGraduated": ".product_pricing_input",
+    "ProductPricingInput_UsagePerUnit": ".product_pricing_input",
+    "ProductPricingInput_UsagePrepaidCredits": ".product_pricing_input",
+    "ProductPricingInput_UsageVolume": ".product_pricing_input",
+    "ProductPricingOutput": ".product_pricing_output",
+    "ProductPricingOutputPricingType": ".product_pricing_output_pricing_type",
+    "ProductRecurringGraduatedInput": ".product_recurring_graduated_input",
+    "ProductRecurringGraduatedInputBillingFrequency": ".product_recurring_graduated_input_billing_frequency",
+    "ProductRecurringGraduatedInputBillingType": ".product_recurring_graduated_input_billing_type",
+    "ProductRecurringPerUnitInput": ".product_recurring_per_unit_input",
+    "ProductRecurringPerUnitInputBillingFrequency": ".product_recurring_per_unit_input_billing_frequency",
+    "ProductRecurringPerUnitInputBillingType": ".product_recurring_per_unit_input_billing_type",
+    "ProductRecurringPercentOfTotalInput": ".product_recurring_percent_of_total_input",
+    "ProductRecurringPercentOfTotalInputBillingFrequency": ".product_recurring_percent_of_total_input_billing_frequency",
+    "ProductRecurringPercentOfTotalInputBillingType": ".product_recurring_percent_of_total_input_billing_type",
+    "ProductRecurringVolumeInput": ".product_recurring_volume_input",
+    "ProductRecurringVolumeInputBillingFrequency": ".product_recurring_volume_input_billing_frequency",
+    "ProductRecurringVolumeInputBillingType": ".product_recurring_volume_input_billing_type",
+    "ProductSeatBasedGraduatedInput": ".product_seat_based_graduated_input",
+    "ProductSeatBasedGraduatedInputBillingFrequency": ".product_seat_based_graduated_input_billing_frequency",
+    "ProductSeatBasedGraduatedInputBillingType": ".product_seat_based_graduated_input_billing_type",
+    "ProductSeatBasedPerUnitInput": ".product_seat_based_per_unit_input",
+    "ProductSeatBasedPerUnitInputBillingFrequency": ".product_seat_based_per_unit_input_billing_frequency",
+    "ProductSeatBasedPerUnitInputBillingType": ".product_seat_based_per_unit_input_billing_type",
+    "ProductSeatBasedPrepaidCreditsInput": ".product_seat_based_prepaid_credits_input",
+    "ProductSeatBasedPrepaidCreditsInputBillingFrequency": ".product_seat_based_prepaid_credits_input_billing_frequency",
+    "ProductSeatBasedPrepaidCreditsInputBillingType": ".product_seat_based_prepaid_credits_input_billing_type",
+    "ProductSeatBasedVolumeInput": ".product_seat_based_volume_input",
+    "ProductSeatBasedVolumeInputBillingFrequency": ".product_seat_based_volume_input_billing_frequency",
+    "ProductSeatBasedVolumeInputBillingType": ".product_seat_based_volume_input_billing_type",
+    "ProductSimplePricePoint": ".product_simple_price_point",
+    "ProductSimplePricePointTiersItem": ".product_simple_price_point_tiers_item",
+    "ProductSimplePricePointTiersItemTierBillingType": ".product_simple_price_point_tiers_item_tier_billing_type",
+    "ProductTieredPricePoint": ".product_tiered_price_point",
+    "ProductTieredPricePointTiersItem": ".product_tiered_price_point_tiers_item",
+    "ProductTieredPricePointTiersItemTierBillingType": ".product_tiered_price_point_tiers_item_tier_billing_type",
+    "ProductUsageBracketedPrepaidCreditsInput": ".product_usage_bracketed_prepaid_credits_input",
+    "ProductUsageBracketedPrepaidCreditsInputBillingFrequency": ".product_usage_bracketed_prepaid_credits_input_billing_frequency",
+    "ProductUsageBracketedPrepaidCreditsInputBillingType": ".product_usage_bracketed_prepaid_credits_input_billing_type",
+    "ProductUsageBracketedPrepaidCreditsInputCreditUnitBracketsItem": ".product_usage_bracketed_prepaid_credits_input_credit_unit_brackets_item",
+    "ProductUsageBracketedPrepaidCreditsInputPricingInput": ".product_usage_bracketed_prepaid_credits_input_pricing_input",
+    "ProductUsageBracketedPrepaidCreditsInputPricingInputKind": ".product_usage_bracketed_prepaid_credits_input_pricing_input_kind",
+    "ProductUsageCostPlusInput": ".product_usage_cost_plus_input",
+    "ProductUsageCostPlusInputBillingFrequency": ".product_usage_cost_plus_input_billing_frequency",
+    "ProductUsageCostPlusInputBillingType": ".product_usage_cost_plus_input_billing_type",
+    "ProductUsageGraduatedInput": ".product_usage_graduated_input",
+    "ProductUsageGraduatedInputBillingFrequency": ".product_usage_graduated_input_billing_frequency",
+    "ProductUsageGraduatedInputBillingType": ".product_usage_graduated_input_billing_type",
+    "ProductUsagePerUnitInput": ".product_usage_per_unit_input",
+    "ProductUsagePerUnitInputBillingFrequency": ".product_usage_per_unit_input_billing_frequency",
+    "ProductUsagePerUnitInputBillingType": ".product_usage_per_unit_input_billing_type",
+    "ProductUsagePrepaidCreditsInput": ".product_usage_prepaid_credits_input",
+    "ProductUsagePrepaidCreditsInputBillingFrequency": ".product_usage_prepaid_credits_input_billing_frequency",
+    "ProductUsagePrepaidCreditsInputBillingType": ".product_usage_prepaid_credits_input_billing_type",
+    "ProductUsageVolumeInput": ".product_usage_volume_input",
+    "ProductUsageVolumeInputBillingFrequency": ".product_usage_volume_input_billing_frequency",
+    "ProductUsageVolumeInputBillingType": ".product_usage_volume_input_billing_type",
+    "RecurringGraduatedInput": ".recurring_graduated_input",
+    "RecurringGraduatedInputBillingFrequency": ".recurring_graduated_input_billing_frequency",
+    "RecurringGraduatedInputBillingType": ".recurring_graduated_input_billing_type",
+    "RecurringPerUnitInput": ".recurring_per_unit_input",
+    "RecurringPerUnitInputBillingFrequency": ".recurring_per_unit_input_billing_frequency",
+    "RecurringPerUnitInputBillingType": ".recurring_per_unit_input_billing_type",
+    "RecurringPercentOfTotalInput": ".recurring_percent_of_total_input",
+    "RecurringPercentOfTotalInputBillingFrequency": ".recurring_percent_of_total_input_billing_frequency",
+    "RecurringPercentOfTotalInputBillingType": ".recurring_percent_of_total_input_billing_type",
+    "RecurringVolumeInput": ".recurring_volume_input",
+    "RecurringVolumeInputBillingFrequency": ".recurring_volume_input_billing_frequency",
+    "RecurringVolumeInputBillingType": ".recurring_volume_input_billing_type",
+    "RotateWebhookSecretResponse": ".rotate_webhook_secret_response",
     "SeatAssignee": ".seat_assignee",
     "SeatAssignmentStatus": ".seat_assignment_status",
+    "SeatBasedGraduatedInput": ".seat_based_graduated_input",
+    "SeatBasedGraduatedInputBillingFrequency": ".seat_based_graduated_input_billing_frequency",
+    "SeatBasedGraduatedInputBillingType": ".seat_based_graduated_input_billing_type",
+    "SeatBasedPerUnitInput": ".seat_based_per_unit_input",
+    "SeatBasedPerUnitInputBillingFrequency": ".seat_based_per_unit_input_billing_frequency",
+    "SeatBasedPerUnitInputBillingType": ".seat_based_per_unit_input_billing_type",
+    "SeatBasedPrepaidCreditsInput": ".seat_based_prepaid_credits_input",
+    "SeatBasedPrepaidCreditsInputBillingFrequency": ".seat_based_prepaid_credits_input_billing_frequency",
+    "SeatBasedPrepaidCreditsInputBillingType": ".seat_based_prepaid_credits_input_billing_type",
+    "SeatBasedVolumeInput": ".seat_based_volume_input",
+    "SeatBasedVolumeInputBillingFrequency": ".seat_based_volume_input_billing_frequency",
+    "SeatBasedVolumeInputBillingType": ".seat_based_volume_input_billing_type",
     "Signal": ".signal",
+    "SimplePricePoint": ".simple_price_point",
+    "SimplePricePointTiersItem": ".simple_price_point_tiers_item",
+    "SimplePricePointTiersItemTierBillingType": ".simple_price_point_tiers_item_tier_billing_type",
     "SuccessResponse": ".success_response",
+    "TieredPricePoint": ".tiered_price_point",
+    "TieredPricePointTiersItem": ".tiered_price_point_tiers_item",
+    "TieredPricePointTiersItemTierBillingType": ".tiered_price_point_tiers_item_tier_billing_type",
+    "TokenUsage": ".token_usage",
     "UpdateContactRequest": ".update_contact_request",
     "UpdateContactRequestRolesItem": ".update_contact_request_roles_item",
     "UpdateCustomerRequest": ".update_customer_request",
     "UpdateProductRequest": ".update_product_request",
+    "UsageBracketedPrepaidCreditsInput": ".usage_bracketed_prepaid_credits_input",
+    "UsageBracketedPrepaidCreditsInputBillingFrequency": ".usage_bracketed_prepaid_credits_input_billing_frequency",
+    "UsageBracketedPrepaidCreditsInputBillingType": ".usage_bracketed_prepaid_credits_input_billing_type",
+    "UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem": ".usage_bracketed_prepaid_credits_input_credit_unit_brackets_item",
+    "UsageBracketedPrepaidCreditsInputPricingInput": ".usage_bracketed_prepaid_credits_input_pricing_input",
+    "UsageBracketedPrepaidCreditsInputPricingInputKind": ".usage_bracketed_prepaid_credits_input_pricing_input_kind",
+    "UsageCost": ".usage_cost",
+    "UsageCostPlusInput": ".usage_cost_plus_input",
+    "UsageCostPlusInputBillingFrequency": ".usage_cost_plus_input_billing_frequency",
+    "UsageCostPlusInputBillingType": ".usage_cost_plus_input_billing_type",
+    "UsageGraduatedInput": ".usage_graduated_input",
+    "UsageGraduatedInputBillingFrequency": ".usage_graduated_input_billing_frequency",
+    "UsageGraduatedInputBillingType": ".usage_graduated_input_billing_type",
+    "UsagePerUnitInput": ".usage_per_unit_input",
+    "UsagePerUnitInputBillingFrequency": ".usage_per_unit_input_billing_frequency",
+    "UsagePerUnitInputBillingType": ".usage_per_unit_input_billing_type",
+    "UsagePrepaidCreditsInput": ".usage_prepaid_credits_input",
+    "UsagePrepaidCreditsInputBillingFrequency": ".usage_prepaid_credits_input_billing_frequency",
+    "UsagePrepaidCreditsInputBillingType": ".usage_prepaid_credits_input_billing_type",
+    "UsageVolumeInput": ".usage_volume_input",
+    "UsageVolumeInputBillingFrequency": ".usage_volume_input_billing_frequency",
+    "UsageVolumeInputBillingType": ".usage_volume_input_billing_type",
     "ValueReceiptDetail": ".value_receipt_detail",
     "ValueReceiptListResponse": ".value_receipt_list_response",
     "ValueReceiptSummary": ".value_receipt_summary",
@@ -203,6 +630,9 @@ _dynamic_imports: typing.Dict[str, str] = {
     "WebhookListResponse": ".webhook_list_response",
     "WebhookName": ".webhook_name",
     "WebhookTestResponse": ".webhook_test_response",
+    "WebhookUpdateResponse": ".webhook_update_response",
+    "WebhookUpdateResponseName": ".webhook_update_response_name",
+    "WritableOrderLineType": ".writable_order_line_type",
 }
 
 
@@ -241,6 +671,11 @@ __all__ = [
     "ContactBillingAddress",
     "ContactListResponse",
     "ContactRolesItem",
+    "Cost",
+    "CostIngestResponse",
+    "CostOverride",
+    "Cost_Cost",
+    "Cost_Usage",
     "CreateOrderLineAttributeRequest",
     "CreateOrderLineAttributeRequestPricing",
     "CreateOrderLineAttributeRequestPricingBillingFrequency",
@@ -251,26 +686,51 @@ __all__ = [
     "CreateOrderLineAttributeRequestPricingCreditBenefitsItemCreditGrantTiming",
     "CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient",
     "CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit",
+    "CreateOrderLineAttributeRequestPricingCreditUnitBracketsItem",
     "CreateOrderLineAttributeRequestPricingPricePoints",
     "CreateOrderLineAttributeRequestPricingPricePointsTiersItem",
     "CreateOrderLineAttributeRequestPricingPricePointsTiersItemTierBillingType",
+    "CreateOrderLineAttributeRequestPricingPricingInput",
+    "CreateOrderLineAttributeRequestPricingPricingInputKind",
     "CreateOrderLineAttributeRequestPricingPricingModel",
     "CreateOrderLineAttributeRequestPricingSignalType",
     "CreateOrderLineRequest",
     "CreditBalance",
     "CreditBalanceListResponse",
     "CreditBalanceRecipient",
+    "CreditBenefitInput",
+    "CreditBenefitInputAllocationCadence",
+    "CreditBenefitInputCreditGrantTiming",
+    "CreditBenefitInputRecipient",
+    "CreditBenefitOutput",
     "CreditCurrency",
     "CreditCurrencyListResponse",
+    "CreditCurrencyStatus",
+    "CreditGrant",
+    "CurrencyCode",
     "Customer",
     "CustomerAttribution",
-    "CustomerBillingAddress",
+    "CustomerBillingAddressInput",
+    "CustomerBillingAddressResponse",
     "CustomerByExternalId",
     "CustomerById",
     "CustomerCreationState",
     "CustomerListResponse",
     "CustomerPortal",
     "CustomerPortalStatus",
+    "CustomerState",
+    "CustomerStateCheckoutLink",
+    "CustomerStateCheckoutLinkStatus",
+    "CustomerStateCreditBalance",
+    "CustomerStateCreditSummary",
+    "CustomerStateCustomer",
+    "CustomerStateOrder",
+    "CustomerStateOrderState",
+    "CustomerStateProductRef",
+    "CustomerStateSeat",
+    "CustomerStateSeatAssignee",
+    "CustomerStateSeatStatus",
+    "CustomerStateSeats",
     "CustomerUser",
     "CustomerUserStatus",
     "EmptyResponse",
@@ -284,26 +744,194 @@ __all__ = [
     "InvoiceSource",
     "InvoiceStatus",
     "InvoiceTaxStatus",
+    "OneTimePerUnitInput",
+    "OneTimePerUnitInputBillingType",
+    "OneTimePerUnitInputFeeType",
     "Order",
+    "OrderBillingFrequencyOverride",
+    "OrderBillingFrequencyOverrideFrequency",
     "OrderCreationState",
     "OrderLine",
+    "OrderLineType",
     "OrderLinesResponse",
     "OrderListResponse",
     "OrderSeat",
     "OrderSeatListResponse",
     "Pagination",
+    "PrecomputedCost",
+    "PricingInput",
+    "PricingInput_OneTimePerUnit",
+    "PricingInput_RecurringGraduated",
+    "PricingInput_RecurringPerUnit",
+    "PricingInput_RecurringPercentOfTotal",
+    "PricingInput_RecurringVolume",
+    "PricingInput_SeatBasedGraduated",
+    "PricingInput_SeatBasedPerUnit",
+    "PricingInput_SeatBasedPrepaidCredits",
+    "PricingInput_SeatBasedVolume",
+    "PricingInput_UsageBracketedPrepaidCredits",
+    "PricingInput_UsageCostPlus",
+    "PricingInput_UsageGraduated",
+    "PricingInput_UsagePerUnit",
+    "PricingInput_UsagePrepaidCredits",
+    "PricingInput_UsageVolume",
+    "PricingListResponse",
+    "PricingOutput",
+    "PricingOutputPricingType",
+    "PricingPricePointOutput",
+    "PricingPricePointOutputTiersItem",
+    "PricingPricePointOutputTiersItemTierBillingType",
+    "PricingResponse",
     "Product",
+    "ProductAttributeOutput",
+    "ProductAttributeUpsert",
+    "ProductAttribution",
     "ProductByExternalId",
     "ProductById",
+    "ProductCreditBenefitInput",
+    "ProductCreditBenefitInputAllocationCadence",
+    "ProductCreditBenefitInputCreditGrantTiming",
+    "ProductCreditBenefitInputRecipient",
+    "ProductCreditBenefitOutput",
+    "ProductDetail",
     "ProductListResponse",
+    "ProductOneTimePerUnitInput",
+    "ProductOneTimePerUnitInputBillingType",
+    "ProductOneTimePerUnitInputFeeType",
+    "ProductPricePointOutput",
+    "ProductPricePointOutputTiersItem",
+    "ProductPricePointOutputTiersItemTierBillingType",
+    "ProductPricingInput",
+    "ProductPricingInput_OneTimePerUnit",
+    "ProductPricingInput_RecurringGraduated",
+    "ProductPricingInput_RecurringPerUnit",
+    "ProductPricingInput_RecurringPercentOfTotal",
+    "ProductPricingInput_RecurringVolume",
+    "ProductPricingInput_SeatBasedGraduated",
+    "ProductPricingInput_SeatBasedPerUnit",
+    "ProductPricingInput_SeatBasedPrepaidCredits",
+    "ProductPricingInput_SeatBasedVolume",
+    "ProductPricingInput_UsageBracketedPrepaidCredits",
+    "ProductPricingInput_UsageCostPlus",
+    "ProductPricingInput_UsageGraduated",
+    "ProductPricingInput_UsagePerUnit",
+    "ProductPricingInput_UsagePrepaidCredits",
+    "ProductPricingInput_UsageVolume",
+    "ProductPricingOutput",
+    "ProductPricingOutputPricingType",
+    "ProductRecurringGraduatedInput",
+    "ProductRecurringGraduatedInputBillingFrequency",
+    "ProductRecurringGraduatedInputBillingType",
+    "ProductRecurringPerUnitInput",
+    "ProductRecurringPerUnitInputBillingFrequency",
+    "ProductRecurringPerUnitInputBillingType",
+    "ProductRecurringPercentOfTotalInput",
+    "ProductRecurringPercentOfTotalInputBillingFrequency",
+    "ProductRecurringPercentOfTotalInputBillingType",
+    "ProductRecurringVolumeInput",
+    "ProductRecurringVolumeInputBillingFrequency",
+    "ProductRecurringVolumeInputBillingType",
+    "ProductSeatBasedGraduatedInput",
+    "ProductSeatBasedGraduatedInputBillingFrequency",
+    "ProductSeatBasedGraduatedInputBillingType",
+    "ProductSeatBasedPerUnitInput",
+    "ProductSeatBasedPerUnitInputBillingFrequency",
+    "ProductSeatBasedPerUnitInputBillingType",
+    "ProductSeatBasedPrepaidCreditsInput",
+    "ProductSeatBasedPrepaidCreditsInputBillingFrequency",
+    "ProductSeatBasedPrepaidCreditsInputBillingType",
+    "ProductSeatBasedVolumeInput",
+    "ProductSeatBasedVolumeInputBillingFrequency",
+    "ProductSeatBasedVolumeInputBillingType",
+    "ProductSimplePricePoint",
+    "ProductSimplePricePointTiersItem",
+    "ProductSimplePricePointTiersItemTierBillingType",
+    "ProductTieredPricePoint",
+    "ProductTieredPricePointTiersItem",
+    "ProductTieredPricePointTiersItemTierBillingType",
+    "ProductUsageBracketedPrepaidCreditsInput",
+    "ProductUsageBracketedPrepaidCreditsInputBillingFrequency",
+    "ProductUsageBracketedPrepaidCreditsInputBillingType",
+    "ProductUsageBracketedPrepaidCreditsInputCreditUnitBracketsItem",
+    "ProductUsageBracketedPrepaidCreditsInputPricingInput",
+    "ProductUsageBracketedPrepaidCreditsInputPricingInputKind",
+    "ProductUsageCostPlusInput",
+    "ProductUsageCostPlusInputBillingFrequency",
+    "ProductUsageCostPlusInputBillingType",
+    "ProductUsageGraduatedInput",
+    "ProductUsageGraduatedInputBillingFrequency",
+    "ProductUsageGraduatedInputBillingType",
+    "ProductUsagePerUnitInput",
+    "ProductUsagePerUnitInputBillingFrequency",
+    "ProductUsagePerUnitInputBillingType",
+    "ProductUsagePrepaidCreditsInput",
+    "ProductUsagePrepaidCreditsInputBillingFrequency",
+    "ProductUsagePrepaidCreditsInputBillingType",
+    "ProductUsageVolumeInput",
+    "ProductUsageVolumeInputBillingFrequency",
+    "ProductUsageVolumeInputBillingType",
+    "RecurringGraduatedInput",
+    "RecurringGraduatedInputBillingFrequency",
+    "RecurringGraduatedInputBillingType",
+    "RecurringPerUnitInput",
+    "RecurringPerUnitInputBillingFrequency",
+    "RecurringPerUnitInputBillingType",
+    "RecurringPercentOfTotalInput",
+    "RecurringPercentOfTotalInputBillingFrequency",
+    "RecurringPercentOfTotalInputBillingType",
+    "RecurringVolumeInput",
+    "RecurringVolumeInputBillingFrequency",
+    "RecurringVolumeInputBillingType",
+    "RotateWebhookSecretResponse",
     "SeatAssignee",
     "SeatAssignmentStatus",
+    "SeatBasedGraduatedInput",
+    "SeatBasedGraduatedInputBillingFrequency",
+    "SeatBasedGraduatedInputBillingType",
+    "SeatBasedPerUnitInput",
+    "SeatBasedPerUnitInputBillingFrequency",
+    "SeatBasedPerUnitInputBillingType",
+    "SeatBasedPrepaidCreditsInput",
+    "SeatBasedPrepaidCreditsInputBillingFrequency",
+    "SeatBasedPrepaidCreditsInputBillingType",
+    "SeatBasedVolumeInput",
+    "SeatBasedVolumeInputBillingFrequency",
+    "SeatBasedVolumeInputBillingType",
     "Signal",
+    "SimplePricePoint",
+    "SimplePricePointTiersItem",
+    "SimplePricePointTiersItemTierBillingType",
     "SuccessResponse",
+    "TieredPricePoint",
+    "TieredPricePointTiersItem",
+    "TieredPricePointTiersItemTierBillingType",
+    "TokenUsage",
     "UpdateContactRequest",
     "UpdateContactRequestRolesItem",
     "UpdateCustomerRequest",
     "UpdateProductRequest",
+    "UsageBracketedPrepaidCreditsInput",
+    "UsageBracketedPrepaidCreditsInputBillingFrequency",
+    "UsageBracketedPrepaidCreditsInputBillingType",
+    "UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem",
+    "UsageBracketedPrepaidCreditsInputPricingInput",
+    "UsageBracketedPrepaidCreditsInputPricingInputKind",
+    "UsageCost",
+    "UsageCostPlusInput",
+    "UsageCostPlusInputBillingFrequency",
+    "UsageCostPlusInputBillingType",
+    "UsageGraduatedInput",
+    "UsageGraduatedInputBillingFrequency",
+    "UsageGraduatedInputBillingType",
+    "UsagePerUnitInput",
+    "UsagePerUnitInputBillingFrequency",
+    "UsagePerUnitInputBillingType",
+    "UsagePrepaidCreditsInput",
+    "UsagePrepaidCreditsInputBillingFrequency",
+    "UsagePrepaidCreditsInputBillingType",
+    "UsageVolumeInput",
+    "UsageVolumeInputBillingFrequency",
+    "UsageVolumeInputBillingType",
     "ValueReceiptDetail",
     "ValueReceiptListResponse",
     "ValueReceiptSummary",
@@ -313,4 +941,7 @@ __all__ = [
     "WebhookListResponse",
     "WebhookName",
     "WebhookTestResponse",
+    "WebhookUpdateResponse",
+    "WebhookUpdateResponseName",
+    "WritableOrderLineType",
 ]

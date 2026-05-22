@@ -3,5 +3,6 @@
 import typing
 
 CreateOrderLineAttributeRequestPricingPricingModel = typing.Union[
-    typing.Literal["perUnit", "volumePricing", "graduatedPricing", "prepaidCredits", "flat"], typing.Any
+    typing.Literal["perUnit", "volumePricing", "graduatedPricing", "prepaidCredits", "bracketedPrepaidCredits", "flat"],
+    typing.Any,
 ]

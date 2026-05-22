@@ -8,3 +8,6 @@ src/paid/tracing/
 src/paid/logger.py
 .github/workflows/ci.yml
 tests/tracing
+.fern/replay.lock
+.fern/replay.yml
+.gitattributes

@@ -14,9 +14,10 @@ from ..errors.forbidden_error import ForbiddenError
 from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
 from ..types.error_response import ErrorResponse
-from ..types.webhook import Webhook
+from ..types.rotate_webhook_secret_response import RotateWebhookSecretResponse
 from ..types.webhook_list_response import WebhookListResponse
 from ..types.webhook_test_response import WebhookTestResponse
+from ..types.webhook_update_response import WebhookUpdateResponse
 from .types.test_webhook_request_webhook_name import TestWebhookRequestWebhookName
 from .types.update_webhook_request_webhook_name import UpdateWebhookRequestWebhookName
 
@@ -32,7 +33,7 @@ class RawWebhooksClient:
         self, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[WebhookListResponse]:
         """
-        List customer-facing billing webhooks for the authenticated organization.
+        List customer-facing billing webhooks for the authenticated organization, along with whether the organization has generated a signing secret.
 
         Parameters
         ----------
@@ -93,7 +94,7 @@ class RawWebhooksClient:
         enabled: typing.Optional[bool] = OMIT,
         url: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Webhook]:
+    ) -> HttpResponse[WebhookUpdateResponse]:
         """
         Enable or disable a webhook and configure the destination URL for the authenticated organization.
 
@@ -112,7 +113,7 @@ class RawWebhooksClient:
 
         Returns
         -------
-        HttpResponse[Webhook]
+        HttpResponse[WebhookUpdateResponse]
             200
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -131,9 +132,9 @@ class RawWebhooksClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Webhook,
+                    WebhookUpdateResponse,
                     parse_obj_as(
-                        type_=Webhook,  # type: ignore
+                        type_=WebhookUpdateResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -274,6 +275,80 @@ class RawWebhooksClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def rotate_webhook_secret(
+        self, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[RotateWebhookSecretResponse]:
+        """
+        Generate a new HMAC signing secret used by every webhook in this organization and return it exactly once. The previous secret is invalidated immediately on next delivery.
+
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[RotateWebhookSecretResponse]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "webhooks/rotate-secret",
+            method="POST",
+            json={},
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    RotateWebhookSecretResponse,
+                    parse_obj_as(
+                        type_=RotateWebhookSecretResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
 
 class AsyncRawWebhooksClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -283,7 +358,7 @@ class AsyncRawWebhooksClient:
         self, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[WebhookListResponse]:
         """
-        List customer-facing billing webhooks for the authenticated organization.
+        List customer-facing billing webhooks for the authenticated organization, along with whether the organization has generated a signing secret.
 
         Parameters
         ----------
@@ -344,7 +419,7 @@ class AsyncRawWebhooksClient:
         enabled: typing.Optional[bool] = OMIT,
         url: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Webhook]:
+    ) -> AsyncHttpResponse[WebhookUpdateResponse]:
         """
         Enable or disable a webhook and configure the destination URL for the authenticated organization.
 
@@ -363,7 +438,7 @@ class AsyncRawWebhooksClient:
 
         Returns
         -------
-        AsyncHttpResponse[Webhook]
+        AsyncHttpResponse[WebhookUpdateResponse]
             200
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -382,9 +457,9 @@ class AsyncRawWebhooksClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Webhook,
+                    WebhookUpdateResponse,
                     parse_obj_as(
-                        type_=Webhook,  # type: ignore
+                        type_=WebhookUpdateResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -500,6 +575,80 @@ class AsyncRawWebhooksClient:
                 )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def rotate_webhook_secret(
+        self, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[RotateWebhookSecretResponse]:
+        """
+        Generate a new HMAC signing secret used by every webhook in this organization and return it exactly once. The previous secret is invalidated immediately on next delivery.
+
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[RotateWebhookSecretResponse]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "webhooks/rotate-secret",
+            method="POST",
+            json={},
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    RotateWebhookSecretResponse,
+                    parse_obj_as(
+                        type_=RotateWebhookSecretResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,

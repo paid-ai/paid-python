@@ -4,8 +4,14 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.credit_currency import CreditCurrency
 from ..types.credit_currency_list_response import CreditCurrencyListResponse
 from .raw_client import AsyncRawCreditsClient, RawCreditsClient
+from .types.list_credit_currencies_request_status import ListCreditCurrenciesRequestStatus
+from .types.update_credit_currency_request_status import UpdateCreditCurrencyRequestStatus
+
+# this is used as the default value for optional parameters
+OMIT = typing.cast(typing.Any, ...)
 
 
 class CreditsClient:
@@ -24,13 +30,19 @@ class CreditsClient:
         return self._raw_client
 
     def list_credit_currencies(
-        self, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        status: typing.Optional[ListCreditCurrenciesRequestStatus] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> CreditCurrencyListResponse:
         """
-        List credit currencies for the organization
+        List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
 
         Parameters
         ----------
+        status : typing.Optional[ListCreditCurrenciesRequestStatus]
+            Filter credit currencies by status. Defaults to `all` so archived currencies remain readable after they are archived.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -48,7 +60,103 @@ class CreditsClient:
         )
         client.credits.list_credit_currencies()
         """
-        _response = self._raw_client.list_credit_currencies(request_options=request_options)
+        _response = self._raw_client.list_credit_currencies(status=status, request_options=request_options)
+        return _response.data
+
+    def create_credit_currency(
+        self,
+        *,
+        name: str,
+        key: str,
+        description: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CreditCurrency:
+        """
+        Creates a credit currency for the organization.
+
+        Parameters
+        ----------
+        name : str
+            Human-readable name shown for this credit currency.
+
+        key : str
+            Stable machine-readable key for this credit currency. Use lowercase letters, numbers, underscores, and hyphens. Keys are unique within an organization.
+
+        description : typing.Optional[str]
+            Optional description for this credit currency.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreditCurrency
+            201
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.credits.create_credit_currency(
+            name="API Credits",
+            key="api_credits",
+            description="Credits consumed by API calls.",
+        )
+        """
+        _response = self._raw_client.create_credit_currency(
+            name=name, key=key, description=description, request_options=request_options
+        )
+        return _response.data
+
+    def update_credit_currency_by_id(
+        self,
+        id: str,
+        *,
+        description: typing.Optional[str] = OMIT,
+        status: typing.Optional[UpdateCreditCurrencyRequestStatus] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CreditCurrency:
+        """
+        Update a credit currency description or set its active/archive status.
+
+        Parameters
+        ----------
+        id : str
+            Credit currency ID.
+
+        description : typing.Optional[str]
+            Updated description for this credit currency. Use null to clear the description.
+
+        status : typing.Optional[UpdateCreditCurrencyRequestStatus]
+            Set to `archived` to archive this credit currency, or `active` to restore it.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreditCurrency
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.credits.update_credit_currency_by_id(
+            id="7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf",
+            description="Credits consumed by developer API calls.",
+            status="archived",
+        )
+        """
+        _response = self._raw_client.update_credit_currency_by_id(
+            id, description=description, status=status, request_options=request_options
+        )
         return _response.data
 
 
@@ -68,13 +176,19 @@ class AsyncCreditsClient:
         return self._raw_client
 
     async def list_credit_currencies(
-        self, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        status: typing.Optional[ListCreditCurrenciesRequestStatus] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> CreditCurrencyListResponse:
         """
-        List credit currencies for the organization
+        List credit currencies for the organization. Includes active and archived currencies by default; use the status query parameter to filter.
 
         Parameters
         ----------
+        status : typing.Optional[ListCreditCurrenciesRequestStatus]
+            Filter credit currencies by status. Defaults to `all` so archived currencies remain readable after they are archived.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -100,5 +214,117 @@ class AsyncCreditsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_credit_currencies(request_options=request_options)
+        _response = await self._raw_client.list_credit_currencies(status=status, request_options=request_options)
+        return _response.data
+
+    async def create_credit_currency(
+        self,
+        *,
+        name: str,
+        key: str,
+        description: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CreditCurrency:
+        """
+        Creates a credit currency for the organization.
+
+        Parameters
+        ----------
+        name : str
+            Human-readable name shown for this credit currency.
+
+        key : str
+            Stable machine-readable key for this credit currency. Use lowercase letters, numbers, underscores, and hyphens. Keys are unique within an organization.
+
+        description : typing.Optional[str]
+            Optional description for this credit currency.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreditCurrency
+            201
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.credits.create_credit_currency(
+                name="API Credits",
+                key="api_credits",
+                description="Credits consumed by API calls.",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.create_credit_currency(
+            name=name, key=key, description=description, request_options=request_options
+        )
+        return _response.data
+
+    async def update_credit_currency_by_id(
+        self,
+        id: str,
+        *,
+        description: typing.Optional[str] = OMIT,
+        status: typing.Optional[UpdateCreditCurrencyRequestStatus] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CreditCurrency:
+        """
+        Update a credit currency description or set its active/archive status.
+
+        Parameters
+        ----------
+        id : str
+            Credit currency ID.
+
+        description : typing.Optional[str]
+            Updated description for this credit currency. Use null to clear the description.
+
+        status : typing.Optional[UpdateCreditCurrencyRequestStatus]
+            Set to `archived` to archive this credit currency, or `active` to restore it.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreditCurrency
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.credits.update_credit_currency_by_id(
+                id="7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf",
+                description="Credits consumed by developer API calls.",
+                status="archived",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.update_credit_currency_by_id(
+            id, description=description, status=status, request_options=request_options
+        )
         return _response.data

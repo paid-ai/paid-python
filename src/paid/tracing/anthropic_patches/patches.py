@@ -67,7 +67,7 @@ def _patch_stream_context_managers() -> None:
                     await self.__wrapped__.__aenter__()
                 return self
 
-            cls.__aenter__ = _aenter  # type: ignore[attr-defined]
+            cls.__aenter__ = _aenter  # type: ignore[attr-defined,method-assign]
 
         if not hasattr(cls, "__aexit__"):
 
@@ -75,7 +75,7 @@ def _patch_stream_context_managers() -> None:
                 if hasattr(self.__wrapped__, "__aexit__"):
                     return await self.__wrapped__.__aexit__(exc_type, exc_val, exc_tb)
 
-            cls.__aexit__ = _aexit  # type: ignore[attr-defined]
+            cls.__aexit__ = _aexit  # type: ignore[attr-defined,method-assign]
 
         # Always override: ObjectProxy's defaults return the wrapped object, bypassing instrumentation.
         def _enter(self):  # type: ignore[misc]
@@ -83,13 +83,13 @@ def _patch_stream_context_managers() -> None:
                 self.__wrapped__.__enter__()
             return self
 
-        cls.__enter__ = _enter  # type: ignore[attr-defined]
+        cls.__enter__ = _enter  # type: ignore[attr-defined,method-assign]
 
         def _exit(self, exc_type, exc_val, exc_tb):  # type: ignore[misc]
             if hasattr(self.__wrapped__, "__exit__"):
                 return self.__wrapped__.__exit__(exc_type, exc_val, exc_tb)
 
-        cls.__exit__ = _exit  # type: ignore[attr-defined]
+        cls.__exit__ = _exit  # type: ignore[attr-defined,method-assign]
 
     logger.debug("Patched stream proxies with context manager support")
 
@@ -195,7 +195,7 @@ def _wrap_async_messages_stream() -> None:
 
         return _AsyncMessageStreamManagerProxy(response, span)
 
-    wrap_function_wrapper(module="anthropic.resources.messages", name="AsyncMessages.stream", wrapper=_wrapper)
+    wrap_function_wrapper("anthropic.resources.messages", "AsyncMessages.stream", _wrapper)
     logger.debug("Wrapped AsyncMessages.stream for instrumentation")
 
 
@@ -396,7 +396,7 @@ def _wrap_beta_messages() -> None:
         logger.debug("Could not import openinference wrappers, skipping beta wrapping")
         return
 
-    tracer: trace_api.Tracer = OITracer(
+    tracer: Any = OITracer(
         tracing.paid_tracer_provider.get_tracer(__name__),
         config=TraceConfig(),
     )
@@ -404,25 +404,25 @@ def _wrap_beta_messages() -> None:
     # --- beta Messages.create (sync) ---
     _beta_originals["Messages.create"] = BetaMessages.create
     wrap_function_wrapper(
-        module=_BETA_MODULE,
-        name="Messages.create",
-        wrapper=_MessagesWrapper(tracer=tracer),
+        _BETA_MODULE,
+        "Messages.create",
+        _MessagesWrapper(tracer=tracer),
     )
 
     # --- beta AsyncMessages.create (async — primary path for pydantic-ai) ---
     _beta_originals["AsyncMessages.create"] = BetaAsyncMessages.create
     wrap_function_wrapper(
-        module=_BETA_MODULE,
-        name="AsyncMessages.create",
-        wrapper=_AsyncMessagesWrapper(tracer=tracer),
+        _BETA_MODULE,
+        "AsyncMessages.create",
+        _AsyncMessagesWrapper(tracer=tracer),
     )
 
     # --- beta Messages.stream (sync) ---
     _beta_originals["Messages.stream"] = BetaMessages.stream
     wrap_function_wrapper(
-        module=_BETA_MODULE,
-        name="Messages.stream",
-        wrapper=_MessagesStreamWrapper(tracer=tracer),
+        _BETA_MODULE,
+        "Messages.stream",
+        _MessagesStreamWrapper(tracer=tracer),
     )
 
     # --- beta AsyncMessages.stream (async) ---
@@ -452,9 +452,9 @@ def _wrap_beta_messages() -> None:
         return _AsyncMessageStreamManagerProxy(response, span)
 
     wrap_function_wrapper(
-        module=_BETA_MODULE,
-        name="AsyncMessages.stream",
-        wrapper=_beta_async_stream_wrapper,
+        _BETA_MODULE,
+        "AsyncMessages.stream",
+        _beta_async_stream_wrapper,
     )
 
     logger.debug("Wrapped beta Messages/AsyncMessages.create and .stream for instrumentation")

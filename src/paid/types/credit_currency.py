@@ -7,21 +7,51 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
+from .credit_currency_status import CreditCurrencyStatus
 
 
 class CreditCurrency(UniversalBaseModel):
-    id: str
-    name: str
-    key: str
-    description: typing.Optional[str] = None
+    id: str = pydantic.Field()
+    """
+    Unique identifier for this credit currency.
+    """
+
+    name: str = pydantic.Field()
+    """
+    Human-readable name shown for this credit currency.
+    """
+
+    key: str = pydantic.Field()
+    """
+    Stable machine-readable key for this credit currency. Keys are unique within an organization.
+    """
+
+    status: CreditCurrencyStatus = pydantic.Field()
+    """
+    Whether this credit currency is active or archived.
+    """
+
+    description: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Optional description for this credit currency.
+    """
+
     archived_at: typing_extensions.Annotated[
-        typing.Optional[dt.datetime], FieldMetadata(alias="archivedAt"), pydantic.Field(alias="archivedAt")
+        typing.Optional[dt.datetime],
+        FieldMetadata(alias="archivedAt"),
+        pydantic.Field(
+            alias="archivedAt", description="When this credit currency was archived. Null means the currency is active."
+        ),
     ] = None
     created_at: typing_extensions.Annotated[
-        dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")
+        dt.datetime,
+        FieldMetadata(alias="createdAt"),
+        pydantic.Field(alias="createdAt", description="When this credit currency was created."),
     ]
     updated_at: typing_extensions.Annotated[
-        dt.datetime, FieldMetadata(alias="updatedAt"), pydantic.Field(alias="updatedAt")
+        dt.datetime,
+        FieldMetadata(alias="updatedAt"),
+        pydantic.Field(alias="updatedAt", description="When this credit currency was last updated."),
     ]
 
     if IS_PYDANTIC_V2:

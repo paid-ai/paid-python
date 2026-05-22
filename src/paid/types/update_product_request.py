@@ -6,6 +6,7 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
+from .product_attribute_upsert import ProductAttributeUpsert
 
 
 class UpdateProductRequest(UniversalBaseModel):
@@ -19,6 +20,11 @@ class UpdateProductRequest(UniversalBaseModel):
         typing.Optional[str], FieldMetadata(alias="externalId"), pydantic.Field(alias="externalId")
     ] = None
     metadata: typing.Optional[typing.Dict[str, typing.Any]] = None
+    product_attributes: typing_extensions.Annotated[
+        typing.Optional[typing.List[ProductAttributeUpsert]],
+        FieldMetadata(alias="productAttributes"),
+        pydantic.Field(alias="productAttributes"),
+    ] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

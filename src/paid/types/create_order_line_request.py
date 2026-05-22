@@ -8,9 +8,14 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .create_order_line_attribute_request import CreateOrderLineAttributeRequest
+from .writable_order_line_type import WritableOrderLineType
 
 
 class CreateOrderLineRequest(UniversalBaseModel):
+    """
+    When override `attributes` are omitted, the order will match the base product (or default plan if plans are configured).
+    """
+
     product_id: typing_extensions.Annotated[str, FieldMetadata(alias="productId"), pydantic.Field(alias="productId")]
     name: typing.Optional[str] = None
     description: typing.Optional[str] = None
@@ -21,6 +26,9 @@ class CreateOrderLineRequest(UniversalBaseModel):
         typing.Optional[dt.datetime], FieldMetadata(alias="endDate"), pydantic.Field(alias="endDate")
     ] = None
     attributes: typing.Optional[typing.List[CreateOrderLineAttributeRequest]] = None
+    line_type: typing_extensions.Annotated[
+        typing.Optional[WritableOrderLineType], FieldMetadata(alias="lineType"), pydantic.Field(alias="lineType")
+    ] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
