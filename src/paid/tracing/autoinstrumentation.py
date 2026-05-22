@@ -83,6 +83,14 @@ except Exception:
     logger.debug("Instructor instrumentation library not available, skipping instrumentation")
     INSTRUCTOR_AVAILABLE = False
 
+try:
+    from opentelemetry.instrumentation.cohere import CohereInstrumentor
+
+    COHERE_AVAILABLE = _module_available("cohere")
+except Exception:
+    logger.debug("Cohere instrumentation library not available, skipping instrumentation")
+    COHERE_AVAILABLE = False
+
 # Track which instrumentors have been initialized
 _initialized_instrumentors: List[str] = []
 
@@ -105,6 +113,7 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
                   - "langchain": LangChain library
                   - "google-genai": Google GenAI library
                   - "instructor": Instructor library
+                  - "cohere": Cohere library
                   If None, all supported libraries that are installed will be instrumented.
 
     Note:
@@ -149,6 +158,7 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
             "langchain",
             "google-genai",
             "instructor",
+            "cohere",
         ]
         logger.debug("[paid:autoinstrument] No libraries specified, defaulting to all: %s", libraries)
 
@@ -173,10 +183,12 @@ def paid_autoinstrument(libraries: Optional[List[str]] = None) -> None:
             _instrument_google_genai()
         elif library == "instructor":
             _instrument_instructor()
+        elif library == "cohere":
+            _instrument_cohere()
         else:
             logger.warning(
                 "Unknown library '%s' - supported libraries: anthropic, openai, openai-agents, "
-                "claude-agent-sdk, bedrock, langchain, google-genai, instructor",
+                "claude-agent-sdk, bedrock, langchain, google-genai, instructor, cohere",
                 library,
             )
 
@@ -351,3 +363,21 @@ def _instrument_instructor() -> None:
     InstructorInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
     _initialized_instrumentors.append("instructor")
     logger.info("Instructor auto-instrumentation enabled")
+
+
+def _instrument_cohere() -> None:
+    """
+    Instrument the Cohere library using opentelemetry-instrumentation-cohere (traceloop).
+    """
+    if not COHERE_AVAILABLE:
+        logger.warning("Cohere instrumentation library not available, skipping instrumentation")
+        return
+
+    logger.debug(
+        "[paid:autoinstrument] Instrumenting cohere with CohereInstrumentor, provider=%s",
+        type(tracing.paid_tracer_provider).__name__,
+    )
+    CohereInstrumentor().instrument(tracer_provider=tracing.paid_tracer_provider)
+
+    _initialized_instrumentors.append("cohere")
+    logger.info("Cohere auto-instrumentation enabled")

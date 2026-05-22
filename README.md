@@ -348,6 +348,7 @@ claude-agent-sdk   - Claude Agent SDK
 bedrock            - AWS Bedrock (boto3)
 langchain          - LangChain framework
 instructor         - Instructor
+cohere             - Cohere SDK
 ```
 
 #### Selective Instrumentation
