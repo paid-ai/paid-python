@@ -51,6 +51,7 @@ opentelemetry-sdk = ">=1.23.0"
 pydantic = ">= 1.9.2"
 pydantic-core = ">=2.18.2"
 typing_extensions = ">= 4.0.0"
+wrapt = "<2"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "==1.13.0"
