@@ -9,6 +9,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .currency_code import CurrencyCode
 from .customer_billing_address_response import CustomerBillingAddressResponse
+from .customer_connections import CustomerConnections
 from .customer_creation_state import CustomerCreationState
 
 
@@ -46,6 +47,7 @@ class Customer(UniversalBaseModel):
     default_currency: typing_extensions.Annotated[
         CurrencyCode, FieldMetadata(alias="defaultCurrency"), pydantic.Field(alias="defaultCurrency")
     ]
+    connections: CustomerConnections
     created_at: typing_extensions.Annotated[
         dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")
     ]

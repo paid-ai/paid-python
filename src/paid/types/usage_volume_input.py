@@ -9,10 +9,16 @@ from ..core.serialization import FieldMetadata
 from .tiered_price_point import TieredPricePoint
 from .usage_volume_input_billing_frequency import UsageVolumeInputBillingFrequency
 from .usage_volume_input_billing_type import UsageVolumeInputBillingType
+from .usage_volume_input_signal_type import UsageVolumeInputSignalType
 
 
 class UsageVolumeInput(UniversalBaseModel):
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[UsageVolumeInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[UsageVolumeInputBillingFrequency],
         FieldMetadata(alias="billingFrequency"),

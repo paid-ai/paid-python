@@ -44,16 +44,24 @@ from .product_usage_bracketed_prepaid_credits_input_credit_unit_brackets_item im
 from .product_usage_bracketed_prepaid_credits_input_pricing_input import (
     ProductUsageBracketedPrepaidCreditsInputPricingInput,
 )
+from .product_usage_bracketed_prepaid_credits_input_signal_type import (
+    ProductUsageBracketedPrepaidCreditsInputSignalType,
+)
 from .product_usage_cost_plus_input_billing_frequency import ProductUsageCostPlusInputBillingFrequency
 from .product_usage_cost_plus_input_billing_type import ProductUsageCostPlusInputBillingType
+from .product_usage_cost_plus_input_signal_type import ProductUsageCostPlusInputSignalType
 from .product_usage_graduated_input_billing_frequency import ProductUsageGraduatedInputBillingFrequency
 from .product_usage_graduated_input_billing_type import ProductUsageGraduatedInputBillingType
+from .product_usage_graduated_input_signal_type import ProductUsageGraduatedInputSignalType
 from .product_usage_per_unit_input_billing_frequency import ProductUsagePerUnitInputBillingFrequency
 from .product_usage_per_unit_input_billing_type import ProductUsagePerUnitInputBillingType
+from .product_usage_per_unit_input_signal_type import ProductUsagePerUnitInputSignalType
 from .product_usage_prepaid_credits_input_billing_frequency import ProductUsagePrepaidCreditsInputBillingFrequency
 from .product_usage_prepaid_credits_input_billing_type import ProductUsagePrepaidCreditsInputBillingType
+from .product_usage_prepaid_credits_input_signal_type import ProductUsagePrepaidCreditsInputSignalType
 from .product_usage_volume_input_billing_frequency import ProductUsageVolumeInputBillingFrequency
 from .product_usage_volume_input_billing_type import ProductUsageVolumeInputBillingType
+from .product_usage_volume_input_signal_type import ProductUsageVolumeInputSignalType
 
 
 class ProductPricingInput_RecurringPerUnit(UniversalBaseModel):
@@ -200,6 +208,11 @@ class ProductPricingInput_UsagePerUnit(UniversalBaseModel):
         typing.Literal["UsagePerUnit"], FieldMetadata(alias="pricingType"), pydantic.Field(alias="pricingType")
     ] = "UsagePerUnit"
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[ProductUsagePerUnitInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[ProductUsagePerUnitInputBillingFrequency],
         FieldMetadata(alias="billingFrequency"),
@@ -234,6 +247,11 @@ class ProductPricingInput_UsageGraduated(UniversalBaseModel):
         typing.Literal["UsageGraduated"], FieldMetadata(alias="pricingType"), pydantic.Field(alias="pricingType")
     ] = "UsageGraduated"
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[ProductUsageGraduatedInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[ProductUsageGraduatedInputBillingFrequency],
         FieldMetadata(alias="billingFrequency"),
@@ -268,6 +286,11 @@ class ProductPricingInput_UsageVolume(UniversalBaseModel):
         typing.Literal["UsageVolume"], FieldMetadata(alias="pricingType"), pydantic.Field(alias="pricingType")
     ] = "UsageVolume"
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[ProductUsageVolumeInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[ProductUsageVolumeInputBillingFrequency],
         FieldMetadata(alias="billingFrequency"),
@@ -302,6 +325,11 @@ class ProductPricingInput_UsagePrepaidCredits(UniversalBaseModel):
         typing.Literal["UsagePrepaidCredits"], FieldMetadata(alias="pricingType"), pydantic.Field(alias="pricingType")
     ] = "UsagePrepaidCredits"
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[ProductUsagePrepaidCreditsInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     credits_currency_id: typing_extensions.Annotated[
         str, FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ]
@@ -349,6 +377,11 @@ class ProductPricingInput_UsageBracketedPrepaidCredits(UniversalBaseModel):
         pydantic.Field(alias="pricingType"),
     ] = "UsageBracketedPrepaidCredits"
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[ProductUsageBracketedPrepaidCreditsInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     credits_currency_id: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ] = None
@@ -411,6 +444,11 @@ class ProductPricingInput_UsageCostPlus(UniversalBaseModel):
     cost_plus_multiplier: typing_extensions.Annotated[
         float, FieldMetadata(alias="costPlusMultiplier"), pydantic.Field(alias="costPlusMultiplier")
     ]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[ProductUsageCostPlusInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[ProductUsageCostPlusInputBillingFrequency],
         FieldMetadata(alias="billingFrequency"),

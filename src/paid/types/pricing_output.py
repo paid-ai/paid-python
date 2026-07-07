@@ -7,6 +7,7 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .pricing_output_pricing_type import PricingOutputPricingType
+from .pricing_output_signal_type import PricingOutputSignalType
 from .pricing_price_point_output import PricingPricePointOutput
 
 
@@ -20,6 +21,9 @@ class PricingOutput(UniversalBaseModel):
     ] = None
     event_name: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")
+    ] = None
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[PricingOutputSignalType], FieldMetadata(alias="signalType"), pydantic.Field(alias="signalType")
     ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="billingFrequency"), pydantic.Field(alias="billingFrequency")

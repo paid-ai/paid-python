@@ -12,6 +12,10 @@ from .create_order_line_attribute_request_pricing_price_points_tiers_item import
 
 
 class CreateOrderLineAttributeRequestPricingPricePoints(UniversalBaseModel):
+    """
+    Single flat price point for this order attribute override. Do not send a currency-keyed map here.
+    """
+
     currency: typing.Optional[str] = None
     unit_price: typing_extensions.Annotated[float, FieldMetadata(alias="unitPrice"), pydantic.Field(alias="unitPrice")]
     min_quantity: typing_extensions.Annotated[

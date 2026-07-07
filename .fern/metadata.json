@@ -17,7 +17,9 @@
       "openinference-instrumentation-instructor": ">=0.1.0",
       "openinference-instrumentation-bedrock": ">=0.1.0",
       "openinference-instrumentation-google-genai": ">=0.1.8",
-      "openinference-instrumentation-claude-agent-sdk": ">=0.1.0"
+      "openinference-instrumentation-claude-agent-sdk": ">=0.1.0",
+      "opentelemetry-instrumentation-cohere": ">=0.51.0",
+      "wrapt": "<2"
     },
     "extra_dev_dependencies": {
       "mistralai": ">=1.9.0 <2.0.0",
@@ -26,6 +28,7 @@
       "instructor": ">=1.0.0",
       "openai-agents": ">=0.2.0",
       "claude-agent-sdk": ">=0.1.0,<0.1.49",
+      "cohere": ">=5.0.0",
       "langchain-core": ">=0.1.0",
       "pydantic-ai": ">=1.41.0",
       "openai": ">=1.12.0",
@@ -33,6 +36,6 @@
       "vcrpy": ">=6.0.0"
     }
   },
-  "originGitCommit": "6cd287678ff2795e29aa6cc5b7796144a6efb836",
-  "sdkVersion": "1.10.0"
+  "originGitCommit": "ae49bf6edf67a246ec00dc47e32ba657e7ba6923",
+  "sdkVersion": "1.11.0"
 }

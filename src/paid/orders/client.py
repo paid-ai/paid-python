@@ -346,6 +346,36 @@ class OrdersClient:
         _response = self._raw_client.delete_order_by_id(id, request_options=request_options)
         return _response.data
 
+    def activate_order_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Order:
+        """
+        Activate a draft order by ID. Activation starts billing for the order using the same validation and side effects as the dashboard activation flow.
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Order
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.orders.activate_order_by_id(
+            id="id",
+        )
+        """
+        _response = self._raw_client.activate_order_by_id(id, request_options=request_options)
+        return _response.data
+
     def get_order_lines(
         self,
         id: str,
@@ -895,6 +925,44 @@ class AsyncOrdersClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.delete_order_by_id(id, request_options=request_options)
+        return _response.data
+
+    async def activate_order_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Order:
+        """
+        Activate a draft order by ID. Activation starts billing for the order using the same validation and side effects as the dashboard activation flow.
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Order
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.orders.activate_order_by_id(
+                id="id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.activate_order_by_id(id, request_options=request_options)
         return _response.data
 
     async def get_order_lines(

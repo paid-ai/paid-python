@@ -4,10 +4,15 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .checkout_plan import CheckoutPlan
 
 
 class CheckoutProduct(UniversalBaseModel):
     id: str
+    plans: typing.Optional[typing.List[CheckoutPlan]] = pydantic.Field(default=None)
+    """
+    Plans selected within this product. Absent when the product is offered with all of its plans and none are individually configured.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

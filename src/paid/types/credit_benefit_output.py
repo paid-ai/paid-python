@@ -11,8 +11,8 @@ from ..core.serialization import FieldMetadata
 class CreditBenefitOutput(UniversalBaseModel):
     id: str
     credits_currency_id: typing_extensions.Annotated[
-        str, FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
-    ]
+        typing.Optional[str], FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
+    ] = None
     amount: float
     recipient: str
     is_infinite_total: typing_extensions.Annotated[

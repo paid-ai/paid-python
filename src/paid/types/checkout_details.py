@@ -7,7 +7,9 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
+from .checkout_custom_card import CheckoutCustomCard
 from .checkout_product import CheckoutProduct
+from .checkout_selected_product import CheckoutSelectedProduct
 from .checkout_status import CheckoutStatus
 
 
@@ -40,6 +42,13 @@ class CheckoutDetails(UniversalBaseModel):
     allowed_currencies: typing_extensions.Annotated[
         typing.List[str], FieldMetadata(alias="allowedCurrencies"), pydantic.Field(alias="allowedCurrencies")
     ]
+    custom_cards: typing_extensions.Annotated[
+        typing.Optional[typing.List[CheckoutCustomCard]],
+        FieldMetadata(alias="customCards"),
+        pydantic.Field(
+            alias="customCards", description="Additional informational pricing cards rendered alongside the plans."
+        ),
+    ] = None
     created_at: typing_extensions.Annotated[
         dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")
     ]
@@ -53,6 +62,11 @@ class CheckoutDetails(UniversalBaseModel):
             alias="orderId",
             description="The resulting order ID once checkout has completed. Null until an order is created.",
         ),
+    ] = None
+    selected_product: typing_extensions.Annotated[
+        typing.Optional[CheckoutSelectedProduct],
+        FieldMetadata(alias="selectedProduct"),
+        pydantic.Field(alias="selectedProduct"),
     ] = None
 
     if IS_PYDANTIC_V2:

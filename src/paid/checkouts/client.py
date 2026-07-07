@@ -6,6 +6,7 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.checkout import Checkout
+from ..types.checkout_custom_card_input import CheckoutCustomCardInput
 from ..types.checkout_details import CheckoutDetails
 from ..types.checkout_list_response import CheckoutListResponse
 from ..types.checkout_product_input import CheckoutProductInput
@@ -87,6 +88,7 @@ class CheckoutsClient:
         collect_phone: typing.Optional[bool] = OMIT,
         single_use: typing.Optional[bool] = OMIT,
         currency: typing.Optional[str] = OMIT,
+        custom_cards: typing.Optional[typing.Sequence[CheckoutCustomCardInput]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Checkout:
         """
@@ -116,7 +118,10 @@ class CheckoutsClient:
         single_use : typing.Optional[bool]
 
         currency : typing.Optional[str]
-            Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans.
+            Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans. If the checkout is for a customer with an active subscription, the currency must match that subscription's currency — subscriptions cannot change currency.
+
+        custom_cards : typing.Optional[typing.Sequence[CheckoutCustomCardInput]]
+            Additional informational pricing cards rendered alongside the plans.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -154,6 +159,7 @@ class CheckoutsClient:
             collect_phone=collect_phone,
             single_use=single_use,
             currency=currency,
+            custom_cards=custom_cards,
             request_options=request_options,
         )
         return _response.data
@@ -297,6 +303,7 @@ class AsyncCheckoutsClient:
         collect_phone: typing.Optional[bool] = OMIT,
         single_use: typing.Optional[bool] = OMIT,
         currency: typing.Optional[str] = OMIT,
+        custom_cards: typing.Optional[typing.Sequence[CheckoutCustomCardInput]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Checkout:
         """
@@ -326,7 +333,10 @@ class AsyncCheckoutsClient:
         single_use : typing.Optional[bool]
 
         currency : typing.Optional[str]
-            Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans.
+            Lock checkout to a specific currency. Omit to allow all currencies supported by the selected plans. If the checkout is for a customer with an active subscription, the currency must match that subscription's currency — subscriptions cannot change currency.
+
+        custom_cards : typing.Optional[typing.Sequence[CheckoutCustomCardInput]]
+            Additional informational pricing cards rendered alongside the plans.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -372,6 +382,7 @@ class AsyncCheckoutsClient:
             collect_phone=collect_phone,
             single_use=single_use,
             currency=currency,
+            custom_cards=custom_cards,
             request_options=request_options,
         )
         return _response.data

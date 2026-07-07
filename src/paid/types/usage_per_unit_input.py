@@ -9,10 +9,16 @@ from ..core.serialization import FieldMetadata
 from .simple_price_point import SimplePricePoint
 from .usage_per_unit_input_billing_frequency import UsagePerUnitInputBillingFrequency
 from .usage_per_unit_input_billing_type import UsagePerUnitInputBillingType
+from .usage_per_unit_input_signal_type import UsagePerUnitInputSignalType
 
 
 class UsagePerUnitInput(UniversalBaseModel):
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[UsagePerUnitInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[UsagePerUnitInputBillingFrequency],
         FieldMetadata(alias="billingFrequency"),

@@ -3,5 +3,5 @@
 import typing
 
 CreateOrderLineAttributeRequestPricingCreditBenefitsItemCreditGrantTiming = typing.Union[
-    typing.Literal["on_payment", "on_order_activation"], typing.Any
+    typing.Literal["on_payment", "on_invoice_posted", "on_order_activation"], typing.Any
 ]
