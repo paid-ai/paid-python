@@ -7,6 +7,8 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.credit_balance_list_response import CreditBalanceListResponse
 from ..types.customer import Customer
+from ..types.customer_alias import CustomerAlias
+from ..types.customer_alias_list_response import CustomerAliasListResponse
 from ..types.customer_billing_address_input import CustomerBillingAddressInput
 from ..types.customer_creation_state import CustomerCreationState
 from ..types.customer_list_response import CustomerListResponse
@@ -14,6 +16,7 @@ from ..types.customer_state import CustomerState
 from ..types.customer_user import CustomerUser
 from ..types.customer_user_status import CustomerUserStatus
 from ..types.empty_response import EmptyResponse
+from ..types.grant_customer_credits_response import GrantCustomerCreditsResponse
 from .raw_client import AsyncRawCustomersClient, RawCustomersClient
 
 # this is used as the default value for optional parameters
@@ -147,6 +150,138 @@ class CustomersClient:
             default_currency=default_currency,
             request_options=request_options,
         )
+        return _response.data
+
+    def list_customer_aliases(
+        self,
+        id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerAliasListResponse:
+        """
+        List alternate external identifiers that resolve to a customer by Paid display ID.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerAliasListResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.list_customer_aliases(
+            id="cus_abc123",
+        )
+        """
+        _response = self._raw_client.list_customer_aliases(
+            id, limit=limit, offset=offset, request_options=request_options
+        )
+        return _response.data
+
+    def create_customer_alias(
+        self,
+        id: str,
+        *,
+        alias: str,
+        name: typing.Optional[str] = OMIT,
+        description: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerAlias:
+        """
+        Create an alternate external identifier for a customer by Paid display ID.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        alias : str
+            Alternate external identifier that should resolve to this customer.
+
+        name : typing.Optional[str]
+            Optional display name for this alias.
+
+        description : typing.Optional[str]
+            Optional note describing where this alias comes from.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerAlias
+            201
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.create_customer_alias(
+            id="cus_abc123",
+            alias="child-customer-1",
+        )
+        """
+        _response = self._raw_client.create_customer_alias(
+            id, alias=alias, name=name, description=description, request_options=request_options
+        )
+        return _response.data
+
+    def delete_customer_alias(
+        self, id: str, alias: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> EmptyResponse:
+        """
+        Remove an alternate external identifier from a customer by Paid display ID.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        alias : str
+            Customer alias value.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        EmptyResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.delete_customer_alias(
+            id="cus_abc123",
+            alias="child-customer-1",
+        )
+        """
+        _response = self._raw_client.delete_customer_alias(id, alias, request_options=request_options)
         return _response.data
 
     def get_customer_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Customer:
@@ -327,6 +462,140 @@ class CustomersClient:
         )
         """
         _response = self._raw_client.get_customer_state_by_id(id, request_options=request_options)
+        return _response.data
+
+    def list_customer_aliases_by_external_id(
+        self,
+        external_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerAliasListResponse:
+        """
+        List alternate external identifiers that resolve to a customer by external ID.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerAliasListResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.list_customer_aliases_by_external_id(
+            external_id="customer_123",
+        )
+        """
+        _response = self._raw_client.list_customer_aliases_by_external_id(
+            external_id, limit=limit, offset=offset, request_options=request_options
+        )
+        return _response.data
+
+    def create_customer_alias_by_external_id(
+        self,
+        external_id: str,
+        *,
+        alias: str,
+        name: typing.Optional[str] = OMIT,
+        description: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerAlias:
+        """
+        Create an alternate external identifier for a customer by external ID.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
+
+        alias : str
+            Alternate external identifier that should resolve to this customer.
+
+        name : typing.Optional[str]
+            Optional display name for this alias.
+
+        description : typing.Optional[str]
+            Optional note describing where this alias comes from.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerAlias
+            201
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.create_customer_alias_by_external_id(
+            external_id="customer_123",
+            alias="child-customer-1",
+        )
+        """
+        _response = self._raw_client.create_customer_alias_by_external_id(
+            external_id, alias=alias, name=name, description=description, request_options=request_options
+        )
+        return _response.data
+
+    def delete_customer_alias_by_external_id(
+        self, external_id: str, alias: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> EmptyResponse:
+        """
+        Remove an alternate external identifier from a customer by external ID.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
+
+        alias : str
+            Customer alias value.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        EmptyResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.delete_customer_alias_by_external_id(
+            external_id="customer_123",
+            alias="child-customer-1",
+        )
+        """
+        _response = self._raw_client.delete_customer_alias_by_external_id(
+            external_id, alias, request_options=request_options
+        )
         return _response.data
 
     def get_customer_by_external_id(
@@ -544,6 +813,75 @@ class CustomersClient:
         _response = self._raw_client.get_customer_credit_balances(id, request_options=request_options)
         return _response.data
 
+    def grant_customer_credits(
+        self,
+        id: str,
+        *,
+        credit_currency_key: str,
+        amount: int,
+        starts_at: typing.Optional[dt.datetime] = OMIT,
+        expires_at: typing.Optional[dt.datetime] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> GrantCustomerCreditsResponse:
+        """
+        Immediately grant credits to a customer using an active credit currency key.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        credit_currency_key : str
+            Stable machine-readable key for the active credit currency to grant.
+
+        amount : int
+            Number of credits to grant. This is not a monetary amount.
+
+        starts_at : typing.Optional[dt.datetime]
+            When these credits become spendable, as an RFC3339 datetime with timezone. Must be at or before the current server time. Defaults to the current server time when omitted.
+
+        expires_at : typing.Optional[dt.datetime]
+            When these credits expire, as an RFC3339 datetime with timezone. Omit or set null for credits that do not expire.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        GrantCustomerCreditsResponse
+            201
+
+        Examples
+        --------
+        import datetime
+
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.grant_customer_credits(
+            id="cus_abc123",
+            credit_currency_key="api_credits",
+            amount=10000,
+            starts_at=datetime.datetime.fromisoformat(
+                "2026-06-05 12:00:00+00:00",
+            ),
+            expires_at=datetime.datetime.fromisoformat(
+                "2026-12-31 23:59:59+00:00",
+            ),
+        )
+        """
+        _response = self._raw_client.grant_customer_credits(
+            id,
+            credit_currency_key=credit_currency_key,
+            amount=amount,
+            starts_at=starts_at,
+            expires_at=expires_at,
+            request_options=request_options,
+        )
+        return _response.data
+
     def get_customer_credit_balances_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> CreditBalanceListResponse:
@@ -576,6 +914,75 @@ class CustomersClient:
         """
         _response = self._raw_client.get_customer_credit_balances_by_external_id(
             external_id, request_options=request_options
+        )
+        return _response.data
+
+    def grant_customer_credits_by_external_id(
+        self,
+        external_id: str,
+        *,
+        credit_currency_key: str,
+        amount: int,
+        starts_at: typing.Optional[dt.datetime] = OMIT,
+        expires_at: typing.Optional[dt.datetime] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> GrantCustomerCreditsResponse:
+        """
+        Immediately grant credits to a customer looked up by external ID using an active credit currency key.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
+
+        credit_currency_key : str
+            Stable machine-readable key for the active credit currency to grant.
+
+        amount : int
+            Number of credits to grant. This is not a monetary amount.
+
+        starts_at : typing.Optional[dt.datetime]
+            When these credits become spendable, as an RFC3339 datetime with timezone. Must be at or before the current server time. Defaults to the current server time when omitted.
+
+        expires_at : typing.Optional[dt.datetime]
+            When these credits expire, as an RFC3339 datetime with timezone. Omit or set null for credits that do not expire.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        GrantCustomerCreditsResponse
+            201
+
+        Examples
+        --------
+        import datetime
+
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.grant_customer_credits_by_external_id(
+            external_id="customer_123",
+            credit_currency_key="api_credits",
+            amount=10000,
+            starts_at=datetime.datetime.fromisoformat(
+                "2026-06-05 12:00:00+00:00",
+            ),
+            expires_at=datetime.datetime.fromisoformat(
+                "2026-12-31 23:59:59+00:00",
+            ),
+        )
+        """
+        _response = self._raw_client.grant_customer_credits_by_external_id(
+            external_id,
+            credit_currency_key=credit_currency_key,
+            amount=amount,
+            starts_at=starts_at,
+            expires_at=expires_at,
+            request_options=request_options,
         )
         return _response.data
 
@@ -782,6 +1189,162 @@ class AsyncCustomersClient:
             default_currency=default_currency,
             request_options=request_options,
         )
+        return _response.data
+
+    async def list_customer_aliases(
+        self,
+        id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerAliasListResponse:
+        """
+        List alternate external identifiers that resolve to a customer by Paid display ID.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerAliasListResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.list_customer_aliases(
+                id="cus_abc123",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list_customer_aliases(
+            id, limit=limit, offset=offset, request_options=request_options
+        )
+        return _response.data
+
+    async def create_customer_alias(
+        self,
+        id: str,
+        *,
+        alias: str,
+        name: typing.Optional[str] = OMIT,
+        description: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerAlias:
+        """
+        Create an alternate external identifier for a customer by Paid display ID.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        alias : str
+            Alternate external identifier that should resolve to this customer.
+
+        name : typing.Optional[str]
+            Optional display name for this alias.
+
+        description : typing.Optional[str]
+            Optional note describing where this alias comes from.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerAlias
+            201
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.create_customer_alias(
+                id="cus_abc123",
+                alias="child-customer-1",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.create_customer_alias(
+            id, alias=alias, name=name, description=description, request_options=request_options
+        )
+        return _response.data
+
+    async def delete_customer_alias(
+        self, id: str, alias: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> EmptyResponse:
+        """
+        Remove an alternate external identifier from a customer by Paid display ID.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        alias : str
+            Customer alias value.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        EmptyResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.delete_customer_alias(
+                id="cus_abc123",
+                alias="child-customer-1",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.delete_customer_alias(id, alias, request_options=request_options)
         return _response.data
 
     async def get_customer_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Customer:
@@ -994,6 +1557,164 @@ class AsyncCustomersClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.get_customer_state_by_id(id, request_options=request_options)
+        return _response.data
+
+    async def list_customer_aliases_by_external_id(
+        self,
+        external_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerAliasListResponse:
+        """
+        List alternate external identifiers that resolve to a customer by external ID.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerAliasListResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.list_customer_aliases_by_external_id(
+                external_id="customer_123",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list_customer_aliases_by_external_id(
+            external_id, limit=limit, offset=offset, request_options=request_options
+        )
+        return _response.data
+
+    async def create_customer_alias_by_external_id(
+        self,
+        external_id: str,
+        *,
+        alias: str,
+        name: typing.Optional[str] = OMIT,
+        description: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerAlias:
+        """
+        Create an alternate external identifier for a customer by external ID.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
+
+        alias : str
+            Alternate external identifier that should resolve to this customer.
+
+        name : typing.Optional[str]
+            Optional display name for this alias.
+
+        description : typing.Optional[str]
+            Optional note describing where this alias comes from.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerAlias
+            201
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.create_customer_alias_by_external_id(
+                external_id="customer_123",
+                alias="child-customer-1",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.create_customer_alias_by_external_id(
+            external_id, alias=alias, name=name, description=description, request_options=request_options
+        )
+        return _response.data
+
+    async def delete_customer_alias_by_external_id(
+        self, external_id: str, alias: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> EmptyResponse:
+        """
+        Remove an alternate external identifier from a customer by external ID.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
+
+        alias : str
+            Customer alias value.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        EmptyResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.delete_customer_alias_by_external_id(
+                external_id="customer_123",
+                alias="child-customer-1",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.delete_customer_alias_by_external_id(
+            external_id, alias, request_options=request_options
+        )
         return _response.data
 
     async def get_customer_by_external_id(
@@ -1253,6 +1974,82 @@ class AsyncCustomersClient:
         _response = await self._raw_client.get_customer_credit_balances(id, request_options=request_options)
         return _response.data
 
+    async def grant_customer_credits(
+        self,
+        id: str,
+        *,
+        credit_currency_key: str,
+        amount: int,
+        starts_at: typing.Optional[dt.datetime] = OMIT,
+        expires_at: typing.Optional[dt.datetime] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> GrantCustomerCreditsResponse:
+        """
+        Immediately grant credits to a customer using an active credit currency key.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        credit_currency_key : str
+            Stable machine-readable key for the active credit currency to grant.
+
+        amount : int
+            Number of credits to grant. This is not a monetary amount.
+
+        starts_at : typing.Optional[dt.datetime]
+            When these credits become spendable, as an RFC3339 datetime with timezone. Must be at or before the current server time. Defaults to the current server time when omitted.
+
+        expires_at : typing.Optional[dt.datetime]
+            When these credits expire, as an RFC3339 datetime with timezone. Omit or set null for credits that do not expire.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        GrantCustomerCreditsResponse
+            201
+
+        Examples
+        --------
+        import asyncio
+        import datetime
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.grant_customer_credits(
+                id="cus_abc123",
+                credit_currency_key="api_credits",
+                amount=10000,
+                starts_at=datetime.datetime.fromisoformat(
+                    "2026-06-05 12:00:00+00:00",
+                ),
+                expires_at=datetime.datetime.fromisoformat(
+                    "2026-12-31 23:59:59+00:00",
+                ),
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.grant_customer_credits(
+            id,
+            credit_currency_key=credit_currency_key,
+            amount=amount,
+            starts_at=starts_at,
+            expires_at=expires_at,
+            request_options=request_options,
+        )
+        return _response.data
+
     async def get_customer_credit_balances_by_external_id(
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> CreditBalanceListResponse:
@@ -1293,6 +2090,82 @@ class AsyncCustomersClient:
         """
         _response = await self._raw_client.get_customer_credit_balances_by_external_id(
             external_id, request_options=request_options
+        )
+        return _response.data
+
+    async def grant_customer_credits_by_external_id(
+        self,
+        external_id: str,
+        *,
+        credit_currency_key: str,
+        amount: int,
+        starts_at: typing.Optional[dt.datetime] = OMIT,
+        expires_at: typing.Optional[dt.datetime] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> GrantCustomerCreditsResponse:
+        """
+        Immediately grant credits to a customer looked up by external ID using an active credit currency key.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
+
+        credit_currency_key : str
+            Stable machine-readable key for the active credit currency to grant.
+
+        amount : int
+            Number of credits to grant. This is not a monetary amount.
+
+        starts_at : typing.Optional[dt.datetime]
+            When these credits become spendable, as an RFC3339 datetime with timezone. Must be at or before the current server time. Defaults to the current server time when omitted.
+
+        expires_at : typing.Optional[dt.datetime]
+            When these credits expire, as an RFC3339 datetime with timezone. Omit or set null for credits that do not expire.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        GrantCustomerCreditsResponse
+            201
+
+        Examples
+        --------
+        import asyncio
+        import datetime
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.grant_customer_credits_by_external_id(
+                external_id="customer_123",
+                credit_currency_key="api_credits",
+                amount=10000,
+                starts_at=datetime.datetime.fromisoformat(
+                    "2026-06-05 12:00:00+00:00",
+                ),
+                expires_at=datetime.datetime.fromisoformat(
+                    "2026-12-31 23:59:59+00:00",
+                ),
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.grant_customer_credits_by_external_id(
+            external_id,
+            credit_currency_key=credit_currency_key,
+            amount=amount,
+            starts_at=starts_at,
+            expires_at=expires_at,
+            request_options=request_options,
         )
         return _response.data
 

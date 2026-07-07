@@ -39,7 +39,10 @@ class CreateOrderLineAttributeRequestPricing(UniversalBaseModel):
     price_points: typing_extensions.Annotated[
         CreateOrderLineAttributeRequestPricingPricePoints,
         FieldMetadata(alias="pricePoints"),
-        pydantic.Field(alias="pricePoints"),
+        pydantic.Field(
+            alias="pricePoints",
+            description="Single flat price point for this order attribute override. Do not send a currency-keyed map here.",
+        ),
     ]
     pricing_model: typing_extensions.Annotated[
         CreateOrderLineAttributeRequestPricingPricingModel,

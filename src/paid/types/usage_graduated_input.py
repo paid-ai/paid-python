@@ -9,10 +9,16 @@ from ..core.serialization import FieldMetadata
 from .tiered_price_point import TieredPricePoint
 from .usage_graduated_input_billing_frequency import UsageGraduatedInputBillingFrequency
 from .usage_graduated_input_billing_type import UsageGraduatedInputBillingType
+from .usage_graduated_input_signal_type import UsageGraduatedInputSignalType
 
 
 class UsageGraduatedInput(UniversalBaseModel):
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[UsageGraduatedInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[UsageGraduatedInputBillingFrequency],
         FieldMetadata(alias="billingFrequency"),

@@ -9,10 +9,16 @@ from ..core.serialization import FieldMetadata
 from .product_simple_price_point import ProductSimplePricePoint
 from .product_usage_prepaid_credits_input_billing_frequency import ProductUsagePrepaidCreditsInputBillingFrequency
 from .product_usage_prepaid_credits_input_billing_type import ProductUsagePrepaidCreditsInputBillingType
+from .product_usage_prepaid_credits_input_signal_type import ProductUsagePrepaidCreditsInputSignalType
 
 
 class ProductUsagePrepaidCreditsInput(UniversalBaseModel):
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[ProductUsagePrepaidCreditsInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     credits_currency_id: typing_extensions.Annotated[
         str, FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ]

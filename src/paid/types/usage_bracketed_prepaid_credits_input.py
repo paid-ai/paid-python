@@ -13,10 +13,16 @@ from .usage_bracketed_prepaid_credits_input_credit_unit_brackets_item import (
     UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem,
 )
 from .usage_bracketed_prepaid_credits_input_pricing_input import UsageBracketedPrepaidCreditsInputPricingInput
+from .usage_bracketed_prepaid_credits_input_signal_type import UsageBracketedPrepaidCreditsInputSignalType
 
 
 class UsageBracketedPrepaidCreditsInput(UniversalBaseModel):
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[UsageBracketedPrepaidCreditsInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     credits_currency_id: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ] = None

@@ -9,12 +9,18 @@ from ..core.serialization import FieldMetadata
 from .simple_price_point import SimplePricePoint
 from .usage_cost_plus_input_billing_frequency import UsageCostPlusInputBillingFrequency
 from .usage_cost_plus_input_billing_type import UsageCostPlusInputBillingType
+from .usage_cost_plus_input_signal_type import UsageCostPlusInputSignalType
 
 
 class UsageCostPlusInput(UniversalBaseModel):
     cost_plus_multiplier: typing_extensions.Annotated[
         float, FieldMetadata(alias="costPlusMultiplier"), pydantic.Field(alias="costPlusMultiplier")
     ]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[UsageCostPlusInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[UsageCostPlusInputBillingFrequency],
         FieldMetadata(alias="billingFrequency"),

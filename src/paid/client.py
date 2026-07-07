@@ -9,17 +9,22 @@ from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .environment import PaidEnvironment
 
 if typing.TYPE_CHECKING:
+    from .analytics_experimental.client import AnalyticsExperimentalClient, AsyncAnalyticsExperimentalClient
     from .checkouts.client import AsyncCheckoutsClient, CheckoutsClient
     from .contacts.client import AsyncContactsClient, ContactsClient
     from .costs.client import AsyncCostsClient, CostsClient
     from .credits.client import AsyncCreditsClient, CreditsClient
+    from .custom_views_experimental.client import AsyncCustomViewsExperimentalClient, CustomViewsExperimentalClient
+    from .customer_groups.client import AsyncCustomerGroupsClient, CustomerGroupsClient
     from .customer_portals.client import AsyncCustomerPortalsClient, CustomerPortalsClient
     from .customers.client import AsyncCustomersClient, CustomersClient
     from .invoices.client import AsyncInvoicesClient, InvoicesClient
     from .orders.client import AsyncOrdersClient, OrdersClient
+    from .plans.client import AsyncPlansClient, PlansClient
     from .pricing.client import AsyncPricingClient, PricingClient
     from .products.client import AsyncProductsClient, ProductsClient
     from .signals.client import AsyncSignalsClient, SignalsClient
+    from .value_models.client import AsyncValueModelsClient, ValueModelsClient
     from .value_receipts.client import AsyncValueReceiptsClient, ValueReceiptsClient
     from .webhooks.client import AsyncWebhooksClient, WebhooksClient
 
@@ -90,6 +95,7 @@ class Paid:
             timeout=_defaulted_timeout,
         )
         self._products: typing.Optional[ProductsClient] = None
+        self._plans: typing.Optional[PlansClient] = None
         self._customers: typing.Optional[CustomersClient] = None
         self._contacts: typing.Optional[ContactsClient] = None
         self._orders: typing.Optional[OrdersClient] = None
@@ -102,6 +108,10 @@ class Paid:
         self._webhooks: typing.Optional[WebhooksClient] = None
         self._pricing: typing.Optional[PricingClient] = None
         self._costs: typing.Optional[CostsClient] = None
+        self._analytics_experimental: typing.Optional[AnalyticsExperimentalClient] = None
+        self._custom_views_experimental: typing.Optional[CustomViewsExperimentalClient] = None
+        self._value_models: typing.Optional[ValueModelsClient] = None
+        self._customer_groups: typing.Optional[CustomerGroupsClient] = None
 
     @property
     def products(self):
@@ -110,6 +120,14 @@ class Paid:
 
             self._products = ProductsClient(client_wrapper=self._client_wrapper)
         return self._products
+
+    @property
+    def plans(self):
+        if self._plans is None:
+            from .plans.client import PlansClient  # noqa: E402
+
+            self._plans = PlansClient(client_wrapper=self._client_wrapper)
+        return self._plans
 
     @property
     def customers(self):
@@ -207,6 +225,38 @@ class Paid:
             self._costs = CostsClient(client_wrapper=self._client_wrapper)
         return self._costs
 
+    @property
+    def analytics_experimental(self):
+        if self._analytics_experimental is None:
+            from .analytics_experimental.client import AnalyticsExperimentalClient  # noqa: E402
+
+            self._analytics_experimental = AnalyticsExperimentalClient(client_wrapper=self._client_wrapper)
+        return self._analytics_experimental
+
+    @property
+    def custom_views_experimental(self):
+        if self._custom_views_experimental is None:
+            from .custom_views_experimental.client import CustomViewsExperimentalClient  # noqa: E402
+
+            self._custom_views_experimental = CustomViewsExperimentalClient(client_wrapper=self._client_wrapper)
+        return self._custom_views_experimental
+
+    @property
+    def value_models(self):
+        if self._value_models is None:
+            from .value_models.client import ValueModelsClient  # noqa: E402
+
+            self._value_models = ValueModelsClient(client_wrapper=self._client_wrapper)
+        return self._value_models
+
+    @property
+    def customer_groups(self):
+        if self._customer_groups is None:
+            from .customer_groups.client import CustomerGroupsClient  # noqa: E402
+
+            self._customer_groups = CustomerGroupsClient(client_wrapper=self._client_wrapper)
+        return self._customer_groups
+
 
 class AsyncPaid:
     """
@@ -274,6 +324,7 @@ class AsyncPaid:
             timeout=_defaulted_timeout,
         )
         self._products: typing.Optional[AsyncProductsClient] = None
+        self._plans: typing.Optional[AsyncPlansClient] = None
         self._customers: typing.Optional[AsyncCustomersClient] = None
         self._contacts: typing.Optional[AsyncContactsClient] = None
         self._orders: typing.Optional[AsyncOrdersClient] = None
@@ -286,6 +337,10 @@ class AsyncPaid:
         self._webhooks: typing.Optional[AsyncWebhooksClient] = None
         self._pricing: typing.Optional[AsyncPricingClient] = None
         self._costs: typing.Optional[AsyncCostsClient] = None
+        self._analytics_experimental: typing.Optional[AsyncAnalyticsExperimentalClient] = None
+        self._custom_views_experimental: typing.Optional[AsyncCustomViewsExperimentalClient] = None
+        self._value_models: typing.Optional[AsyncValueModelsClient] = None
+        self._customer_groups: typing.Optional[AsyncCustomerGroupsClient] = None
 
     @property
     def products(self):
@@ -294,6 +349,14 @@ class AsyncPaid:
 
             self._products = AsyncProductsClient(client_wrapper=self._client_wrapper)
         return self._products
+
+    @property
+    def plans(self):
+        if self._plans is None:
+            from .plans.client import AsyncPlansClient  # noqa: E402
+
+            self._plans = AsyncPlansClient(client_wrapper=self._client_wrapper)
+        return self._plans
 
     @property
     def customers(self):
@@ -390,6 +453,38 @@ class AsyncPaid:
 
             self._costs = AsyncCostsClient(client_wrapper=self._client_wrapper)
         return self._costs
+
+    @property
+    def analytics_experimental(self):
+        if self._analytics_experimental is None:
+            from .analytics_experimental.client import AsyncAnalyticsExperimentalClient  # noqa: E402
+
+            self._analytics_experimental = AsyncAnalyticsExperimentalClient(client_wrapper=self._client_wrapper)
+        return self._analytics_experimental
+
+    @property
+    def custom_views_experimental(self):
+        if self._custom_views_experimental is None:
+            from .custom_views_experimental.client import AsyncCustomViewsExperimentalClient  # noqa: E402
+
+            self._custom_views_experimental = AsyncCustomViewsExperimentalClient(client_wrapper=self._client_wrapper)
+        return self._custom_views_experimental
+
+    @property
+    def value_models(self):
+        if self._value_models is None:
+            from .value_models.client import AsyncValueModelsClient  # noqa: E402
+
+            self._value_models = AsyncValueModelsClient(client_wrapper=self._client_wrapper)
+        return self._value_models
+
+    @property
+    def customer_groups(self):
+        if self._customer_groups is None:
+            from .customer_groups.client import AsyncCustomerGroupsClient  # noqa: E402
+
+            self._customer_groups = AsyncCustomerGroupsClient(client_wrapper=self._client_wrapper)
+        return self._customer_groups
 
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidEnvironment) -> str:

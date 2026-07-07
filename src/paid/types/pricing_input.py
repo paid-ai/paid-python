@@ -34,16 +34,22 @@ from .usage_bracketed_prepaid_credits_input_credit_unit_brackets_item import (
     UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem,
 )
 from .usage_bracketed_prepaid_credits_input_pricing_input import UsageBracketedPrepaidCreditsInputPricingInput
+from .usage_bracketed_prepaid_credits_input_signal_type import UsageBracketedPrepaidCreditsInputSignalType
 from .usage_cost_plus_input_billing_frequency import UsageCostPlusInputBillingFrequency
 from .usage_cost_plus_input_billing_type import UsageCostPlusInputBillingType
+from .usage_cost_plus_input_signal_type import UsageCostPlusInputSignalType
 from .usage_graduated_input_billing_frequency import UsageGraduatedInputBillingFrequency
 from .usage_graduated_input_billing_type import UsageGraduatedInputBillingType
+from .usage_graduated_input_signal_type import UsageGraduatedInputSignalType
 from .usage_per_unit_input_billing_frequency import UsagePerUnitInputBillingFrequency
 from .usage_per_unit_input_billing_type import UsagePerUnitInputBillingType
+from .usage_per_unit_input_signal_type import UsagePerUnitInputSignalType
 from .usage_prepaid_credits_input_billing_frequency import UsagePrepaidCreditsInputBillingFrequency
 from .usage_prepaid_credits_input_billing_type import UsagePrepaidCreditsInputBillingType
+from .usage_prepaid_credits_input_signal_type import UsagePrepaidCreditsInputSignalType
 from .usage_volume_input_billing_frequency import UsageVolumeInputBillingFrequency
 from .usage_volume_input_billing_type import UsageVolumeInputBillingType
+from .usage_volume_input_signal_type import UsageVolumeInputSignalType
 
 
 class PricingInput_RecurringPerUnit(UniversalBaseModel):
@@ -190,6 +196,11 @@ class PricingInput_UsagePerUnit(UniversalBaseModel):
         typing.Literal["UsagePerUnit"], FieldMetadata(alias="pricingType"), pydantic.Field(alias="pricingType")
     ] = "UsagePerUnit"
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[UsagePerUnitInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[UsagePerUnitInputBillingFrequency],
         FieldMetadata(alias="billingFrequency"),
@@ -224,6 +235,11 @@ class PricingInput_UsageGraduated(UniversalBaseModel):
         typing.Literal["UsageGraduated"], FieldMetadata(alias="pricingType"), pydantic.Field(alias="pricingType")
     ] = "UsageGraduated"
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[UsageGraduatedInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[UsageGraduatedInputBillingFrequency],
         FieldMetadata(alias="billingFrequency"),
@@ -258,6 +274,11 @@ class PricingInput_UsageVolume(UniversalBaseModel):
         typing.Literal["UsageVolume"], FieldMetadata(alias="pricingType"), pydantic.Field(alias="pricingType")
     ] = "UsageVolume"
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[UsageVolumeInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[UsageVolumeInputBillingFrequency],
         FieldMetadata(alias="billingFrequency"),
@@ -292,6 +313,11 @@ class PricingInput_UsagePrepaidCredits(UniversalBaseModel):
         typing.Literal["UsagePrepaidCredits"], FieldMetadata(alias="pricingType"), pydantic.Field(alias="pricingType")
     ] = "UsagePrepaidCredits"
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[UsagePrepaidCreditsInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     credits_currency_id: typing_extensions.Annotated[
         str, FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ]
@@ -339,6 +365,11 @@ class PricingInput_UsageBracketedPrepaidCredits(UniversalBaseModel):
         pydantic.Field(alias="pricingType"),
     ] = "UsageBracketedPrepaidCredits"
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[UsageBracketedPrepaidCreditsInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     credits_currency_id: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ] = None
@@ -401,6 +432,11 @@ class PricingInput_UsageCostPlus(UniversalBaseModel):
     cost_plus_multiplier: typing_extensions.Annotated[
         float, FieldMetadata(alias="costPlusMultiplier"), pydantic.Field(alias="costPlusMultiplier")
     ]
+    signal_type: typing_extensions.Annotated[
+        typing.Optional[UsageCostPlusInputSignalType],
+        FieldMetadata(alias="signalType"),
+        pydantic.Field(alias="signalType"),
+    ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[UsageCostPlusInputBillingFrequency],
         FieldMetadata(alias="billingFrequency"),
