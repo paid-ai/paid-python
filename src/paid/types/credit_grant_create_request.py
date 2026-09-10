@@ -18,9 +18,9 @@ class CreditGrantCreateRequest(UniversalBaseModel):
             description="Stable machine-readable key for the active credit currency to grant.",
         ),
     ]
-    amount: int = pydantic.Field()
+    amount: float = pydantic.Field()
     """
-    Number of credits to grant. This is not a monetary amount.
+    Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
     """
 
     starts_at: typing_extensions.Annotated[

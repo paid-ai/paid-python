@@ -17,12 +17,12 @@ class CreateOrderLineAttributeRequestPricingPricePoints(UniversalBaseModel):
     """
 
     currency: typing.Optional[str] = None
-    unit_price: typing_extensions.Annotated[float, FieldMetadata(alias="unitPrice"), pydantic.Field(alias="unitPrice")]
+    unit_price: typing_extensions.Annotated[int, FieldMetadata(alias="unitPrice"), pydantic.Field(alias="unitPrice")]
     min_quantity: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="minQuantity"), pydantic.Field(alias="minQuantity")
+        typing.Optional[int], FieldMetadata(alias="minQuantity"), pydantic.Field(alias="minQuantity")
     ] = None
     included_quantity: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="includedQuantity"), pydantic.Field(alias="includedQuantity")
+        typing.Optional[int], FieldMetadata(alias="includedQuantity"), pydantic.Field(alias="includedQuantity")
     ] = None
     tiers: typing.Optional[typing.List[CreateOrderLineAttributeRequestPricingPricePointsTiersItem]] = None
 

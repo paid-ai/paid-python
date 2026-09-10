@@ -7,7 +7,9 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .custom_view_detail_period import CustomViewDetailPeriod
+from .custom_view_detail_scope import CustomViewDetailScope
 from .custom_view_detail_status import CustomViewDetailStatus
+from .custom_view_filter import CustomViewFilter
 
 
 class CustomViewDetail(UniversalBaseModel):
@@ -31,6 +33,16 @@ class CustomViewDetail(UniversalBaseModel):
     period: typing.Optional[CustomViewDetailPeriod] = pydantic.Field(default=None)
     """
     The view's current default date range, or null if it uses no adjustable period.
+    """
+
+    filters: typing.Optional[typing.List[CustomViewFilter]] = pydantic.Field(default=None)
+    """
+    The filter parameters this view accepts per request (pass values as `filter_<name>` query params on the data endpoint), or null if it declares none. Embedding hosts can render controls from the declared values.
+    """
+
+    scope: CustomViewDetailScope = pydantic.Field()
+    """
+    'customer': data is scoped to one viewing customer and the view is embeddable per-customer. 'organization': data is org-wide and the view is internal-only.
     """
 
     if IS_PYDANTIC_V2:

@@ -9,11 +9,17 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .attribution import Attribution
 from .customer_attribution import CustomerAttribution
+from .customer_unit_attribution import CustomerUnitAttribution
 
 
 class Signal(UniversalBaseModel):
     event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
     customer: CustomerAttribution
+    customer_unit: typing_extensions.Annotated[
+        typing.Optional[CustomerUnitAttribution],
+        FieldMetadata(alias="customerUnit"),
+        pydantic.Field(alias="customerUnit"),
+    ] = None
     attribution: typing.Optional[Attribution] = None
     timestamp: typing.Optional[dt.datetime] = pydantic.Field(default=None)
     """

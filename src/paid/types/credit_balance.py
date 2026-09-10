@@ -23,11 +23,19 @@ class CreditBalance(UniversalBaseModel):
     ]
     available: float = pydantic.Field()
     """
-    Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available).
+    Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available). JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
     """
 
-    used: float
-    total: float
+    used: float = pydantic.Field()
+    """
+    JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+    """
+
+    total: float = pydantic.Field()
+    """
+    JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+    """
+
     period_start: typing_extensions.Annotated[
         typing.Optional[dt.datetime],
         FieldMetadata(alias="periodStart"),

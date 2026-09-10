@@ -9,6 +9,8 @@ from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .environment import PaidEnvironment
 
 if typing.TYPE_CHECKING:
+    from .amendments.client import AmendmentsClient, AsyncAmendmentsClient
+    from .analytics.client import AnalyticsClient, AsyncAnalyticsClient
     from .analytics_experimental.client import AnalyticsExperimentalClient, AsyncAnalyticsExperimentalClient
     from .checkouts.client import AsyncCheckoutsClient, CheckoutsClient
     from .contacts.client import AsyncContactsClient, ContactsClient
@@ -20,10 +22,14 @@ if typing.TYPE_CHECKING:
     from .customers.client import AsyncCustomersClient, CustomersClient
     from .invoices.client import AsyncInvoicesClient, InvoicesClient
     from .orders.client import AsyncOrdersClient, OrdersClient
+    from .payment_allocations.client import AsyncPaymentAllocationsClient, PaymentAllocationsClient
+    from .payment_methods.client import AsyncPaymentMethodsClient, PaymentMethodsClient
+    from .payments.client import AsyncPaymentsClient, PaymentsClient
     from .plans.client import AsyncPlansClient, PlansClient
     from .pricing.client import AsyncPricingClient, PricingClient
     from .products.client import AsyncProductsClient, ProductsClient
     from .signals.client import AsyncSignalsClient, SignalsClient
+    from .value_metrics.client import AsyncValueMetricsClient, ValueMetricsClient
     from .value_models.client import AsyncValueModelsClient, ValueModelsClient
     from .value_receipts.client import AsyncValueReceiptsClient, ValueReceiptsClient
     from .webhooks.client import AsyncWebhooksClient, WebhooksClient
@@ -108,10 +114,16 @@ class Paid:
         self._webhooks: typing.Optional[WebhooksClient] = None
         self._pricing: typing.Optional[PricingClient] = None
         self._costs: typing.Optional[CostsClient] = None
-        self._analytics_experimental: typing.Optional[AnalyticsExperimentalClient] = None
+        self._analytics: typing.Optional[AnalyticsClient] = None
         self._custom_views_experimental: typing.Optional[CustomViewsExperimentalClient] = None
         self._value_models: typing.Optional[ValueModelsClient] = None
+        self._value_metrics: typing.Optional[ValueMetricsClient] = None
         self._customer_groups: typing.Optional[CustomerGroupsClient] = None
+        self._payment_methods: typing.Optional[PaymentMethodsClient] = None
+        self._payments: typing.Optional[PaymentsClient] = None
+        self._payment_allocations: typing.Optional[PaymentAllocationsClient] = None
+        self._amendments: typing.Optional[AmendmentsClient] = None
+        self._analytics_experimental: typing.Optional[AnalyticsExperimentalClient] = None
 
     @property
     def products(self):
@@ -226,12 +238,12 @@ class Paid:
         return self._costs
 
     @property
-    def analytics_experimental(self):
-        if self._analytics_experimental is None:
-            from .analytics_experimental.client import AnalyticsExperimentalClient  # noqa: E402
+    def analytics(self):
+        if self._analytics is None:
+            from .analytics.client import AnalyticsClient  # noqa: E402
 
-            self._analytics_experimental = AnalyticsExperimentalClient(client_wrapper=self._client_wrapper)
-        return self._analytics_experimental
+            self._analytics = AnalyticsClient(client_wrapper=self._client_wrapper)
+        return self._analytics
 
     @property
     def custom_views_experimental(self):
@@ -250,12 +262,60 @@ class Paid:
         return self._value_models
 
     @property
+    def value_metrics(self):
+        if self._value_metrics is None:
+            from .value_metrics.client import ValueMetricsClient  # noqa: E402
+
+            self._value_metrics = ValueMetricsClient(client_wrapper=self._client_wrapper)
+        return self._value_metrics
+
+    @property
     def customer_groups(self):
         if self._customer_groups is None:
             from .customer_groups.client import CustomerGroupsClient  # noqa: E402
 
             self._customer_groups = CustomerGroupsClient(client_wrapper=self._client_wrapper)
         return self._customer_groups
+
+    @property
+    def payment_methods(self):
+        if self._payment_methods is None:
+            from .payment_methods.client import PaymentMethodsClient  # noqa: E402
+
+            self._payment_methods = PaymentMethodsClient(client_wrapper=self._client_wrapper)
+        return self._payment_methods
+
+    @property
+    def payments(self):
+        if self._payments is None:
+            from .payments.client import PaymentsClient  # noqa: E402
+
+            self._payments = PaymentsClient(client_wrapper=self._client_wrapper)
+        return self._payments
+
+    @property
+    def payment_allocations(self):
+        if self._payment_allocations is None:
+            from .payment_allocations.client import PaymentAllocationsClient  # noqa: E402
+
+            self._payment_allocations = PaymentAllocationsClient(client_wrapper=self._client_wrapper)
+        return self._payment_allocations
+
+    @property
+    def amendments(self):
+        if self._amendments is None:
+            from .amendments.client import AmendmentsClient  # noqa: E402
+
+            self._amendments = AmendmentsClient(client_wrapper=self._client_wrapper)
+        return self._amendments
+
+    @property
+    def analytics_experimental(self):
+        if self._analytics_experimental is None:
+            from .analytics_experimental.client import AnalyticsExperimentalClient  # noqa: E402
+
+            self._analytics_experimental = AnalyticsExperimentalClient(client_wrapper=self._client_wrapper)
+        return self._analytics_experimental
 
 
 class AsyncPaid:
@@ -337,10 +397,16 @@ class AsyncPaid:
         self._webhooks: typing.Optional[AsyncWebhooksClient] = None
         self._pricing: typing.Optional[AsyncPricingClient] = None
         self._costs: typing.Optional[AsyncCostsClient] = None
-        self._analytics_experimental: typing.Optional[AsyncAnalyticsExperimentalClient] = None
+        self._analytics: typing.Optional[AsyncAnalyticsClient] = None
         self._custom_views_experimental: typing.Optional[AsyncCustomViewsExperimentalClient] = None
         self._value_models: typing.Optional[AsyncValueModelsClient] = None
+        self._value_metrics: typing.Optional[AsyncValueMetricsClient] = None
         self._customer_groups: typing.Optional[AsyncCustomerGroupsClient] = None
+        self._payment_methods: typing.Optional[AsyncPaymentMethodsClient] = None
+        self._payments: typing.Optional[AsyncPaymentsClient] = None
+        self._payment_allocations: typing.Optional[AsyncPaymentAllocationsClient] = None
+        self._amendments: typing.Optional[AsyncAmendmentsClient] = None
+        self._analytics_experimental: typing.Optional[AsyncAnalyticsExperimentalClient] = None
 
     @property
     def products(self):
@@ -455,12 +521,12 @@ class AsyncPaid:
         return self._costs
 
     @property
-    def analytics_experimental(self):
-        if self._analytics_experimental is None:
-            from .analytics_experimental.client import AsyncAnalyticsExperimentalClient  # noqa: E402
+    def analytics(self):
+        if self._analytics is None:
+            from .analytics.client import AsyncAnalyticsClient  # noqa: E402
 
-            self._analytics_experimental = AsyncAnalyticsExperimentalClient(client_wrapper=self._client_wrapper)
-        return self._analytics_experimental
+            self._analytics = AsyncAnalyticsClient(client_wrapper=self._client_wrapper)
+        return self._analytics
 
     @property
     def custom_views_experimental(self):
@@ -479,12 +545,60 @@ class AsyncPaid:
         return self._value_models
 
     @property
+    def value_metrics(self):
+        if self._value_metrics is None:
+            from .value_metrics.client import AsyncValueMetricsClient  # noqa: E402
+
+            self._value_metrics = AsyncValueMetricsClient(client_wrapper=self._client_wrapper)
+        return self._value_metrics
+
+    @property
     def customer_groups(self):
         if self._customer_groups is None:
             from .customer_groups.client import AsyncCustomerGroupsClient  # noqa: E402
 
             self._customer_groups = AsyncCustomerGroupsClient(client_wrapper=self._client_wrapper)
         return self._customer_groups
+
+    @property
+    def payment_methods(self):
+        if self._payment_methods is None:
+            from .payment_methods.client import AsyncPaymentMethodsClient  # noqa: E402
+
+            self._payment_methods = AsyncPaymentMethodsClient(client_wrapper=self._client_wrapper)
+        return self._payment_methods
+
+    @property
+    def payments(self):
+        if self._payments is None:
+            from .payments.client import AsyncPaymentsClient  # noqa: E402
+
+            self._payments = AsyncPaymentsClient(client_wrapper=self._client_wrapper)
+        return self._payments
+
+    @property
+    def payment_allocations(self):
+        if self._payment_allocations is None:
+            from .payment_allocations.client import AsyncPaymentAllocationsClient  # noqa: E402
+
+            self._payment_allocations = AsyncPaymentAllocationsClient(client_wrapper=self._client_wrapper)
+        return self._payment_allocations
+
+    @property
+    def amendments(self):
+        if self._amendments is None:
+            from .amendments.client import AsyncAmendmentsClient  # noqa: E402
+
+            self._amendments = AsyncAmendmentsClient(client_wrapper=self._client_wrapper)
+        return self._amendments
+
+    @property
+    def analytics_experimental(self):
+        if self._analytics_experimental is None:
+            from .analytics_experimental.client import AsyncAnalyticsExperimentalClient  # noqa: E402
+
+            self._analytics_experimental = AsyncAnalyticsExperimentalClient(client_wrapper=self._client_wrapper)
+        return self._analytics_experimental
 
 
 def _get_base_url(*, base_url: typing.Optional[str] = None, environment: PaidEnvironment) -> str:

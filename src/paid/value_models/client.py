@@ -85,6 +85,8 @@ class ValueModelsClient:
 
         Examples
         --------
+        import datetime
+
         from paid import (
             Paid,
             ValueModelContent,
@@ -92,7 +94,9 @@ class ValueModelsClient:
             ValueModelContentFormulasItemVariablesItem,
             ValueModelContentSignalsItem,
             ValueModelContentValueTypesItem,
-            ValueModelContentValueTypesItemUnitZero,
+            ValueModelContentValueTypesItemCalculationTimelineItem,
+            ValueModelContentValueTypesItemCalculationTimelineItemCalculation,
+            ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZero,
         )
 
         client = Paid(
@@ -105,9 +109,22 @@ class ValueModelsClient:
                     ValueModelContentValueTypesItem(
                         slug="slug",
                         name="name",
-                        unit=ValueModelContentValueTypesItemUnitZero(
-                            type="monetary",
-                        ),
+                        calculation_timeline=[
+                            ValueModelContentValueTypesItemCalculationTimelineItem(
+                                effective_from=datetime.datetime.fromisoformat(
+                                    "2024-01-15 09:30:00+00:00",
+                                ),
+                                calculation=ValueModelContentValueTypesItemCalculationTimelineItemCalculation(
+                                    unit=ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZero(
+                                        type="monetary",
+                                    ),
+                                    formula_ids=["formulaIds"],
+                                    signal_event_names=["signalEventNames"],
+                                    segment_table_ids=["segmentTableIds"],
+                                    override_ids=["overrideIds"],
+                                ),
+                            )
+                        ],
                     )
                 ],
                 formulas=[
@@ -318,6 +335,7 @@ class AsyncValueModelsClient:
         Examples
         --------
         import asyncio
+        import datetime
 
         from paid import (
             AsyncPaid,
@@ -326,7 +344,9 @@ class AsyncValueModelsClient:
             ValueModelContentFormulasItemVariablesItem,
             ValueModelContentSignalsItem,
             ValueModelContentValueTypesItem,
-            ValueModelContentValueTypesItemUnitZero,
+            ValueModelContentValueTypesItemCalculationTimelineItem,
+            ValueModelContentValueTypesItemCalculationTimelineItemCalculation,
+            ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZero,
         )
 
         client = AsyncPaid(
@@ -342,9 +362,22 @@ class AsyncValueModelsClient:
                         ValueModelContentValueTypesItem(
                             slug="slug",
                             name="name",
-                            unit=ValueModelContentValueTypesItemUnitZero(
-                                type="monetary",
-                            ),
+                            calculation_timeline=[
+                                ValueModelContentValueTypesItemCalculationTimelineItem(
+                                    effective_from=datetime.datetime.fromisoformat(
+                                        "2024-01-15 09:30:00+00:00",
+                                    ),
+                                    calculation=ValueModelContentValueTypesItemCalculationTimelineItemCalculation(
+                                        unit=ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZero(
+                                            type="monetary",
+                                        ),
+                                        formula_ids=["formulaIds"],
+                                        signal_event_names=["signalEventNames"],
+                                        segment_table_ids=["segmentTableIds"],
+                                        override_ids=["overrideIds"],
+                                    ),
+                                )
+                            ],
                         )
                     ],
                     formulas=[

@@ -64,6 +64,30 @@ client.products.list_products()
 <dl>
 <dd>
 
+**name:** `typing.Optional[str]` — Search by product name (case-insensitive, matches anywhere in the name).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**active:** `typing.Optional[bool]` — Filter by the product's active flag: true or false.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**archived:** `typing.Optional[bool]` — Filter by archived state: true returns only archived products, false only non-archived. Omit to include both.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -88,7 +112,7 @@ client.products.list_products()
 <dl>
 <dd>
 
-Creates a new product for the organization
+Creates a new product for the organization. Products are created without pricing: to create product attributes and set their pricing, call the update product endpoint (updateProductById / updateProductByExternalId), which upserts productAttributes.
 </dd>
 </dl>
 </dd>
@@ -268,7 +292,7 @@ client.products.get_product_by_id(
 <dl>
 <dd>
 
-Update a product by ID. Optionally upsert product attributes with pricing.
+Update a product by ID. Also creates and edits product attributes: productAttributes upserts attributes and sets their pricing (metering event, price points, credit brackets). This is the endpoint to use to add pricing to a product created without any.
 </dd>
 </dl>
 </dd>
@@ -464,7 +488,7 @@ client.products.get_product_by_external_id(
 <dl>
 <dd>
 
-Update a product by external ID. Optionally upsert product attributes with pricing.
+Update a product by external ID. Also creates and edits product attributes: productAttributes upserts attributes and sets their pricing (metering event, price points, credit brackets). This is the endpoint to use to add pricing to a product created without any.
 </dd>
 </dl>
 </dd>
@@ -726,7 +750,7 @@ client.plans.create_plan(
                 price_points=[
                     ProductSimplePricePoint(
                         currency="USD",
-                        unit_price=99.0,
+                        unit_price=99,
                     )
                 ],
             ),
@@ -1325,6 +1349,54 @@ client.customers.list_customers()
 <dd>
 
 **offset:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `typing.Optional[str]` — Search by customer name (case-insensitive, matches anywhere in the name).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[ListCustomersRequestStatus]` — Filter by customer status. churned: customers marked as churned. active: everyone else.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**creation_state:** `typing.Optional[ListCustomersRequestCreationState]` — Filter by creation state: draft or active.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**created_at_from:** `typing.Optional[str]` — Only customers created on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**created_at_to:** `typing.Optional[str]` — Only customers created on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_id:** `typing.Optional[str]` — Filter by your external customer ID (exact match).
     
 </dd>
 </dl>
@@ -2857,7 +2929,7 @@ client = Paid(
 client.customers.grant_customer_credits(
     id="cus_abc123",
     credit_currency_key="api_credits",
-    amount=10000,
+    amount=10000.0,
     starts_at=datetime.datetime.fromisoformat(
         "2026-06-05 12:00:00+00:00",
     ),
@@ -2896,7 +2968,7 @@ client.customers.grant_customer_credits(
 <dl>
 <dd>
 
-**amount:** `int` — Number of credits to grant. This is not a monetary amount.
+**amount:** `float` — Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
     
 </dd>
 </dl>
@@ -3002,6 +3074,178 @@ client.customers.get_customer_credit_balances_by_external_id(
 </dl>
 </details>
 
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">list_customer_pending_credit_consumption</a>(...) -&gt; AsyncHttpResponse[PendingCreditConsumptionListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+List credit consumption that was recorded before a matching credit pool existed — for example usage that arrived before an invoice was paid or before a new period's credits were granted. Entries leave this list once they are applied to a pool or settled. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `/api/v2/customers/external/{externalId}/credits/pending-consumption`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.list_customer_pending_credit_consumption(
+    id="cus_abc123",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">list_customer_pending_credit_consumption_by_external_id</a>(...) -&gt; AsyncHttpResponse[PendingCreditConsumptionListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+List credit consumption recorded before a matching credit pool existed, for a customer looked up by external ID.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.list_customer_pending_credit_consumption_by_external_id(
+    external_id="customer_123",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**external_id:** `str` — Customer ID from the integrator's system, stored on Paid as `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.customers.<a href="src/paid/customers/client.py">grant_customer_credits_by_external_id</a>(...) -&gt; AsyncHttpResponse[GrantCustomerCreditsResponse]</code></summary>
 <dl>
 <dd>
@@ -3039,7 +3283,7 @@ client = Paid(
 client.customers.grant_customer_credits_by_external_id(
     external_id="customer_123",
     credit_currency_key="api_credits",
-    amount=10000,
+    amount=10000.0,
     starts_at=datetime.datetime.fromisoformat(
         "2026-06-05 12:00:00+00:00",
     ),
@@ -3078,7 +3322,7 @@ client.customers.grant_customer_credits_by_external_id(
 <dl>
 <dd>
 
-**amount:** `int` — Number of credits to grant. This is not a monetary amount.
+**amount:** `float` — Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
     
 </dd>
 </dl>
@@ -3206,6 +3450,1564 @@ client.customers.upsert_customer_user_by_external_id(
 <dd>
 
 **status:** `typing.Optional[CustomerUserStatus]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">list_customer_units_by_external_id</a>(...) -&gt; AsyncHttpResponse[CustomerUnitListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the customer's units as a flat list, newest last; assemble the tree from `parentExternalId` (`null` on the root unit, `isRoot: true`). Deleted units are hidden unless `status=DELETED` is given. Filter by `externalType`, or by `parentExternalId` for one level of the tree. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.list_customer_units_by_external_id(
+    external_id="customer_123",
+    parent_external_id="dept-rnd",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**external_id:** `str` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[ListCustomerUnitsByExternalIdRequestStatus]` — Filter by status (default ACTIVE).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_type:** `typing.Optional[str]` — Filter by external type.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**parent_external_id:** `typing.Optional[str]` — Your external ID of the parent unit; lists its direct children.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">create_customer_unit_by_external_id</a>(...) -&gt; AsyncHttpResponse[CustomerUnit]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a unit for this customer. `externalId` is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and `name` defaults to it. Omit `parentExternalId` to create the customer's root unit (its first unit; `409 ROOT_EXISTS` if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (`409 PARENT_NOT_FOUND`) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. `409` also when the externalId is taken (`CUSTOMER_UNIT_EXISTS`), the tree would get too deep, or the customer is on seat-based billing. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.create_customer_unit_by_external_id(
+    external_id_="customer_123",
+    external_id="team-research",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**external_id_:** `str` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_id:** `str` — Your own id for the unit: required, unique within the customer, immutable, at most 255 characters. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (`customerUnit.externalCustomerUnitId`). Cannot be `.` or `..`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `typing.Optional[str]` — Display name (defaults to the external ID).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_type:** `typing.Optional[str]` — Your structural vocabulary for the unit (`department`, `tenant`, `team`, ...). Free text; filterable; Paid never branches on it.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**parent_external_id:** `typing.Optional[str]` — Your external ID of the parent unit; omit it to create the root unit.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**metadata:** `typing.Optional[typing.Dict[str, typing.Any]]` — Freeform JSON for your own use.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">get_customer_unit_by_external_id</a>(...) -&gt; AsyncHttpResponse[CustomerUnit]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns one unit of this customer by its `externalId`, including a deleted one. `404` when the unit does not exist or belongs to another customer. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.get_customer_unit_by_external_id(
+    external_id="customer_123",
+    external_customer_unit_id="team-research",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**external_id:** `str` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_unit_id:** `str` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">delete_customer_unit_by_external_id</a>(...) -&gt; AsyncHttpResponse[CustomerUnit]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Soft-deletes a unit: it stays readable with `status: DELETED` and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. `409` while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.delete_customer_unit_by_external_id(
+    external_id="customer_123",
+    external_customer_unit_id="team-research",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**external_id:** `str` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_unit_id:** `str` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">update_customer_unit_by_external_id</a>(...) -&gt; AsyncHttpResponse[CustomerUnit]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Renames, re-types, re-parents or annotates a unit, the root included. `externalId` cannot change. Re-parenting (`parentExternalId`) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. `409` for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (`ROOT_UNIT_IMMOVABLE`), a move under the unit's own subtree, or a tree that would get too deep. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.update_customer_unit_by_external_id(
+    external_id="customer_123",
+    external_customer_unit_id="team-research",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**external_id:** `str` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_unit_id:** `str` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `typing.Optional[str]` — Display name. Never used to address the unit.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_type:** `typing.Optional[str]` — Your structural vocabulary for the unit (`department`, `tenant`, `team`, ...). Free text; filterable; Paid never branches on it.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**parent_external_id:** `typing.Optional[str]` — Your external ID of the new parent unit; moves the unit and its subtree.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**metadata:** `typing.Optional[typing.Dict[str, typing.Any]]` — Freeform JSON for your own use.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">list_customer_units</a>(...) -&gt; AsyncHttpResponse[CustomerUnitListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the customer's units as a flat list, newest last; assemble the tree from `parentExternalId` (`null` on the root unit, `isRoot: true`). Deleted units are hidden unless `status=DELETED` is given. Filter by `externalType`, or by `parentExternalId` for one level of the tree. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.list_customer_units(
+    id="cus_abc123",
+    parent_external_id="dept-rnd",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[ListCustomerUnitsRequestStatus]` — Filter by status (default ACTIVE).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_type:** `typing.Optional[str]` — Filter by external type.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**parent_external_id:** `typing.Optional[str]` — Your external ID of the parent unit; lists its direct children.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">create_customer_unit</a>(...) -&gt; AsyncHttpResponse[CustomerUnit]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a unit for this customer. `externalId` is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and `name` defaults to it. Omit `parentExternalId` to create the customer's root unit (its first unit; `409 ROOT_EXISTS` if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (`409 PARENT_NOT_FOUND`) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. `409` also when the externalId is taken (`CUSTOMER_UNIT_EXISTS`), the tree would get too deep, or the customer is on seat-based billing. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.create_customer_unit(
+    id="cus_abc123",
+    external_id="team-research",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_id:** `str` — Your own id for the unit: required, unique within the customer, immutable, at most 255 characters. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (`customerUnit.externalCustomerUnitId`). Cannot be `.` or `..`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `typing.Optional[str]` — Display name (defaults to the external ID).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_type:** `typing.Optional[str]` — Your structural vocabulary for the unit (`department`, `tenant`, `team`, ...). Free text; filterable; Paid never branches on it.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**parent_external_id:** `typing.Optional[str]` — Your external ID of the parent unit; omit it to create the root unit.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**metadata:** `typing.Optional[typing.Dict[str, typing.Any]]` — Freeform JSON for your own use.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">get_customer_unit</a>(...) -&gt; AsyncHttpResponse[CustomerUnit]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns one unit of this customer by its `externalId`, including a deleted one. `404` when the unit does not exist or belongs to another customer. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.get_customer_unit(
+    id="cus_abc123",
+    external_customer_unit_id="team-research",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_unit_id:** `str` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">delete_customer_unit</a>(...) -&gt; AsyncHttpResponse[CustomerUnit]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Soft-deletes a unit: it stays readable with `status: DELETED` and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. `409` while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.delete_customer_unit(
+    id="cus_abc123",
+    external_customer_unit_id="team-research",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_unit_id:** `str` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">update_customer_unit</a>(...) -&gt; AsyncHttpResponse[CustomerUnit]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Renames, re-types, re-parents or annotates a unit, the root included. `externalId` cannot change. Re-parenting (`parentExternalId`) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. `409` for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (`ROOT_UNIT_IMMOVABLE`), a move under the unit's own subtree, or a tree that would get too deep. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.update_customer_unit(
+    id="cus_abc123",
+    external_customer_unit_id="team-research",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_unit_id:** `str` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `typing.Optional[str]` — Display name. Never used to address the unit.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_type:** `typing.Optional[str]` — Your structural vocabulary for the unit (`department`, `tenant`, `team`, ...). Free text; filterable; Paid never branches on it.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**parent_external_id:** `typing.Optional[str]` — Your external ID of the new parent unit; moves the unit and its subtree.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**metadata:** `typing.Optional[typing.Dict[str, typing.Any]]` — Freeform JSON for your own use.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">get_customer_unit_cap_by_external_id</a>(...) -&gt; AsyncHttpResponse[CustomerUnitCapResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with `creditsCurrencyId`; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. `404` when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.get_customer_unit_cap_by_external_id(
+    external_id="customer_123",
+    external_customer_unit_id="tenant-a",
+    credits_currency_id="7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**external_id:** `str` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_unit_id:** `str` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**credits_currency_id:** `typing.Optional[str]` — The credits currency to read. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">set_customer_unit_cap_by_external_id</a>(...) -&gt; AsyncHttpResponse[CustomerUnitCapSetResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Sets the cap on this customer unit for one credits currency by recording a new cap version; earlier versions are kept and never modified, and the newest version wins where they overlap. The new version applies from `effectiveFrom` (default now) and its periods are anchored on that day of the month. Select the currency with `creditsCurrencyId` in the body; it may be omitted only when the organization has exactly one credits currency. A cap on the customer's root unit is the customer-wide cap. `404` when the customer or the unit does not exist. `409` for customers on seat-based billing. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.set_customer_unit_cap_by_external_id(
+    external_id="customer_123",
+    external_customer_unit_id="tenant-a",
+    amount=10000.0,
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**external_id:** `str` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_unit_id:** `str` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**amount:** `float` — The cap, in credits of the currency, per period. Must be positive.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**frequency:** `typing.Optional[CustomerUnitCapSetFrequency]` — Period length. Periods start on the day-of-month of `effectiveFrom` (UTC), clamped in shorter months.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**credits_currency_id:** `typing.Optional[str]` — The credits currency to cap. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**effective_from:** `typing.Optional[dt.datetime]` — ISO 8601 timestamp. When the cap starts applying and the anchor day for its periods (UTC). Defaults to now when omitted. Spend earlier in the period that contains it still counts toward the cap.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">end_customer_unit_cap_by_external_id</a>(...) -&gt; AsyncHttpResponse[CustomerUnitCapEndResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Ends the cap on this customer unit for one credits currency by setting `effectiveUntil` to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with `creditsCurrencyId`; it may be omitted only when the organization has exactly one credits currency. `404` when the customer or the unit does not exist, or there is no open version for that currency. Addresses the customer by your external customer id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.end_customer_unit_cap_by_external_id(
+    external_id="customer_123",
+    external_customer_unit_id="tenant-a",
+    credits_currency_id="7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**external_id:** `str` — Customer ID from your system, stored on Paid as the customer's `externalId`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_unit_id:** `str` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**credits_currency_id:** `typing.Optional[str]` — The credits currency whose cap to end. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">get_customer_unit_cap</a>(...) -&gt; AsyncHttpResponse[CustomerUnitCapResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with `creditsCurrencyId`; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. `404` when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.get_customer_unit_cap(
+    id="cus_abc123",
+    external_customer_unit_id="tenant-a",
+    credits_currency_id="7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_unit_id:** `str` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**credits_currency_id:** `typing.Optional[str]` — The credits currency to read. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">set_customer_unit_cap</a>(...) -&gt; AsyncHttpResponse[CustomerUnitCapSetResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Sets the cap on this customer unit for one credits currency by recording a new cap version; earlier versions are kept and never modified, and the newest version wins where they overlap. The new version applies from `effectiveFrom` (default now) and its periods are anchored on that day of the month. Select the currency with `creditsCurrencyId` in the body; it may be omitted only when the organization has exactly one credits currency. A cap on the customer's root unit is the customer-wide cap. `404` when the customer or the unit does not exist. `409` for customers on seat-based billing. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.set_customer_unit_cap(
+    id="cus_abc123",
+    external_customer_unit_id="tenant-a",
+    amount=10000.0,
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_unit_id:** `str` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**amount:** `float` — The cap, in credits of the currency, per period. Must be positive.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**frequency:** `typing.Optional[CustomerUnitCapSetFrequency]` — Period length. Periods start on the day-of-month of `effectiveFrom` (UTC), clamped in shorter months.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**credits_currency_id:** `typing.Optional[str]` — The credits currency to cap. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**effective_from:** `typing.Optional[dt.datetime]` — ISO 8601 timestamp. When the cap starts applying and the anchor day for its periods (UTC). Defaults to now when omitted. Spend earlier in the period that contains it still counts toward the cap.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.customers.<a href="src/paid/customers/client.py">end_customer_unit_cap</a>(...) -&gt; AsyncHttpResponse[CustomerUnitCapEndResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Ends the cap on this customer unit for one credits currency by setting `effectiveUntil` to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with `creditsCurrencyId`; it may be omitted only when the organization has exactly one credits currency. `404` when the customer or the unit does not exist, or there is no open version for that currency. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.customers.end_customer_unit_cap(
+    id="cus_abc123",
+    external_customer_unit_id="tenant-a",
+    credits_currency_id="7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Paid customer display id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_unit_id:** `str` — Your own id for the unit (its `externalId`), unique within this customer.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**credits_currency_id:** `typing.Optional[str]` — The credits currency whose cap to end. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
     
 </dd>
 </dl>
@@ -4035,6 +5837,78 @@ client.orders.list_orders()
 <dd>
 
 **offset:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**customer_id:** `typing.Optional[str]` — Filter by customer ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_id:** `typing.Optional[str]` — Filter by customer external ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_id:** `typing.Optional[str]` — Filter by the order's external ID (exact match).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**creation_state:** `typing.Optional[ListOrdersRequestCreationState]` — Filter by creation state: draft or active.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[OrderStatusFilter]` — Filter by derived order status. draft: not yet activated. paused: billing is paused. ended: end date is in the past. active: activated, not paused, and not ended.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**start_date_from:** `typing.Optional[str]` — Only orders whose start date is on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**start_date_to:** `typing.Optional[str]` — Only orders whose start date is on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**end_date_from:** `typing.Optional[str]` — Only orders whose end date is on or after this date. Orders without an end date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**end_date_to:** `typing.Optional[str]` — Only orders whose end date is on or before this date. Orders without an end date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
     
 </dd>
 </dl>
@@ -5092,6 +6966,102 @@ client.invoices.list_invoices()
 <dl>
 <dd>
 
+**customer_id:** `typing.Optional[str]` — Filter by customer ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_id:** `typing.Optional[str]` — Filter by customer external ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order_id:** `typing.Optional[str]` — Filter by the order this invoice was generated from.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[ListInvoicesRequestStatus]` — Filter by invoice status.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**payment_status:** `typing.Optional[ListInvoicesRequestPaymentStatus]` — Filter by payment status.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**issue_date_from:** `typing.Optional[str]` — Only invoices whose issue date is on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**issue_date_to:** `typing.Optional[str]` — Only invoices whose issue date is on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**due_date_from:** `typing.Optional[str]` — Only invoices whose due date is on or after this date. Invoices without a due date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**due_date_to:** `typing.Optional[str]` — Only invoices whose due date is on or before this date. Invoices without a due date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**display_number:** `typing.Optional[str]` — Filter by the invoice number shown on the invoice, whether draft or posted (exact match).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**purchase_order_reference:** `typing.Optional[str]` — Filter by purchase order reference (exact match, whitespace-sensitive).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**currency:** `typing.Optional[str]` — Filter by invoice currency code (case-insensitive, e.g. USD).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -5339,6 +7309,208 @@ client.invoices.get_invoice_lines(
 </details>
 
 ## Signals
+<details><summary><code>client.signals.<a href="src/paid/signals/client.py">list_signals</a>(...) -&gt; AsyncHttpResponse[SignalListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns ingested signals (usage events) for your organization, newest first. Filter by signal name, customer, product, and creation date range.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.signals.list_signals()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**signal_name:** `typing.Optional[str]` — Filter by signal event name (exact match).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**customer_id:** `typing.Optional[str]` — Filter by the Paid customer ID the signal is attributed to.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_id:** `typing.Optional[str]` — Filter by your external customer ID. Aliases resolve to the attributed customer, and unresolved IDs match raw ingest data.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**product_id:** `typing.Optional[str]` — Filter by the Paid product ID the signal is attributed to.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_product_id:** `typing.Optional[str]` — Filter by your external product ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**created_at_from:** `typing.Optional[str]` — Only signals created on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**created_at_to:** `typing.Optional[str]` — Only signals created on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.signals.<a href="src/paid/signals/client.py">get_signal_by_id</a>(...) -&gt; AsyncHttpResponse[SignalListItem]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.signals.get_signal_by_id(
+    id="6890b0e2a6f2c30012f0a1b3",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — Signal ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.signals.<a href="src/paid/signals/client.py">create_signals</a>(...) -&gt; AsyncHttpResponse[BulkSignalsResponse]</code></summary>
 <dl>
 <dd>
@@ -5554,6 +7726,146 @@ client.credits.create_credit_currency(
 <dd>
 
 **description:** `typing.Optional[str]` — Optional description for this credit currency.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.credits.<a href="src/paid/credits/client.py">list_credit_transactions</a>(...) -&gt; AsyncHttpResponse[CreditTransactionListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.credits.list_credit_transactions()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**customer_id:** `typing.Optional[str]` — Filter by customer ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_id:** `typing.Optional[str]` — Filter by customer external ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**credits_currency_id:** `typing.Optional[str]` — Filter by credit currency ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**credit_currency_key:** `typing.Optional[str]` — Filter by the stable machine-readable key of the credit currency.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**type:** `typing.Optional[ListCreditTransactionsRequestType]` — Filter by transaction type.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order_id:** `typing.Optional[str]` — Filter by the order this transaction is linked to.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**created_at_from:** `typing.Optional[str]` — Only transactions recorded on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**created_at_to:** `typing.Optional[str]` — Only transactions recorded on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
     
 </dd>
 </dl>
@@ -6143,123 +8455,6 @@ client.customer_portals.create_customer_portal()
 </details>
 
 ## ValueReceipts
-<details><summary><code>client.value_receipts.<a href="src/paid/value_receipts/client.py">sync_value_receipt</a>(...) -&gt; AsyncHttpResponse[ValueReceiptSyncResponse]</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Find or create a value receipt by natural key (customer + product/order + dates), then populate it with current data inline. Returns the ID, status, and public URL. Posted (sealed) VRs are returned as-is without re-populating.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-import datetime
-
-from paid import Paid
-
-client = Paid(
-    token="YOUR_TOKEN",
-)
-client.value_receipts.sync_value_receipt(
-    start_date=datetime.datetime.fromisoformat(
-        "2024-01-15 09:30:00+00:00",
-    ),
-    end_date=datetime.datetime.fromisoformat(
-        "2024-01-15 09:30:00+00:00",
-    ),
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**start_date:** `dt.datetime` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**end_date:** `dt.datetime` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**customer_id:** `typing.Optional[str]` — Mutually exclusive with externalCustomerId. Exactly one is required.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**external_customer_id:** `typing.Optional[str]` — Mutually exclusive with customerId. Exactly one is required.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**product:** `typing.Optional[SyncValueReceiptRequestProduct]` — Mutually exclusive with orderId. Provide at most one.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**order_id:** `typing.Optional[str]` — Mutually exclusive with product. Provide at most one.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
 <details><summary><code>client.value_receipts.<a href="src/paid/value_receipts/client.py">list_value_receipts</a>(...) -&gt; AsyncHttpResponse[ValueReceiptListResponse]</code></summary>
 <dl>
 <dd>
@@ -6357,6 +8552,240 @@ client.value_receipts.list_value_receipts()
 <dd>
 
 **archived:** `typing.Optional[ListValueReceiptsRequestArchived]` — Include archived value receipts. Defaults to false.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.value_receipts.<a href="src/paid/value_receipts/client.py">create_value_receipt</a>(...) -&gt; AsyncHttpResponse[ValueReceiptSyncResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a value receipt for a customer and date range, optionally scoped to a product or an order. Every call creates a receipt, so calling twice for the same period gives the customer two. The date range must have ended; a range with nothing delivered in it reports zero. Returns the receipt's ID and public URL.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+import datetime
+
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.value_receipts.create_value_receipt(
+    start_date=datetime.datetime.fromisoformat(
+        "2024-01-15 09:30:00+00:00",
+    ),
+    end_date=datetime.datetime.fromisoformat(
+        "2024-01-15 09:30:00+00:00",
+    ),
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**start_date:** `dt.datetime` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**end_date:** `dt.datetime` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**customer_id:** `typing.Optional[str]` — Mutually exclusive with externalCustomerId. Exactly one is required.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_id:** `typing.Optional[str]` — Mutually exclusive with customerId. Exactly one is required.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**product:** `typing.Optional[SyncValueReceiptRequestProduct]` — Mutually exclusive with orderId. Provide at most one.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order_id:** `typing.Optional[str]` — Mutually exclusive with product. Provide at most one.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.value_receipts.<a href="src/paid/value_receipts/client.py">sync_value_receipt</a>(...) -&gt; AsyncHttpResponse[ValueReceiptSyncResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), refreshed with current data, and creates one only if there is none (201), so calling twice does not give the customer two receipts.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+import datetime
+
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.value_receipts.sync_value_receipt(
+    start_date=datetime.datetime.fromisoformat(
+        "2024-01-15 09:30:00+00:00",
+    ),
+    end_date=datetime.datetime.fromisoformat(
+        "2024-01-15 09:30:00+00:00",
+    ),
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**start_date:** `dt.datetime` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**end_date:** `dt.datetime` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**customer_id:** `typing.Optional[str]` — Mutually exclusive with externalCustomerId. Exactly one is required.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_id:** `typing.Optional[str]` — Mutually exclusive with customerId. Exactly one is required.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**product:** `typing.Optional[SyncValueReceiptRequestProduct]` — Mutually exclusive with orderId. Provide at most one.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order_id:** `typing.Optional[str]` — Mutually exclusive with product. Provide at most one.
     
 </dd>
 </dl>
@@ -6738,7 +9167,7 @@ client.value_receipts.unarchive_value_receipt(
 <dl>
 <dd>
 
-Make a value receipt publicly accessible via URL.
+Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
 </dd>
 </dl>
 </dd>
@@ -6816,7 +9245,7 @@ client.value_receipts.publish_value_receipt(
 <dl>
 <dd>
 
-Revoke public access to a value receipt.
+Revoke public access to a value receipt. Available for archived receipts too, so a live link can always be revoked.
 </dd>
 </dl>
 </dd>
@@ -7304,7 +9733,7 @@ client.pricing.get_pricing(
 <dl>
 <dd>
 
-Updates pricing on an existing product attribute. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
+Updates pricing on an existing product attribute. To create a new attribute, use the update product endpoint (updateProductById), which upserts productAttributes. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
 </dd>
 </dl>
 </dd>
@@ -7331,7 +9760,7 @@ client.pricing.update_pricing(
         price_points=[
             SimplePricePoint(
                 currency="currency",
-                unit_price=1.1,
+                unit_price=1,
             )
         ],
     ),
@@ -7466,8 +9895,8 @@ client.costs.create_costs(
 </dl>
 </details>
 
-## AnalyticsExperimental
-<details><summary><code>client.analytics_experimental.<a href="src/paid/analytics_experimental/client.py">execute_analytics_query</a>(...) -&gt; AsyncHttpResponse[AnalyticsQueryResponse]</code></summary>
+## Analytics
+<details><summary><code>client.analytics.<a href="src/paid/analytics/client.py">execute_analytics_query</a>(...) -&gt; AsyncHttpResponse[AnalyticsQueryResponse]</code></summary>
 <dl>
 <dd>
 
@@ -7479,11 +9908,9 @@ client.costs.create_costs(
 <dl>
 <dd>
 
-⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
-
 Runs a single ClickHouse SELECT (or WITH … SELECT) against your organization's analytics views. Before writing a query, call `getAnalyticsSchema` (GET /schema) for the available views and columns, and `getSignalsMetadata` (GET /signals/metadata) for the JSON paths inside `fact_signal.data`. Results are automatically scoped to your organization — no org filter is needed or possible. Only SELECT/WITH statements are accepted.
 
-Conventions: monetary amounts are minor units (cents — divide by 100 for the major unit); most are integers, but `fact_cost.cost_amount` is fractional cents (Decimal) since a single AI call usually costs less than a cent; 64-bit integers (counts, ids, amounts) are returned as JSON strings to preserve precision, so parse them client-side. Query signal payloads via JSON paths, e.g. `SELECT data.country::String AS country, count() FROM fact_signal GROUP BY country`.
+Conventions: monetary amounts are minor units (cents — divide by 100 for the major unit); most are integers, but `fact_cost.cost_amount` is fractional cents (Decimal) since a single AI call usually costs less than a cent; 64-bit integers (counts, ids, amounts) are returned as JSON strings to preserve precision, so parse them client-side; Decimal columns (fractional cents, and credit amounts, which are counts of credits rather than cents and are never divided by 100) come back as JSON numbers instead, so a value beyond 2^53 is already rounded — select toString(col) when you need its exact digits. Query signal payloads via JSON paths, e.g. `SELECT data.country::String AS country, count() FROM fact_signal GROUP BY country`.
 
 Limits: 30 seconds of execution time and 10,000 result rows (truncation is flagged via `meta.truncated`). Prefer aggregates and a `created_at` date filter on large tables — this endpoint is for interactive analytics, not bulk export.
 </dd>
@@ -7505,7 +9932,7 @@ from paid import Paid
 client = Paid(
     token="YOUR_TOKEN",
 )
-client.analytics_experimental.execute_analytics_query(
+client.analytics.execute_analytics_query(
     query="SELECT signal_name, count() AS signals FROM fact_signal WHERE created_at > now() - INTERVAL 30 DAY GROUP BY signal_name ORDER BY signals DESC",
 )
 
@@ -7543,7 +9970,7 @@ client.analytics_experimental.execute_analytics_query(
 </dl>
 </details>
 
-<details><summary><code>client.analytics_experimental.<a href="src/paid/analytics_experimental/client.py">get_analytics_schema</a>() -&gt; AsyncHttpResponse[AnalyticsSchemaResponse]</code></summary>
+<details><summary><code>client.analytics.<a href="src/paid/analytics/client.py">get_analytics_schema</a>() -&gt; AsyncHttpResponse[AnalyticsSchemaResponse]</code></summary>
 <dl>
 <dd>
 
@@ -7554,8 +9981,6 @@ client.analytics_experimental.execute_analytics_query(
 
 <dl>
 <dd>
-
-⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
 Returns the analytics views available to POST /query, with column names, ClickHouse types, and descriptions. Dimensions (`dim_*`) describe entities; facts (`fact_*`) are event/transaction tables that join to dimensions via the `*_id` columns described in each comment.
 </dd>
@@ -7577,7 +10002,7 @@ from paid import Paid
 client = Paid(
     token="YOUR_TOKEN",
 )
-client.analytics_experimental.get_analytics_schema()
+client.analytics.get_analytics_schema()
 
 ```
 </dd>
@@ -7605,7 +10030,7 @@ client.analytics_experimental.get_analytics_schema()
 </dl>
 </details>
 
-<details><summary><code>client.analytics_experimental.<a href="src/paid/analytics_experimental/client.py">get_signals_metadata</a>(...) -&gt; AsyncHttpResponse[SignalsMetadataResponse]</code></summary>
+<details><summary><code>client.analytics.<a href="src/paid/analytics/client.py">get_signals_metadata</a>(...) -&gt; AsyncHttpResponse[SignalsMetadataResponse]</code></summary>
 <dl>
 <dd>
 
@@ -7616,8 +10041,6 @@ client.analytics_experimental.get_analytics_schema()
 
 <dl>
 <dd>
-
-⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
 Lists the JSON paths (and their observed types) present in the `data` payload of your signals within a time window (default: last 30 days), grouped by signal name. Use the returned paths in queries against `fact_signal`, e.g. `WHERE data.<path>::String = '...'`.
 </dd>
@@ -7639,7 +10062,7 @@ from paid import Paid
 client = Paid(
     token="YOUR_TOKEN",
 )
-client.analytics_experimental.get_signals_metadata()
+client.analytics.get_signals_metadata()
 
 ```
 </dd>
@@ -7768,7 +10191,7 @@ client.custom_views_experimental.list_custom_views()
 
 ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-⚠️ Only call this when the user has EXPLICITLY asked to save, create, or publish the view. After generating or previewing a dashboard, do NOT automatically save a draft — show it to the user and wait for them to ask you to save it. Saves named analytics queries + a self-contained HTML render bundle as a DRAFT custom view. **Call getCustomViewAuthoringGuide (GET /experimental/views/authoring-guide) first** — it returns the full guide and a copy-paste interactive template. Key rules: (1) Do NOT add a customer filter to the SQL — the database scopes every query to the viewing customer at embed time. (2) Each query's SQL must be SELECT-only; return clearly-named columns. Compute metric VALUES in SQL (e.g. (count()*2)/5 AS custom_metric) — derive a number in the render bundle only when it depends on user interaction (toggle/filter/hover) or is pure formatting of a value a query already returns. (3) The render bundle must be SELF-CONTAINED — inline all CSS/JS/charting, NO external loads or fetch (the sandbox has connect-src 'none'); it must listen for the `paid:data` message (data keyed by query id) and re-render on each one. (4) Make it INTERACTIVE — mousemove hover tooltips and at least one addEventListener-wired control that re-renders (a static chart feels broken). (5) The render bundle is the single source of truth — preview the EXACT bundle you save (call getCustomViewPreviewHarness with your bundle + sample data and render the HTML it returns) or review it in the Paid preview; do NOT build a separate chart, and only show numbers that come from a declared query. (6) A view is a FULL dashboard — include as many charts/KPIs as the analysis has. Keep every element derived from the single viewing customer (KPIs, trends, type mix); drop only cross-customer comparisons (rankings, share-of-total, 'N customers'). Don't simplify to one chart. (7) To make the date range adjustable (e.g. the user says 'last month'), write the date boundary as `{period_start:DateTime}` / `{period_end:DateTime}` placeholders in the SQL and pass a default `period` (relative like {kind:'relative',unit:'month',amount:1}, or absolute start/end). The org user can then change it in Paid without re-authoring. A query using the placeholders REQUIRES a period. Do NOT add your own date-range picker to the render bundle — Paid owns the timeframe and the bundle receives already-filtered data; a second in-bundle picker cannot re-run the SQL. The response returns a `previewUrl` — give it to the user so they can open the new view in Paid.
+⚠️ Only call this when the user has EXPLICITLY asked to save or create the view. After generating or previewing a dashboard, do NOT automatically save it — show it to the user and wait for them to ask you to save it. A customer-scoped view is created as a DRAFT — creating it is NOT permission to publish; never chain a publish onto a create. An organization-scoped view is created already PUBLISHED instead: it has no draft state and no publish step at all (never call publishCustomView on one — it's a no-op, and unpublishView refuses it outright). After saving, hand the user the previewUrl and wait for their feedback before doing anything else. Saves named analytics queries + a self-contained HTML render bundle. **Call getCustomViewAuthoringGuide (GET /experimental/views/authoring-guide) first** — it returns the full guide and a copy-paste interactive template. Key rules: (1) Do NOT add a customer filter to the SQL — the database scopes every query to the viewing customer at embed time. (2) Each query's SQL must be SELECT-only; return clearly-named columns. Compute metric VALUES in SQL (e.g. (count()*2)/5 AS custom_metric) — derive a number in the render bundle only when it depends on user interaction (toggle/filter/hover) or is pure formatting of a value a query already returns. (3) The render bundle must be SELF-CONTAINED — inline all CSS/JS/charting, NO external loads or fetch (the sandbox has connect-src 'none'); it must listen for the `paid:data` message (data keyed by query id) and re-render on each one. (4) Make it INTERACTIVE — mousemove hover tooltips and at least one addEventListener-wired control that re-renders (a static chart feels broken). (5) The render bundle is the single source of truth — BEFORE saving, preview the EXACT bundle in the user's current client (call getCustomViewPreviewHarness with your bundle + sample data and render the HTML it returns) and show it to the user; that preview in the current client is how the user first sees the dashboard. Do NOT save a draft just to preview it in Paid — creating writes to the user's real account and is never a preview step. Do NOT build a separate chart, and only show numbers that come from a declared query. (6) A view is a FULL dashboard — include as many charts/KPIs as the analysis has. Keep every element derived from the single viewing customer (KPIs, trends, type mix); drop only cross-customer comparisons (rankings, share-of-total, 'N customers'). Don't simplify to one chart. (7) To make the date range adjustable (e.g. the user says 'last month'), write the date boundary as `{period_start:DateTime}` / `{period_end:DateTime}` placeholders in the SQL and pass a default `period` (relative like {kind:'relative',unit:'month',amount:1}, or absolute start/end). The org user can then change it in Paid without re-authoring. A query using the placeholders REQUIRES a period. Do NOT add your own date-range picker to the render bundle — Paid owns the timeframe and the bundle receives already-filtered data; a second in-bundle picker cannot re-run the SQL. (8) Check your draft with validateCustomView (POST /experimental/views/validate) BEFORE asking the user to save — it runs these same gates without persisting and reports every problem at once. The response returns a `previewUrl` — give it to the user so they can open the new view in Paid.
 </dd>
 </dl>
 </dd>
@@ -7853,6 +10276,22 @@ client.custom_views_experimental.create_custom_view(
 <dl>
 <dd>
 
+**filters:** `typing.Optional[typing.Sequence[CustomViewFilter]]` — Optional per-request filter parameters. Required for every {filter_<name>:String} placeholder the queries reference.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**scope:** `typing.Optional[CreateCustomViewRequestScope]` — 'customer' (default): data is scoped to one viewing customer and the view is embeddable per-customer. 'organization': data is org-wide; the view is internal-only (visible to org members in Paid, never embeddable).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -7879,7 +10318,7 @@ client.custom_views_experimental.create_custom_view(
 
 ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-Flips the view from DRAFT to PUBLISHED. Only PUBLISHED views are served on the embed data path — this is the gate that stops an unreviewed view reaching end-customers. Idempotent: publishing an already-published view is a no-op success. The response returns a `previewUrl` — give it to the user so they can open the view in Paid.
+⚠️ Never publish as an automatic follow-up to creating or generating a view. Only call this after you have shown the user the built/previewed view and they have EXPLICITLY approved publishing — building and publishing are separate user decisions, and answering an earlier question (e.g. the view's scope) is NOT publish approval. Flips the view from DRAFT to PUBLISHED. Only PUBLISHED views are served on the embed data path — this is the gate that stops an unreviewed view reaching end-customers. Idempotent: publishing an already-published view is a no-op success. The response returns a `previewUrl` — give it to the user so they can open the view in Paid.
 </dd>
 </dl>
 </dd>
@@ -8107,7 +10546,7 @@ client.custom_views_experimental.get_custom_view(
 
 ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-Partially updates a view's name, description, queries, or render bundle. Omitted fields are left unchanged; `queries` is a FULL replacement of the query list. Updated SQL and bundles pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load.
+Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — `bundleEdits` (exact search-and-replace on the stored render bundle) and `queryUpserts`/`queryRemovals` (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: `renderBundle`, and `queries` (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load.
 </dd>
 </dl>
 </dd>
@@ -8169,7 +10608,7 @@ client.custom_views_experimental.update_custom_view(
 <dl>
 <dd>
 
-**queries:** `typing.Optional[typing.Sequence[CustomViewQuery]]` — Full replacement of the view's query list. Each SQL is re-validated (SELECT-only) exactly like createCustomView.
+**queries:** `typing.Optional[typing.Sequence[CustomViewQuery]]` — Full replacement of the view's query list. Each SQL is re-validated (SELECT-only) exactly like createCustomView. For changing one or two queries, prefer `queryUpserts`/`queryRemovals` instead. Cannot be combined with them.
     
 </dd>
 </dl>
@@ -8177,7 +10616,39 @@ client.custom_views_experimental.update_custom_view(
 <dl>
 <dd>
 
-**render_bundle:** `typing.Optional[str]` — Replacement render bundle. Re-validated (size cap, self-contained, paid:data listener) exactly like createCustomView.
+**render_bundle:** `typing.Optional[str]` — Replacement render bundle. Re-validated (size cap, self-contained, paid:data listener) exactly like createCustomView. For small changes, prefer `bundleEdits` instead. Cannot be combined with `bundleEdits`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**bundle_edits:** `typing.Optional[typing.Sequence[RenderBundleEdit]]` — PREFERRED for revisions: exact search-and-replace edits applied in order to the stored render bundle, so you send only the changed text instead of re-transmitting the whole bundle. The edited result passes the same validation as a full replacement. Cannot be combined with `renderBundle`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**query_upserts:** `typing.Optional[typing.Sequence[CustomViewQuery]]` — PREFERRED for revisions: per-query changes — each entry replaces the stored query with the same id, or is appended as a new query. Queries not mentioned are left unchanged. Cannot be combined with `queries`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**query_removals:** `typing.Optional[typing.Sequence[str]]` — Ids of stored queries to remove (applied before `queryUpserts`). Rejected if an id does not exist. Cannot be combined with `queries`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filters:** `typing.Optional[typing.Sequence[CustomViewFilter]]` — Full replacement of the view's declared filter parameters; pass null to remove them all. Every {filter_<name>:String} placeholder the (resulting) queries reference must stay declared.
     
 </dd>
 </dl>
@@ -8211,7 +10682,7 @@ client.custom_views_experimental.update_custom_view(
 
 ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-Runs every stored query of the view on the read-only analytics database, scoped to the caller's organization AND the given customer (both enforced as ClickHouse row filters), and returns the result sets keyed by query id. The customer scope is enforced by the database — it cannot be widened by the stored SQL.
+Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given `customerId` (both enforced as ClickHouse row filters) — `customerId` is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and `customerId` is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as `filter_<name>` query parameters (e.g. `filter_region=eu`); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it.
 </dd>
 </dl>
 </dd>
@@ -8233,7 +10704,6 @@ client = Paid(
 )
 client.custom_views_experimental.get_custom_view_data(
     display_id="displayId",
-    customer_id="customerId",
 )
 
 ```
@@ -8258,7 +10728,7 @@ client.custom_views_experimental.get_custom_view_data(
 <dl>
 <dd>
 
-**customer_id:** `str` — Customer to scope the data to (dev/preview only; the embed derives this from the verified token).
+**customer_id:** `typing.Optional[str]` — Customer to scope the data to (dev/preview only; the embed derives this from the verified token). Required for customer-scoped views; ignored for organization-scoped views (their data is org-wide).
     
 </dd>
 </dl>
@@ -8332,7 +10802,7 @@ client.custom_views_experimental.get_custom_view_data(
 
 ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-Mints a short-lived, customer-scoped token for embedding a published custom view. Call this from your server with your API key, then pass the returned token to the embed SDK.
+Mints a short-lived, customer-scoped token for embedding a published custom view. Call this from your server with your API key, then pass the returned token to the embed SDK. Organization-scoped views cannot be embedded per-customer — this returns a 400 (`ORG_SCOPED_VIEW_NOT_EMBEDDABLE`) for one.
 </dd>
 </dl>
 </dd>
@@ -8495,6 +10965,8 @@ Uploads a new value model version. Validates the content, creates a new version,
 <dd>
 
 ```python
+import datetime
+
 from paid import (
     Paid,
     ValueModelContent,
@@ -8502,7 +10974,9 @@ from paid import (
     ValueModelContentFormulasItemVariablesItem,
     ValueModelContentSignalsItem,
     ValueModelContentValueTypesItem,
-    ValueModelContentValueTypesItemUnitZero,
+    ValueModelContentValueTypesItemCalculationTimelineItem,
+    ValueModelContentValueTypesItemCalculationTimelineItemCalculation,
+    ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZero,
 )
 
 client = Paid(
@@ -8515,9 +10989,22 @@ client.value_models.update_value_model(
             ValueModelContentValueTypesItem(
                 slug="slug",
                 name="name",
-                unit=ValueModelContentValueTypesItemUnitZero(
-                    type="monetary",
-                ),
+                calculation_timeline=[
+                    ValueModelContentValueTypesItemCalculationTimelineItem(
+                        effective_from=datetime.datetime.fromisoformat(
+                            "2024-01-15 09:30:00+00:00",
+                        ),
+                        calculation=ValueModelContentValueTypesItemCalculationTimelineItemCalculation(
+                            unit=ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZero(
+                                type="monetary",
+                            ),
+                            formula_ids=["formulaIds"],
+                            signal_event_names=["signalEventNames"],
+                            segment_table_ids=["segmentTableIds"],
+                            override_ids=["overrideIds"],
+                        ),
+                    )
+                ],
             )
         ],
         formulas=[
@@ -8783,6 +11270,560 @@ client.value_models.refresh_value_model_backfill()
 
 <dl>
 <dd>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## ValueMetrics
+<details><summary><code>client.value_metrics.<a href="src/paid/value_metrics/client.py">list_value_metrics</a>(...) -&gt; AsyncHttpResponse[ValueMetricListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the value metrics in the current value model, without their formulas. Archived metrics are hidden unless includeArchived is true.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.value_metrics.list_value_metrics()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**include_archived:** `typing.Optional[bool]` — Whether to include archived metrics in the response. Defaults to false.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.value_metrics.<a href="src/paid/value_metrics/client.py">create_value_metric</a>(...) -&gt; AsyncHttpResponse[ValueMetricWriteAck]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Adds one value metric — its unit, formula, signal binding and optional monetary conversion — to the value model. The signal must already exist: an event name your organization has sent, or one referenced by usage pricing on an active product. Publishes a new value model version and recalculates delivered value for historical signals.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import (
+    Paid,
+    ValueMetricFormula,
+    ValueMetricFormulaVariable,
+    ValueMetricSignalBinding,
+    ValueMetricUnit,
+)
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.value_metrics.create_value_metric(
+    name="Time saved",
+    unit=ValueMetricUnit(
+        type="monetary",
+    ),
+    formula=ValueMetricFormula(
+        expression="minutes_saved / 60",
+        variables=[
+            ValueMetricFormulaVariable(
+                id="id",
+                label="label",
+            )
+        ],
+    ),
+    signal=ValueMetricSignalBinding(
+        event_name="ticket_resolved",
+    ),
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**name:** `str` — Customer-facing metric name.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**unit:** `ValueMetricUnit` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**formula:** `ValueMetricFormula` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**signal:** `ValueMetricSignalBinding` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**slug:** `typing.Optional[str]` — Stable identifier. Derived from the name when omitted.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**monetary_conversion:** `typing.Optional[ValueMetricMonetaryConversion]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**category:** `typing.Optional[CreateValueMetricRequestCategory]` — Classification: hve = human value equivalent, time = time saved, cost = cost savings, revenue = revenue generated, risk = risk avoided.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**description:** `typing.Optional[str]` — Short customer-facing copy shown on value receipts.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**long_description:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sources:** `typing.Optional[typing.Sequence[CreateValueMetricRequestSourcesItem]]` — Up to 3 customer-facing citations backing this metric.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**expected_active_version:** `typing.Optional[int]` — Optimistic concurrency guard. When supplied and it does not match the live active version, the request fails with 409 instead of overwriting a concurrent change.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.value_metrics.<a href="src/paid/value_metrics/client.py">get_value_metric</a>(...) -&gt; AsyncHttpResponse[ValueMetricDetail]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns one value metric with its formula, signal binding and monetary conversion joined together. Call getCurrentValueModel if you need the active version number to guard a follow-up write.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.value_metrics.get_value_metric(
+    slug="slug",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**slug:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.value_metrics.<a href="src/paid/value_metrics/client.py">archive_value_metric</a>(...) -&gt; AsyncHttpResponse[ValueMetricWriteAck]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Marks a value metric archived so it stops appearing in listValueMetrics. Its formula and signal bindings are deliberately kept, so historical delivered value and sealed value receipts still resolve — which also means an archived metric's signals continue to be ingested and can still surface on value receipts. Removing it from receipts entirely requires deleting its signal bindings. Restore it with updateValueMetric and archivedAt null.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.value_metrics.archive_value_metric(
+    slug="slug",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**slug:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**expected_active_version:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.value_metrics.<a href="src/paid/value_metrics/client.py">update_value_metric</a>(...) -&gt; AsyncHttpResponse[ValueMetricWriteAck]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Changes one value metric. Omitted fields are left alone. You can change its name, category, unit, customer-facing copy, sources, monetary rate, archive state, and the value, label or display format of any variable its formula declares. The formula expression and the signal it is bound to cannot be changed — recreate the metric, or use the whole value-model upload. Publishes a new value model version.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.value_metrics.update_value_metric(
+    slug="slug",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**slug:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**unit:** `typing.Optional[ValueMetricUnit]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**monetary_conversion:** `typing.Optional[ValueMetricMonetaryConversion]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**variables:** `typing.Optional[typing.Dict[str, ValueMetricVariableEdit]]` — Per-variable edits, keyed by the variable id the formula declares. Merged: a variable you do not name is untouched. Naming one the formula does not declare is an error rather than a no-op.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**archived_at:** `typing.Optional[dt.datetime]` — Set null to restore an archived metric.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**category:** `typing.Optional[UpdateValueMetricRequestCategory]` — Classification: hve = human value equivalent, time = time saved, cost = cost savings, revenue = revenue generated, risk = risk avoided.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**description:** `typing.Optional[str]` — Short customer-facing copy shown on value receipts.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**long_description:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**sources:** `typing.Optional[typing.Sequence[UpdateValueMetricRequestSourcesItem]]` — Up to 3 customer-facing citations backing this metric.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**expected_active_version:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
 
 <dl>
 <dd>
@@ -9398,6 +12439,1398 @@ client.customer_groups.delete_customer_group_members(
 <dd>
 
 **customer_ids:** `typing.Sequence[str]` — External customer IDs.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## PaymentMethods
+<details><summary><code>client.payment_methods.<a href="src/paid/payment_methods/client.py">list_payment_methods</a>(...) -&gt; AsyncHttpResponse[PaymentMethodListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the payment methods saved for a customer
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.payment_methods.list_payment_methods(
+    customer_id="cus_1234abcd",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**customer_id:** `typing.Optional[str]` — Filter by Paid customer ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_id:** `typing.Optional[str]` — Filter by your external customer ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.payment_methods.<a href="src/paid/payment_methods/client.py">create_payment_method</a>(...) -&gt; AsyncHttpResponse[PaymentMethodSetup]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Starts attaching a payment method to a customer by exchanging a client-side confirmation token for a setup intent. Complete any additional authentication client-side using the returned client secret.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.payment_methods.create_payment_method(
+    confirmation_token="ctoken_1NXWPnLkdIwHu7ix",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**confirmation_token:** `str` — Confirmation token generated client-side by the payment processor's elements (e.g. a Stripe ConfirmationToken ID).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**customer_id:** `typing.Optional[str]` — Paid customer ID to attach the payment method to.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_id:** `typing.Optional[str]` — Your external customer ID to attach the payment method to.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**return_url:** `typing.Optional[str]` — URL the customer is redirected to after completing any additional authentication step (e.g. 3-D Secure).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**metadata:** `typing.Optional[typing.Dict[str, str]]` — Key-value metadata stored on the setup intent.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.payment_methods.<a href="src/paid/payment_methods/client.py">get_payment_method</a>(...) -&gt; AsyncHttpResponse[PaymentMethod]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Get a payment method by its ID
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.payment_methods.get_payment_method(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.payment_methods.<a href="src/paid/payment_methods/client.py">delete_payment_method</a>(...) -&gt; AsyncHttpResponse[EmptyResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Detaches a payment method from the customer and removes it from the payment processor
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.payment_methods.delete_payment_method(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.payment_methods.<a href="src/paid/payment_methods/client.py">update_default_payment_method</a>(...) -&gt; AsyncHttpResponse[PaymentMethod]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Makes this payment method the customer's default for future charges
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.payment_methods.update_default_payment_method(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Payments
+<details><summary><code>client.payments.<a href="src/paid/payments/client.py">list_payments</a>(...) -&gt; AsyncHttpResponse[PaymentListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists payments for your organization
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.payments.list_payments()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**customer_id:** `typing.Optional[str]` — Filter by Paid customer ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_id:** `typing.Optional[str]` — Filter by your external customer ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[ListPaymentsRequestStatus]` — Filter by payment status.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.payments.<a href="src/paid/payments/client.py">create_payment</a>(...) -&gt; AsyncHttpResponse[Payment]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Records a payment received from a customer, e.g. a bank transfer or check collected outside Paid. Allocate it to invoice lines with the payment allocations endpoints.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.payments.create_payment(
+    amount=15000,
+    currency="USD",
+    payment_type="creditCard",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**amount:** `int` — Payment amount in cents (minor currency units).
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**currency:** `str` — Three-letter ISO currency code.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**payment_type:** `PaymentType` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**customer_id:** `typing.Optional[str]` — Paid customer ID the payment belongs to.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**external_customer_id:** `typing.Optional[str]` — Your external customer ID the payment belongs to.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**payment_date:** `typing.Optional[dt.datetime]` — When the payment was made (ISO 8601). Defaults to the current time.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[PaymentCreateStatus]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**metadata:** `typing.Optional[typing.Dict[str, typing.Any]]` — Key-value metadata stored on the payment.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.payments.<a href="src/paid/payments/client.py">get_payment</a>(...) -&gt; AsyncHttpResponse[Payment]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Get a payment by its ID
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.payments.get_payment(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## PaymentAllocations
+<details><summary><code>client.payment_allocations.<a href="src/paid/payment_allocations/client.py">list_payment_allocations</a>(...) -&gt; AsyncHttpResponse[PaymentAllocationListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists payment allocations for a payment or an invoice
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.payment_allocations.list_payment_allocations(
+    payment_id="pay_1234abcd",
+    invoice_id="inv_1234abcd",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**payment_id:** `typing.Optional[str]` — Filter by the payment the amounts were allocated from.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**invoice_id:** `typing.Optional[str]` — Filter by the invoice the allocated lines belong to.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.payment_allocations.<a href="src/paid/payment_allocations/client.py">create_payment_allocation</a>(...) -&gt; AsyncHttpResponse[PaymentAllocationCreateResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Allocates a payment across one or more invoice lines. When an invoice becomes fully paid, its credit entitlements are processed.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid, PaymentAllocationInput
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.payment_allocations.create_payment_allocation(
+    payment_id="pay_1234abcd",
+    allocations=[
+        PaymentAllocationInput(
+            invoice_line_id="invoiceLineId",
+            amount=15000,
+        )
+    ],
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**payment_id:** `str` — The payment to allocate from.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**allocations:** `typing.Sequence[PaymentAllocationInput]` — Invoice lines to allocate the payment to.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Amendments
+<details><summary><code>client.amendments.<a href="src/paid/amendments/client.py">get_order_amendment_options</a>(...) -&gt; AsyncHttpResponse[AmendmentOptions]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns which amendments the order admits right now: per-attribute intents and treatment axes with choosable options, defaults, and unavailability reasons, plus the order version, currency, and effective date an amendment request needs.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.amendments.get_order_amendment_options(
+    order_id="orderId",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**order_id:** `str` — Display id of the order (for example `ord_5rLZXDFSHNw`). Line and attribute ids in amendment bodies are UUIDs from the options response.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.amendments.<a href="src/paid/amendments/client.py">preview_order_amendment</a>(...) -&gt; AsyncHttpResponse[AmendmentPlan]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Compiles amendment intents into a plan (operations, money effects, credit effects, state diff) without executing. The returned planHash can be passed to the execute endpoint for two-phase, drift-guarded execution.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid, UnifiedAmendmentIntent_UpdateQuantity
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.amendments.preview_order_amendment(
+    order_id="orderId",
+    order_version=1,
+    intents=[
+        UnifiedAmendmentIntent_UpdateQuantity(
+            order_line_attribute_id="orderLineAttributeId",
+            new_quantity=1,
+        )
+    ],
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**order_id:** `str` — Display id of the order (for example `ord_5rLZXDFSHNw`). Line and attribute ids in amendment bodies are UUIDs from the options response.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order_version:** `int` — Must match `orderVersion` from the options response. Returns 409 if the order has been amended since.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**intents:** `typing.Sequence[UnifiedAmendmentIntent]` — At least one intent, discriminated by type.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**default_treatment:** `typing.Optional[UnifiedAmendmentPreviewRequestDefaultTreatment]` — Recurring charges pick next-cycle vs settle-now. Usage price changes pick new usage only vs the whole current period.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.amendments.<a href="src/paid/amendments/client.py">execute_order_amendment</a>(...) -&gt; AsyncHttpResponse[UnifiedAmendmentResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Executes amendment intents against an order. One-shot by default; pass the previewed planHash to require the recomputed plan to match (409 PLAN_CONFLICT on drift).
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid, UnifiedAmendmentIntent_UpdateQuantity
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.amendments.execute_order_amendment(
+    order_id="orderId",
+    order_version=1,
+    intents=[
+        UnifiedAmendmentIntent_UpdateQuantity(
+            order_line_attribute_id="orderLineAttributeId",
+            new_quantity=1,
+        )
+    ],
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**order_id:** `str` — Display id of the order (for example `ord_5rLZXDFSHNw`). Line and attribute ids in amendment bodies are UUIDs from the options response.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**order_version:** `int` — Must match `orderVersion` from the options response. Returns 409 if the order has been amended since.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**intents:** `typing.Sequence[UnifiedAmendmentIntent]` — At least one intent, discriminated by type.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**default_treatment:** `typing.Optional[UnifiedAmendmentExecuteRequestDefaultTreatment]` — Recurring charges pick next-cycle vs settle-now. Usage price changes pick new usage only vs the whole current period.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**plan_hash:** `typing.Optional[str]` — From preview. When set, execute recomputes the plan and returns 409 `PLAN_CONFLICT` if billing state has drifted. Omit only for one-shot execute.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## AnalyticsExperimental
+<details><summary><code>client.analytics_experimental.<a href="src/paid/analytics_experimental/client.py">execute_experimental_analytics_query</a>(...) -&gt; AsyncHttpResponse[AnalyticsQueryResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+This experimental path is deprecated and is not supported for new integrations. Use `POST /api/v2/analytics/query` instead; the old path remains available for existing integrations.
+
+Runs a single ClickHouse SELECT (or WITH … SELECT) against your organization's analytics views. Before writing a query, call `getAnalyticsSchema` (GET /schema) for the available views and columns, and `getSignalsMetadata` (GET /signals/metadata) for the JSON paths inside `fact_signal.data`. Results are automatically scoped to your organization — no org filter is needed or possible. Only SELECT/WITH statements are accepted.
+
+Conventions: monetary amounts are minor units (cents — divide by 100 for the major unit); most are integers, but `fact_cost.cost_amount` is fractional cents (Decimal) since a single AI call usually costs less than a cent; 64-bit integers (counts, ids, amounts) are returned as JSON strings to preserve precision, so parse them client-side; Decimal columns (fractional cents, and credit amounts, which are counts of credits rather than cents and are never divided by 100) come back as JSON numbers instead, so a value beyond 2^53 is already rounded — select toString(col) when you need its exact digits. Query signal payloads via JSON paths, e.g. `SELECT data.country::String AS country, count() FROM fact_signal GROUP BY country`.
+
+Limits: 30 seconds of execution time and 10,000 result rows (truncation is flagged via `meta.truncated`). Prefer aggregates and a `created_at` date filter on large tables — this endpoint is for interactive analytics, not bulk export.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.analytics_experimental.execute_experimental_analytics_query(
+    query="SELECT signal_name, count() AS signals FROM fact_signal WHERE created_at > now() - INTERVAL 30 DAY GROUP BY signal_name ORDER BY signals DESC",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**query:** `str` — A single ClickHouse SELECT (or WITH ... SELECT) statement against the analytics views. Results are automatically scoped to your organization. See GET /schema for the available views and columns.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.analytics_experimental.<a href="src/paid/analytics_experimental/client.py">get_experimental_analytics_schema</a>() -&gt; AsyncHttpResponse[AnalyticsSchemaResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+This experimental path is deprecated and is not supported for new integrations. Use `GET /api/v2/analytics/schema` instead; the old path remains available for existing integrations.
+
+Returns the analytics views available to POST /query, with column names, ClickHouse types, and descriptions. Dimensions (`dim_*`) describe entities; facts (`fact_*`) are event/transaction tables that join to dimensions via the `*_id` columns described in each comment.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.analytics_experimental.get_experimental_analytics_schema()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.analytics_experimental.<a href="src/paid/analytics_experimental/client.py">get_experimental_signals_metadata</a>(...) -&gt; AsyncHttpResponse[SignalsMetadataResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+This experimental path is deprecated and is not supported for new integrations. Use `GET /api/v2/analytics/signals/metadata` instead; the old path remains available for existing integrations.
+
+Lists the JSON paths (and their observed types) present in the `data` payload of your signals within a time window (default: last 30 days), grouped by signal name. Use the returned paths in queries against `fact_signal`, e.g. `WHERE data.<path>::String = '...'`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.analytics_experimental.get_experimental_signals_metadata()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**signal_name:** `typing.Optional[str]` — Restrict discovery to a single signal name.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**from_date:** `typing.Optional[dt.datetime]` — Start of the discovery window. Defaults to 30 days ago.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**to_date:** `typing.Optional[dt.datetime]` — End of the discovery window. Defaults to now.
     
 </dd>
 </dl>

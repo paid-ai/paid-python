@@ -13,23 +13,23 @@ from .create_order_line_attribute_request_pricing_price_points_tiers_item_tier_b
 
 class CreateOrderLineAttributeRequestPricingPricePointsTiersItem(UniversalBaseModel):
     flat_amount: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="flatAmount"), pydantic.Field(alias="flatAmount")
+        typing.Optional[int], FieldMetadata(alias="flatAmount"), pydantic.Field(alias="flatAmount")
     ] = None
     index: typing.Optional[float] = None
     lower_bound: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="lowerBound"), pydantic.Field(alias="lowerBound")
+        typing.Optional[int], FieldMetadata(alias="lowerBound"), pydantic.Field(alias="lowerBound")
     ] = None
-    number: typing.Optional[float] = None
+    number: typing.Optional[int] = None
     tier_billing_type: typing_extensions.Annotated[
         typing.Optional[CreateOrderLineAttributeRequestPricingPricePointsTiersItemTierBillingType],
         FieldMetadata(alias="tierBillingType"),
         pydantic.Field(alias="tierBillingType"),
     ] = None
     unit_amount: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="unitAmount"), pydantic.Field(alias="unitAmount")
+        typing.Optional[int], FieldMetadata(alias="unitAmount"), pydantic.Field(alias="unitAmount")
     ] = None
     upper_bound: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="upperBound"), pydantic.Field(alias="upperBound")
+        typing.Optional[int], FieldMetadata(alias="upperBound"), pydantic.Field(alias="upperBound")
     ] = None
 
     if IS_PYDANTIC_V2:

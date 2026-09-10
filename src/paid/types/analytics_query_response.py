@@ -12,7 +12,7 @@ class AnalyticsQueryResponse(UniversalBaseModel):
     columns: typing.List[AnalyticsColumn]
     rows: typing.List[typing.List[typing.Any]] = pydantic.Field()
     """
-    Result rows; values are ordered to match `columns`. 64-bit integers (UInt64/Int64 — counts, sums, amounts in cents, ids) are returned as JSON strings to preserve precision; parse them client-side as needed.
+    Result rows; values are ordered to match `columns`. 64-bit integers (UInt64/Int64 — counts, sums, amounts in cents, ids) are returned as JSON strings to preserve precision; parse them client-side as needed. Decimal columns (fractional cents, and credit amounts and balances) are returned as JSON numbers rather than strings, so a value beyond 2^53 is already rounded in this response. Select toString(col) for exact digits.
     """
 
     meta: AnalyticsQueryResponseMeta

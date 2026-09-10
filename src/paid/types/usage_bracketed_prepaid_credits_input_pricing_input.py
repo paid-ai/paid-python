@@ -9,6 +9,10 @@ from .usage_bracketed_prepaid_credits_input_pricing_input_kind import UsageBrack
 
 class UsageBracketedPrepaidCreditsInputPricingInput(UniversalBaseModel):
     kind: UsageBracketedPrepaidCreditsInputPricingInputKind
+    path: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Key in the signal's data payload that supplies the bracket-matching quantity — for a signal with data {"rooms": 3}, use rooms. Dots address nested fields, for example dimensions.pages. Defaults to the top-level quantity field.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

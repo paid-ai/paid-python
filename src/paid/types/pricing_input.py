@@ -46,6 +46,7 @@ from .usage_per_unit_input_billing_type import UsagePerUnitInputBillingType
 from .usage_per_unit_input_signal_type import UsagePerUnitInputSignalType
 from .usage_prepaid_credits_input_billing_frequency import UsagePrepaidCreditsInputBillingFrequency
 from .usage_prepaid_credits_input_billing_type import UsagePrepaidCreditsInputBillingType
+from .usage_prepaid_credits_input_pricing_input import UsagePrepaidCreditsInputPricingInput
 from .usage_prepaid_credits_input_signal_type import UsagePrepaidCreditsInputSignalType
 from .usage_volume_input_billing_frequency import UsageVolumeInputBillingFrequency
 from .usage_volume_input_billing_type import UsageVolumeInputBillingType
@@ -327,6 +328,11 @@ class PricingInput_UsagePrepaidCredits(UniversalBaseModel):
     unit_value: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="unitValue"), pydantic.Field(alias="unitValue")
     ] = None
+    pricing_input: typing_extensions.Annotated[
+        typing.Optional[UsagePrepaidCreditsInputPricingInput],
+        FieldMetadata(alias="pricingInput"),
+        pydantic.Field(alias="pricingInput"),
+    ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[UsagePrepaidCreditsInputBillingFrequency],
         FieldMetadata(alias="billingFrequency"),
@@ -377,7 +383,7 @@ class PricingInput_UsageBracketedPrepaidCredits(UniversalBaseModel):
         typing.Optional[float], FieldMetadata(alias="unitValue"), pydantic.Field(alias="unitValue")
     ] = None
     overage_unit_price: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
+        typing.Optional[int], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
     ] = None
     credit_rollover_amount: typing_extensions.Annotated[
         typing.Optional[float],

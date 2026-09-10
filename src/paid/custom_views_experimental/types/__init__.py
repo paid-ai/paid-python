@@ -9,6 +9,7 @@ if typing.TYPE_CHECKING:
     from .create_custom_view_request_period import CreateCustomViewRequestPeriod
     from .create_custom_view_request_period_kind import CreateCustomViewRequestPeriodKind
     from .create_custom_view_request_period_unit import CreateCustomViewRequestPeriodUnit
+    from .create_custom_view_request_scope import CreateCustomViewRequestScope
     from .get_custom_view_data_request_period_kind import GetCustomViewDataRequestPeriodKind
     from .get_custom_view_data_request_period_unit import GetCustomViewDataRequestPeriodUnit
     from .update_custom_view_period_request_period import UpdateCustomViewPeriodRequestPeriod
@@ -18,6 +19,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CreateCustomViewRequestPeriod": ".create_custom_view_request_period",
     "CreateCustomViewRequestPeriodKind": ".create_custom_view_request_period_kind",
     "CreateCustomViewRequestPeriodUnit": ".create_custom_view_request_period_unit",
+    "CreateCustomViewRequestScope": ".create_custom_view_request_scope",
     "GetCustomViewDataRequestPeriodKind": ".get_custom_view_data_request_period_kind",
     "GetCustomViewDataRequestPeriodUnit": ".get_custom_view_data_request_period_unit",
     "UpdateCustomViewPeriodRequestPeriod": ".update_custom_view_period_request_period",
@@ -51,6 +53,7 @@ __all__ = [
     "CreateCustomViewRequestPeriod",
     "CreateCustomViewRequestPeriodKind",
     "CreateCustomViewRequestPeriodUnit",
+    "CreateCustomViewRequestScope",
     "GetCustomViewDataRequestPeriodKind",
     "GetCustomViewDataRequestPeriodUnit",
     "UpdateCustomViewPeriodRequestPeriod",

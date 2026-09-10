@@ -15,7 +15,11 @@ class ProductCreditBenefitInput(UniversalBaseModel):
     credits_currency_id: typing_extensions.Annotated[
         str, FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ]
-    amount: float
+    amount: float = pydantic.Field()
+    """
+    Credit amount, exact to at most 6 decimal places.
+    """
+
     recipient: typing.Optional[ProductCreditBenefitInputRecipient] = None
     is_infinite_total: typing_extensions.Annotated[
         typing.Optional[bool], FieldMetadata(alias="isInfiniteTotal"), pydantic.Field(alias="isInfiniteTotal")
@@ -31,13 +35,15 @@ class ProductCreditBenefitInput(UniversalBaseModel):
         pydantic.Field(alias="creditGrantTiming"),
     ] = None
     overage_unit_price: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
+        typing.Optional[int], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
     ] = None
     rollover_amount: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="rolloverAmount"), pydantic.Field(alias="rolloverAmount")
+        typing.Optional[float],
+        FieldMetadata(alias="rolloverAmount"),
+        pydantic.Field(alias="rolloverAmount", description="Credit amount, exact to at most 6 decimal places."),
     ] = None
     rollover_duration: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="rolloverDuration"), pydantic.Field(alias="rolloverDuration")
+        typing.Optional[int], FieldMetadata(alias="rolloverDuration"), pydantic.Field(alias="rolloverDuration")
     ] = None
     rollover_duration_unit: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="rolloverDurationUnit"), pydantic.Field(alias="rolloverDurationUnit")

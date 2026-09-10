@@ -7,6 +7,7 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .custom_view_summary_period import CustomViewSummaryPeriod
+from .custom_view_summary_scope import CustomViewSummaryScope
 from .custom_view_summary_status import CustomViewSummaryStatus
 
 
@@ -30,6 +31,10 @@ class CustomViewSummary(UniversalBaseModel):
         FieldMetadata(alias="createdAt"),
         pydantic.Field(alias="createdAt", description="ISO 8601 creation timestamp."),
     ]
+    scope: CustomViewSummaryScope = pydantic.Field()
+    """
+    'customer': data is scoped to one viewing customer and the view is embeddable per-customer. 'organization': data is org-wide and the view is internal-only.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

@@ -75,7 +75,12 @@ class Invoice(UniversalBaseModel):
         typing.Optional[str], FieldMetadata(alias="paymentLink"), pydantic.Field(alias="paymentLink")
     ] = None
     dispute_link: typing_extensions.Annotated[
-        typing.Optional[str], FieldMetadata(alias="disputeLink"), pydantic.Field(alias="disputeLink")
+        typing.Optional[str],
+        FieldMetadata(alias="disputeLink"),
+        pydantic.Field(
+            alias="disputeLink",
+            description="Always null. The disputes feature is removed. Will be removed in a future API version.",
+        ),
     ] = None
     public_url_token: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="publicUrlToken"), pydantic.Field(alias="publicUrlToken")
@@ -83,6 +88,11 @@ class Invoice(UniversalBaseModel):
     tax_exempt: typing_extensions.Annotated[bool, FieldMetadata(alias="taxExempt"), pydantic.Field(alias="taxExempt")]
     billing_contact_id: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="billingContactId"), pydantic.Field(alias="billingContactId")
+    ] = None
+    purchase_order_reference: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="purchaseOrderReference"),
+        pydantic.Field(alias="purchaseOrderReference", description="Purchase order reference stamped on this invoice."),
     ] = None
 
     if IS_PYDANTIC_V2:

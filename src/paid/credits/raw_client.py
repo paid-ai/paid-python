@@ -15,8 +15,9 @@ from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
 from ..types.credit_currency import CreditCurrency
 from ..types.credit_currency_list_response import CreditCurrencyListResponse
-from ..types.error_response import ErrorResponse
+from ..types.credit_transaction_list_response import CreditTransactionListResponse
 from .types.list_credit_currencies_request_status import ListCreditCurrenciesRequestStatus
+from .types.list_credit_transactions_request_type import ListCreditTransactionsRequestType
 from .types.update_credit_currency_request_status import UpdateCreditCurrencyRequestStatus
 
 # this is used as the default value for optional parameters
@@ -71,9 +72,9 @@ class RawCreditsClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -82,9 +83,9 @@ class RawCreditsClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -152,9 +153,9 @@ class RawCreditsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -163,9 +164,9 @@ class RawCreditsClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -174,9 +175,130 @@ class RawCreditsClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def list_credit_transactions(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        credits_currency_id: typing.Optional[str] = None,
+        credit_currency_key: typing.Optional[str] = None,
+        type: typing.Optional[ListCreditTransactionsRequestType] = None,
+        order_id: typing.Optional[str] = None,
+        created_at_from: typing.Optional[str] = None,
+        created_at_to: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[CreditTransactionListResponse]:
+        """
+        List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+
+        Parameters
+        ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        customer_id : typing.Optional[str]
+            Filter by customer ID.
+
+        external_customer_id : typing.Optional[str]
+            Filter by customer external ID.
+
+        credits_currency_id : typing.Optional[str]
+            Filter by credit currency ID.
+
+        credit_currency_key : typing.Optional[str]
+            Filter by the stable machine-readable key of the credit currency.
+
+        type : typing.Optional[ListCreditTransactionsRequestType]
+            Filter by transaction type.
+
+        order_id : typing.Optional[str]
+            Filter by the order this transaction is linked to.
+
+        created_at_from : typing.Optional[str]
+            Only transactions recorded on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        created_at_to : typing.Optional[str]
+            Only transactions recorded on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[CreditTransactionListResponse]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "credits/transactions",
+            method="GET",
+            params={
+                "limit": limit,
+                "offset": offset,
+                "customerId": customer_id,
+                "externalCustomerId": external_customer_id,
+                "creditsCurrencyId": credits_currency_id,
+                "creditCurrencyKey": credit_currency_key,
+                "type": type,
+                "orderId": order_id,
+                "createdAtFrom": created_at_from,
+                "createdAtTo": created_at_to,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CreditTransactionListResponse,
+                    parse_obj_as(
+                        type_=CreditTransactionListResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -243,9 +365,9 @@ class RawCreditsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -254,9 +376,9 @@ class RawCreditsClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -265,9 +387,9 @@ class RawCreditsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -276,9 +398,9 @@ class RawCreditsClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -337,9 +459,9 @@ class AsyncRawCreditsClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -348,9 +470,9 @@ class AsyncRawCreditsClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -418,9 +540,9 @@ class AsyncRawCreditsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -429,9 +551,9 @@ class AsyncRawCreditsClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -440,9 +562,130 @@ class AsyncRawCreditsClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def list_credit_transactions(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        credits_currency_id: typing.Optional[str] = None,
+        credit_currency_key: typing.Optional[str] = None,
+        type: typing.Optional[ListCreditTransactionsRequestType] = None,
+        order_id: typing.Optional[str] = None,
+        created_at_from: typing.Optional[str] = None,
+        created_at_to: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[CreditTransactionListResponse]:
+        """
+        List credit ledger transactions (grants, spends, and pending grants) for the organization, newest first. Filter by customer, credit currency, type, order, or date range.
+
+        Parameters
+        ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        customer_id : typing.Optional[str]
+            Filter by customer ID.
+
+        external_customer_id : typing.Optional[str]
+            Filter by customer external ID.
+
+        credits_currency_id : typing.Optional[str]
+            Filter by credit currency ID.
+
+        credit_currency_key : typing.Optional[str]
+            Filter by the stable machine-readable key of the credit currency.
+
+        type : typing.Optional[ListCreditTransactionsRequestType]
+            Filter by transaction type.
+
+        order_id : typing.Optional[str]
+            Filter by the order this transaction is linked to.
+
+        created_at_from : typing.Optional[str]
+            Only transactions recorded on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        created_at_to : typing.Optional[str]
+            Only transactions recorded on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[CreditTransactionListResponse]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "credits/transactions",
+            method="GET",
+            params={
+                "limit": limit,
+                "offset": offset,
+                "customerId": customer_id,
+                "externalCustomerId": external_customer_id,
+                "creditsCurrencyId": credits_currency_id,
+                "creditCurrencyKey": credit_currency_key,
+                "type": type,
+                "orderId": order_id,
+                "createdAtFrom": created_at_from,
+                "createdAtTo": created_at_to,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CreditTransactionListResponse,
+                    parse_obj_as(
+                        type_=CreditTransactionListResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -509,9 +752,9 @@ class AsyncRawCreditsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -520,9 +763,9 @@ class AsyncRawCreditsClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -531,9 +774,9 @@ class AsyncRawCreditsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -542,9 +785,9 @@ class AsyncRawCreditsClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),

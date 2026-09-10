@@ -13,11 +13,22 @@ from ..types.customer_billing_address_input import CustomerBillingAddressInput
 from ..types.customer_creation_state import CustomerCreationState
 from ..types.customer_list_response import CustomerListResponse
 from ..types.customer_state import CustomerState
+from ..types.customer_unit import CustomerUnit
+from ..types.customer_unit_cap_end_response import CustomerUnitCapEndResponse
+from ..types.customer_unit_cap_response import CustomerUnitCapResponse
+from ..types.customer_unit_cap_set_frequency import CustomerUnitCapSetFrequency
+from ..types.customer_unit_cap_set_response import CustomerUnitCapSetResponse
+from ..types.customer_unit_list_response import CustomerUnitListResponse
 from ..types.customer_user import CustomerUser
 from ..types.customer_user_status import CustomerUserStatus
 from ..types.empty_response import EmptyResponse
 from ..types.grant_customer_credits_response import GrantCustomerCreditsResponse
+from ..types.pending_credit_consumption_list_response import PendingCreditConsumptionListResponse
 from .raw_client import AsyncRawCustomersClient, RawCustomersClient
+from .types.list_customer_units_by_external_id_request_status import ListCustomerUnitsByExternalIdRequestStatus
+from .types.list_customer_units_request_status import ListCustomerUnitsRequestStatus
+from .types.list_customers_request_creation_state import ListCustomersRequestCreationState
+from .types.list_customers_request_status import ListCustomersRequestStatus
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -43,6 +54,12 @@ class CustomersClient:
         *,
         limit: typing.Optional[int] = None,
         offset: typing.Optional[int] = None,
+        name: typing.Optional[str] = None,
+        status: typing.Optional[ListCustomersRequestStatus] = None,
+        creation_state: typing.Optional[ListCustomersRequestCreationState] = None,
+        created_at_from: typing.Optional[str] = None,
+        created_at_to: typing.Optional[str] = None,
+        external_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CustomerListResponse:
         """
@@ -53,6 +70,24 @@ class CustomersClient:
         limit : typing.Optional[int]
 
         offset : typing.Optional[int]
+
+        name : typing.Optional[str]
+            Search by customer name (case-insensitive, matches anywhere in the name).
+
+        status : typing.Optional[ListCustomersRequestStatus]
+            Filter by customer status. churned: customers marked as churned. active: everyone else.
+
+        creation_state : typing.Optional[ListCustomersRequestCreationState]
+            Filter by creation state: draft or active.
+
+        created_at_from : typing.Optional[str]
+            Only customers created on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        created_at_to : typing.Optional[str]
+            Only customers created on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        external_id : typing.Optional[str]
+            Filter by your external customer ID (exact match).
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -71,7 +106,17 @@ class CustomersClient:
         )
         client.customers.list_customers()
         """
-        _response = self._raw_client.list_customers(limit=limit, offset=offset, request_options=request_options)
+        _response = self._raw_client.list_customers(
+            limit=limit,
+            offset=offset,
+            name=name,
+            status=status,
+            creation_state=creation_state,
+            created_at_from=created_at_from,
+            created_at_to=created_at_to,
+            external_id=external_id,
+            request_options=request_options,
+        )
         return _response.data
 
     def create_customer(
@@ -818,7 +863,7 @@ class CustomersClient:
         id: str,
         *,
         credit_currency_key: str,
-        amount: int,
+        amount: float,
         starts_at: typing.Optional[dt.datetime] = OMIT,
         expires_at: typing.Optional[dt.datetime] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -834,8 +879,8 @@ class CustomersClient:
         credit_currency_key : str
             Stable machine-readable key for the active credit currency to grant.
 
-        amount : int
-            Number of credits to grant. This is not a monetary amount.
+        amount : float
+            Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
 
         starts_at : typing.Optional[dt.datetime]
             When these credits become spendable, as an RFC3339 datetime with timezone. Must be at or before the current server time. Defaults to the current server time when omitted.
@@ -863,7 +908,7 @@ class CustomersClient:
         client.customers.grant_customer_credits(
             id="cus_abc123",
             credit_currency_key="api_credits",
-            amount=10000,
+            amount=10000.0,
             starts_at=datetime.datetime.fromisoformat(
                 "2026-06-05 12:00:00+00:00",
             ),
@@ -917,12 +962,100 @@ class CustomersClient:
         )
         return _response.data
 
+    def list_customer_pending_credit_consumption(
+        self,
+        id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> PendingCreditConsumptionListResponse:
+        """
+        List credit consumption that was recorded before a matching credit pool existed — for example usage that arrived before an invoice was paid or before a new period's credits were granted. Entries leave this list once they are applied to a pool or settled. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `/api/v2/customers/external/{externalId}/credits/pending-consumption`.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        PendingCreditConsumptionListResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.list_customer_pending_credit_consumption(
+            id="cus_abc123",
+        )
+        """
+        _response = self._raw_client.list_customer_pending_credit_consumption(
+            id, limit=limit, offset=offset, request_options=request_options
+        )
+        return _response.data
+
+    def list_customer_pending_credit_consumption_by_external_id(
+        self,
+        external_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> PendingCreditConsumptionListResponse:
+        """
+        List credit consumption recorded before a matching credit pool existed, for a customer looked up by external ID.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        PendingCreditConsumptionListResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.list_customer_pending_credit_consumption_by_external_id(
+            external_id="customer_123",
+        )
+        """
+        _response = self._raw_client.list_customer_pending_credit_consumption_by_external_id(
+            external_id, limit=limit, offset=offset, request_options=request_options
+        )
+        return _response.data
+
     def grant_customer_credits_by_external_id(
         self,
         external_id: str,
         *,
         credit_currency_key: str,
-        amount: int,
+        amount: float,
         starts_at: typing.Optional[dt.datetime] = OMIT,
         expires_at: typing.Optional[dt.datetime] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -938,8 +1071,8 @@ class CustomersClient:
         credit_currency_key : str
             Stable machine-readable key for the active credit currency to grant.
 
-        amount : int
-            Number of credits to grant. This is not a monetary amount.
+        amount : float
+            Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
 
         starts_at : typing.Optional[dt.datetime]
             When these credits become spendable, as an RFC3339 datetime with timezone. Must be at or before the current server time. Defaults to the current server time when omitted.
@@ -967,7 +1100,7 @@ class CustomersClient:
         client.customers.grant_customer_credits_by_external_id(
             external_id="customer_123",
             credit_currency_key="api_credits",
-            amount=10000,
+            amount=10000.0,
             starts_at=datetime.datetime.fromisoformat(
                 "2026-06-05 12:00:00+00:00",
             ),
@@ -1045,6 +1178,884 @@ class CustomersClient:
         )
         return _response.data
 
+    def list_customer_units_by_external_id(
+        self,
+        external_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        status: typing.Optional[ListCustomerUnitsByExternalIdRequestStatus] = None,
+        external_type: typing.Optional[str] = None,
+        parent_external_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitListResponse:
+        """
+        Lists the customer's units as a flat list, newest last; assemble the tree from `parentExternalId` (`null` on the root unit, `isRoot: true`). Deleted units are hidden unless `status=DELETED` is given. Filter by `externalType`, or by `parentExternalId` for one level of the tree. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        status : typing.Optional[ListCustomerUnitsByExternalIdRequestStatus]
+            Filter by status (default ACTIVE).
+
+        external_type : typing.Optional[str]
+            Filter by external type.
+
+        parent_external_id : typing.Optional[str]
+            Your external ID of the parent unit; lists its direct children.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitListResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.list_customer_units_by_external_id(
+            external_id="customer_123",
+            parent_external_id="dept-rnd",
+        )
+        """
+        _response = self._raw_client.list_customer_units_by_external_id(
+            external_id,
+            limit=limit,
+            offset=offset,
+            status=status,
+            external_type=external_type,
+            parent_external_id=parent_external_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def create_customer_unit_by_external_id(
+        self,
+        external_id_: str,
+        *,
+        external_id: str,
+        name: typing.Optional[str] = OMIT,
+        external_type: typing.Optional[str] = OMIT,
+        parent_external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnit:
+        """
+        Creates a unit for this customer. `externalId` is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and `name` defaults to it. Omit `parentExternalId` to create the customer's root unit (its first unit; `409 ROOT_EXISTS` if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (`409 PARENT_NOT_FOUND`) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. `409` also when the externalId is taken (`CUSTOMER_UNIT_EXISTS`), the tree would get too deep, or the customer is on seat-based billing. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id_ : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        external_id : str
+            Your own id for the unit: required, unique within the customer, immutable, at most 255 characters. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (`customerUnit.externalCustomerUnitId`). Cannot be `.` or `..`.
+
+        name : typing.Optional[str]
+            Display name (defaults to the external ID).
+
+        external_type : typing.Optional[str]
+            Your structural vocabulary for the unit (`department`, `tenant`, `team`, ...). Free text; filterable; Paid never branches on it.
+
+        parent_external_id : typing.Optional[str]
+            Your external ID of the parent unit; omit it to create the root unit.
+
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
+            Freeform JSON for your own use.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            201
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.create_customer_unit_by_external_id(
+            external_id_="customer_123",
+            external_id="team-research",
+        )
+        """
+        _response = self._raw_client.create_customer_unit_by_external_id(
+            external_id_,
+            external_id=external_id,
+            name=name,
+            external_type=external_type,
+            parent_external_id=parent_external_id,
+            metadata=metadata,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def get_customer_unit_by_external_id(
+        self,
+        external_id: str,
+        external_customer_unit_id: str,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnit:
+        """
+        Returns one unit of this customer by its `externalId`, including a deleted one. `404` when the unit does not exist or belongs to another customer. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.get_customer_unit_by_external_id(
+            external_id="customer_123",
+            external_customer_unit_id="team-research",
+        )
+        """
+        _response = self._raw_client.get_customer_unit_by_external_id(
+            external_id, external_customer_unit_id, request_options=request_options
+        )
+        return _response.data
+
+    def delete_customer_unit_by_external_id(
+        self,
+        external_id: str,
+        external_customer_unit_id: str,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnit:
+        """
+        Soft-deletes a unit: it stays readable with `status: DELETED` and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. `409` while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.delete_customer_unit_by_external_id(
+            external_id="customer_123",
+            external_customer_unit_id="team-research",
+        )
+        """
+        _response = self._raw_client.delete_customer_unit_by_external_id(
+            external_id, external_customer_unit_id, request_options=request_options
+        )
+        return _response.data
+
+    def update_customer_unit_by_external_id(
+        self,
+        external_id: str,
+        external_customer_unit_id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        external_type: typing.Optional[str] = OMIT,
+        parent_external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnit:
+        """
+        Renames, re-types, re-parents or annotates a unit, the root included. `externalId` cannot change. Re-parenting (`parentExternalId`) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. `409` for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (`ROOT_UNIT_IMMOVABLE`), a move under the unit's own subtree, or a tree that would get too deep. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        name : typing.Optional[str]
+            Display name. Never used to address the unit.
+
+        external_type : typing.Optional[str]
+            Your structural vocabulary for the unit (`department`, `tenant`, `team`, ...). Free text; filterable; Paid never branches on it.
+
+        parent_external_id : typing.Optional[str]
+            Your external ID of the new parent unit; moves the unit and its subtree.
+
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
+            Freeform JSON for your own use.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.update_customer_unit_by_external_id(
+            external_id="customer_123",
+            external_customer_unit_id="team-research",
+        )
+        """
+        _response = self._raw_client.update_customer_unit_by_external_id(
+            external_id,
+            external_customer_unit_id,
+            name=name,
+            external_type=external_type,
+            parent_external_id=parent_external_id,
+            metadata=metadata,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def list_customer_units(
+        self,
+        id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        status: typing.Optional[ListCustomerUnitsRequestStatus] = None,
+        external_type: typing.Optional[str] = None,
+        parent_external_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitListResponse:
+        """
+        Lists the customer's units as a flat list, newest last; assemble the tree from `parentExternalId` (`null` on the root unit, `isRoot: true`). Deleted units are hidden unless `status=DELETED` is given. Filter by `externalType`, or by `parentExternalId` for one level of the tree. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        status : typing.Optional[ListCustomerUnitsRequestStatus]
+            Filter by status (default ACTIVE).
+
+        external_type : typing.Optional[str]
+            Filter by external type.
+
+        parent_external_id : typing.Optional[str]
+            Your external ID of the parent unit; lists its direct children.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitListResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.list_customer_units(
+            id="cus_abc123",
+            parent_external_id="dept-rnd",
+        )
+        """
+        _response = self._raw_client.list_customer_units(
+            id,
+            limit=limit,
+            offset=offset,
+            status=status,
+            external_type=external_type,
+            parent_external_id=parent_external_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def create_customer_unit(
+        self,
+        id: str,
+        *,
+        external_id: str,
+        name: typing.Optional[str] = OMIT,
+        external_type: typing.Optional[str] = OMIT,
+        parent_external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnit:
+        """
+        Creates a unit for this customer. `externalId` is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and `name` defaults to it. Omit `parentExternalId` to create the customer's root unit (its first unit; `409 ROOT_EXISTS` if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (`409 PARENT_NOT_FOUND`) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. `409` also when the externalId is taken (`CUSTOMER_UNIT_EXISTS`), the tree would get too deep, or the customer is on seat-based billing. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        external_id : str
+            Your own id for the unit: required, unique within the customer, immutable, at most 255 characters. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (`customerUnit.externalCustomerUnitId`). Cannot be `.` or `..`.
+
+        name : typing.Optional[str]
+            Display name (defaults to the external ID).
+
+        external_type : typing.Optional[str]
+            Your structural vocabulary for the unit (`department`, `tenant`, `team`, ...). Free text; filterable; Paid never branches on it.
+
+        parent_external_id : typing.Optional[str]
+            Your external ID of the parent unit; omit it to create the root unit.
+
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
+            Freeform JSON for your own use.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            201
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.create_customer_unit(
+            id="cus_abc123",
+            external_id="team-research",
+        )
+        """
+        _response = self._raw_client.create_customer_unit(
+            id,
+            external_id=external_id,
+            name=name,
+            external_type=external_type,
+            parent_external_id=parent_external_id,
+            metadata=metadata,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def get_customer_unit(
+        self, id: str, external_customer_unit_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> CustomerUnit:
+        """
+        Returns one unit of this customer by its `externalId`, including a deleted one. `404` when the unit does not exist or belongs to another customer. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.get_customer_unit(
+            id="cus_abc123",
+            external_customer_unit_id="team-research",
+        )
+        """
+        _response = self._raw_client.get_customer_unit(id, external_customer_unit_id, request_options=request_options)
+        return _response.data
+
+    def delete_customer_unit(
+        self, id: str, external_customer_unit_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> CustomerUnit:
+        """
+        Soft-deletes a unit: it stays readable with `status: DELETED` and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. `409` while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.delete_customer_unit(
+            id="cus_abc123",
+            external_customer_unit_id="team-research",
+        )
+        """
+        _response = self._raw_client.delete_customer_unit(
+            id, external_customer_unit_id, request_options=request_options
+        )
+        return _response.data
+
+    def update_customer_unit(
+        self,
+        id: str,
+        external_customer_unit_id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        external_type: typing.Optional[str] = OMIT,
+        parent_external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnit:
+        """
+        Renames, re-types, re-parents or annotates a unit, the root included. `externalId` cannot change. Re-parenting (`parentExternalId`) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. `409` for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (`ROOT_UNIT_IMMOVABLE`), a move under the unit's own subtree, or a tree that would get too deep. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        name : typing.Optional[str]
+            Display name. Never used to address the unit.
+
+        external_type : typing.Optional[str]
+            Your structural vocabulary for the unit (`department`, `tenant`, `team`, ...). Free text; filterable; Paid never branches on it.
+
+        parent_external_id : typing.Optional[str]
+            Your external ID of the new parent unit; moves the unit and its subtree.
+
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
+            Freeform JSON for your own use.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.update_customer_unit(
+            id="cus_abc123",
+            external_customer_unit_id="team-research",
+        )
+        """
+        _response = self._raw_client.update_customer_unit(
+            id,
+            external_customer_unit_id,
+            name=name,
+            external_type=external_type,
+            parent_external_id=parent_external_id,
+            metadata=metadata,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def get_customer_unit_cap_by_external_id(
+        self,
+        external_id: str,
+        external_customer_unit_id: str,
+        *,
+        credits_currency_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitCapResponse:
+        """
+        Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with `creditsCurrencyId`; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. `404` when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        credits_currency_id : typing.Optional[str]
+            The credits currency to read. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitCapResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.get_customer_unit_cap_by_external_id(
+            external_id="customer_123",
+            external_customer_unit_id="tenant-a",
+            credits_currency_id="7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf",
+        )
+        """
+        _response = self._raw_client.get_customer_unit_cap_by_external_id(
+            external_id,
+            external_customer_unit_id,
+            credits_currency_id=credits_currency_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def set_customer_unit_cap_by_external_id(
+        self,
+        external_id: str,
+        external_customer_unit_id: str,
+        *,
+        amount: float,
+        frequency: typing.Optional[CustomerUnitCapSetFrequency] = OMIT,
+        credits_currency_id: typing.Optional[str] = OMIT,
+        effective_from: typing.Optional[dt.datetime] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitCapSetResponse:
+        """
+        Sets the cap on this customer unit for one credits currency by recording a new cap version; earlier versions are kept and never modified, and the newest version wins where they overlap. The new version applies from `effectiveFrom` (default now) and its periods are anchored on that day of the month. Select the currency with `creditsCurrencyId` in the body; it may be omitted only when the organization has exactly one credits currency. A cap on the customer's root unit is the customer-wide cap. `404` when the customer or the unit does not exist. `409` for customers on seat-based billing. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        amount : float
+            The cap, in credits of the currency, per period. Must be positive.
+
+        frequency : typing.Optional[CustomerUnitCapSetFrequency]
+            Period length. Periods start on the day-of-month of `effectiveFrom` (UTC), clamped in shorter months.
+
+        credits_currency_id : typing.Optional[str]
+            The credits currency to cap. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+
+        effective_from : typing.Optional[dt.datetime]
+            ISO 8601 timestamp. When the cap starts applying and the anchor day for its periods (UTC). Defaults to now when omitted. Spend earlier in the period that contains it still counts toward the cap.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitCapSetResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.set_customer_unit_cap_by_external_id(
+            external_id="customer_123",
+            external_customer_unit_id="tenant-a",
+            amount=10000.0,
+        )
+        """
+        _response = self._raw_client.set_customer_unit_cap_by_external_id(
+            external_id,
+            external_customer_unit_id,
+            amount=amount,
+            frequency=frequency,
+            credits_currency_id=credits_currency_id,
+            effective_from=effective_from,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def end_customer_unit_cap_by_external_id(
+        self,
+        external_id: str,
+        external_customer_unit_id: str,
+        *,
+        credits_currency_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitCapEndResponse:
+        """
+        Ends the cap on this customer unit for one credits currency by setting `effectiveUntil` to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with `creditsCurrencyId`; it may be omitted only when the organization has exactly one credits currency. `404` when the customer or the unit does not exist, or there is no open version for that currency. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        credits_currency_id : typing.Optional[str]
+            The credits currency whose cap to end. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitCapEndResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.end_customer_unit_cap_by_external_id(
+            external_id="customer_123",
+            external_customer_unit_id="tenant-a",
+            credits_currency_id="7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf",
+        )
+        """
+        _response = self._raw_client.end_customer_unit_cap_by_external_id(
+            external_id,
+            external_customer_unit_id,
+            credits_currency_id=credits_currency_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def get_customer_unit_cap(
+        self,
+        id: str,
+        external_customer_unit_id: str,
+        *,
+        credits_currency_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitCapResponse:
+        """
+        Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with `creditsCurrencyId`; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. `404` when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        credits_currency_id : typing.Optional[str]
+            The credits currency to read. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitCapResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.get_customer_unit_cap(
+            id="cus_abc123",
+            external_customer_unit_id="tenant-a",
+            credits_currency_id="7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf",
+        )
+        """
+        _response = self._raw_client.get_customer_unit_cap(
+            id, external_customer_unit_id, credits_currency_id=credits_currency_id, request_options=request_options
+        )
+        return _response.data
+
+    def set_customer_unit_cap(
+        self,
+        id: str,
+        external_customer_unit_id: str,
+        *,
+        amount: float,
+        frequency: typing.Optional[CustomerUnitCapSetFrequency] = OMIT,
+        credits_currency_id: typing.Optional[str] = OMIT,
+        effective_from: typing.Optional[dt.datetime] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitCapSetResponse:
+        """
+        Sets the cap on this customer unit for one credits currency by recording a new cap version; earlier versions are kept and never modified, and the newest version wins where they overlap. The new version applies from `effectiveFrom` (default now) and its periods are anchored on that day of the month. Select the currency with `creditsCurrencyId` in the body; it may be omitted only when the organization has exactly one credits currency. A cap on the customer's root unit is the customer-wide cap. `404` when the customer or the unit does not exist. `409` for customers on seat-based billing. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        amount : float
+            The cap, in credits of the currency, per period. Must be positive.
+
+        frequency : typing.Optional[CustomerUnitCapSetFrequency]
+            Period length. Periods start on the day-of-month of `effectiveFrom` (UTC), clamped in shorter months.
+
+        credits_currency_id : typing.Optional[str]
+            The credits currency to cap. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+
+        effective_from : typing.Optional[dt.datetime]
+            ISO 8601 timestamp. When the cap starts applying and the anchor day for its periods (UTC). Defaults to now when omitted. Spend earlier in the period that contains it still counts toward the cap.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitCapSetResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.set_customer_unit_cap(
+            id="cus_abc123",
+            external_customer_unit_id="tenant-a",
+            amount=10000.0,
+        )
+        """
+        _response = self._raw_client.set_customer_unit_cap(
+            id,
+            external_customer_unit_id,
+            amount=amount,
+            frequency=frequency,
+            credits_currency_id=credits_currency_id,
+            effective_from=effective_from,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def end_customer_unit_cap(
+        self,
+        id: str,
+        external_customer_unit_id: str,
+        *,
+        credits_currency_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitCapEndResponse:
+        """
+        Ends the cap on this customer unit for one credits currency by setting `effectiveUntil` to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with `creditsCurrencyId`; it may be omitted only when the organization has exactly one credits currency. `404` when the customer or the unit does not exist, or there is no open version for that currency. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        credits_currency_id : typing.Optional[str]
+            The credits currency whose cap to end. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitCapEndResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.customers.end_customer_unit_cap(
+            id="cus_abc123",
+            external_customer_unit_id="tenant-a",
+            credits_currency_id="7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf",
+        )
+        """
+        _response = self._raw_client.end_customer_unit_cap(
+            id, external_customer_unit_id, credits_currency_id=credits_currency_id, request_options=request_options
+        )
+        return _response.data
+
 
 class AsyncCustomersClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -1066,6 +2077,12 @@ class AsyncCustomersClient:
         *,
         limit: typing.Optional[int] = None,
         offset: typing.Optional[int] = None,
+        name: typing.Optional[str] = None,
+        status: typing.Optional[ListCustomersRequestStatus] = None,
+        creation_state: typing.Optional[ListCustomersRequestCreationState] = None,
+        created_at_from: typing.Optional[str] = None,
+        created_at_to: typing.Optional[str] = None,
+        external_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CustomerListResponse:
         """
@@ -1076,6 +2093,24 @@ class AsyncCustomersClient:
         limit : typing.Optional[int]
 
         offset : typing.Optional[int]
+
+        name : typing.Optional[str]
+            Search by customer name (case-insensitive, matches anywhere in the name).
+
+        status : typing.Optional[ListCustomersRequestStatus]
+            Filter by customer status. churned: customers marked as churned. active: everyone else.
+
+        creation_state : typing.Optional[ListCustomersRequestCreationState]
+            Filter by creation state: draft or active.
+
+        created_at_from : typing.Optional[str]
+            Only customers created on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        created_at_to : typing.Optional[str]
+            Only customers created on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        external_id : typing.Optional[str]
+            Filter by your external customer ID (exact match).
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1102,7 +2137,17 @@ class AsyncCustomersClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_customers(limit=limit, offset=offset, request_options=request_options)
+        _response = await self._raw_client.list_customers(
+            limit=limit,
+            offset=offset,
+            name=name,
+            status=status,
+            creation_state=creation_state,
+            created_at_from=created_at_from,
+            created_at_to=created_at_to,
+            external_id=external_id,
+            request_options=request_options,
+        )
         return _response.data
 
     async def create_customer(
@@ -1979,7 +3024,7 @@ class AsyncCustomersClient:
         id: str,
         *,
         credit_currency_key: str,
-        amount: int,
+        amount: float,
         starts_at: typing.Optional[dt.datetime] = OMIT,
         expires_at: typing.Optional[dt.datetime] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -1995,8 +3040,8 @@ class AsyncCustomersClient:
         credit_currency_key : str
             Stable machine-readable key for the active credit currency to grant.
 
-        amount : int
-            Number of credits to grant. This is not a monetary amount.
+        amount : float
+            Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
 
         starts_at : typing.Optional[dt.datetime]
             When these credits become spendable, as an RFC3339 datetime with timezone. Must be at or before the current server time. Defaults to the current server time when omitted.
@@ -2028,7 +3073,7 @@ class AsyncCustomersClient:
             await client.customers.grant_customer_credits(
                 id="cus_abc123",
                 credit_currency_key="api_credits",
-                amount=10000,
+                amount=10000.0,
                 starts_at=datetime.datetime.fromisoformat(
                     "2026-06-05 12:00:00+00:00",
                 ),
@@ -2093,12 +3138,116 @@ class AsyncCustomersClient:
         )
         return _response.data
 
+    async def list_customer_pending_credit_consumption(
+        self,
+        id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> PendingCreditConsumptionListResponse:
+        """
+        List credit consumption that was recorded before a matching credit pool existed — for example usage that arrived before an invoice was paid or before a new period's credits were granted. Entries leave this list once they are applied to a pool or settled. Use the value returned as `customer.id`, for example `cus_abc123`. If you have your own customer ID, use `/api/v2/customers/external/{externalId}/credits/pending-consumption`.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        PendingCreditConsumptionListResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.list_customer_pending_credit_consumption(
+                id="cus_abc123",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list_customer_pending_credit_consumption(
+            id, limit=limit, offset=offset, request_options=request_options
+        )
+        return _response.data
+
+    async def list_customer_pending_credit_consumption_by_external_id(
+        self,
+        external_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> PendingCreditConsumptionListResponse:
+        """
+        List credit consumption recorded before a matching credit pool existed, for a customer looked up by external ID.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from the integrator's system, stored on Paid as `externalId`.
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        PendingCreditConsumptionListResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.list_customer_pending_credit_consumption_by_external_id(
+                external_id="customer_123",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list_customer_pending_credit_consumption_by_external_id(
+            external_id, limit=limit, offset=offset, request_options=request_options
+        )
+        return _response.data
+
     async def grant_customer_credits_by_external_id(
         self,
         external_id: str,
         *,
         credit_currency_key: str,
-        amount: int,
+        amount: float,
         starts_at: typing.Optional[dt.datetime] = OMIT,
         expires_at: typing.Optional[dt.datetime] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -2114,8 +3263,8 @@ class AsyncCustomersClient:
         credit_currency_key : str
             Stable machine-readable key for the active credit currency to grant.
 
-        amount : int
-            Number of credits to grant. This is not a monetary amount.
+        amount : float
+            Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
 
         starts_at : typing.Optional[dt.datetime]
             When these credits become spendable, as an RFC3339 datetime with timezone. Must be at or before the current server time. Defaults to the current server time when omitted.
@@ -2147,7 +3296,7 @@ class AsyncCustomersClient:
             await client.customers.grant_customer_credits_by_external_id(
                 external_id="customer_123",
                 credit_currency_key="api_credits",
-                amount=10000,
+                amount=10000.0,
                 starts_at=datetime.datetime.fromisoformat(
                     "2026-06-05 12:00:00+00:00",
                 ),
@@ -2233,5 +3382,1013 @@ class AsyncCustomersClient:
             metadata=metadata,
             status=status,
             request_options=request_options,
+        )
+        return _response.data
+
+    async def list_customer_units_by_external_id(
+        self,
+        external_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        status: typing.Optional[ListCustomerUnitsByExternalIdRequestStatus] = None,
+        external_type: typing.Optional[str] = None,
+        parent_external_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitListResponse:
+        """
+        Lists the customer's units as a flat list, newest last; assemble the tree from `parentExternalId` (`null` on the root unit, `isRoot: true`). Deleted units are hidden unless `status=DELETED` is given. Filter by `externalType`, or by `parentExternalId` for one level of the tree. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        status : typing.Optional[ListCustomerUnitsByExternalIdRequestStatus]
+            Filter by status (default ACTIVE).
+
+        external_type : typing.Optional[str]
+            Filter by external type.
+
+        parent_external_id : typing.Optional[str]
+            Your external ID of the parent unit; lists its direct children.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitListResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.list_customer_units_by_external_id(
+                external_id="customer_123",
+                parent_external_id="dept-rnd",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list_customer_units_by_external_id(
+            external_id,
+            limit=limit,
+            offset=offset,
+            status=status,
+            external_type=external_type,
+            parent_external_id=parent_external_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def create_customer_unit_by_external_id(
+        self,
+        external_id_: str,
+        *,
+        external_id: str,
+        name: typing.Optional[str] = OMIT,
+        external_type: typing.Optional[str] = OMIT,
+        parent_external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnit:
+        """
+        Creates a unit for this customer. `externalId` is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and `name` defaults to it. Omit `parentExternalId` to create the customer's root unit (its first unit; `409 ROOT_EXISTS` if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (`409 PARENT_NOT_FOUND`) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. `409` also when the externalId is taken (`CUSTOMER_UNIT_EXISTS`), the tree would get too deep, or the customer is on seat-based billing. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id_ : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        external_id : str
+            Your own id for the unit: required, unique within the customer, immutable, at most 255 characters. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (`customerUnit.externalCustomerUnitId`). Cannot be `.` or `..`.
+
+        name : typing.Optional[str]
+            Display name (defaults to the external ID).
+
+        external_type : typing.Optional[str]
+            Your structural vocabulary for the unit (`department`, `tenant`, `team`, ...). Free text; filterable; Paid never branches on it.
+
+        parent_external_id : typing.Optional[str]
+            Your external ID of the parent unit; omit it to create the root unit.
+
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
+            Freeform JSON for your own use.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            201
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.create_customer_unit_by_external_id(
+                external_id_="customer_123",
+                external_id="team-research",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.create_customer_unit_by_external_id(
+            external_id_,
+            external_id=external_id,
+            name=name,
+            external_type=external_type,
+            parent_external_id=parent_external_id,
+            metadata=metadata,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def get_customer_unit_by_external_id(
+        self,
+        external_id: str,
+        external_customer_unit_id: str,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnit:
+        """
+        Returns one unit of this customer by its `externalId`, including a deleted one. `404` when the unit does not exist or belongs to another customer. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.get_customer_unit_by_external_id(
+                external_id="customer_123",
+                external_customer_unit_id="team-research",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_customer_unit_by_external_id(
+            external_id, external_customer_unit_id, request_options=request_options
+        )
+        return _response.data
+
+    async def delete_customer_unit_by_external_id(
+        self,
+        external_id: str,
+        external_customer_unit_id: str,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnit:
+        """
+        Soft-deletes a unit: it stays readable with `status: DELETED` and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. `409` while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.delete_customer_unit_by_external_id(
+                external_id="customer_123",
+                external_customer_unit_id="team-research",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.delete_customer_unit_by_external_id(
+            external_id, external_customer_unit_id, request_options=request_options
+        )
+        return _response.data
+
+    async def update_customer_unit_by_external_id(
+        self,
+        external_id: str,
+        external_customer_unit_id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        external_type: typing.Optional[str] = OMIT,
+        parent_external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnit:
+        """
+        Renames, re-types, re-parents or annotates a unit, the root included. `externalId` cannot change. Re-parenting (`parentExternalId`) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. `409` for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (`ROOT_UNIT_IMMOVABLE`), a move under the unit's own subtree, or a tree that would get too deep. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        name : typing.Optional[str]
+            Display name. Never used to address the unit.
+
+        external_type : typing.Optional[str]
+            Your structural vocabulary for the unit (`department`, `tenant`, `team`, ...). Free text; filterable; Paid never branches on it.
+
+        parent_external_id : typing.Optional[str]
+            Your external ID of the new parent unit; moves the unit and its subtree.
+
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
+            Freeform JSON for your own use.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.update_customer_unit_by_external_id(
+                external_id="customer_123",
+                external_customer_unit_id="team-research",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.update_customer_unit_by_external_id(
+            external_id,
+            external_customer_unit_id,
+            name=name,
+            external_type=external_type,
+            parent_external_id=parent_external_id,
+            metadata=metadata,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def list_customer_units(
+        self,
+        id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        status: typing.Optional[ListCustomerUnitsRequestStatus] = None,
+        external_type: typing.Optional[str] = None,
+        parent_external_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitListResponse:
+        """
+        Lists the customer's units as a flat list, newest last; assemble the tree from `parentExternalId` (`null` on the root unit, `isRoot: true`). Deleted units are hidden unless `status=DELETED` is given. Filter by `externalType`, or by `parentExternalId` for one level of the tree. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        status : typing.Optional[ListCustomerUnitsRequestStatus]
+            Filter by status (default ACTIVE).
+
+        external_type : typing.Optional[str]
+            Filter by external type.
+
+        parent_external_id : typing.Optional[str]
+            Your external ID of the parent unit; lists its direct children.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitListResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.list_customer_units(
+                id="cus_abc123",
+                parent_external_id="dept-rnd",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list_customer_units(
+            id,
+            limit=limit,
+            offset=offset,
+            status=status,
+            external_type=external_type,
+            parent_external_id=parent_external_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def create_customer_unit(
+        self,
+        id: str,
+        *,
+        external_id: str,
+        name: typing.Optional[str] = OMIT,
+        external_type: typing.Optional[str] = OMIT,
+        parent_external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnit:
+        """
+        Creates a unit for this customer. `externalId` is your own key for it: required, unique within the customer and immutable; every unit route addresses the unit by it, and `name` defaults to it. Omit `parentExternalId` to create the customer's root unit (its first unit; `409 ROOT_EXISTS` if it already has one — a customer created with an external id usable as a unit key already has its root, keyed by that external id, so name it as the parent instead); otherwise the parent must exist (`409 PARENT_NOT_FOUND`) and be ACTIVE. Units are never created implicitly: a signal that names a unit before it exists is accepted and its spend attaches to the unit once you create it with that key. `409` also when the externalId is taken (`CUSTOMER_UNIT_EXISTS`), the tree would get too deep, or the customer is on seat-based billing. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        external_id : str
+            Your own id for the unit: required, unique within the customer, immutable, at most 255 characters. Every unit route addresses the unit by it (percent-encode it in the path), and so do signals (`customerUnit.externalCustomerUnitId`). Cannot be `.` or `..`.
+
+        name : typing.Optional[str]
+            Display name (defaults to the external ID).
+
+        external_type : typing.Optional[str]
+            Your structural vocabulary for the unit (`department`, `tenant`, `team`, ...). Free text; filterable; Paid never branches on it.
+
+        parent_external_id : typing.Optional[str]
+            Your external ID of the parent unit; omit it to create the root unit.
+
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
+            Freeform JSON for your own use.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            201
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.create_customer_unit(
+                id="cus_abc123",
+                external_id="team-research",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.create_customer_unit(
+            id,
+            external_id=external_id,
+            name=name,
+            external_type=external_type,
+            parent_external_id=parent_external_id,
+            metadata=metadata,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def get_customer_unit(
+        self, id: str, external_customer_unit_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> CustomerUnit:
+        """
+        Returns one unit of this customer by its `externalId`, including a deleted one. `404` when the unit does not exist or belongs to another customer. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.get_customer_unit(
+                id="cus_abc123",
+                external_customer_unit_id="team-research",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_customer_unit(
+            id, external_customer_unit_id, request_options=request_options
+        )
+        return _response.data
+
+    async def delete_customer_unit(
+        self, id: str, external_customer_unit_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> CustomerUnit:
+        """
+        Soft-deletes a unit: it stays readable with `status: DELETED` and cannot be reactivated. Spend history that references it is kept, and signals that keep naming it are still attributed to it. `409` while the unit has ACTIVE children or a cap in force or scheduled; the root follows the same rules, and once it is deleted a new root can be created. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.delete_customer_unit(
+                id="cus_abc123",
+                external_customer_unit_id="team-research",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.delete_customer_unit(
+            id, external_customer_unit_id, request_options=request_options
+        )
+        return _response.data
+
+    async def update_customer_unit(
+        self,
+        id: str,
+        external_customer_unit_id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        external_type: typing.Optional[str] = OMIT,
+        parent_external_id: typing.Optional[str] = OMIT,
+        metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnit:
+        """
+        Renames, re-types, re-parents or annotates a unit, the root included. `externalId` cannot change. Re-parenting (`parentExternalId`) moves the unit with everything under it. Spend already recorded keeps naming the unit it landed on; caps are evaluated on the current tree, so from the move on the unit's spend in the running cap period counts toward its new ancestors' caps and no longer toward the old ones. `409` for a deleted unit, a parent that does not exist or is not ACTIVE, a move of the root (`ROOT_UNIT_IMMOVABLE`), a move under the unit's own subtree, or a tree that would get too deep. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        name : typing.Optional[str]
+            Display name. Never used to address the unit.
+
+        external_type : typing.Optional[str]
+            Your structural vocabulary for the unit (`department`, `tenant`, `team`, ...). Free text; filterable; Paid never branches on it.
+
+        parent_external_id : typing.Optional[str]
+            Your external ID of the new parent unit; moves the unit and its subtree.
+
+        metadata : typing.Optional[typing.Dict[str, typing.Any]]
+            Freeform JSON for your own use.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnit
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.update_customer_unit(
+                id="cus_abc123",
+                external_customer_unit_id="team-research",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.update_customer_unit(
+            id,
+            external_customer_unit_id,
+            name=name,
+            external_type=external_type,
+            parent_external_id=parent_external_id,
+            metadata=metadata,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def get_customer_unit_cap_by_external_id(
+        self,
+        external_id: str,
+        external_customer_unit_id: str,
+        *,
+        credits_currency_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitCapResponse:
+        """
+        Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with `creditsCurrencyId`; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. `404` when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        credits_currency_id : typing.Optional[str]
+            The credits currency to read. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitCapResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.get_customer_unit_cap_by_external_id(
+                external_id="customer_123",
+                external_customer_unit_id="tenant-a",
+                credits_currency_id="7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_customer_unit_cap_by_external_id(
+            external_id,
+            external_customer_unit_id,
+            credits_currency_id=credits_currency_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def set_customer_unit_cap_by_external_id(
+        self,
+        external_id: str,
+        external_customer_unit_id: str,
+        *,
+        amount: float,
+        frequency: typing.Optional[CustomerUnitCapSetFrequency] = OMIT,
+        credits_currency_id: typing.Optional[str] = OMIT,
+        effective_from: typing.Optional[dt.datetime] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitCapSetResponse:
+        """
+        Sets the cap on this customer unit for one credits currency by recording a new cap version; earlier versions are kept and never modified, and the newest version wins where they overlap. The new version applies from `effectiveFrom` (default now) and its periods are anchored on that day of the month. Select the currency with `creditsCurrencyId` in the body; it may be omitted only when the organization has exactly one credits currency. A cap on the customer's root unit is the customer-wide cap. `404` when the customer or the unit does not exist. `409` for customers on seat-based billing. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        amount : float
+            The cap, in credits of the currency, per period. Must be positive.
+
+        frequency : typing.Optional[CustomerUnitCapSetFrequency]
+            Period length. Periods start on the day-of-month of `effectiveFrom` (UTC), clamped in shorter months.
+
+        credits_currency_id : typing.Optional[str]
+            The credits currency to cap. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+
+        effective_from : typing.Optional[dt.datetime]
+            ISO 8601 timestamp. When the cap starts applying and the anchor day for its periods (UTC). Defaults to now when omitted. Spend earlier in the period that contains it still counts toward the cap.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitCapSetResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.set_customer_unit_cap_by_external_id(
+                external_id="customer_123",
+                external_customer_unit_id="tenant-a",
+                amount=10000.0,
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.set_customer_unit_cap_by_external_id(
+            external_id,
+            external_customer_unit_id,
+            amount=amount,
+            frequency=frequency,
+            credits_currency_id=credits_currency_id,
+            effective_from=effective_from,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def end_customer_unit_cap_by_external_id(
+        self,
+        external_id: str,
+        external_customer_unit_id: str,
+        *,
+        credits_currency_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitCapEndResponse:
+        """
+        Ends the cap on this customer unit for one credits currency by setting `effectiveUntil` to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with `creditsCurrencyId`; it may be omitted only when the organization has exactly one credits currency. `404` when the customer or the unit does not exist, or there is no open version for that currency. Addresses the customer by your external customer id.
+
+        Parameters
+        ----------
+        external_id : str
+            Customer ID from your system, stored on Paid as the customer's `externalId`.
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        credits_currency_id : typing.Optional[str]
+            The credits currency whose cap to end. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitCapEndResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.end_customer_unit_cap_by_external_id(
+                external_id="customer_123",
+                external_customer_unit_id="tenant-a",
+                credits_currency_id="7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.end_customer_unit_cap_by_external_id(
+            external_id,
+            external_customer_unit_id,
+            credits_currency_id=credits_currency_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def get_customer_unit_cap(
+        self,
+        id: str,
+        external_customer_unit_id: str,
+        *,
+        credits_currency_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitCapResponse:
+        """
+        Returns the cap in force on this customer unit for one credits currency, with usage in the current period when available. Select the currency with `creditsCurrencyId`; it may be omitted only when the organization has exactly one credits currency, which is then used and echoed back. `404` when the customer or the unit does not exist, or the unit has no cap in force for that currency. The usage figures are advisory: other spend may land between this read and the next burn. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        credits_currency_id : typing.Optional[str]
+            The credits currency to read. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitCapResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.get_customer_unit_cap(
+                id="cus_abc123",
+                external_customer_unit_id="tenant-a",
+                credits_currency_id="7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_customer_unit_cap(
+            id, external_customer_unit_id, credits_currency_id=credits_currency_id, request_options=request_options
+        )
+        return _response.data
+
+    async def set_customer_unit_cap(
+        self,
+        id: str,
+        external_customer_unit_id: str,
+        *,
+        amount: float,
+        frequency: typing.Optional[CustomerUnitCapSetFrequency] = OMIT,
+        credits_currency_id: typing.Optional[str] = OMIT,
+        effective_from: typing.Optional[dt.datetime] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitCapSetResponse:
+        """
+        Sets the cap on this customer unit for one credits currency by recording a new cap version; earlier versions are kept and never modified, and the newest version wins where they overlap. The new version applies from `effectiveFrom` (default now) and its periods are anchored on that day of the month. Select the currency with `creditsCurrencyId` in the body; it may be omitted only when the organization has exactly one credits currency. A cap on the customer's root unit is the customer-wide cap. `404` when the customer or the unit does not exist. `409` for customers on seat-based billing. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        amount : float
+            The cap, in credits of the currency, per period. Must be positive.
+
+        frequency : typing.Optional[CustomerUnitCapSetFrequency]
+            Period length. Periods start on the day-of-month of `effectiveFrom` (UTC), clamped in shorter months.
+
+        credits_currency_id : typing.Optional[str]
+            The credits currency to cap. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+
+        effective_from : typing.Optional[dt.datetime]
+            ISO 8601 timestamp. When the cap starts applying and the anchor day for its periods (UTC). Defaults to now when omitted. Spend earlier in the period that contains it still counts toward the cap.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitCapSetResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.set_customer_unit_cap(
+                id="cus_abc123",
+                external_customer_unit_id="tenant-a",
+                amount=10000.0,
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.set_customer_unit_cap(
+            id,
+            external_customer_unit_id,
+            amount=amount,
+            frequency=frequency,
+            credits_currency_id=credits_currency_id,
+            effective_from=effective_from,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def end_customer_unit_cap(
+        self,
+        id: str,
+        external_customer_unit_id: str,
+        *,
+        credits_currency_id: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CustomerUnitCapEndResponse:
+        """
+        Ends the cap on this customer unit for one credits currency by setting `effectiveUntil` to now on every open version — the one in force, older overlapping versions still open, and versions scheduled to start later — so nothing can resurface or activate afterwards; nothing is deleted and history is kept. Select the currency with `creditsCurrencyId`; it may be omitted only when the organization has exactly one credits currency. `404` when the customer or the unit does not exist, or there is no open version for that currency. Use the value returned as `customer.id`, for example `cus_abc123`; if you have your own customer ID, use the `/api/v2/customers/external/{externalId}/…` twin.
+
+        Parameters
+        ----------
+        id : str
+            Paid customer display id
+
+        external_customer_unit_id : str
+            Your own id for the unit (its `externalId`), unique within this customer.
+
+        credits_currency_id : typing.Optional[str]
+            The credits currency whose cap to end. Omit it only when the organization has exactly one credits currency, which is then used; otherwise it is required.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CustomerUnitCapEndResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.customers.end_customer_unit_cap(
+                id="cus_abc123",
+                external_customer_unit_id="tenant-a",
+                credits_currency_id="7f4f5d4c-55e9-4d5b-a3e7-c9eb3d2d01bf",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.end_customer_unit_cap(
+            id, external_customer_unit_id, credits_currency_id=credits_currency_id, request_options=request_options
         )
         return _response.data

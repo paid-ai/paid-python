@@ -7,7 +7,9 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .custom_view_authoring_detail_period import CustomViewAuthoringDetailPeriod
+from .custom_view_authoring_detail_scope import CustomViewAuthoringDetailScope
 from .custom_view_authoring_detail_status import CustomViewAuthoringDetailStatus
+from .custom_view_filter import CustomViewFilter
 from .custom_view_query import CustomViewQuery
 
 
@@ -34,6 +36,16 @@ class CustomViewAuthoringDetail(UniversalBaseModel):
     The view's current default date range, or null if it uses no adjustable period.
     """
 
+    filters: typing.Optional[typing.List[CustomViewFilter]] = pydantic.Field(default=None)
+    """
+    The filter parameters this view accepts per request (pass values as `filter_<name>` query params on the data endpoint), or null if it declares none. Embedding hosts can render controls from the declared values.
+    """
+
+    scope: CustomViewAuthoringDetailScope = pydantic.Field()
+    """
+    'customer': data is scoped to one viewing customer and the view is embeddable per-customer. 'organization': data is org-wide and the view is internal-only.
+    """
+
     queries: typing.List[CustomViewQuery]
     created_by: typing_extensions.Annotated[str, FieldMetadata(alias="createdBy"), pydantic.Field(alias="createdBy")]
     created_at: typing_extensions.Annotated[str, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")]
@@ -41,6 +53,16 @@ class CustomViewAuthoringDetail(UniversalBaseModel):
     schema_version: typing_extensions.Annotated[
         int, FieldMetadata(alias="schemaVersion"), pydantic.Field(alias="schemaVersion")
     ]
+    guide: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    The authoring guide (only when includeGuide=true) — same content as getCustomViewAuthoringGuide, returned inline to save a round trip.
+    """
+
+    sample_bundle: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="sampleBundle"),
+        pydantic.Field(alias="sampleBundle", description="The render-bundle template (only when includeGuide=true)."),
+    ] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

@@ -11,7 +11,19 @@ from .credit_grant_result_status import CreditGrantResultStatus
 
 
 class CreditGrantResult(UniversalBaseModel):
-    amount: int
+    amount: int = pydantic.Field()
+    """
+    Whole-credit projection of the amount granted, truncated toward zero. May be 0 for a sub-unit grant. Exact for values within ±2^53; see amountDecimal for the exact value at any magnitude.
+    """
+
+    amount_decimal: typing_extensions.Annotated[
+        str,
+        FieldMetadata(alias="amountDecimal"),
+        pydantic.Field(
+            alias="amountDecimal",
+            description="Exact number of credits granted, as a decimal string. Exact at any magnitude, and at the full 6 decimal places.",
+        ),
+    ]
     starts_at: typing_extensions.Annotated[
         dt.datetime,
         FieldMetadata(alias="startsAt"),

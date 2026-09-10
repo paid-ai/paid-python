@@ -13,10 +13,11 @@ from ..errors.bad_request_error import BadRequestError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
-from ..types.error_response import ErrorResponse
 from ..types.invoice import Invoice
 from ..types.invoice_lines_response import InvoiceLinesResponse
 from ..types.invoice_list_response import InvoiceListResponse
+from .types.list_invoices_request_payment_status import ListInvoicesRequestPaymentStatus
+from .types.list_invoices_request_status import ListInvoicesRequestStatus
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -31,6 +32,18 @@ class RawInvoicesClient:
         *,
         limit: typing.Optional[int] = None,
         offset: typing.Optional[int] = None,
+        customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        order_id: typing.Optional[str] = None,
+        status: typing.Optional[ListInvoicesRequestStatus] = None,
+        payment_status: typing.Optional[ListInvoicesRequestPaymentStatus] = None,
+        issue_date_from: typing.Optional[str] = None,
+        issue_date_to: typing.Optional[str] = None,
+        due_date_from: typing.Optional[str] = None,
+        due_date_to: typing.Optional[str] = None,
+        display_number: typing.Optional[str] = None,
+        purchase_order_reference: typing.Optional[str] = None,
+        currency: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[InvoiceListResponse]:
         """
@@ -41,6 +54,42 @@ class RawInvoicesClient:
         limit : typing.Optional[int]
 
         offset : typing.Optional[int]
+
+        customer_id : typing.Optional[str]
+            Filter by customer ID.
+
+        external_customer_id : typing.Optional[str]
+            Filter by customer external ID.
+
+        order_id : typing.Optional[str]
+            Filter by the order this invoice was generated from.
+
+        status : typing.Optional[ListInvoicesRequestStatus]
+            Filter by invoice status.
+
+        payment_status : typing.Optional[ListInvoicesRequestPaymentStatus]
+            Filter by payment status.
+
+        issue_date_from : typing.Optional[str]
+            Only invoices whose issue date is on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        issue_date_to : typing.Optional[str]
+            Only invoices whose issue date is on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        due_date_from : typing.Optional[str]
+            Only invoices whose due date is on or after this date. Invoices without a due date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        due_date_to : typing.Optional[str]
+            Only invoices whose due date is on or before this date. Invoices without a due date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        display_number : typing.Optional[str]
+            Filter by the invoice number shown on the invoice, whether draft or posted (exact match).
+
+        purchase_order_reference : typing.Optional[str]
+            Filter by purchase order reference (exact match, whitespace-sensitive).
+
+        currency : typing.Optional[str]
+            Filter by invoice currency code (case-insensitive, e.g. USD).
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -56,6 +105,18 @@ class RawInvoicesClient:
             params={
                 "limit": limit,
                 "offset": offset,
+                "customerId": customer_id,
+                "externalCustomerId": external_customer_id,
+                "orderId": order_id,
+                "status": status,
+                "paymentStatus": payment_status,
+                "issueDateFrom": issue_date_from,
+                "issueDateTo": issue_date_to,
+                "dueDateFrom": due_date_from,
+                "dueDateTo": due_date_to,
+                "displayNumber": display_number,
+                "purchaseOrderReference": purchase_order_reference,
+                "currency": currency,
             },
             request_options=request_options,
         )
@@ -73,9 +134,9 @@ class RawInvoicesClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -84,9 +145,9 @@ class RawInvoicesClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -95,9 +156,9 @@ class RawInvoicesClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -144,9 +205,9 @@ class RawInvoicesClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -155,9 +216,9 @@ class RawInvoicesClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -166,9 +227,9 @@ class RawInvoicesClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -228,9 +289,9 @@ class RawInvoicesClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -239,9 +300,9 @@ class RawInvoicesClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -250,9 +311,9 @@ class RawInvoicesClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -261,9 +322,9 @@ class RawInvoicesClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -323,9 +384,9 @@ class RawInvoicesClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -334,9 +395,9 @@ class RawInvoicesClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -345,9 +406,9 @@ class RawInvoicesClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -367,6 +428,18 @@ class AsyncRawInvoicesClient:
         *,
         limit: typing.Optional[int] = None,
         offset: typing.Optional[int] = None,
+        customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        order_id: typing.Optional[str] = None,
+        status: typing.Optional[ListInvoicesRequestStatus] = None,
+        payment_status: typing.Optional[ListInvoicesRequestPaymentStatus] = None,
+        issue_date_from: typing.Optional[str] = None,
+        issue_date_to: typing.Optional[str] = None,
+        due_date_from: typing.Optional[str] = None,
+        due_date_to: typing.Optional[str] = None,
+        display_number: typing.Optional[str] = None,
+        purchase_order_reference: typing.Optional[str] = None,
+        currency: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[InvoiceListResponse]:
         """
@@ -377,6 +450,42 @@ class AsyncRawInvoicesClient:
         limit : typing.Optional[int]
 
         offset : typing.Optional[int]
+
+        customer_id : typing.Optional[str]
+            Filter by customer ID.
+
+        external_customer_id : typing.Optional[str]
+            Filter by customer external ID.
+
+        order_id : typing.Optional[str]
+            Filter by the order this invoice was generated from.
+
+        status : typing.Optional[ListInvoicesRequestStatus]
+            Filter by invoice status.
+
+        payment_status : typing.Optional[ListInvoicesRequestPaymentStatus]
+            Filter by payment status.
+
+        issue_date_from : typing.Optional[str]
+            Only invoices whose issue date is on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        issue_date_to : typing.Optional[str]
+            Only invoices whose issue date is on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        due_date_from : typing.Optional[str]
+            Only invoices whose due date is on or after this date. Invoices without a due date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        due_date_to : typing.Optional[str]
+            Only invoices whose due date is on or before this date. Invoices without a due date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        display_number : typing.Optional[str]
+            Filter by the invoice number shown on the invoice, whether draft or posted (exact match).
+
+        purchase_order_reference : typing.Optional[str]
+            Filter by purchase order reference (exact match, whitespace-sensitive).
+
+        currency : typing.Optional[str]
+            Filter by invoice currency code (case-insensitive, e.g. USD).
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -392,6 +501,18 @@ class AsyncRawInvoicesClient:
             params={
                 "limit": limit,
                 "offset": offset,
+                "customerId": customer_id,
+                "externalCustomerId": external_customer_id,
+                "orderId": order_id,
+                "status": status,
+                "paymentStatus": payment_status,
+                "issueDateFrom": issue_date_from,
+                "issueDateTo": issue_date_to,
+                "dueDateFrom": due_date_from,
+                "dueDateTo": due_date_to,
+                "displayNumber": display_number,
+                "purchaseOrderReference": purchase_order_reference,
+                "currency": currency,
             },
             request_options=request_options,
         )
@@ -409,9 +530,9 @@ class AsyncRawInvoicesClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -420,9 +541,9 @@ class AsyncRawInvoicesClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -431,9 +552,9 @@ class AsyncRawInvoicesClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -480,9 +601,9 @@ class AsyncRawInvoicesClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -491,9 +612,9 @@ class AsyncRawInvoicesClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -502,9 +623,9 @@ class AsyncRawInvoicesClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -564,9 +685,9 @@ class AsyncRawInvoicesClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -575,9 +696,9 @@ class AsyncRawInvoicesClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -586,9 +707,9 @@ class AsyncRawInvoicesClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -597,9 +718,9 @@ class AsyncRawInvoicesClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -659,9 +780,9 @@ class AsyncRawInvoicesClient:
                 raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -670,9 +791,9 @@ class AsyncRawInvoicesClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -681,9 +802,9 @@ class AsyncRawInvoicesClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        ErrorResponse,
+                        typing.Any,
                         parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
