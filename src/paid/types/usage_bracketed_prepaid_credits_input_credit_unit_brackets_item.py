@@ -13,8 +13,18 @@ class UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem(UniversalBaseModel
         typing.Optional[int], FieldMetadata(alias="upTo"), pydantic.Field(alias="upTo")
     ] = None
     credit_units: typing_extensions.Annotated[
-        int, FieldMetadata(alias="creditUnits"), pydantic.Field(alias="creditUnits")
+        float,
+        FieldMetadata(alias="creditUnits"),
+        pydantic.Field(alias="creditUnits", description="Credit amount, exact to at most 6 decimal places."),
     ]
+    credit_units_per_unit: typing_extensions.Annotated[
+        typing.Optional[float],
+        FieldMetadata(alias="creditUnitsPerUnit"),
+        pydantic.Field(
+            alias="creditUnitsPerUnit",
+            description="Credits burned per unit in this band (graduated), instead of the flat creditUnits per signal. Brackets must be all flat or all graduated. Requires the graduated-credit-brackets flag.",
+        ),
+    ] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

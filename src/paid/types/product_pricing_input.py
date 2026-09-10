@@ -58,6 +58,7 @@ from .product_usage_per_unit_input_billing_type import ProductUsagePerUnitInputB
 from .product_usage_per_unit_input_signal_type import ProductUsagePerUnitInputSignalType
 from .product_usage_prepaid_credits_input_billing_frequency import ProductUsagePrepaidCreditsInputBillingFrequency
 from .product_usage_prepaid_credits_input_billing_type import ProductUsagePrepaidCreditsInputBillingType
+from .product_usage_prepaid_credits_input_pricing_input import ProductUsagePrepaidCreditsInputPricingInput
 from .product_usage_prepaid_credits_input_signal_type import ProductUsagePrepaidCreditsInputSignalType
 from .product_usage_volume_input_billing_frequency import ProductUsageVolumeInputBillingFrequency
 from .product_usage_volume_input_billing_type import ProductUsageVolumeInputBillingType
@@ -339,6 +340,11 @@ class ProductPricingInput_UsagePrepaidCredits(UniversalBaseModel):
     unit_value: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="unitValue"), pydantic.Field(alias="unitValue")
     ] = None
+    pricing_input: typing_extensions.Annotated[
+        typing.Optional[ProductUsagePrepaidCreditsInputPricingInput],
+        FieldMetadata(alias="pricingInput"),
+        pydantic.Field(alias="pricingInput"),
+    ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[ProductUsagePrepaidCreditsInputBillingFrequency],
         FieldMetadata(alias="billingFrequency"),
@@ -389,7 +395,7 @@ class ProductPricingInput_UsageBracketedPrepaidCredits(UniversalBaseModel):
         typing.Optional[float], FieldMetadata(alias="unitValue"), pydantic.Field(alias="unitValue")
     ] = None
     overage_unit_price: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
+        typing.Optional[int], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
     ] = None
     credit_rollover_amount: typing_extensions.Annotated[
         typing.Optional[float],

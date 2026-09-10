@@ -6,12 +6,12 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.success_response import SuccessResponse
+from ..types.sync_value_receipt_request_product import SyncValueReceiptRequestProduct
 from ..types.value_receipt_detail import ValueReceiptDetail
 from ..types.value_receipt_list_response import ValueReceiptListResponse
 from ..types.value_receipt_sync_response import ValueReceiptSyncResponse
 from .raw_client import AsyncRawValueReceiptsClient, RawValueReceiptsClient
 from .types.list_value_receipts_request_archived import ListValueReceiptsRequestArchived
-from .types.sync_value_receipt_request_product import SyncValueReceiptRequestProduct
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -31,75 +31,6 @@ class ValueReceiptsClient:
         RawValueReceiptsClient
         """
         return self._raw_client
-
-    def sync_value_receipt(
-        self,
-        *,
-        start_date: dt.datetime,
-        end_date: dt.datetime,
-        customer_id: typing.Optional[str] = OMIT,
-        external_customer_id: typing.Optional[str] = OMIT,
-        product: typing.Optional[SyncValueReceiptRequestProduct] = OMIT,
-        order_id: typing.Optional[str] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ValueReceiptSyncResponse:
-        """
-        Find or create a value receipt by natural key (customer + product/order + dates), then populate it with current data inline. Returns the ID, status, and public URL. Posted (sealed) VRs are returned as-is without re-populating.
-
-        Parameters
-        ----------
-        start_date : dt.datetime
-
-        end_date : dt.datetime
-
-        customer_id : typing.Optional[str]
-            Mutually exclusive with externalCustomerId. Exactly one is required.
-
-        external_customer_id : typing.Optional[str]
-            Mutually exclusive with customerId. Exactly one is required.
-
-        product : typing.Optional[SyncValueReceiptRequestProduct]
-            Mutually exclusive with orderId. Provide at most one.
-
-        order_id : typing.Optional[str]
-            Mutually exclusive with product. Provide at most one.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        ValueReceiptSyncResponse
-            200
-
-        Examples
-        --------
-        import datetime
-
-        from paid import Paid
-
-        client = Paid(
-            token="YOUR_TOKEN",
-        )
-        client.value_receipts.sync_value_receipt(
-            start_date=datetime.datetime.fromisoformat(
-                "2024-01-15 09:30:00+00:00",
-            ),
-            end_date=datetime.datetime.fromisoformat(
-                "2024-01-15 09:30:00+00:00",
-            ),
-        )
-        """
-        _response = self._raw_client.sync_value_receipt(
-            start_date=start_date,
-            end_date=end_date,
-            customer_id=customer_id,
-            external_customer_id=external_customer_id,
-            product=product,
-            order_id=order_id,
-            request_options=request_options,
-        )
-        return _response.data
 
     def list_value_receipts(
         self,
@@ -160,6 +91,144 @@ class ValueReceiptsClient:
             order_id=order_id,
             product_id=product_id,
             archived=archived,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def create_value_receipt(
+        self,
+        *,
+        start_date: dt.datetime,
+        end_date: dt.datetime,
+        customer_id: typing.Optional[str] = OMIT,
+        external_customer_id: typing.Optional[str] = OMIT,
+        product: typing.Optional[SyncValueReceiptRequestProduct] = OMIT,
+        order_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ValueReceiptSyncResponse:
+        """
+        Creates a value receipt for a customer and date range, optionally scoped to a product or an order. Every call creates a receipt, so calling twice for the same period gives the customer two. The date range must have ended; a range with nothing delivered in it reports zero. Returns the receipt's ID and public URL.
+
+        Parameters
+        ----------
+        start_date : dt.datetime
+
+        end_date : dt.datetime
+
+        customer_id : typing.Optional[str]
+            Mutually exclusive with externalCustomerId. Exactly one is required.
+
+        external_customer_id : typing.Optional[str]
+            Mutually exclusive with customerId. Exactly one is required.
+
+        product : typing.Optional[SyncValueReceiptRequestProduct]
+            Mutually exclusive with orderId. Provide at most one.
+
+        order_id : typing.Optional[str]
+            Mutually exclusive with product. Provide at most one.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ValueReceiptSyncResponse
+            201
+
+        Examples
+        --------
+        import datetime
+
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.value_receipts.create_value_receipt(
+            start_date=datetime.datetime.fromisoformat(
+                "2024-01-15 09:30:00+00:00",
+            ),
+            end_date=datetime.datetime.fromisoformat(
+                "2024-01-15 09:30:00+00:00",
+            ),
+        )
+        """
+        _response = self._raw_client.create_value_receipt(
+            start_date=start_date,
+            end_date=end_date,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            product=product,
+            order_id=order_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def sync_value_receipt(
+        self,
+        *,
+        start_date: dt.datetime,
+        end_date: dt.datetime,
+        customer_id: typing.Optional[str] = OMIT,
+        external_customer_id: typing.Optional[str] = OMIT,
+        product: typing.Optional[SyncValueReceiptRequestProduct] = OMIT,
+        order_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ValueReceiptSyncResponse:
+        """
+        Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), refreshed with current data, and creates one only if there is none (201), so calling twice does not give the customer two receipts.
+
+        Parameters
+        ----------
+        start_date : dt.datetime
+
+        end_date : dt.datetime
+
+        customer_id : typing.Optional[str]
+            Mutually exclusive with externalCustomerId. Exactly one is required.
+
+        external_customer_id : typing.Optional[str]
+            Mutually exclusive with customerId. Exactly one is required.
+
+        product : typing.Optional[SyncValueReceiptRequestProduct]
+            Mutually exclusive with orderId. Provide at most one.
+
+        order_id : typing.Optional[str]
+            Mutually exclusive with product. Provide at most one.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ValueReceiptSyncResponse
+            200
+
+        Examples
+        --------
+        import datetime
+
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.value_receipts.sync_value_receipt(
+            start_date=datetime.datetime.fromisoformat(
+                "2024-01-15 09:30:00+00:00",
+            ),
+            end_date=datetime.datetime.fromisoformat(
+                "2024-01-15 09:30:00+00:00",
+            ),
+        )
+        """
+        _response = self._raw_client.sync_value_receipt(
+            start_date=start_date,
+            end_date=end_date,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            product=product,
+            order_id=order_id,
             request_options=request_options,
         )
         return _response.data
@@ -332,7 +401,7 @@ class ValueReceiptsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ValueReceiptDetail:
         """
-        Make a value receipt publicly accessible via URL.
+        Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
 
         Parameters
         ----------
@@ -368,7 +437,7 @@ class ValueReceiptsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> ValueReceiptDetail:
         """
-        Revoke public access to a value receipt.
+        Revoke public access to a value receipt. Available for archived receipts too, so a live link can always be revoked.
 
         Parameters
         ----------
@@ -411,82 +480,6 @@ class AsyncValueReceiptsClient:
         AsyncRawValueReceiptsClient
         """
         return self._raw_client
-
-    async def sync_value_receipt(
-        self,
-        *,
-        start_date: dt.datetime,
-        end_date: dt.datetime,
-        customer_id: typing.Optional[str] = OMIT,
-        external_customer_id: typing.Optional[str] = OMIT,
-        product: typing.Optional[SyncValueReceiptRequestProduct] = OMIT,
-        order_id: typing.Optional[str] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ValueReceiptSyncResponse:
-        """
-        Find or create a value receipt by natural key (customer + product/order + dates), then populate it with current data inline. Returns the ID, status, and public URL. Posted (sealed) VRs are returned as-is without re-populating.
-
-        Parameters
-        ----------
-        start_date : dt.datetime
-
-        end_date : dt.datetime
-
-        customer_id : typing.Optional[str]
-            Mutually exclusive with externalCustomerId. Exactly one is required.
-
-        external_customer_id : typing.Optional[str]
-            Mutually exclusive with customerId. Exactly one is required.
-
-        product : typing.Optional[SyncValueReceiptRequestProduct]
-            Mutually exclusive with orderId. Provide at most one.
-
-        order_id : typing.Optional[str]
-            Mutually exclusive with product. Provide at most one.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        ValueReceiptSyncResponse
-            200
-
-        Examples
-        --------
-        import asyncio
-        import datetime
-
-        from paid import AsyncPaid
-
-        client = AsyncPaid(
-            token="YOUR_TOKEN",
-        )
-
-
-        async def main() -> None:
-            await client.value_receipts.sync_value_receipt(
-                start_date=datetime.datetime.fromisoformat(
-                    "2024-01-15 09:30:00+00:00",
-                ),
-                end_date=datetime.datetime.fromisoformat(
-                    "2024-01-15 09:30:00+00:00",
-                ),
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.sync_value_receipt(
-            start_date=start_date,
-            end_date=end_date,
-            customer_id=customer_id,
-            external_customer_id=external_customer_id,
-            product=product,
-            order_id=order_id,
-            request_options=request_options,
-        )
-        return _response.data
 
     async def list_value_receipts(
         self,
@@ -555,6 +548,158 @@ class AsyncValueReceiptsClient:
             order_id=order_id,
             product_id=product_id,
             archived=archived,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def create_value_receipt(
+        self,
+        *,
+        start_date: dt.datetime,
+        end_date: dt.datetime,
+        customer_id: typing.Optional[str] = OMIT,
+        external_customer_id: typing.Optional[str] = OMIT,
+        product: typing.Optional[SyncValueReceiptRequestProduct] = OMIT,
+        order_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ValueReceiptSyncResponse:
+        """
+        Creates a value receipt for a customer and date range, optionally scoped to a product or an order. Every call creates a receipt, so calling twice for the same period gives the customer two. The date range must have ended; a range with nothing delivered in it reports zero. Returns the receipt's ID and public URL.
+
+        Parameters
+        ----------
+        start_date : dt.datetime
+
+        end_date : dt.datetime
+
+        customer_id : typing.Optional[str]
+            Mutually exclusive with externalCustomerId. Exactly one is required.
+
+        external_customer_id : typing.Optional[str]
+            Mutually exclusive with customerId. Exactly one is required.
+
+        product : typing.Optional[SyncValueReceiptRequestProduct]
+            Mutually exclusive with orderId. Provide at most one.
+
+        order_id : typing.Optional[str]
+            Mutually exclusive with product. Provide at most one.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ValueReceiptSyncResponse
+            201
+
+        Examples
+        --------
+        import asyncio
+        import datetime
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.value_receipts.create_value_receipt(
+                start_date=datetime.datetime.fromisoformat(
+                    "2024-01-15 09:30:00+00:00",
+                ),
+                end_date=datetime.datetime.fromisoformat(
+                    "2024-01-15 09:30:00+00:00",
+                ),
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.create_value_receipt(
+            start_date=start_date,
+            end_date=end_date,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            product=product,
+            order_id=order_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def sync_value_receipt(
+        self,
+        *,
+        start_date: dt.datetime,
+        end_date: dt.datetime,
+        customer_id: typing.Optional[str] = OMIT,
+        external_customer_id: typing.Optional[str] = OMIT,
+        product: typing.Optional[SyncValueReceiptRequestProduct] = OMIT,
+        order_id: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ValueReceiptSyncResponse:
+        """
+        Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), refreshed with current data, and creates one only if there is none (201), so calling twice does not give the customer two receipts.
+
+        Parameters
+        ----------
+        start_date : dt.datetime
+
+        end_date : dt.datetime
+
+        customer_id : typing.Optional[str]
+            Mutually exclusive with externalCustomerId. Exactly one is required.
+
+        external_customer_id : typing.Optional[str]
+            Mutually exclusive with customerId. Exactly one is required.
+
+        product : typing.Optional[SyncValueReceiptRequestProduct]
+            Mutually exclusive with orderId. Provide at most one.
+
+        order_id : typing.Optional[str]
+            Mutually exclusive with product. Provide at most one.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ValueReceiptSyncResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+        import datetime
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.value_receipts.sync_value_receipt(
+                start_date=datetime.datetime.fromisoformat(
+                    "2024-01-15 09:30:00+00:00",
+                ),
+                end_date=datetime.datetime.fromisoformat(
+                    "2024-01-15 09:30:00+00:00",
+                ),
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.sync_value_receipt(
+            start_date=start_date,
+            end_date=end_date,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            product=product,
+            order_id=order_id,
             request_options=request_options,
         )
         return _response.data
@@ -767,7 +912,7 @@ class AsyncValueReceiptsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ValueReceiptDetail:
         """
-        Make a value receipt publicly accessible via URL.
+        Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
 
         Parameters
         ----------
@@ -811,7 +956,7 @@ class AsyncValueReceiptsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> ValueReceiptDetail:
         """
-        Revoke public access to a value receipt.
+        Revoke public access to a value receipt. Available for archived receipts too, so a live link can always be revoked.
 
         Parameters
         ----------

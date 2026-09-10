@@ -26,12 +26,18 @@ class CreateOrderLineAttributeRequestPricingCreditBenefitsItem(UniversalBaseMode
         typing.Optional[str], FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ] = None
     recipient: typing.Optional[CreateOrderLineAttributeRequestPricingCreditBenefitsItemRecipient] = None
-    amount: float
+    amount: float = pydantic.Field()
+    """
+    Credit amount, exact to at most 6 decimal places.
+    """
+
     rollover_amount: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="rolloverAmount"), pydantic.Field(alias="rolloverAmount")
+        typing.Optional[float],
+        FieldMetadata(alias="rolloverAmount"),
+        pydantic.Field(alias="rolloverAmount", description="Credit amount, exact to at most 6 decimal places."),
     ] = None
     rollover_duration: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="rolloverDuration"), pydantic.Field(alias="rolloverDuration")
+        typing.Optional[int], FieldMetadata(alias="rolloverDuration"), pydantic.Field(alias="rolloverDuration")
     ] = None
     rollover_duration_unit: typing_extensions.Annotated[
         typing.Optional[CreateOrderLineAttributeRequestPricingCreditBenefitsItemRolloverDurationUnit],

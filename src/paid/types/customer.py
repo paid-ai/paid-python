@@ -11,6 +11,7 @@ from .currency_code import CurrencyCode
 from .customer_billing_address_response import CustomerBillingAddressResponse
 from .customer_connections import CustomerConnections
 from .customer_creation_state import CustomerCreationState
+from .customer_status import CustomerStatus
 
 
 class Customer(UniversalBaseModel):
@@ -37,6 +38,11 @@ class Customer(UniversalBaseModel):
     creation_state: typing_extensions.Annotated[
         CustomerCreationState, FieldMetadata(alias="creationState"), pydantic.Field(alias="creationState")
     ]
+    status: CustomerStatus = pydantic.Field()
+    """
+    Customer status: churned when the customer is marked as churned, active otherwise.
+    """
+
     churn_date: typing_extensions.Annotated[
         typing.Optional[dt.datetime], FieldMetadata(alias="churnDate"), pydantic.Field(alias="churnDate")
     ] = None

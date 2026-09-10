@@ -7,11 +7,7 @@ from importlib import import_module
 
 if typing.TYPE_CHECKING:
     from .list_value_receipts_request_archived import ListValueReceiptsRequestArchived
-    from .sync_value_receipt_request_product import SyncValueReceiptRequestProduct
-_dynamic_imports: typing.Dict[str, str] = {
-    "ListValueReceiptsRequestArchived": ".list_value_receipts_request_archived",
-    "SyncValueReceiptRequestProduct": ".sync_value_receipt_request_product",
-}
+_dynamic_imports: typing.Dict[str, str] = {"ListValueReceiptsRequestArchived": ".list_value_receipts_request_archived"}
 
 
 def __getattr__(attr_name: str) -> typing.Any:
@@ -35,4 +31,4 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = ["ListValueReceiptsRequestArchived", "SyncValueReceiptRequestProduct"]
+__all__ = ["ListValueReceiptsRequestArchived"]

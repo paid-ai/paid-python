@@ -11,23 +11,21 @@ from .product_simple_price_point_tiers_item_tier_billing_type import ProductSimp
 
 class ProductSimplePricePointTiersItem(UniversalBaseModel):
     flat_amount: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="flatAmount"), pydantic.Field(alias="flatAmount")
+        typing.Optional[int], FieldMetadata(alias="flatAmount"), pydantic.Field(alias="flatAmount")
     ] = None
     index: typing.Optional[float] = None
-    lower_bound: typing_extensions.Annotated[
-        float, FieldMetadata(alias="lowerBound"), pydantic.Field(alias="lowerBound")
-    ]
-    number: typing.Optional[float] = None
+    lower_bound: typing_extensions.Annotated[int, FieldMetadata(alias="lowerBound"), pydantic.Field(alias="lowerBound")]
+    number: typing.Optional[int] = None
     tier_billing_type: typing_extensions.Annotated[
         typing.Optional[ProductSimplePricePointTiersItemTierBillingType],
         FieldMetadata(alias="tierBillingType"),
         pydantic.Field(alias="tierBillingType"),
     ] = None
     unit_amount: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="unitAmount"), pydantic.Field(alias="unitAmount")
+        typing.Optional[int], FieldMetadata(alias="unitAmount"), pydantic.Field(alias="unitAmount")
     ] = None
     upper_bound: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="upperBound"), pydantic.Field(alias="upperBound")
+        typing.Optional[int], FieldMetadata(alias="upperBound"), pydantic.Field(alias="upperBound")
     ] = None
 
     if IS_PYDANTIC_V2:

@@ -7,9 +7,11 @@ from importlib import import_module
 
 if typing.TYPE_CHECKING:
     from .list_credit_currencies_request_status import ListCreditCurrenciesRequestStatus
+    from .list_credit_transactions_request_type import ListCreditTransactionsRequestType
     from .update_credit_currency_request_status import UpdateCreditCurrencyRequestStatus
 _dynamic_imports: typing.Dict[str, str] = {
     "ListCreditCurrenciesRequestStatus": ".list_credit_currencies_request_status",
+    "ListCreditTransactionsRequestType": ".list_credit_transactions_request_type",
     "UpdateCreditCurrencyRequestStatus": ".update_credit_currency_request_status",
 }
 
@@ -35,4 +37,8 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = ["ListCreditCurrenciesRequestStatus", "UpdateCreditCurrencyRequestStatus"]
+__all__ = [
+    "ListCreditCurrenciesRequestStatus",
+    "ListCreditTransactionsRequestType",
+    "UpdateCreditCurrencyRequestStatus",
+]

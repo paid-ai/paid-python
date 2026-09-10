@@ -34,6 +34,9 @@ class ProductsClient:
         *,
         limit: typing.Optional[int] = None,
         offset: typing.Optional[int] = None,
+        name: typing.Optional[str] = None,
+        active: typing.Optional[bool] = None,
+        archived: typing.Optional[bool] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ProductListResponse:
         """
@@ -44,6 +47,15 @@ class ProductsClient:
         limit : typing.Optional[int]
 
         offset : typing.Optional[int]
+
+        name : typing.Optional[str]
+            Search by product name (case-insensitive, matches anywhere in the name).
+
+        active : typing.Optional[bool]
+            Filter by the product's active flag: true or false.
+
+        archived : typing.Optional[bool]
+            Filter by archived state: true returns only archived products, false only non-archived. Omit to include both.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -62,7 +74,9 @@ class ProductsClient:
         )
         client.products.list_products()
         """
-        _response = self._raw_client.list_products(limit=limit, offset=offset, request_options=request_options)
+        _response = self._raw_client.list_products(
+            limit=limit, offset=offset, name=name, active=active, archived=archived, request_options=request_options
+        )
         return _response.data
 
     def create_product(
@@ -77,7 +91,7 @@ class ProductsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
-        Creates a new product for the organization
+        Creates a new product for the organization. Products are created without pricing: to create product attributes and set their pricing, call the update product endpoint (updateProductById / updateProductByExternalId), which upserts productAttributes.
 
         Parameters
         ----------
@@ -167,7 +181,7 @@ class ProductsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ProductDetail:
         """
-        Update a product by ID. Optionally upsert product attributes with pricing.
+        Update a product by ID. Also creates and edits product attributes: productAttributes upserts attributes and sets their pricing (metering event, price points, credit brackets). This is the endpoint to use to add pricing to a product created without any.
 
         Parameters
         ----------
@@ -265,7 +279,7 @@ class ProductsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ProductDetail:
         """
-        Update a product by external ID. Optionally upsert product attributes with pricing.
+        Update a product by external ID. Also creates and edits product attributes: productAttributes upserts attributes and sets their pricing (metering event, price points, credit brackets). This is the endpoint to use to add pricing to a product created without any.
 
         Parameters
         ----------
@@ -338,6 +352,9 @@ class AsyncProductsClient:
         *,
         limit: typing.Optional[int] = None,
         offset: typing.Optional[int] = None,
+        name: typing.Optional[str] = None,
+        active: typing.Optional[bool] = None,
+        archived: typing.Optional[bool] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ProductListResponse:
         """
@@ -348,6 +365,15 @@ class AsyncProductsClient:
         limit : typing.Optional[int]
 
         offset : typing.Optional[int]
+
+        name : typing.Optional[str]
+            Search by product name (case-insensitive, matches anywhere in the name).
+
+        active : typing.Optional[bool]
+            Filter by the product's active flag: true or false.
+
+        archived : typing.Optional[bool]
+            Filter by archived state: true returns only archived products, false only non-archived. Omit to include both.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -374,7 +400,9 @@ class AsyncProductsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_products(limit=limit, offset=offset, request_options=request_options)
+        _response = await self._raw_client.list_products(
+            limit=limit, offset=offset, name=name, active=active, archived=archived, request_options=request_options
+        )
         return _response.data
 
     async def create_product(
@@ -389,7 +417,7 @@ class AsyncProductsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Product:
         """
-        Creates a new product for the organization
+        Creates a new product for the organization. Products are created without pricing: to create product attributes and set their pricing, call the update product endpoint (updateProductById / updateProductByExternalId), which upserts productAttributes.
 
         Parameters
         ----------
@@ -497,7 +525,7 @@ class AsyncProductsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ProductDetail:
         """
-        Update a product by ID. Optionally upsert product attributes with pricing.
+        Update a product by ID. Also creates and edits product attributes: productAttributes upserts attributes and sets their pricing (metering event, price points, credit brackets). This is the endpoint to use to add pricing to a product created without any.
 
         Parameters
         ----------
@@ -611,7 +639,7 @@ class AsyncProductsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ProductDetail:
         """
-        Update a product by external ID. Optionally upsert product attributes with pricing.
+        Update a product by external ID. Also creates and edits product attributes: productAttributes upserts attributes and sets their pricing (metering event, price points, credit brackets). This is the endpoint to use to add pricing to a product created without any.
 
         Parameters
         ----------

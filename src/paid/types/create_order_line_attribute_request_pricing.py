@@ -73,15 +73,17 @@ class CreateOrderLineAttributeRequestPricing(UniversalBaseModel):
         typing.Optional[str], FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ] = None
     credit_cost: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="creditCost"), pydantic.Field(alias="creditCost")
+        typing.Optional[float],
+        FieldMetadata(alias="creditCost"),
+        pydantic.Field(alias="creditCost", description="Credit amount, exact to at most 6 decimal places."),
     ] = None
     overage_unit_price: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
+        typing.Optional[int], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
     ] = None
     credit_rollover_amount: typing_extensions.Annotated[
         typing.Optional[float],
         FieldMetadata(alias="creditRolloverAmount"),
-        pydantic.Field(alias="creditRolloverAmount"),
+        pydantic.Field(alias="creditRolloverAmount", description="Credit amount, exact to at most 6 decimal places."),
     ] = None
     credit_benefits: typing_extensions.Annotated[
         typing.Optional[typing.List[CreateOrderLineAttributeRequestPricingCreditBenefitsItem]],

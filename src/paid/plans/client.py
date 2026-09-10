@@ -144,7 +144,7 @@ class PlansClient:
                         price_points=[
                             ProductSimplePricePoint(
                                 currency="USD",
-                                unit_price=99.0,
+                                unit_price=99,
                             )
                         ],
                     ),
@@ -539,7 +539,7 @@ class AsyncPlansClient:
                             price_points=[
                                 ProductSimplePricePoint(
                                     currency="USD",
-                                    unit_price=99.0,
+                                    unit_price=99,
                                 )
                             ],
                         ),
