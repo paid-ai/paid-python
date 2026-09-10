@@ -6,8 +6,55 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
+    from .add_attribute_intent import AddAttributeIntent
+    from .add_attribute_intent_charge_stub import AddAttributeIntentChargeStub
+    from .add_attribute_intent_credit_grant import AddAttributeIntentCreditGrant
+    from .add_attribute_intent_treatment import AddAttributeIntentTreatment
+    from .add_from_catalog_intent import AddFromCatalogIntent
+    from .add_from_catalog_intent_charge_stub import AddFromCatalogIntentChargeStub
     from .add_members_response import AddMembersResponse
+    from .amendment_add_attribute_options import AmendmentAddAttributeOptions
+    from .amendment_add_axis_options import (
+        AmendmentAddAxisOptions,
+        AmendmentAddAxisOptions_ChargeStub,
+        AmendmentAddAxisOptions_CreditGrant,
+    )
+    from .amendment_attribute_options import AmendmentAttributeOptions
+    from .amendment_attribute_state import AmendmentAttributeState
+    from .amendment_axis_choice_value import AmendmentAxisChoiceValue
+    from .amendment_axis_id import AmendmentAxisId
+    from .amendment_axis_options import (
+        AmendmentAxisOptions,
+        AmendmentAxisOptions_ChargeStub,
+        AmendmentAxisOptions_CreditGrant,
+        AmendmentAxisOptions_Money,
+        AmendmentAxisOptions_UsageAttribution,
+    )
+    from .amendment_axis_relevance import AmendmentAxisRelevance
+    from .amendment_billing_type import AmendmentBillingType
+    from .amendment_charge_type import AmendmentChargeType
+    from .amendment_credit_effect_kind import AmendmentCreditEffectKind
+    from .amendment_error_response import AmendmentErrorResponse
+    from .amendment_intent_kind import AmendmentIntentKind
+    from .amendment_intent_options import AmendmentIntentOptions
+    from .amendment_line_options import AmendmentLineOptions
+    from .amendment_money_billing import AmendmentMoneyBilling
+    from .amendment_options import AmendmentOptions
+    from .amendment_plan import AmendmentPlan
+    from .amendment_plan_attribute_diff import AmendmentPlanAttributeDiff
+    from .amendment_plan_change import AmendmentPlanChange
+    from .amendment_plan_credit_effect import AmendmentPlanCreditEffect
+    from .amendment_plan_line_type import AmendmentPlanLineType
+    from .amendment_plan_money_effect import AmendmentPlanMoneyEffect
+    from .amendment_plan_money_effect_kind import AmendmentPlanMoneyEffectKind
+    from .amendment_plan_treatment_resolution import AmendmentPlanTreatmentResolution
+    from .amendment_plan_usage_effect import AmendmentPlanUsageEffect
+    from .amendment_plan_usage_effect_kind import AmendmentPlanUsageEffectKind
+    from .amendment_pricing_clause import AmendmentPricingClause
+    from .amendment_pricing_model import AmendmentPricingModel
+    from .amendment_treatment_source import AmendmentTreatmentSource
     from .analytics_column import AnalyticsColumn
+    from .analytics_query_request import AnalyticsQueryRequest
     from .analytics_query_response import AnalyticsQueryResponse
     from .analytics_query_response_meta import AnalyticsQueryResponseMeta
     from .analytics_schema_column import AnalyticsSchemaColumn
@@ -17,6 +64,12 @@ if typing.TYPE_CHECKING:
     from .backfill_response import BackfillResponse
     from .batch_seat_assignments_response import BatchSeatAssignmentsResponse
     from .bulk_signals_response import BulkSignalsResponse
+    from .charge_stub_add_axis_options import ChargeStubAddAxisOptions
+    from .charge_stub_add_axis_options_options_item import ChargeStubAddAxisOptionsOptionsItem
+    from .charge_stub_add_axis_options_options_item_value import ChargeStubAddAxisOptionsOptionsItemValue
+    from .charge_stub_axis_options import ChargeStubAxisOptions
+    from .charge_stub_axis_options_options_item import ChargeStubAxisOptionsOptionsItem
+    from .charge_stub_axis_options_options_item_value import ChargeStubAxisOptionsOptionsItemValue
     from .checkout import Checkout
     from .checkout_custom_card import CheckoutCustomCard
     from .checkout_custom_card_input import CheckoutCustomCardInput
@@ -98,35 +151,58 @@ if typing.TYPE_CHECKING:
     from .credit_currency_list_response import CreditCurrencyListResponse
     from .credit_currency_status import CreditCurrencyStatus
     from .credit_grant import CreditGrant
+    from .credit_grant_add_axis_options import CreditGrantAddAxisOptions
+    from .credit_grant_add_axis_options_options_item import CreditGrantAddAxisOptionsOptionsItem
+    from .credit_grant_axis_options import CreditGrantAxisOptions
+    from .credit_grant_axis_options_options_item import CreditGrantAxisOptionsOptionsItem
     from .credit_grant_create_request import CreditGrantCreateRequest
     from .credit_grant_currency import CreditGrantCurrency
     from .credit_grant_customer import CreditGrantCustomer
     from .credit_grant_result import CreditGrantResult
     from .credit_grant_result_status import CreditGrantResultStatus
+    from .credit_grant_value import CreditGrantValue
+    from .credit_transaction import CreditTransaction
+    from .credit_transaction_currency import CreditTransactionCurrency
+    from .credit_transaction_customer import CreditTransactionCustomer
+    from .credit_transaction_list_response import CreditTransactionListResponse
+    from .credit_transaction_product import CreditTransactionProduct
+    from .credit_transaction_type import CreditTransactionType
     from .currency_code import CurrencyCode
     from .custom_view import CustomView
     from .custom_view_authoring_detail import CustomViewAuthoringDetail
     from .custom_view_authoring_detail_period import CustomViewAuthoringDetailPeriod
     from .custom_view_authoring_detail_period_kind import CustomViewAuthoringDetailPeriodKind
     from .custom_view_authoring_detail_period_unit import CustomViewAuthoringDetailPeriodUnit
+    from .custom_view_authoring_detail_scope import CustomViewAuthoringDetailScope
     from .custom_view_authoring_detail_status import CustomViewAuthoringDetailStatus
     from .custom_view_authoring_guide import CustomViewAuthoringGuide
     from .custom_view_detail import CustomViewDetail
     from .custom_view_detail_period import CustomViewDetailPeriod
     from .custom_view_detail_period_kind import CustomViewDetailPeriodKind
     from .custom_view_detail_period_unit import CustomViewDetailPeriodUnit
+    from .custom_view_detail_scope import CustomViewDetailScope
     from .custom_view_detail_status import CustomViewDetailStatus
     from .custom_view_embed_token_response import CustomViewEmbedTokenResponse
+    from .custom_view_filter import CustomViewFilter
     from .custom_view_list_response import CustomViewListResponse
     from .custom_view_preview_harness import CustomViewPreviewHarness
     from .custom_view_preview_harness_request import CustomViewPreviewHarnessRequest
+    from .custom_view_preview_harness_request_synthetic_value_item import (
+        CustomViewPreviewHarnessRequestSyntheticValueItem,
+    )
+    from .custom_view_preview_harness_request_synthetic_value_item_type import (
+        CustomViewPreviewHarnessRequestSyntheticValueItemType,
+    )
     from .custom_view_query import CustomViewQuery
+    from .custom_view_scope import CustomViewScope
     from .custom_view_status import CustomViewStatus
     from .custom_view_summary import CustomViewSummary
     from .custom_view_summary_period import CustomViewSummaryPeriod
     from .custom_view_summary_period_kind import CustomViewSummaryPeriodKind
     from .custom_view_summary_period_unit import CustomViewSummaryPeriodUnit
+    from .custom_view_summary_scope import CustomViewSummaryScope
     from .custom_view_summary_status import CustomViewSummaryStatus
+    from .custom_view_validation_finding import CustomViewValidationFinding
     from .customer import Customer
     from .customer_alias import CustomerAlias
     from .customer_alias_create_request import CustomerAliasCreateRequest
@@ -159,9 +235,32 @@ if typing.TYPE_CHECKING:
     from .customer_state_seat_assignee import CustomerStateSeatAssignee
     from .customer_state_seat_status import CustomerStateSeatStatus
     from .customer_state_seats import CustomerStateSeats
+    from .customer_status import CustomerStatus
+    from .customer_unit import CustomerUnit
+    from .customer_unit_attribution import CustomerUnitAttribution
+    from .customer_unit_cap_current_period import CustomerUnitCapCurrentPeriod
+    from .customer_unit_cap_end_response import CustomerUnitCapEndResponse
+    from .customer_unit_cap_ended_policy import CustomerUnitCapEndedPolicy
+    from .customer_unit_cap_ended_policy_frequency import CustomerUnitCapEndedPolicyFrequency
+    from .customer_unit_cap_open_policy import CustomerUnitCapOpenPolicy
+    from .customer_unit_cap_open_policy_effective_until import CustomerUnitCapOpenPolicyEffectiveUntil
+    from .customer_unit_cap_open_policy_frequency import CustomerUnitCapOpenPolicyFrequency
+    from .customer_unit_cap_period import CustomerUnitCapPeriod
+    from .customer_unit_cap_policy import CustomerUnitCapPolicy
+    from .customer_unit_cap_policy_frequency import CustomerUnitCapPolicyFrequency
+    from .customer_unit_cap_response import CustomerUnitCapResponse
+    from .customer_unit_cap_set import CustomerUnitCapSet
+    from .customer_unit_cap_set_frequency import CustomerUnitCapSetFrequency
+    from .customer_unit_cap_set_response import CustomerUnitCapSetResponse
+    from .customer_unit_create import CustomerUnitCreate
+    from .customer_unit_list_response import CustomerUnitListResponse
+    from .customer_unit_status import CustomerUnitStatus
+    from .customer_unit_update import CustomerUnitUpdate
     from .customer_user import CustomerUser
     from .customer_user_status import CustomerUserStatus
     from .empty_response import EmptyResponse
+    from .end_attribute_intent import EndAttributeIntent
+    from .end_attribute_intent_treatment import EndAttributeIntentTreatment
     from .error_response import ErrorResponse
     from .grant_customer_credits_response import GrantCustomerCreditsResponse
     from .invoice import Invoice
@@ -174,6 +273,9 @@ if typing.TYPE_CHECKING:
     from .invoice_status import InvoiceStatus
     from .invoice_tax_status import InvoiceTaxStatus
     from .member_request import MemberRequest
+    from .money_axis_options import MoneyAxisOptions
+    from .money_axis_options_options_item import MoneyAxisOptionsOptionsItem
+    from .money_axis_value import MoneyAxisValue
     from .one_time_per_unit_input import OneTimePerUnitInput
     from .one_time_per_unit_input_billing_type import OneTimePerUnitInputBillingType
     from .one_time_per_unit_input_fee_type import OneTimePerUnitInputFeeType
@@ -188,6 +290,22 @@ if typing.TYPE_CHECKING:
     from .order_seat import OrderSeat
     from .order_seat_list_response import OrderSeatListResponse
     from .pagination import Pagination
+    from .payment import Payment
+    from .payment_allocation import PaymentAllocation
+    from .payment_allocation_create_response import PaymentAllocationCreateResponse
+    from .payment_allocation_input import PaymentAllocationInput
+    from .payment_allocation_list_response import PaymentAllocationListResponse
+    from .payment_create_status import PaymentCreateStatus
+    from .payment_list_response import PaymentListResponse
+    from .payment_method import PaymentMethod
+    from .payment_method_card import PaymentMethodCard
+    from .payment_method_list_response import PaymentMethodListResponse
+    from .payment_method_setup import PaymentMethodSetup
+    from .payment_method_setup_setup_intent import PaymentMethodSetupSetupIntent
+    from .payment_type import PaymentType
+    from .pending_credit_consumption import PendingCreditConsumption
+    from .pending_credit_consumption_currency import PendingCreditConsumptionCurrency
+    from .pending_credit_consumption_list_response import PendingCreditConsumptionListResponse
     from .plan import Plan
     from .plan_attribute import PlanAttribute
     from .plan_attribute_input import PlanAttributeInput
@@ -203,6 +321,13 @@ if typing.TYPE_CHECKING:
     from .plan_status import PlanStatus
     from .plan_upgrade_path_group import PlanUpgradePathGroup
     from .plan_upgrade_path_response import PlanUpgradePathResponse
+    from .planned_add import PlannedAdd
+    from .planned_add_charge_stub import PlannedAddChargeStub
+    from .planned_copy import PlannedCopy
+    from .planned_end import PlannedEnd
+    from .planned_operations import PlannedOperations
+    from .planned_order_term import PlannedOrderTerm
+    from .planned_replace import PlannedReplace
     from .precomputed_cost import PrecomputedCost
     from .pricing_input import (
         PricingInput,
@@ -227,9 +352,9 @@ if typing.TYPE_CHECKING:
     from .pricing_output_pricing_type import PricingOutputPricingType
     from .pricing_output_signal_type import PricingOutputSignalType
     from .pricing_price_point_output import PricingPricePointOutput
-    from .pricing_price_point_output_tiers_item import PricingPricePointOutputTiersItem
-    from .pricing_price_point_output_tiers_item_tier_billing_type import PricingPricePointOutputTiersItemTierBillingType
     from .pricing_response import PricingResponse
+    from .pricing_tier_output import PricingTierOutput
+    from .pricing_tier_output_tier_billing_type import PricingTierOutputTierBillingType
     from .product import Product
     from .product_attribute_output import ProductAttributeOutput
     from .product_attribute_upsert import ProductAttributeUpsert
@@ -247,8 +372,6 @@ if typing.TYPE_CHECKING:
     from .product_one_time_per_unit_input_billing_type import ProductOneTimePerUnitInputBillingType
     from .product_one_time_per_unit_input_fee_type import ProductOneTimePerUnitInputFeeType
     from .product_price_point_output import ProductPricePointOutput
-    from .product_price_point_output_tiers_item import ProductPricePointOutputTiersItem
-    from .product_price_point_output_tiers_item_tier_billing_type import ProductPricePointOutputTiersItemTierBillingType
     from .product_pricing_input import (
         ProductPricingInput,
         ProductPricingInput_OneTimePerUnit,
@@ -270,6 +393,8 @@ if typing.TYPE_CHECKING:
     from .product_pricing_output import ProductPricingOutput
     from .product_pricing_output_pricing_type import ProductPricingOutputPricingType
     from .product_pricing_output_signal_type import ProductPricingOutputSignalType
+    from .product_pricing_tier_output import ProductPricingTierOutput
+    from .product_pricing_tier_output_tier_billing_type import ProductPricingTierOutputTierBillingType
     from .product_recurring_graduated_input import ProductRecurringGraduatedInput
     from .product_recurring_graduated_input_billing_frequency import ProductRecurringGraduatedInputBillingFrequency
     from .product_recurring_graduated_input_billing_type import ProductRecurringGraduatedInputBillingType
@@ -338,6 +463,8 @@ if typing.TYPE_CHECKING:
     from .product_usage_prepaid_credits_input import ProductUsagePrepaidCreditsInput
     from .product_usage_prepaid_credits_input_billing_frequency import ProductUsagePrepaidCreditsInputBillingFrequency
     from .product_usage_prepaid_credits_input_billing_type import ProductUsagePrepaidCreditsInputBillingType
+    from .product_usage_prepaid_credits_input_pricing_input import ProductUsagePrepaidCreditsInputPricingInput
+    from .product_usage_prepaid_credits_input_pricing_input_kind import ProductUsagePrepaidCreditsInputPricingInputKind
     from .product_usage_prepaid_credits_input_signal_type import ProductUsagePrepaidCreditsInputSignalType
     from .product_usage_volume_input import ProductUsageVolumeInput
     from .product_usage_volume_input_billing_frequency import ProductUsageVolumeInputBillingFrequency
@@ -356,6 +483,7 @@ if typing.TYPE_CHECKING:
     from .recurring_volume_input_billing_frequency import RecurringVolumeInputBillingFrequency
     from .recurring_volume_input_billing_type import RecurringVolumeInputBillingType
     from .remove_members_response import RemoveMembersResponse
+    from .render_bundle_edit import RenderBundleEdit
     from .rotate_webhook_secret_response import RotateWebhookSecretResponse
     from .seat_assignee import SeatAssignee
     from .seat_assignment_status import SeatAssignmentStatus
@@ -373,6 +501,8 @@ if typing.TYPE_CHECKING:
     from .seat_based_volume_input_billing_type import SeatBasedVolumeInputBillingType
     from .set_members_response import SetMembersResponse
     from .signal import Signal
+    from .signal_list_item import SignalListItem
+    from .signal_list_response import SignalListResponse
     from .signals_metadata_response import SignalsMetadataResponse
     from .signals_metadata_response_meta import SignalsMetadataResponseMeta
     from .signals_metadata_response_signals_item import SignalsMetadataResponseSignalsItem
@@ -382,16 +512,40 @@ if typing.TYPE_CHECKING:
     from .simple_price_point_tiers_item_tier_billing_type import SimplePricePointTiersItemTierBillingType
     from .stripe_connection import StripeConnection
     from .success_response import SuccessResponse
+    from .sync_value_receipt_request import SyncValueReceiptRequest
+    from .sync_value_receipt_request_product import SyncValueReceiptRequestProduct
     from .tiered_price_point import TieredPricePoint
     from .tiered_price_point_tiers_item import TieredPricePointTiersItem
     from .tiered_price_point_tiers_item_tier_billing_type import TieredPricePointTiersItemTierBillingType
     from .token_usage import TokenUsage
+    from .unified_amendment_intent import (
+        UnifiedAmendmentIntent,
+        UnifiedAmendmentIntent_AddAttribute,
+        UnifiedAmendmentIntent_AddFromCatalog,
+        UnifiedAmendmentIntent_EndAttribute,
+        UnifiedAmendmentIntent_UpdateLineTerm,
+        UnifiedAmendmentIntent_UpdateOrderTerm,
+        UnifiedAmendmentIntent_UpdatePricing,
+        UnifiedAmendmentIntent_UpdateQuantity,
+    )
+    from .unified_amendment_response import UnifiedAmendmentResponse
     from .update_contact_request import UpdateContactRequest
     from .update_contact_request_roles_item import UpdateContactRequestRolesItem
     from .update_customer_request import UpdateCustomerRequest
+    from .update_line_term_intent import UpdateLineTermIntent
+    from .update_line_term_intent_treatment import UpdateLineTermIntentTreatment
+    from .update_order_term_intent import UpdateOrderTermIntent
+    from .update_order_term_intent_treatment import UpdateOrderTermIntentTreatment
     from .update_plan_request import UpdatePlanRequest
     from .update_plan_request_status import UpdatePlanRequestStatus
+    from .update_pricing_intent import UpdatePricingIntent
+    from .update_pricing_intent_treatment import UpdatePricingIntentTreatment
     from .update_product_request import UpdateProductRequest
+    from .update_quantity_intent import UpdateQuantityIntent
+    from .update_quantity_intent_treatment import UpdateQuantityIntentTreatment
+    from .usage_attribution_axis_options import UsageAttributionAxisOptions
+    from .usage_attribution_axis_options_options_item import UsageAttributionAxisOptionsOptionsItem
+    from .usage_attribution_axis_value import UsageAttributionAxisValue
     from .usage_bracketed_prepaid_credits_input import UsageBracketedPrepaidCreditsInput
     from .usage_bracketed_prepaid_credits_input_billing_frequency import (
         UsageBracketedPrepaidCreditsInputBillingFrequency,
@@ -421,11 +575,48 @@ if typing.TYPE_CHECKING:
     from .usage_prepaid_credits_input import UsagePrepaidCreditsInput
     from .usage_prepaid_credits_input_billing_frequency import UsagePrepaidCreditsInputBillingFrequency
     from .usage_prepaid_credits_input_billing_type import UsagePrepaidCreditsInputBillingType
+    from .usage_prepaid_credits_input_pricing_input import UsagePrepaidCreditsInputPricingInput
+    from .usage_prepaid_credits_input_pricing_input_kind import UsagePrepaidCreditsInputPricingInputKind
     from .usage_prepaid_credits_input_signal_type import UsagePrepaidCreditsInputSignalType
     from .usage_volume_input import UsageVolumeInput
     from .usage_volume_input_billing_frequency import UsageVolumeInputBillingFrequency
     from .usage_volume_input_billing_type import UsageVolumeInputBillingType
     from .usage_volume_input_signal_type import UsageVolumeInputSignalType
+    from .validate_custom_view_request import ValidateCustomViewRequest
+    from .validate_custom_view_request_period import ValidateCustomViewRequestPeriod
+    from .validate_custom_view_request_period_kind import ValidateCustomViewRequestPeriodKind
+    from .validate_custom_view_request_period_unit import ValidateCustomViewRequestPeriodUnit
+    from .validate_custom_view_request_scope import ValidateCustomViewRequestScope
+    from .validate_custom_view_response import ValidateCustomViewResponse
+    from .value_metric_detail import ValueMetricDetail
+    from .value_metric_detail_formula import ValueMetricDetailFormula
+    from .value_metric_detail_monetary_conversion import ValueMetricDetailMonetaryConversion
+    from .value_metric_detail_monetary_conversion_variables_item import ValueMetricDetailMonetaryConversionVariablesItem
+    from .value_metric_detail_sources_item import ValueMetricDetailSourcesItem
+    from .value_metric_formula import ValueMetricFormula
+    from .value_metric_formula_variable import ValueMetricFormulaVariable
+    from .value_metric_formula_variable_format import ValueMetricFormulaVariableFormat
+    from .value_metric_formula_variable_format_unit import ValueMetricFormulaVariableFormatUnit
+    from .value_metric_formula_variable_type import ValueMetricFormulaVariableType
+    from .value_metric_list_response import ValueMetricListResponse
+    from .value_metric_monetary_conversion import ValueMetricMonetaryConversion
+    from .value_metric_signal_binding import ValueMetricSignalBinding
+    from .value_metric_summary import ValueMetricSummary
+    from .value_metric_summary_monetary_conversion import ValueMetricSummaryMonetaryConversion
+    from .value_metric_summary_monetary_conversion_variables_item import (
+        ValueMetricSummaryMonetaryConversionVariablesItem,
+    )
+    from .value_metric_unit import ValueMetricUnit
+    from .value_metric_unit_duration_unit import ValueMetricUnitDurationUnit
+    from .value_metric_unit_type import ValueMetricUnitType
+    from .value_metric_validation_response import ValueMetricValidationResponse
+    from .value_metric_validation_response_errors_item import ValueMetricValidationResponseErrorsItem
+    from .value_metric_variable_edit import ValueMetricVariableEdit
+    from .value_metric_variable_edit_format import ValueMetricVariableEditFormat
+    from .value_metric_variable_edit_format_unit import ValueMetricVariableEditFormatUnit
+    from .value_metric_write_ack import ValueMetricWriteAck
+    from .value_model_authoring_guide import ValueModelAuthoringGuide
+    from .value_model_authoring_guide_examples_item import ValueModelAuthoringGuideExamplesItem
     from .value_model_content import ValueModelContent
     from .value_model_content_formulas_item import ValueModelContentFormulasItem
     from .value_model_content_formulas_item_conditions_item import ValueModelContentFormulasItemConditionsItem
@@ -450,6 +641,12 @@ if typing.TYPE_CHECKING:
     from .value_model_content_formulas_item_variables_item_derived_from_target_unit import (
         ValueModelContentFormulasItemVariablesItemDerivedFromTargetUnit,
     )
+    from .value_model_content_formulas_item_variables_item_format import (
+        ValueModelContentFormulasItemVariablesItemFormat,
+    )
+    from .value_model_content_formulas_item_variables_item_format_unit import (
+        ValueModelContentFormulasItemVariablesItemFormatUnit,
+    )
     from .value_model_content_formulas_item_variables_item_type import ValueModelContentFormulasItemVariablesItemType
     from .value_model_content_overrides_item import ValueModelContentOverridesItem
     from .value_model_content_overrides_item_additional_signals_item import (
@@ -468,6 +665,12 @@ if typing.TYPE_CHECKING:
     from .value_model_content_overrides_item_signal_overrides_value_defaults_value import (
         ValueModelContentOverridesItemSignalOverridesValueDefaultsValue,
     )
+    from .value_model_content_overrides_item_value_type_overrides_value import (
+        ValueModelContentOverridesItemValueTypeOverridesValue,
+    )
+    from .value_model_content_overrides_item_value_type_overrides_value_variables_value import (
+        ValueModelContentOverridesItemValueTypeOverridesValueVariablesValue,
+    )
     from .value_model_content_segment_tables_item import ValueModelContentSegmentTablesItem
     from .value_model_content_segment_tables_item_columns_item import ValueModelContentSegmentTablesItemColumnsItem
     from .value_model_content_segment_tables_item_columns_item_type import (
@@ -477,39 +680,59 @@ if typing.TYPE_CHECKING:
     from .value_model_content_signals_item import ValueModelContentSignalsItem
     from .value_model_content_signals_item_defaults_value import ValueModelContentSignalsItemDefaultsValue
     from .value_model_content_value_types_item import ValueModelContentValueTypesItem
-    from .value_model_content_value_types_item_monetary_conversion import (
-        ValueModelContentValueTypesItemMonetaryConversion,
+    from .value_model_content_value_types_item_calculation_timeline_item import (
+        ValueModelContentValueTypesItemCalculationTimelineItem,
     )
-    from .value_model_content_value_types_item_monetary_conversion_conditions_item import (
-        ValueModelContentValueTypesItemMonetaryConversionConditionsItem,
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculation,
     )
-    from .value_model_content_value_types_item_monetary_conversion_conditions_item_operator import (
-        ValueModelContentValueTypesItemMonetaryConversionConditionsItemOperator,
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_monetary_conversion import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversion,
     )
-    from .value_model_content_value_types_item_monetary_conversion_conditions_item_result import (
-        ValueModelContentValueTypesItemMonetaryConversionConditionsItemResult,
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_monetary_conversion_conditions_item import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItem,
     )
-    from .value_model_content_value_types_item_monetary_conversion_conditions_item_result_type import (
-        ValueModelContentValueTypesItemMonetaryConversionConditionsItemResultType,
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_monetary_conversion_conditions_item_operator import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItemOperator,
     )
-    from .value_model_content_value_types_item_monetary_conversion_conditions_item_value import (
-        ValueModelContentValueTypesItemMonetaryConversionConditionsItemValue,
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_monetary_conversion_conditions_item_result import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItemResult,
     )
-    from .value_model_content_value_types_item_monetary_conversion_variables_item import (
-        ValueModelContentValueTypesItemMonetaryConversionVariablesItem,
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_monetary_conversion_conditions_item_result_type import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItemResultType,
     )
-    from .value_model_content_value_types_item_unit import ValueModelContentValueTypesItemUnit
-    from .value_model_content_value_types_item_unit_duration_unit import ValueModelContentValueTypesItemUnitDurationUnit
-    from .value_model_content_value_types_item_unit_duration_unit_duration_unit import (
-        ValueModelContentValueTypesItemUnitDurationUnitDurationUnit,
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_monetary_conversion_conditions_item_value import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItemValue,
     )
-    from .value_model_content_value_types_item_unit_duration_unit_type import (
-        ValueModelContentValueTypesItemUnitDurationUnitType,
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_monetary_conversion_variables_item import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionVariablesItem,
     )
-    from .value_model_content_value_types_item_unit_type import ValueModelContentValueTypesItemUnitType
-    from .value_model_content_value_types_item_unit_type_type import ValueModelContentValueTypesItemUnitTypeType
-    from .value_model_content_value_types_item_unit_zero import ValueModelContentValueTypesItemUnitZero
-    from .value_model_content_value_types_item_unit_zero_type import ValueModelContentValueTypesItemUnitZeroType
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_unit import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnit,
+    )
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_unit_duration_unit import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitDurationUnit,
+    )
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_unit_duration_unit_duration_unit import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitDurationUnitDurationUnit,
+    )
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_unit_duration_unit_type import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitDurationUnitType,
+    )
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_unit_type import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitType,
+    )
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_unit_type_type import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitTypeType,
+    )
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_unit_zero import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZero,
+    )
+    from .value_model_content_value_types_item_calculation_timeline_item_calculation_unit_zero_type import (
+        ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZeroType,
+    )
+    from .value_model_content_value_types_item_category import ValueModelContentValueTypesItemCategory
+    from .value_model_content_value_types_item_sources_item import ValueModelContentValueTypesItemSourcesItem
     from .value_model_detail import ValueModelDetail
     from .value_model_summary import ValueModelSummary
     from .value_model_summary_status import ValueModelSummaryStatus
@@ -528,8 +751,51 @@ if typing.TYPE_CHECKING:
     from .webhook_update_response_name import WebhookUpdateResponseName
     from .writable_order_line_type import WritableOrderLineType
 _dynamic_imports: typing.Dict[str, str] = {
+    "AddAttributeIntent": ".add_attribute_intent",
+    "AddAttributeIntentChargeStub": ".add_attribute_intent_charge_stub",
+    "AddAttributeIntentCreditGrant": ".add_attribute_intent_credit_grant",
+    "AddAttributeIntentTreatment": ".add_attribute_intent_treatment",
+    "AddFromCatalogIntent": ".add_from_catalog_intent",
+    "AddFromCatalogIntentChargeStub": ".add_from_catalog_intent_charge_stub",
     "AddMembersResponse": ".add_members_response",
+    "AmendmentAddAttributeOptions": ".amendment_add_attribute_options",
+    "AmendmentAddAxisOptions": ".amendment_add_axis_options",
+    "AmendmentAddAxisOptions_ChargeStub": ".amendment_add_axis_options",
+    "AmendmentAddAxisOptions_CreditGrant": ".amendment_add_axis_options",
+    "AmendmentAttributeOptions": ".amendment_attribute_options",
+    "AmendmentAttributeState": ".amendment_attribute_state",
+    "AmendmentAxisChoiceValue": ".amendment_axis_choice_value",
+    "AmendmentAxisId": ".amendment_axis_id",
+    "AmendmentAxisOptions": ".amendment_axis_options",
+    "AmendmentAxisOptions_ChargeStub": ".amendment_axis_options",
+    "AmendmentAxisOptions_CreditGrant": ".amendment_axis_options",
+    "AmendmentAxisOptions_Money": ".amendment_axis_options",
+    "AmendmentAxisOptions_UsageAttribution": ".amendment_axis_options",
+    "AmendmentAxisRelevance": ".amendment_axis_relevance",
+    "AmendmentBillingType": ".amendment_billing_type",
+    "AmendmentChargeType": ".amendment_charge_type",
+    "AmendmentCreditEffectKind": ".amendment_credit_effect_kind",
+    "AmendmentErrorResponse": ".amendment_error_response",
+    "AmendmentIntentKind": ".amendment_intent_kind",
+    "AmendmentIntentOptions": ".amendment_intent_options",
+    "AmendmentLineOptions": ".amendment_line_options",
+    "AmendmentMoneyBilling": ".amendment_money_billing",
+    "AmendmentOptions": ".amendment_options",
+    "AmendmentPlan": ".amendment_plan",
+    "AmendmentPlanAttributeDiff": ".amendment_plan_attribute_diff",
+    "AmendmentPlanChange": ".amendment_plan_change",
+    "AmendmentPlanCreditEffect": ".amendment_plan_credit_effect",
+    "AmendmentPlanLineType": ".amendment_plan_line_type",
+    "AmendmentPlanMoneyEffect": ".amendment_plan_money_effect",
+    "AmendmentPlanMoneyEffectKind": ".amendment_plan_money_effect_kind",
+    "AmendmentPlanTreatmentResolution": ".amendment_plan_treatment_resolution",
+    "AmendmentPlanUsageEffect": ".amendment_plan_usage_effect",
+    "AmendmentPlanUsageEffectKind": ".amendment_plan_usage_effect_kind",
+    "AmendmentPricingClause": ".amendment_pricing_clause",
+    "AmendmentPricingModel": ".amendment_pricing_model",
+    "AmendmentTreatmentSource": ".amendment_treatment_source",
     "AnalyticsColumn": ".analytics_column",
+    "AnalyticsQueryRequest": ".analytics_query_request",
     "AnalyticsQueryResponse": ".analytics_query_response",
     "AnalyticsQueryResponseMeta": ".analytics_query_response_meta",
     "AnalyticsSchemaColumn": ".analytics_schema_column",
@@ -539,6 +805,12 @@ _dynamic_imports: typing.Dict[str, str] = {
     "BackfillResponse": ".backfill_response",
     "BatchSeatAssignmentsResponse": ".batch_seat_assignments_response",
     "BulkSignalsResponse": ".bulk_signals_response",
+    "ChargeStubAddAxisOptions": ".charge_stub_add_axis_options",
+    "ChargeStubAddAxisOptionsOptionsItem": ".charge_stub_add_axis_options_options_item",
+    "ChargeStubAddAxisOptionsOptionsItemValue": ".charge_stub_add_axis_options_options_item_value",
+    "ChargeStubAxisOptions": ".charge_stub_axis_options",
+    "ChargeStubAxisOptionsOptionsItem": ".charge_stub_axis_options_options_item",
+    "ChargeStubAxisOptionsOptionsItemValue": ".charge_stub_axis_options_options_item_value",
     "Checkout": ".checkout",
     "CheckoutCustomCard": ".checkout_custom_card",
     "CheckoutCustomCardInput": ".checkout_custom_card_input",
@@ -590,35 +862,54 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CreditCurrencyListResponse": ".credit_currency_list_response",
     "CreditCurrencyStatus": ".credit_currency_status",
     "CreditGrant": ".credit_grant",
+    "CreditGrantAddAxisOptions": ".credit_grant_add_axis_options",
+    "CreditGrantAddAxisOptionsOptionsItem": ".credit_grant_add_axis_options_options_item",
+    "CreditGrantAxisOptions": ".credit_grant_axis_options",
+    "CreditGrantAxisOptionsOptionsItem": ".credit_grant_axis_options_options_item",
     "CreditGrantCreateRequest": ".credit_grant_create_request",
     "CreditGrantCurrency": ".credit_grant_currency",
     "CreditGrantCustomer": ".credit_grant_customer",
     "CreditGrantResult": ".credit_grant_result",
     "CreditGrantResultStatus": ".credit_grant_result_status",
+    "CreditGrantValue": ".credit_grant_value",
+    "CreditTransaction": ".credit_transaction",
+    "CreditTransactionCurrency": ".credit_transaction_currency",
+    "CreditTransactionCustomer": ".credit_transaction_customer",
+    "CreditTransactionListResponse": ".credit_transaction_list_response",
+    "CreditTransactionProduct": ".credit_transaction_product",
+    "CreditTransactionType": ".credit_transaction_type",
     "CurrencyCode": ".currency_code",
     "CustomView": ".custom_view",
     "CustomViewAuthoringDetail": ".custom_view_authoring_detail",
     "CustomViewAuthoringDetailPeriod": ".custom_view_authoring_detail_period",
     "CustomViewAuthoringDetailPeriodKind": ".custom_view_authoring_detail_period_kind",
     "CustomViewAuthoringDetailPeriodUnit": ".custom_view_authoring_detail_period_unit",
+    "CustomViewAuthoringDetailScope": ".custom_view_authoring_detail_scope",
     "CustomViewAuthoringDetailStatus": ".custom_view_authoring_detail_status",
     "CustomViewAuthoringGuide": ".custom_view_authoring_guide",
     "CustomViewDetail": ".custom_view_detail",
     "CustomViewDetailPeriod": ".custom_view_detail_period",
     "CustomViewDetailPeriodKind": ".custom_view_detail_period_kind",
     "CustomViewDetailPeriodUnit": ".custom_view_detail_period_unit",
+    "CustomViewDetailScope": ".custom_view_detail_scope",
     "CustomViewDetailStatus": ".custom_view_detail_status",
     "CustomViewEmbedTokenResponse": ".custom_view_embed_token_response",
+    "CustomViewFilter": ".custom_view_filter",
     "CustomViewListResponse": ".custom_view_list_response",
     "CustomViewPreviewHarness": ".custom_view_preview_harness",
     "CustomViewPreviewHarnessRequest": ".custom_view_preview_harness_request",
+    "CustomViewPreviewHarnessRequestSyntheticValueItem": ".custom_view_preview_harness_request_synthetic_value_item",
+    "CustomViewPreviewHarnessRequestSyntheticValueItemType": ".custom_view_preview_harness_request_synthetic_value_item_type",
     "CustomViewQuery": ".custom_view_query",
+    "CustomViewScope": ".custom_view_scope",
     "CustomViewStatus": ".custom_view_status",
     "CustomViewSummary": ".custom_view_summary",
     "CustomViewSummaryPeriod": ".custom_view_summary_period",
     "CustomViewSummaryPeriodKind": ".custom_view_summary_period_kind",
     "CustomViewSummaryPeriodUnit": ".custom_view_summary_period_unit",
+    "CustomViewSummaryScope": ".custom_view_summary_scope",
     "CustomViewSummaryStatus": ".custom_view_summary_status",
+    "CustomViewValidationFinding": ".custom_view_validation_finding",
     "Customer": ".customer",
     "CustomerAlias": ".customer_alias",
     "CustomerAliasCreateRequest": ".customer_alias_create_request",
@@ -651,9 +942,32 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CustomerStateSeatAssignee": ".customer_state_seat_assignee",
     "CustomerStateSeatStatus": ".customer_state_seat_status",
     "CustomerStateSeats": ".customer_state_seats",
+    "CustomerStatus": ".customer_status",
+    "CustomerUnit": ".customer_unit",
+    "CustomerUnitAttribution": ".customer_unit_attribution",
+    "CustomerUnitCapCurrentPeriod": ".customer_unit_cap_current_period",
+    "CustomerUnitCapEndResponse": ".customer_unit_cap_end_response",
+    "CustomerUnitCapEndedPolicy": ".customer_unit_cap_ended_policy",
+    "CustomerUnitCapEndedPolicyFrequency": ".customer_unit_cap_ended_policy_frequency",
+    "CustomerUnitCapOpenPolicy": ".customer_unit_cap_open_policy",
+    "CustomerUnitCapOpenPolicyEffectiveUntil": ".customer_unit_cap_open_policy_effective_until",
+    "CustomerUnitCapOpenPolicyFrequency": ".customer_unit_cap_open_policy_frequency",
+    "CustomerUnitCapPeriod": ".customer_unit_cap_period",
+    "CustomerUnitCapPolicy": ".customer_unit_cap_policy",
+    "CustomerUnitCapPolicyFrequency": ".customer_unit_cap_policy_frequency",
+    "CustomerUnitCapResponse": ".customer_unit_cap_response",
+    "CustomerUnitCapSet": ".customer_unit_cap_set",
+    "CustomerUnitCapSetFrequency": ".customer_unit_cap_set_frequency",
+    "CustomerUnitCapSetResponse": ".customer_unit_cap_set_response",
+    "CustomerUnitCreate": ".customer_unit_create",
+    "CustomerUnitListResponse": ".customer_unit_list_response",
+    "CustomerUnitStatus": ".customer_unit_status",
+    "CustomerUnitUpdate": ".customer_unit_update",
     "CustomerUser": ".customer_user",
     "CustomerUserStatus": ".customer_user_status",
     "EmptyResponse": ".empty_response",
+    "EndAttributeIntent": ".end_attribute_intent",
+    "EndAttributeIntentTreatment": ".end_attribute_intent_treatment",
     "ErrorResponse": ".error_response",
     "GrantCustomerCreditsResponse": ".grant_customer_credits_response",
     "Invoice": ".invoice",
@@ -666,6 +980,9 @@ _dynamic_imports: typing.Dict[str, str] = {
     "InvoiceStatus": ".invoice_status",
     "InvoiceTaxStatus": ".invoice_tax_status",
     "MemberRequest": ".member_request",
+    "MoneyAxisOptions": ".money_axis_options",
+    "MoneyAxisOptionsOptionsItem": ".money_axis_options_options_item",
+    "MoneyAxisValue": ".money_axis_value",
     "OneTimePerUnitInput": ".one_time_per_unit_input",
     "OneTimePerUnitInputBillingType": ".one_time_per_unit_input_billing_type",
     "OneTimePerUnitInputFeeType": ".one_time_per_unit_input_fee_type",
@@ -680,6 +997,22 @@ _dynamic_imports: typing.Dict[str, str] = {
     "OrderSeat": ".order_seat",
     "OrderSeatListResponse": ".order_seat_list_response",
     "Pagination": ".pagination",
+    "Payment": ".payment",
+    "PaymentAllocation": ".payment_allocation",
+    "PaymentAllocationCreateResponse": ".payment_allocation_create_response",
+    "PaymentAllocationInput": ".payment_allocation_input",
+    "PaymentAllocationListResponse": ".payment_allocation_list_response",
+    "PaymentCreateStatus": ".payment_create_status",
+    "PaymentListResponse": ".payment_list_response",
+    "PaymentMethod": ".payment_method",
+    "PaymentMethodCard": ".payment_method_card",
+    "PaymentMethodListResponse": ".payment_method_list_response",
+    "PaymentMethodSetup": ".payment_method_setup",
+    "PaymentMethodSetupSetupIntent": ".payment_method_setup_setup_intent",
+    "PaymentType": ".payment_type",
+    "PendingCreditConsumption": ".pending_credit_consumption",
+    "PendingCreditConsumptionCurrency": ".pending_credit_consumption_currency",
+    "PendingCreditConsumptionListResponse": ".pending_credit_consumption_list_response",
     "Plan": ".plan",
     "PlanAttribute": ".plan_attribute",
     "PlanAttributeInput": ".plan_attribute_input",
@@ -695,6 +1028,13 @@ _dynamic_imports: typing.Dict[str, str] = {
     "PlanStatus": ".plan_status",
     "PlanUpgradePathGroup": ".plan_upgrade_path_group",
     "PlanUpgradePathResponse": ".plan_upgrade_path_response",
+    "PlannedAdd": ".planned_add",
+    "PlannedAddChargeStub": ".planned_add_charge_stub",
+    "PlannedCopy": ".planned_copy",
+    "PlannedEnd": ".planned_end",
+    "PlannedOperations": ".planned_operations",
+    "PlannedOrderTerm": ".planned_order_term",
+    "PlannedReplace": ".planned_replace",
     "PrecomputedCost": ".precomputed_cost",
     "PricingInput": ".pricing_input",
     "PricingInput_OneTimePerUnit": ".pricing_input",
@@ -717,9 +1057,9 @@ _dynamic_imports: typing.Dict[str, str] = {
     "PricingOutputPricingType": ".pricing_output_pricing_type",
     "PricingOutputSignalType": ".pricing_output_signal_type",
     "PricingPricePointOutput": ".pricing_price_point_output",
-    "PricingPricePointOutputTiersItem": ".pricing_price_point_output_tiers_item",
-    "PricingPricePointOutputTiersItemTierBillingType": ".pricing_price_point_output_tiers_item_tier_billing_type",
     "PricingResponse": ".pricing_response",
+    "PricingTierOutput": ".pricing_tier_output",
+    "PricingTierOutputTierBillingType": ".pricing_tier_output_tier_billing_type",
     "Product": ".product",
     "ProductAttributeOutput": ".product_attribute_output",
     "ProductAttributeUpsert": ".product_attribute_upsert",
@@ -737,8 +1077,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ProductOneTimePerUnitInputBillingType": ".product_one_time_per_unit_input_billing_type",
     "ProductOneTimePerUnitInputFeeType": ".product_one_time_per_unit_input_fee_type",
     "ProductPricePointOutput": ".product_price_point_output",
-    "ProductPricePointOutputTiersItem": ".product_price_point_output_tiers_item",
-    "ProductPricePointOutputTiersItemTierBillingType": ".product_price_point_output_tiers_item_tier_billing_type",
     "ProductPricingInput": ".product_pricing_input",
     "ProductPricingInput_OneTimePerUnit": ".product_pricing_input",
     "ProductPricingInput_RecurringGraduated": ".product_pricing_input",
@@ -758,6 +1096,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ProductPricingOutput": ".product_pricing_output",
     "ProductPricingOutputPricingType": ".product_pricing_output_pricing_type",
     "ProductPricingOutputSignalType": ".product_pricing_output_signal_type",
+    "ProductPricingTierOutput": ".product_pricing_tier_output",
+    "ProductPricingTierOutputTierBillingType": ".product_pricing_tier_output_tier_billing_type",
     "ProductRecurringGraduatedInput": ".product_recurring_graduated_input",
     "ProductRecurringGraduatedInputBillingFrequency": ".product_recurring_graduated_input_billing_frequency",
     "ProductRecurringGraduatedInputBillingType": ".product_recurring_graduated_input_billing_type",
@@ -810,6 +1150,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ProductUsagePrepaidCreditsInput": ".product_usage_prepaid_credits_input",
     "ProductUsagePrepaidCreditsInputBillingFrequency": ".product_usage_prepaid_credits_input_billing_frequency",
     "ProductUsagePrepaidCreditsInputBillingType": ".product_usage_prepaid_credits_input_billing_type",
+    "ProductUsagePrepaidCreditsInputPricingInput": ".product_usage_prepaid_credits_input_pricing_input",
+    "ProductUsagePrepaidCreditsInputPricingInputKind": ".product_usage_prepaid_credits_input_pricing_input_kind",
     "ProductUsagePrepaidCreditsInputSignalType": ".product_usage_prepaid_credits_input_signal_type",
     "ProductUsageVolumeInput": ".product_usage_volume_input",
     "ProductUsageVolumeInputBillingFrequency": ".product_usage_volume_input_billing_frequency",
@@ -828,6 +1170,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "RecurringVolumeInputBillingFrequency": ".recurring_volume_input_billing_frequency",
     "RecurringVolumeInputBillingType": ".recurring_volume_input_billing_type",
     "RemoveMembersResponse": ".remove_members_response",
+    "RenderBundleEdit": ".render_bundle_edit",
     "RotateWebhookSecretResponse": ".rotate_webhook_secret_response",
     "SeatAssignee": ".seat_assignee",
     "SeatAssignmentStatus": ".seat_assignment_status",
@@ -845,6 +1188,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "SeatBasedVolumeInputBillingType": ".seat_based_volume_input_billing_type",
     "SetMembersResponse": ".set_members_response",
     "Signal": ".signal",
+    "SignalListItem": ".signal_list_item",
+    "SignalListResponse": ".signal_list_response",
     "SignalsMetadataResponse": ".signals_metadata_response",
     "SignalsMetadataResponseMeta": ".signals_metadata_response_meta",
     "SignalsMetadataResponseSignalsItem": ".signals_metadata_response_signals_item",
@@ -854,16 +1199,38 @@ _dynamic_imports: typing.Dict[str, str] = {
     "SimplePricePointTiersItemTierBillingType": ".simple_price_point_tiers_item_tier_billing_type",
     "StripeConnection": ".stripe_connection",
     "SuccessResponse": ".success_response",
+    "SyncValueReceiptRequest": ".sync_value_receipt_request",
+    "SyncValueReceiptRequestProduct": ".sync_value_receipt_request_product",
     "TieredPricePoint": ".tiered_price_point",
     "TieredPricePointTiersItem": ".tiered_price_point_tiers_item",
     "TieredPricePointTiersItemTierBillingType": ".tiered_price_point_tiers_item_tier_billing_type",
     "TokenUsage": ".token_usage",
+    "UnifiedAmendmentIntent": ".unified_amendment_intent",
+    "UnifiedAmendmentIntent_AddAttribute": ".unified_amendment_intent",
+    "UnifiedAmendmentIntent_AddFromCatalog": ".unified_amendment_intent",
+    "UnifiedAmendmentIntent_EndAttribute": ".unified_amendment_intent",
+    "UnifiedAmendmentIntent_UpdateLineTerm": ".unified_amendment_intent",
+    "UnifiedAmendmentIntent_UpdateOrderTerm": ".unified_amendment_intent",
+    "UnifiedAmendmentIntent_UpdatePricing": ".unified_amendment_intent",
+    "UnifiedAmendmentIntent_UpdateQuantity": ".unified_amendment_intent",
+    "UnifiedAmendmentResponse": ".unified_amendment_response",
     "UpdateContactRequest": ".update_contact_request",
     "UpdateContactRequestRolesItem": ".update_contact_request_roles_item",
     "UpdateCustomerRequest": ".update_customer_request",
+    "UpdateLineTermIntent": ".update_line_term_intent",
+    "UpdateLineTermIntentTreatment": ".update_line_term_intent_treatment",
+    "UpdateOrderTermIntent": ".update_order_term_intent",
+    "UpdateOrderTermIntentTreatment": ".update_order_term_intent_treatment",
     "UpdatePlanRequest": ".update_plan_request",
     "UpdatePlanRequestStatus": ".update_plan_request_status",
+    "UpdatePricingIntent": ".update_pricing_intent",
+    "UpdatePricingIntentTreatment": ".update_pricing_intent_treatment",
     "UpdateProductRequest": ".update_product_request",
+    "UpdateQuantityIntent": ".update_quantity_intent",
+    "UpdateQuantityIntentTreatment": ".update_quantity_intent_treatment",
+    "UsageAttributionAxisOptions": ".usage_attribution_axis_options",
+    "UsageAttributionAxisOptionsOptionsItem": ".usage_attribution_axis_options_options_item",
+    "UsageAttributionAxisValue": ".usage_attribution_axis_value",
     "UsageBracketedPrepaidCreditsInput": ".usage_bracketed_prepaid_credits_input",
     "UsageBracketedPrepaidCreditsInputBillingFrequency": ".usage_bracketed_prepaid_credits_input_billing_frequency",
     "UsageBracketedPrepaidCreditsInputBillingType": ".usage_bracketed_prepaid_credits_input_billing_type",
@@ -887,11 +1254,46 @@ _dynamic_imports: typing.Dict[str, str] = {
     "UsagePrepaidCreditsInput": ".usage_prepaid_credits_input",
     "UsagePrepaidCreditsInputBillingFrequency": ".usage_prepaid_credits_input_billing_frequency",
     "UsagePrepaidCreditsInputBillingType": ".usage_prepaid_credits_input_billing_type",
+    "UsagePrepaidCreditsInputPricingInput": ".usage_prepaid_credits_input_pricing_input",
+    "UsagePrepaidCreditsInputPricingInputKind": ".usage_prepaid_credits_input_pricing_input_kind",
     "UsagePrepaidCreditsInputSignalType": ".usage_prepaid_credits_input_signal_type",
     "UsageVolumeInput": ".usage_volume_input",
     "UsageVolumeInputBillingFrequency": ".usage_volume_input_billing_frequency",
     "UsageVolumeInputBillingType": ".usage_volume_input_billing_type",
     "UsageVolumeInputSignalType": ".usage_volume_input_signal_type",
+    "ValidateCustomViewRequest": ".validate_custom_view_request",
+    "ValidateCustomViewRequestPeriod": ".validate_custom_view_request_period",
+    "ValidateCustomViewRequestPeriodKind": ".validate_custom_view_request_period_kind",
+    "ValidateCustomViewRequestPeriodUnit": ".validate_custom_view_request_period_unit",
+    "ValidateCustomViewRequestScope": ".validate_custom_view_request_scope",
+    "ValidateCustomViewResponse": ".validate_custom_view_response",
+    "ValueMetricDetail": ".value_metric_detail",
+    "ValueMetricDetailFormula": ".value_metric_detail_formula",
+    "ValueMetricDetailMonetaryConversion": ".value_metric_detail_monetary_conversion",
+    "ValueMetricDetailMonetaryConversionVariablesItem": ".value_metric_detail_monetary_conversion_variables_item",
+    "ValueMetricDetailSourcesItem": ".value_metric_detail_sources_item",
+    "ValueMetricFormula": ".value_metric_formula",
+    "ValueMetricFormulaVariable": ".value_metric_formula_variable",
+    "ValueMetricFormulaVariableFormat": ".value_metric_formula_variable_format",
+    "ValueMetricFormulaVariableFormatUnit": ".value_metric_formula_variable_format_unit",
+    "ValueMetricFormulaVariableType": ".value_metric_formula_variable_type",
+    "ValueMetricListResponse": ".value_metric_list_response",
+    "ValueMetricMonetaryConversion": ".value_metric_monetary_conversion",
+    "ValueMetricSignalBinding": ".value_metric_signal_binding",
+    "ValueMetricSummary": ".value_metric_summary",
+    "ValueMetricSummaryMonetaryConversion": ".value_metric_summary_monetary_conversion",
+    "ValueMetricSummaryMonetaryConversionVariablesItem": ".value_metric_summary_monetary_conversion_variables_item",
+    "ValueMetricUnit": ".value_metric_unit",
+    "ValueMetricUnitDurationUnit": ".value_metric_unit_duration_unit",
+    "ValueMetricUnitType": ".value_metric_unit_type",
+    "ValueMetricValidationResponse": ".value_metric_validation_response",
+    "ValueMetricValidationResponseErrorsItem": ".value_metric_validation_response_errors_item",
+    "ValueMetricVariableEdit": ".value_metric_variable_edit",
+    "ValueMetricVariableEditFormat": ".value_metric_variable_edit_format",
+    "ValueMetricVariableEditFormatUnit": ".value_metric_variable_edit_format_unit",
+    "ValueMetricWriteAck": ".value_metric_write_ack",
+    "ValueModelAuthoringGuide": ".value_model_authoring_guide",
+    "ValueModelAuthoringGuideExamplesItem": ".value_model_authoring_guide_examples_item",
     "ValueModelContent": ".value_model_content",
     "ValueModelContentFormulasItem": ".value_model_content_formulas_item",
     "ValueModelContentFormulasItemConditionsItem": ".value_model_content_formulas_item_conditions_item",
@@ -904,6 +1306,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ValueModelContentFormulasItemVariablesItem": ".value_model_content_formulas_item_variables_item",
     "ValueModelContentFormulasItemVariablesItemDerivedFrom": ".value_model_content_formulas_item_variables_item_derived_from",
     "ValueModelContentFormulasItemVariablesItemDerivedFromTargetUnit": ".value_model_content_formulas_item_variables_item_derived_from_target_unit",
+    "ValueModelContentFormulasItemVariablesItemFormat": ".value_model_content_formulas_item_variables_item_format",
+    "ValueModelContentFormulasItemVariablesItemFormatUnit": ".value_model_content_formulas_item_variables_item_format_unit",
     "ValueModelContentFormulasItemVariablesItemType": ".value_model_content_formulas_item_variables_item_type",
     "ValueModelContentOverridesItem": ".value_model_content_overrides_item",
     "ValueModelContentOverridesItemAdditionalSignalsItem": ".value_model_content_overrides_item_additional_signals_item",
@@ -912,6 +1316,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ValueModelContentOverridesItemScope": ".value_model_content_overrides_item_scope",
     "ValueModelContentOverridesItemSignalOverridesValue": ".value_model_content_overrides_item_signal_overrides_value",
     "ValueModelContentOverridesItemSignalOverridesValueDefaultsValue": ".value_model_content_overrides_item_signal_overrides_value_defaults_value",
+    "ValueModelContentOverridesItemValueTypeOverridesValue": ".value_model_content_overrides_item_value_type_overrides_value",
+    "ValueModelContentOverridesItemValueTypeOverridesValueVariablesValue": ".value_model_content_overrides_item_value_type_overrides_value_variables_value",
     "ValueModelContentSegmentTablesItem": ".value_model_content_segment_tables_item",
     "ValueModelContentSegmentTablesItemColumnsItem": ".value_model_content_segment_tables_item_columns_item",
     "ValueModelContentSegmentTablesItemColumnsItemType": ".value_model_content_segment_tables_item_columns_item_type",
@@ -919,21 +1325,25 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ValueModelContentSignalsItem": ".value_model_content_signals_item",
     "ValueModelContentSignalsItemDefaultsValue": ".value_model_content_signals_item_defaults_value",
     "ValueModelContentValueTypesItem": ".value_model_content_value_types_item",
-    "ValueModelContentValueTypesItemMonetaryConversion": ".value_model_content_value_types_item_monetary_conversion",
-    "ValueModelContentValueTypesItemMonetaryConversionConditionsItem": ".value_model_content_value_types_item_monetary_conversion_conditions_item",
-    "ValueModelContentValueTypesItemMonetaryConversionConditionsItemOperator": ".value_model_content_value_types_item_monetary_conversion_conditions_item_operator",
-    "ValueModelContentValueTypesItemMonetaryConversionConditionsItemResult": ".value_model_content_value_types_item_monetary_conversion_conditions_item_result",
-    "ValueModelContentValueTypesItemMonetaryConversionConditionsItemResultType": ".value_model_content_value_types_item_monetary_conversion_conditions_item_result_type",
-    "ValueModelContentValueTypesItemMonetaryConversionConditionsItemValue": ".value_model_content_value_types_item_monetary_conversion_conditions_item_value",
-    "ValueModelContentValueTypesItemMonetaryConversionVariablesItem": ".value_model_content_value_types_item_monetary_conversion_variables_item",
-    "ValueModelContentValueTypesItemUnit": ".value_model_content_value_types_item_unit",
-    "ValueModelContentValueTypesItemUnitDurationUnit": ".value_model_content_value_types_item_unit_duration_unit",
-    "ValueModelContentValueTypesItemUnitDurationUnitDurationUnit": ".value_model_content_value_types_item_unit_duration_unit_duration_unit",
-    "ValueModelContentValueTypesItemUnitDurationUnitType": ".value_model_content_value_types_item_unit_duration_unit_type",
-    "ValueModelContentValueTypesItemUnitType": ".value_model_content_value_types_item_unit_type",
-    "ValueModelContentValueTypesItemUnitTypeType": ".value_model_content_value_types_item_unit_type_type",
-    "ValueModelContentValueTypesItemUnitZero": ".value_model_content_value_types_item_unit_zero",
-    "ValueModelContentValueTypesItemUnitZeroType": ".value_model_content_value_types_item_unit_zero_type",
+    "ValueModelContentValueTypesItemCalculationTimelineItem": ".value_model_content_value_types_item_calculation_timeline_item",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculation": ".value_model_content_value_types_item_calculation_timeline_item_calculation",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversion": ".value_model_content_value_types_item_calculation_timeline_item_calculation_monetary_conversion",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItem": ".value_model_content_value_types_item_calculation_timeline_item_calculation_monetary_conversion_conditions_item",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItemOperator": ".value_model_content_value_types_item_calculation_timeline_item_calculation_monetary_conversion_conditions_item_operator",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItemResult": ".value_model_content_value_types_item_calculation_timeline_item_calculation_monetary_conversion_conditions_item_result",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItemResultType": ".value_model_content_value_types_item_calculation_timeline_item_calculation_monetary_conversion_conditions_item_result_type",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItemValue": ".value_model_content_value_types_item_calculation_timeline_item_calculation_monetary_conversion_conditions_item_value",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionVariablesItem": ".value_model_content_value_types_item_calculation_timeline_item_calculation_monetary_conversion_variables_item",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnit": ".value_model_content_value_types_item_calculation_timeline_item_calculation_unit",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitDurationUnit": ".value_model_content_value_types_item_calculation_timeline_item_calculation_unit_duration_unit",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitDurationUnitDurationUnit": ".value_model_content_value_types_item_calculation_timeline_item_calculation_unit_duration_unit_duration_unit",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitDurationUnitType": ".value_model_content_value_types_item_calculation_timeline_item_calculation_unit_duration_unit_type",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitType": ".value_model_content_value_types_item_calculation_timeline_item_calculation_unit_type",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitTypeType": ".value_model_content_value_types_item_calculation_timeline_item_calculation_unit_type_type",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZero": ".value_model_content_value_types_item_calculation_timeline_item_calculation_unit_zero",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZeroType": ".value_model_content_value_types_item_calculation_timeline_item_calculation_unit_zero_type",
+    "ValueModelContentValueTypesItemCategory": ".value_model_content_value_types_item_category",
+    "ValueModelContentValueTypesItemSourcesItem": ".value_model_content_value_types_item_sources_item",
     "ValueModelDetail": ".value_model_detail",
     "ValueModelSummary": ".value_model_summary",
     "ValueModelSummaryStatus": ".value_model_summary_status",
@@ -976,8 +1386,51 @@ def __dir__():
 
 
 __all__ = [
+    "AddAttributeIntent",
+    "AddAttributeIntentChargeStub",
+    "AddAttributeIntentCreditGrant",
+    "AddAttributeIntentTreatment",
+    "AddFromCatalogIntent",
+    "AddFromCatalogIntentChargeStub",
     "AddMembersResponse",
+    "AmendmentAddAttributeOptions",
+    "AmendmentAddAxisOptions",
+    "AmendmentAddAxisOptions_ChargeStub",
+    "AmendmentAddAxisOptions_CreditGrant",
+    "AmendmentAttributeOptions",
+    "AmendmentAttributeState",
+    "AmendmentAxisChoiceValue",
+    "AmendmentAxisId",
+    "AmendmentAxisOptions",
+    "AmendmentAxisOptions_ChargeStub",
+    "AmendmentAxisOptions_CreditGrant",
+    "AmendmentAxisOptions_Money",
+    "AmendmentAxisOptions_UsageAttribution",
+    "AmendmentAxisRelevance",
+    "AmendmentBillingType",
+    "AmendmentChargeType",
+    "AmendmentCreditEffectKind",
+    "AmendmentErrorResponse",
+    "AmendmentIntentKind",
+    "AmendmentIntentOptions",
+    "AmendmentLineOptions",
+    "AmendmentMoneyBilling",
+    "AmendmentOptions",
+    "AmendmentPlan",
+    "AmendmentPlanAttributeDiff",
+    "AmendmentPlanChange",
+    "AmendmentPlanCreditEffect",
+    "AmendmentPlanLineType",
+    "AmendmentPlanMoneyEffect",
+    "AmendmentPlanMoneyEffectKind",
+    "AmendmentPlanTreatmentResolution",
+    "AmendmentPlanUsageEffect",
+    "AmendmentPlanUsageEffectKind",
+    "AmendmentPricingClause",
+    "AmendmentPricingModel",
+    "AmendmentTreatmentSource",
     "AnalyticsColumn",
+    "AnalyticsQueryRequest",
     "AnalyticsQueryResponse",
     "AnalyticsQueryResponseMeta",
     "AnalyticsSchemaColumn",
@@ -987,6 +1440,12 @@ __all__ = [
     "BackfillResponse",
     "BatchSeatAssignmentsResponse",
     "BulkSignalsResponse",
+    "ChargeStubAddAxisOptions",
+    "ChargeStubAddAxisOptionsOptionsItem",
+    "ChargeStubAddAxisOptionsOptionsItemValue",
+    "ChargeStubAxisOptions",
+    "ChargeStubAxisOptionsOptionsItem",
+    "ChargeStubAxisOptionsOptionsItemValue",
     "Checkout",
     "CheckoutCustomCard",
     "CheckoutCustomCardInput",
@@ -1038,35 +1497,54 @@ __all__ = [
     "CreditCurrencyListResponse",
     "CreditCurrencyStatus",
     "CreditGrant",
+    "CreditGrantAddAxisOptions",
+    "CreditGrantAddAxisOptionsOptionsItem",
+    "CreditGrantAxisOptions",
+    "CreditGrantAxisOptionsOptionsItem",
     "CreditGrantCreateRequest",
     "CreditGrantCurrency",
     "CreditGrantCustomer",
     "CreditGrantResult",
     "CreditGrantResultStatus",
+    "CreditGrantValue",
+    "CreditTransaction",
+    "CreditTransactionCurrency",
+    "CreditTransactionCustomer",
+    "CreditTransactionListResponse",
+    "CreditTransactionProduct",
+    "CreditTransactionType",
     "CurrencyCode",
     "CustomView",
     "CustomViewAuthoringDetail",
     "CustomViewAuthoringDetailPeriod",
     "CustomViewAuthoringDetailPeriodKind",
     "CustomViewAuthoringDetailPeriodUnit",
+    "CustomViewAuthoringDetailScope",
     "CustomViewAuthoringDetailStatus",
     "CustomViewAuthoringGuide",
     "CustomViewDetail",
     "CustomViewDetailPeriod",
     "CustomViewDetailPeriodKind",
     "CustomViewDetailPeriodUnit",
+    "CustomViewDetailScope",
     "CustomViewDetailStatus",
     "CustomViewEmbedTokenResponse",
+    "CustomViewFilter",
     "CustomViewListResponse",
     "CustomViewPreviewHarness",
     "CustomViewPreviewHarnessRequest",
+    "CustomViewPreviewHarnessRequestSyntheticValueItem",
+    "CustomViewPreviewHarnessRequestSyntheticValueItemType",
     "CustomViewQuery",
+    "CustomViewScope",
     "CustomViewStatus",
     "CustomViewSummary",
     "CustomViewSummaryPeriod",
     "CustomViewSummaryPeriodKind",
     "CustomViewSummaryPeriodUnit",
+    "CustomViewSummaryScope",
     "CustomViewSummaryStatus",
+    "CustomViewValidationFinding",
     "Customer",
     "CustomerAlias",
     "CustomerAliasCreateRequest",
@@ -1099,9 +1577,32 @@ __all__ = [
     "CustomerStateSeatAssignee",
     "CustomerStateSeatStatus",
     "CustomerStateSeats",
+    "CustomerStatus",
+    "CustomerUnit",
+    "CustomerUnitAttribution",
+    "CustomerUnitCapCurrentPeriod",
+    "CustomerUnitCapEndResponse",
+    "CustomerUnitCapEndedPolicy",
+    "CustomerUnitCapEndedPolicyFrequency",
+    "CustomerUnitCapOpenPolicy",
+    "CustomerUnitCapOpenPolicyEffectiveUntil",
+    "CustomerUnitCapOpenPolicyFrequency",
+    "CustomerUnitCapPeriod",
+    "CustomerUnitCapPolicy",
+    "CustomerUnitCapPolicyFrequency",
+    "CustomerUnitCapResponse",
+    "CustomerUnitCapSet",
+    "CustomerUnitCapSetFrequency",
+    "CustomerUnitCapSetResponse",
+    "CustomerUnitCreate",
+    "CustomerUnitListResponse",
+    "CustomerUnitStatus",
+    "CustomerUnitUpdate",
     "CustomerUser",
     "CustomerUserStatus",
     "EmptyResponse",
+    "EndAttributeIntent",
+    "EndAttributeIntentTreatment",
     "ErrorResponse",
     "GrantCustomerCreditsResponse",
     "Invoice",
@@ -1114,6 +1615,9 @@ __all__ = [
     "InvoiceStatus",
     "InvoiceTaxStatus",
     "MemberRequest",
+    "MoneyAxisOptions",
+    "MoneyAxisOptionsOptionsItem",
+    "MoneyAxisValue",
     "OneTimePerUnitInput",
     "OneTimePerUnitInputBillingType",
     "OneTimePerUnitInputFeeType",
@@ -1128,6 +1632,22 @@ __all__ = [
     "OrderSeat",
     "OrderSeatListResponse",
     "Pagination",
+    "Payment",
+    "PaymentAllocation",
+    "PaymentAllocationCreateResponse",
+    "PaymentAllocationInput",
+    "PaymentAllocationListResponse",
+    "PaymentCreateStatus",
+    "PaymentListResponse",
+    "PaymentMethod",
+    "PaymentMethodCard",
+    "PaymentMethodListResponse",
+    "PaymentMethodSetup",
+    "PaymentMethodSetupSetupIntent",
+    "PaymentType",
+    "PendingCreditConsumption",
+    "PendingCreditConsumptionCurrency",
+    "PendingCreditConsumptionListResponse",
     "Plan",
     "PlanAttribute",
     "PlanAttributeInput",
@@ -1143,6 +1663,13 @@ __all__ = [
     "PlanStatus",
     "PlanUpgradePathGroup",
     "PlanUpgradePathResponse",
+    "PlannedAdd",
+    "PlannedAddChargeStub",
+    "PlannedCopy",
+    "PlannedEnd",
+    "PlannedOperations",
+    "PlannedOrderTerm",
+    "PlannedReplace",
     "PrecomputedCost",
     "PricingInput",
     "PricingInput_OneTimePerUnit",
@@ -1165,9 +1692,9 @@ __all__ = [
     "PricingOutputPricingType",
     "PricingOutputSignalType",
     "PricingPricePointOutput",
-    "PricingPricePointOutputTiersItem",
-    "PricingPricePointOutputTiersItemTierBillingType",
     "PricingResponse",
+    "PricingTierOutput",
+    "PricingTierOutputTierBillingType",
     "Product",
     "ProductAttributeOutput",
     "ProductAttributeUpsert",
@@ -1185,8 +1712,6 @@ __all__ = [
     "ProductOneTimePerUnitInputBillingType",
     "ProductOneTimePerUnitInputFeeType",
     "ProductPricePointOutput",
-    "ProductPricePointOutputTiersItem",
-    "ProductPricePointOutputTiersItemTierBillingType",
     "ProductPricingInput",
     "ProductPricingInput_OneTimePerUnit",
     "ProductPricingInput_RecurringGraduated",
@@ -1206,6 +1731,8 @@ __all__ = [
     "ProductPricingOutput",
     "ProductPricingOutputPricingType",
     "ProductPricingOutputSignalType",
+    "ProductPricingTierOutput",
+    "ProductPricingTierOutputTierBillingType",
     "ProductRecurringGraduatedInput",
     "ProductRecurringGraduatedInputBillingFrequency",
     "ProductRecurringGraduatedInputBillingType",
@@ -1258,6 +1785,8 @@ __all__ = [
     "ProductUsagePrepaidCreditsInput",
     "ProductUsagePrepaidCreditsInputBillingFrequency",
     "ProductUsagePrepaidCreditsInputBillingType",
+    "ProductUsagePrepaidCreditsInputPricingInput",
+    "ProductUsagePrepaidCreditsInputPricingInputKind",
     "ProductUsagePrepaidCreditsInputSignalType",
     "ProductUsageVolumeInput",
     "ProductUsageVolumeInputBillingFrequency",
@@ -1276,6 +1805,7 @@ __all__ = [
     "RecurringVolumeInputBillingFrequency",
     "RecurringVolumeInputBillingType",
     "RemoveMembersResponse",
+    "RenderBundleEdit",
     "RotateWebhookSecretResponse",
     "SeatAssignee",
     "SeatAssignmentStatus",
@@ -1293,6 +1823,8 @@ __all__ = [
     "SeatBasedVolumeInputBillingType",
     "SetMembersResponse",
     "Signal",
+    "SignalListItem",
+    "SignalListResponse",
     "SignalsMetadataResponse",
     "SignalsMetadataResponseMeta",
     "SignalsMetadataResponseSignalsItem",
@@ -1302,16 +1834,38 @@ __all__ = [
     "SimplePricePointTiersItemTierBillingType",
     "StripeConnection",
     "SuccessResponse",
+    "SyncValueReceiptRequest",
+    "SyncValueReceiptRequestProduct",
     "TieredPricePoint",
     "TieredPricePointTiersItem",
     "TieredPricePointTiersItemTierBillingType",
     "TokenUsage",
+    "UnifiedAmendmentIntent",
+    "UnifiedAmendmentIntent_AddAttribute",
+    "UnifiedAmendmentIntent_AddFromCatalog",
+    "UnifiedAmendmentIntent_EndAttribute",
+    "UnifiedAmendmentIntent_UpdateLineTerm",
+    "UnifiedAmendmentIntent_UpdateOrderTerm",
+    "UnifiedAmendmentIntent_UpdatePricing",
+    "UnifiedAmendmentIntent_UpdateQuantity",
+    "UnifiedAmendmentResponse",
     "UpdateContactRequest",
     "UpdateContactRequestRolesItem",
     "UpdateCustomerRequest",
+    "UpdateLineTermIntent",
+    "UpdateLineTermIntentTreatment",
+    "UpdateOrderTermIntent",
+    "UpdateOrderTermIntentTreatment",
     "UpdatePlanRequest",
     "UpdatePlanRequestStatus",
+    "UpdatePricingIntent",
+    "UpdatePricingIntentTreatment",
     "UpdateProductRequest",
+    "UpdateQuantityIntent",
+    "UpdateQuantityIntentTreatment",
+    "UsageAttributionAxisOptions",
+    "UsageAttributionAxisOptionsOptionsItem",
+    "UsageAttributionAxisValue",
     "UsageBracketedPrepaidCreditsInput",
     "UsageBracketedPrepaidCreditsInputBillingFrequency",
     "UsageBracketedPrepaidCreditsInputBillingType",
@@ -1335,11 +1889,46 @@ __all__ = [
     "UsagePrepaidCreditsInput",
     "UsagePrepaidCreditsInputBillingFrequency",
     "UsagePrepaidCreditsInputBillingType",
+    "UsagePrepaidCreditsInputPricingInput",
+    "UsagePrepaidCreditsInputPricingInputKind",
     "UsagePrepaidCreditsInputSignalType",
     "UsageVolumeInput",
     "UsageVolumeInputBillingFrequency",
     "UsageVolumeInputBillingType",
     "UsageVolumeInputSignalType",
+    "ValidateCustomViewRequest",
+    "ValidateCustomViewRequestPeriod",
+    "ValidateCustomViewRequestPeriodKind",
+    "ValidateCustomViewRequestPeriodUnit",
+    "ValidateCustomViewRequestScope",
+    "ValidateCustomViewResponse",
+    "ValueMetricDetail",
+    "ValueMetricDetailFormula",
+    "ValueMetricDetailMonetaryConversion",
+    "ValueMetricDetailMonetaryConversionVariablesItem",
+    "ValueMetricDetailSourcesItem",
+    "ValueMetricFormula",
+    "ValueMetricFormulaVariable",
+    "ValueMetricFormulaVariableFormat",
+    "ValueMetricFormulaVariableFormatUnit",
+    "ValueMetricFormulaVariableType",
+    "ValueMetricListResponse",
+    "ValueMetricMonetaryConversion",
+    "ValueMetricSignalBinding",
+    "ValueMetricSummary",
+    "ValueMetricSummaryMonetaryConversion",
+    "ValueMetricSummaryMonetaryConversionVariablesItem",
+    "ValueMetricUnit",
+    "ValueMetricUnitDurationUnit",
+    "ValueMetricUnitType",
+    "ValueMetricValidationResponse",
+    "ValueMetricValidationResponseErrorsItem",
+    "ValueMetricVariableEdit",
+    "ValueMetricVariableEditFormat",
+    "ValueMetricVariableEditFormatUnit",
+    "ValueMetricWriteAck",
+    "ValueModelAuthoringGuide",
+    "ValueModelAuthoringGuideExamplesItem",
     "ValueModelContent",
     "ValueModelContentFormulasItem",
     "ValueModelContentFormulasItemConditionsItem",
@@ -1352,6 +1941,8 @@ __all__ = [
     "ValueModelContentFormulasItemVariablesItem",
     "ValueModelContentFormulasItemVariablesItemDerivedFrom",
     "ValueModelContentFormulasItemVariablesItemDerivedFromTargetUnit",
+    "ValueModelContentFormulasItemVariablesItemFormat",
+    "ValueModelContentFormulasItemVariablesItemFormatUnit",
     "ValueModelContentFormulasItemVariablesItemType",
     "ValueModelContentOverridesItem",
     "ValueModelContentOverridesItemAdditionalSignalsItem",
@@ -1360,6 +1951,8 @@ __all__ = [
     "ValueModelContentOverridesItemScope",
     "ValueModelContentOverridesItemSignalOverridesValue",
     "ValueModelContentOverridesItemSignalOverridesValueDefaultsValue",
+    "ValueModelContentOverridesItemValueTypeOverridesValue",
+    "ValueModelContentOverridesItemValueTypeOverridesValueVariablesValue",
     "ValueModelContentSegmentTablesItem",
     "ValueModelContentSegmentTablesItemColumnsItem",
     "ValueModelContentSegmentTablesItemColumnsItemType",
@@ -1367,21 +1960,25 @@ __all__ = [
     "ValueModelContentSignalsItem",
     "ValueModelContentSignalsItemDefaultsValue",
     "ValueModelContentValueTypesItem",
-    "ValueModelContentValueTypesItemMonetaryConversion",
-    "ValueModelContentValueTypesItemMonetaryConversionConditionsItem",
-    "ValueModelContentValueTypesItemMonetaryConversionConditionsItemOperator",
-    "ValueModelContentValueTypesItemMonetaryConversionConditionsItemResult",
-    "ValueModelContentValueTypesItemMonetaryConversionConditionsItemResultType",
-    "ValueModelContentValueTypesItemMonetaryConversionConditionsItemValue",
-    "ValueModelContentValueTypesItemMonetaryConversionVariablesItem",
-    "ValueModelContentValueTypesItemUnit",
-    "ValueModelContentValueTypesItemUnitDurationUnit",
-    "ValueModelContentValueTypesItemUnitDurationUnitDurationUnit",
-    "ValueModelContentValueTypesItemUnitDurationUnitType",
-    "ValueModelContentValueTypesItemUnitType",
-    "ValueModelContentValueTypesItemUnitTypeType",
-    "ValueModelContentValueTypesItemUnitZero",
-    "ValueModelContentValueTypesItemUnitZeroType",
+    "ValueModelContentValueTypesItemCalculationTimelineItem",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculation",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversion",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItem",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItemOperator",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItemResult",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItemResultType",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionConditionsItemValue",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationMonetaryConversionVariablesItem",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnit",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitDurationUnit",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitDurationUnitDurationUnit",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitDurationUnitType",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitType",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitTypeType",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZero",
+    "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZeroType",
+    "ValueModelContentValueTypesItemCategory",
+    "ValueModelContentValueTypesItemSourcesItem",
     "ValueModelDetail",
     "ValueModelSummary",
     "ValueModelSummaryStatus",

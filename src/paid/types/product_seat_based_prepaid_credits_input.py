@@ -18,7 +18,9 @@ class ProductSeatBasedPrepaidCreditsInput(UniversalBaseModel):
         str, FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ]
     credit_cost: typing_extensions.Annotated[
-        float, FieldMetadata(alias="creditCost"), pydantic.Field(alias="creditCost")
+        float,
+        FieldMetadata(alias="creditCost"),
+        pydantic.Field(alias="creditCost", description="Credit amount, exact to at most 6 decimal places."),
     ]
     unit_value: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="unitValue"), pydantic.Field(alias="unitValue")

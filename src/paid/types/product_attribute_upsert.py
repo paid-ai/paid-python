@@ -22,6 +22,9 @@ class ProductAttributeUpsert(UniversalBaseModel):
         FieldMetadata(alias="creditBenefits"),
         pydantic.Field(alias="creditBenefits"),
     ] = None
+    tax_code: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="taxCode"), pydantic.Field(alias="taxCode")
+    ] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

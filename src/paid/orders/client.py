@@ -18,6 +18,8 @@ from ..types.order_seat_list_response import OrderSeatListResponse
 from .raw_client import AsyncRawOrdersClient, RawOrdersClient
 from .types.batch_seat_assignments_request_assignments_item import BatchSeatAssignmentsRequestAssignmentsItem
 from .types.list_order_seats_request_status import ListOrderSeatsRequestStatus
+from .types.list_orders_request_creation_state import ListOrdersRequestCreationState
+from .types.order_status_filter import OrderStatusFilter
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -43,6 +45,15 @@ class OrdersClient:
         *,
         limit: typing.Optional[int] = None,
         offset: typing.Optional[int] = None,
+        customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        external_id: typing.Optional[str] = None,
+        creation_state: typing.Optional[ListOrdersRequestCreationState] = None,
+        status: typing.Optional[OrderStatusFilter] = None,
+        start_date_from: typing.Optional[str] = None,
+        start_date_to: typing.Optional[str] = None,
+        end_date_from: typing.Optional[str] = None,
+        end_date_to: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> OrderListResponse:
         """
@@ -53,6 +64,33 @@ class OrdersClient:
         limit : typing.Optional[int]
 
         offset : typing.Optional[int]
+
+        customer_id : typing.Optional[str]
+            Filter by customer ID.
+
+        external_customer_id : typing.Optional[str]
+            Filter by customer external ID.
+
+        external_id : typing.Optional[str]
+            Filter by the order's external ID (exact match).
+
+        creation_state : typing.Optional[ListOrdersRequestCreationState]
+            Filter by creation state: draft or active.
+
+        status : typing.Optional[OrderStatusFilter]
+            Filter by derived order status. draft: not yet activated. paused: billing is paused. ended: end date is in the past. active: activated, not paused, and not ended.
+
+        start_date_from : typing.Optional[str]
+            Only orders whose start date is on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        start_date_to : typing.Optional[str]
+            Only orders whose start date is on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        end_date_from : typing.Optional[str]
+            Only orders whose end date is on or after this date. Orders without an end date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        end_date_to : typing.Optional[str]
+            Only orders whose end date is on or before this date. Orders without an end date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -71,7 +109,20 @@ class OrdersClient:
         )
         client.orders.list_orders()
         """
-        _response = self._raw_client.list_orders(limit=limit, offset=offset, request_options=request_options)
+        _response = self._raw_client.list_orders(
+            limit=limit,
+            offset=offset,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            external_id=external_id,
+            creation_state=creation_state,
+            status=status,
+            start_date_from=start_date_from,
+            start_date_to=start_date_to,
+            end_date_from=end_date_from,
+            end_date_to=end_date_to,
+            request_options=request_options,
+        )
         return _response.data
 
     def create_order(
@@ -582,6 +633,15 @@ class AsyncOrdersClient:
         *,
         limit: typing.Optional[int] = None,
         offset: typing.Optional[int] = None,
+        customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        external_id: typing.Optional[str] = None,
+        creation_state: typing.Optional[ListOrdersRequestCreationState] = None,
+        status: typing.Optional[OrderStatusFilter] = None,
+        start_date_from: typing.Optional[str] = None,
+        start_date_to: typing.Optional[str] = None,
+        end_date_from: typing.Optional[str] = None,
+        end_date_to: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> OrderListResponse:
         """
@@ -592,6 +652,33 @@ class AsyncOrdersClient:
         limit : typing.Optional[int]
 
         offset : typing.Optional[int]
+
+        customer_id : typing.Optional[str]
+            Filter by customer ID.
+
+        external_customer_id : typing.Optional[str]
+            Filter by customer external ID.
+
+        external_id : typing.Optional[str]
+            Filter by the order's external ID (exact match).
+
+        creation_state : typing.Optional[ListOrdersRequestCreationState]
+            Filter by creation state: draft or active.
+
+        status : typing.Optional[OrderStatusFilter]
+            Filter by derived order status. draft: not yet activated. paused: billing is paused. ended: end date is in the past. active: activated, not paused, and not ended.
+
+        start_date_from : typing.Optional[str]
+            Only orders whose start date is on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        start_date_to : typing.Optional[str]
+            Only orders whose start date is on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        end_date_from : typing.Optional[str]
+            Only orders whose end date is on or after this date. Orders without an end date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        end_date_to : typing.Optional[str]
+            Only orders whose end date is on or before this date. Orders without an end date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -618,7 +705,20 @@ class AsyncOrdersClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_orders(limit=limit, offset=offset, request_options=request_options)
+        _response = await self._raw_client.list_orders(
+            limit=limit,
+            offset=offset,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            external_id=external_id,
+            creation_state=creation_state,
+            status=status,
+            start_date_from=start_date_from,
+            start_date_to=start_date_to,
+            end_date_from=end_date_from,
+            end_date_to=end_date_to,
+            request_options=request_options,
+        )
         return _response.data
 
     async def create_order(

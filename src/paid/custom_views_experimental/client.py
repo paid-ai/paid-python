@@ -7,11 +7,14 @@ from ..core.request_options import RequestOptions
 from ..types.custom_view import CustomView
 from ..types.custom_view_detail import CustomViewDetail
 from ..types.custom_view_embed_token_response import CustomViewEmbedTokenResponse
+from ..types.custom_view_filter import CustomViewFilter
 from ..types.custom_view_list_response import CustomViewListResponse
 from ..types.custom_view_query import CustomViewQuery
+from ..types.render_bundle_edit import RenderBundleEdit
 from ..types.view_data_response import ViewDataResponse
 from .raw_client import AsyncRawCustomViewsExperimentalClient, RawCustomViewsExperimentalClient
 from .types.create_custom_view_request_period import CreateCustomViewRequestPeriod
+from .types.create_custom_view_request_scope import CreateCustomViewRequestScope
 from .types.get_custom_view_data_request_period_kind import GetCustomViewDataRequestPeriodKind
 from .types.get_custom_view_data_request_period_unit import GetCustomViewDataRequestPeriodUnit
 from .types.update_custom_view_period_request_period import UpdateCustomViewPeriodRequestPeriod
@@ -71,12 +74,14 @@ class CustomViewsExperimentalClient:
         render_bundle: str,
         description: typing.Optional[str] = OMIT,
         period: typing.Optional[CreateCustomViewRequestPeriod] = OMIT,
+        filters: typing.Optional[typing.Sequence[CustomViewFilter]] = OMIT,
+        scope: typing.Optional[CreateCustomViewRequestScope] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CustomView:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        ⚠️ Only call this when the user has EXPLICITLY asked to save, create, or publish the view. After generating or previewing a dashboard, do NOT automatically save a draft — show it to the user and wait for them to ask you to save it. Saves named analytics queries + a self-contained HTML render bundle as a DRAFT custom view. **Call getCustomViewAuthoringGuide (GET /experimental/views/authoring-guide) first** — it returns the full guide and a copy-paste interactive template. Key rules: (1) Do NOT add a customer filter to the SQL — the database scopes every query to the viewing customer at embed time. (2) Each query's SQL must be SELECT-only; return clearly-named columns. Compute metric VALUES in SQL (e.g. (count()*2)/5 AS custom_metric) — derive a number in the render bundle only when it depends on user interaction (toggle/filter/hover) or is pure formatting of a value a query already returns. (3) The render bundle must be SELF-CONTAINED — inline all CSS/JS/charting, NO external loads or fetch (the sandbox has connect-src 'none'); it must listen for the `paid:data` message (data keyed by query id) and re-render on each one. (4) Make it INTERACTIVE — mousemove hover tooltips and at least one addEventListener-wired control that re-renders (a static chart feels broken). (5) The render bundle is the single source of truth — preview the EXACT bundle you save (call getCustomViewPreviewHarness with your bundle + sample data and render the HTML it returns) or review it in the Paid preview; do NOT build a separate chart, and only show numbers that come from a declared query. (6) A view is a FULL dashboard — include as many charts/KPIs as the analysis has. Keep every element derived from the single viewing customer (KPIs, trends, type mix); drop only cross-customer comparisons (rankings, share-of-total, 'N customers'). Don't simplify to one chart. (7) To make the date range adjustable (e.g. the user says 'last month'), write the date boundary as `{period_start:DateTime}` / `{period_end:DateTime}` placeholders in the SQL and pass a default `period` (relative like {kind:'relative',unit:'month',amount:1}, or absolute start/end). The org user can then change it in Paid without re-authoring. A query using the placeholders REQUIRES a period. Do NOT add your own date-range picker to the render bundle — Paid owns the timeframe and the bundle receives already-filtered data; a second in-bundle picker cannot re-run the SQL. The response returns a `previewUrl` — give it to the user so they can open the new view in Paid.
+        ⚠️ Only call this when the user has EXPLICITLY asked to save or create the view. After generating or previewing a dashboard, do NOT automatically save it — show it to the user and wait for them to ask you to save it. A customer-scoped view is created as a DRAFT — creating it is NOT permission to publish; never chain a publish onto a create. An organization-scoped view is created already PUBLISHED instead: it has no draft state and no publish step at all (never call publishCustomView on one — it's a no-op, and unpublishView refuses it outright). After saving, hand the user the previewUrl and wait for their feedback before doing anything else. Saves named analytics queries + a self-contained HTML render bundle. **Call getCustomViewAuthoringGuide (GET /experimental/views/authoring-guide) first** — it returns the full guide and a copy-paste interactive template. Key rules: (1) Do NOT add a customer filter to the SQL — the database scopes every query to the viewing customer at embed time. (2) Each query's SQL must be SELECT-only; return clearly-named columns. Compute metric VALUES in SQL (e.g. (count()*2)/5 AS custom_metric) — derive a number in the render bundle only when it depends on user interaction (toggle/filter/hover) or is pure formatting of a value a query already returns. (3) The render bundle must be SELF-CONTAINED — inline all CSS/JS/charting, NO external loads or fetch (the sandbox has connect-src 'none'); it must listen for the `paid:data` message (data keyed by query id) and re-render on each one. (4) Make it INTERACTIVE — mousemove hover tooltips and at least one addEventListener-wired control that re-renders (a static chart feels broken). (5) The render bundle is the single source of truth — BEFORE saving, preview the EXACT bundle in the user's current client (call getCustomViewPreviewHarness with your bundle + sample data and render the HTML it returns) and show it to the user; that preview in the current client is how the user first sees the dashboard. Do NOT save a draft just to preview it in Paid — creating writes to the user's real account and is never a preview step. Do NOT build a separate chart, and only show numbers that come from a declared query. (6) A view is a FULL dashboard — include as many charts/KPIs as the analysis has. Keep every element derived from the single viewing customer (KPIs, trends, type mix); drop only cross-customer comparisons (rankings, share-of-total, 'N customers'). Don't simplify to one chart. (7) To make the date range adjustable (e.g. the user says 'last month'), write the date boundary as `{period_start:DateTime}` / `{period_end:DateTime}` placeholders in the SQL and pass a default `period` (relative like {kind:'relative',unit:'month',amount:1}, or absolute start/end). The org user can then change it in Paid without re-authoring. A query using the placeholders REQUIRES a period. Do NOT add your own date-range picker to the render bundle — Paid owns the timeframe and the bundle receives already-filtered data; a second in-bundle picker cannot re-run the SQL. (8) Check your draft with validateCustomView (POST /experimental/views/validate) BEFORE asking the user to save — it runs these same gates without persisting and reports every problem at once. The response returns a `previewUrl` — give it to the user so they can open the new view in Paid.
 
         Parameters
         ----------
@@ -94,6 +99,12 @@ class CustomViewsExperimentalClient:
 
         period : typing.Optional[CreateCustomViewRequestPeriod]
             Optional default date range. Required if any query uses the `{period_start:DateTime}` / `{period_end:DateTime}` placeholders. Can be changed later in Paid without re-authoring.
+
+        filters : typing.Optional[typing.Sequence[CustomViewFilter]]
+            Optional per-request filter parameters. Required for every {filter_<name>:String} placeholder the queries reference.
+
+        scope : typing.Optional[CreateCustomViewRequestScope]
+            'customer' (default): data is scoped to one viewing customer and the view is embeddable per-customer. 'organization': data is org-wide; the view is internal-only (visible to org members in Paid, never embeddable).
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -127,6 +138,8 @@ class CustomViewsExperimentalClient:
             render_bundle=render_bundle,
             description=description,
             period=period,
+            filters=filters,
+            scope=scope,
             request_options=request_options,
         )
         return _response.data
@@ -137,7 +150,7 @@ class CustomViewsExperimentalClient:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        Flips the view from DRAFT to PUBLISHED. Only PUBLISHED views are served on the embed data path — this is the gate that stops an unreviewed view reaching end-customers. Idempotent: publishing an already-published view is a no-op success. The response returns a `previewUrl` — give it to the user so they can open the view in Paid.
+        ⚠️ Never publish as an automatic follow-up to creating or generating a view. Only call this after you have shown the user the built/previewed view and they have EXPLICITLY approved publishing — building and publishing are separate user decisions, and answering an earlier question (e.g. the view's scope) is NOT publish approval. Flips the view from DRAFT to PUBLISHED. Only PUBLISHED views are served on the embed data path — this is the gate that stops an unreviewed view reaching end-customers. Idempotent: publishing an already-published view is a no-op success. The response returns a `previewUrl` — give it to the user so they can open the view in Paid.
 
         Parameters
         ----------
@@ -254,12 +267,16 @@ class CustomViewsExperimentalClient:
         description: typing.Optional[str] = OMIT,
         queries: typing.Optional[typing.Sequence[CustomViewQuery]] = OMIT,
         render_bundle: typing.Optional[str] = OMIT,
+        bundle_edits: typing.Optional[typing.Sequence[RenderBundleEdit]] = OMIT,
+        query_upserts: typing.Optional[typing.Sequence[CustomViewQuery]] = OMIT,
+        query_removals: typing.Optional[typing.Sequence[str]] = OMIT,
+        filters: typing.Optional[typing.Sequence[CustomViewFilter]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CustomView:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        Partially updates a view's name, description, queries, or render bundle. Omitted fields are left unchanged; `queries` is a FULL replacement of the query list. Updated SQL and bundles pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load.
+        Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — `bundleEdits` (exact search-and-replace on the stored render bundle) and `queryUpserts`/`queryRemovals` (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: `renderBundle`, and `queries` (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load.
 
         Parameters
         ----------
@@ -272,10 +289,22 @@ class CustomViewsExperimentalClient:
             New description; pass null to clear it.
 
         queries : typing.Optional[typing.Sequence[CustomViewQuery]]
-            Full replacement of the view's query list. Each SQL is re-validated (SELECT-only) exactly like createCustomView.
+            Full replacement of the view's query list. Each SQL is re-validated (SELECT-only) exactly like createCustomView. For changing one or two queries, prefer `queryUpserts`/`queryRemovals` instead. Cannot be combined with them.
 
         render_bundle : typing.Optional[str]
-            Replacement render bundle. Re-validated (size cap, self-contained, paid:data listener) exactly like createCustomView.
+            Replacement render bundle. Re-validated (size cap, self-contained, paid:data listener) exactly like createCustomView. For small changes, prefer `bundleEdits` instead. Cannot be combined with `bundleEdits`.
+
+        bundle_edits : typing.Optional[typing.Sequence[RenderBundleEdit]]
+            PREFERRED for revisions: exact search-and-replace edits applied in order to the stored render bundle, so you send only the changed text instead of re-transmitting the whole bundle. The edited result passes the same validation as a full replacement. Cannot be combined with `renderBundle`.
+
+        query_upserts : typing.Optional[typing.Sequence[CustomViewQuery]]
+            PREFERRED for revisions: per-query changes — each entry replaces the stored query with the same id, or is appended as a new query. Queries not mentioned are left unchanged. Cannot be combined with `queries`.
+
+        query_removals : typing.Optional[typing.Sequence[str]]
+            Ids of stored queries to remove (applied before `queryUpserts`). Rejected if an id does not exist. Cannot be combined with `queries`.
+
+        filters : typing.Optional[typing.Sequence[CustomViewFilter]]
+            Full replacement of the view's declared filter parameters; pass null to remove them all. Every {filter_<name>:String} placeholder the (resulting) queries reference must stay declared.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -302,6 +331,10 @@ class CustomViewsExperimentalClient:
             description=description,
             queries=queries,
             render_bundle=render_bundle,
+            bundle_edits=bundle_edits,
+            query_upserts=query_upserts,
+            query_removals=query_removals,
+            filters=filters,
             request_options=request_options,
         )
         return _response.data
@@ -310,7 +343,7 @@ class CustomViewsExperimentalClient:
         self,
         display_id: str,
         *,
-        customer_id: str,
+        customer_id: typing.Optional[str] = None,
         period_kind: typing.Optional[GetCustomViewDataRequestPeriodKind] = None,
         period_unit: typing.Optional[GetCustomViewDataRequestPeriodUnit] = None,
         period_amount: typing.Optional[int] = None,
@@ -321,14 +354,14 @@ class CustomViewsExperimentalClient:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        Runs every stored query of the view on the read-only analytics database, scoped to the caller's organization AND the given customer (both enforced as ClickHouse row filters), and returns the result sets keyed by query id. The customer scope is enforced by the database — it cannot be widened by the stored SQL.
+        Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given `customerId` (both enforced as ClickHouse row filters) — `customerId` is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and `customerId` is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as `filter_<name>` query parameters (e.g. `filter_region=eu`); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it.
 
         Parameters
         ----------
         display_id : str
 
-        customer_id : str
-            Customer to scope the data to (dev/preview only; the embed derives this from the verified token).
+        customer_id : typing.Optional[str]
+            Customer to scope the data to (dev/preview only; the embed derives this from the verified token). Required for customer-scoped views; ignored for organization-scoped views (their data is org-wide).
 
         period_kind : typing.Optional[GetCustomViewDataRequestPeriodKind]
             Override the view's default date range for this request only. 'relative' = rolling window (set periodUnit + periodAmount); 'absolute' = fixed range (set periodStart + periodEnd).
@@ -362,7 +395,6 @@ class CustomViewsExperimentalClient:
         )
         client.custom_views_experimental.get_custom_view_data(
             display_id="displayId",
-            customer_id="customerId",
         )
         """
         _response = self._raw_client.get_custom_view_data(
@@ -388,7 +420,7 @@ class CustomViewsExperimentalClient:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        Mints a short-lived, customer-scoped token for embedding a published custom view. Call this from your server with your API key, then pass the returned token to the embed SDK.
+        Mints a short-lived, customer-scoped token for embedding a published custom view. Call this from your server with your API key, then pass the returned token to the embed SDK. Organization-scoped views cannot be embedded per-customer — this returns a 400 (`ORG_SCOPED_VIEW_NOT_EMBEDDABLE`) for one.
 
         Parameters
         ----------
@@ -487,12 +519,14 @@ class AsyncCustomViewsExperimentalClient:
         render_bundle: str,
         description: typing.Optional[str] = OMIT,
         period: typing.Optional[CreateCustomViewRequestPeriod] = OMIT,
+        filters: typing.Optional[typing.Sequence[CustomViewFilter]] = OMIT,
+        scope: typing.Optional[CreateCustomViewRequestScope] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CustomView:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        ⚠️ Only call this when the user has EXPLICITLY asked to save, create, or publish the view. After generating or previewing a dashboard, do NOT automatically save a draft — show it to the user and wait for them to ask you to save it. Saves named analytics queries + a self-contained HTML render bundle as a DRAFT custom view. **Call getCustomViewAuthoringGuide (GET /experimental/views/authoring-guide) first** — it returns the full guide and a copy-paste interactive template. Key rules: (1) Do NOT add a customer filter to the SQL — the database scopes every query to the viewing customer at embed time. (2) Each query's SQL must be SELECT-only; return clearly-named columns. Compute metric VALUES in SQL (e.g. (count()*2)/5 AS custom_metric) — derive a number in the render bundle only when it depends on user interaction (toggle/filter/hover) or is pure formatting of a value a query already returns. (3) The render bundle must be SELF-CONTAINED — inline all CSS/JS/charting, NO external loads or fetch (the sandbox has connect-src 'none'); it must listen for the `paid:data` message (data keyed by query id) and re-render on each one. (4) Make it INTERACTIVE — mousemove hover tooltips and at least one addEventListener-wired control that re-renders (a static chart feels broken). (5) The render bundle is the single source of truth — preview the EXACT bundle you save (call getCustomViewPreviewHarness with your bundle + sample data and render the HTML it returns) or review it in the Paid preview; do NOT build a separate chart, and only show numbers that come from a declared query. (6) A view is a FULL dashboard — include as many charts/KPIs as the analysis has. Keep every element derived from the single viewing customer (KPIs, trends, type mix); drop only cross-customer comparisons (rankings, share-of-total, 'N customers'). Don't simplify to one chart. (7) To make the date range adjustable (e.g. the user says 'last month'), write the date boundary as `{period_start:DateTime}` / `{period_end:DateTime}` placeholders in the SQL and pass a default `period` (relative like {kind:'relative',unit:'month',amount:1}, or absolute start/end). The org user can then change it in Paid without re-authoring. A query using the placeholders REQUIRES a period. Do NOT add your own date-range picker to the render bundle — Paid owns the timeframe and the bundle receives already-filtered data; a second in-bundle picker cannot re-run the SQL. The response returns a `previewUrl` — give it to the user so they can open the new view in Paid.
+        ⚠️ Only call this when the user has EXPLICITLY asked to save or create the view. After generating or previewing a dashboard, do NOT automatically save it — show it to the user and wait for them to ask you to save it. A customer-scoped view is created as a DRAFT — creating it is NOT permission to publish; never chain a publish onto a create. An organization-scoped view is created already PUBLISHED instead: it has no draft state and no publish step at all (never call publishCustomView on one — it's a no-op, and unpublishView refuses it outright). After saving, hand the user the previewUrl and wait for their feedback before doing anything else. Saves named analytics queries + a self-contained HTML render bundle. **Call getCustomViewAuthoringGuide (GET /experimental/views/authoring-guide) first** — it returns the full guide and a copy-paste interactive template. Key rules: (1) Do NOT add a customer filter to the SQL — the database scopes every query to the viewing customer at embed time. (2) Each query's SQL must be SELECT-only; return clearly-named columns. Compute metric VALUES in SQL (e.g. (count()*2)/5 AS custom_metric) — derive a number in the render bundle only when it depends on user interaction (toggle/filter/hover) or is pure formatting of a value a query already returns. (3) The render bundle must be SELF-CONTAINED — inline all CSS/JS/charting, NO external loads or fetch (the sandbox has connect-src 'none'); it must listen for the `paid:data` message (data keyed by query id) and re-render on each one. (4) Make it INTERACTIVE — mousemove hover tooltips and at least one addEventListener-wired control that re-renders (a static chart feels broken). (5) The render bundle is the single source of truth — BEFORE saving, preview the EXACT bundle in the user's current client (call getCustomViewPreviewHarness with your bundle + sample data and render the HTML it returns) and show it to the user; that preview in the current client is how the user first sees the dashboard. Do NOT save a draft just to preview it in Paid — creating writes to the user's real account and is never a preview step. Do NOT build a separate chart, and only show numbers that come from a declared query. (6) A view is a FULL dashboard — include as many charts/KPIs as the analysis has. Keep every element derived from the single viewing customer (KPIs, trends, type mix); drop only cross-customer comparisons (rankings, share-of-total, 'N customers'). Don't simplify to one chart. (7) To make the date range adjustable (e.g. the user says 'last month'), write the date boundary as `{period_start:DateTime}` / `{period_end:DateTime}` placeholders in the SQL and pass a default `period` (relative like {kind:'relative',unit:'month',amount:1}, or absolute start/end). The org user can then change it in Paid without re-authoring. A query using the placeholders REQUIRES a period. Do NOT add your own date-range picker to the render bundle — Paid owns the timeframe and the bundle receives already-filtered data; a second in-bundle picker cannot re-run the SQL. (8) Check your draft with validateCustomView (POST /experimental/views/validate) BEFORE asking the user to save — it runs these same gates without persisting and reports every problem at once. The response returns a `previewUrl` — give it to the user so they can open the new view in Paid.
 
         Parameters
         ----------
@@ -510,6 +544,12 @@ class AsyncCustomViewsExperimentalClient:
 
         period : typing.Optional[CreateCustomViewRequestPeriod]
             Optional default date range. Required if any query uses the `{period_start:DateTime}` / `{period_end:DateTime}` placeholders. Can be changed later in Paid without re-authoring.
+
+        filters : typing.Optional[typing.Sequence[CustomViewFilter]]
+            Optional per-request filter parameters. Required for every {filter_<name>:String} placeholder the queries reference.
+
+        scope : typing.Optional[CreateCustomViewRequestScope]
+            'customer' (default): data is scoped to one viewing customer and the view is embeddable per-customer. 'organization': data is org-wide; the view is internal-only (visible to org members in Paid, never embeddable).
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -551,6 +591,8 @@ class AsyncCustomViewsExperimentalClient:
             render_bundle=render_bundle,
             description=description,
             period=period,
+            filters=filters,
+            scope=scope,
             request_options=request_options,
         )
         return _response.data
@@ -561,7 +603,7 @@ class AsyncCustomViewsExperimentalClient:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        Flips the view from DRAFT to PUBLISHED. Only PUBLISHED views are served on the embed data path — this is the gate that stops an unreviewed view reaching end-customers. Idempotent: publishing an already-published view is a no-op success. The response returns a `previewUrl` — give it to the user so they can open the view in Paid.
+        ⚠️ Never publish as an automatic follow-up to creating or generating a view. Only call this after you have shown the user the built/previewed view and they have EXPLICITLY approved publishing — building and publishing are separate user decisions, and answering an earlier question (e.g. the view's scope) is NOT publish approval. Flips the view from DRAFT to PUBLISHED. Only PUBLISHED views are served on the embed data path — this is the gate that stops an unreviewed view reaching end-customers. Idempotent: publishing an already-published view is a no-op success. The response returns a `previewUrl` — give it to the user so they can open the view in Paid.
 
         Parameters
         ----------
@@ -702,12 +744,16 @@ class AsyncCustomViewsExperimentalClient:
         description: typing.Optional[str] = OMIT,
         queries: typing.Optional[typing.Sequence[CustomViewQuery]] = OMIT,
         render_bundle: typing.Optional[str] = OMIT,
+        bundle_edits: typing.Optional[typing.Sequence[RenderBundleEdit]] = OMIT,
+        query_upserts: typing.Optional[typing.Sequence[CustomViewQuery]] = OMIT,
+        query_removals: typing.Optional[typing.Sequence[str]] = OMIT,
+        filters: typing.Optional[typing.Sequence[CustomViewFilter]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CustomView:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        Partially updates a view's name, description, queries, or render bundle. Omitted fields are left unchanged; `queries` is a FULL replacement of the query list. Updated SQL and bundles pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load.
+        Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — `bundleEdits` (exact search-and-replace on the stored render bundle) and `queryUpserts`/`queryRemovals` (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: `renderBundle`, and `queries` (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load.
 
         Parameters
         ----------
@@ -720,10 +766,22 @@ class AsyncCustomViewsExperimentalClient:
             New description; pass null to clear it.
 
         queries : typing.Optional[typing.Sequence[CustomViewQuery]]
-            Full replacement of the view's query list. Each SQL is re-validated (SELECT-only) exactly like createCustomView.
+            Full replacement of the view's query list. Each SQL is re-validated (SELECT-only) exactly like createCustomView. For changing one or two queries, prefer `queryUpserts`/`queryRemovals` instead. Cannot be combined with them.
 
         render_bundle : typing.Optional[str]
-            Replacement render bundle. Re-validated (size cap, self-contained, paid:data listener) exactly like createCustomView.
+            Replacement render bundle. Re-validated (size cap, self-contained, paid:data listener) exactly like createCustomView. For small changes, prefer `bundleEdits` instead. Cannot be combined with `bundleEdits`.
+
+        bundle_edits : typing.Optional[typing.Sequence[RenderBundleEdit]]
+            PREFERRED for revisions: exact search-and-replace edits applied in order to the stored render bundle, so you send only the changed text instead of re-transmitting the whole bundle. The edited result passes the same validation as a full replacement. Cannot be combined with `renderBundle`.
+
+        query_upserts : typing.Optional[typing.Sequence[CustomViewQuery]]
+            PREFERRED for revisions: per-query changes — each entry replaces the stored query with the same id, or is appended as a new query. Queries not mentioned are left unchanged. Cannot be combined with `queries`.
+
+        query_removals : typing.Optional[typing.Sequence[str]]
+            Ids of stored queries to remove (applied before `queryUpserts`). Rejected if an id does not exist. Cannot be combined with `queries`.
+
+        filters : typing.Optional[typing.Sequence[CustomViewFilter]]
+            Full replacement of the view's declared filter parameters; pass null to remove them all. Every {filter_<name>:String} placeholder the (resulting) queries reference must stay declared.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -758,6 +816,10 @@ class AsyncCustomViewsExperimentalClient:
             description=description,
             queries=queries,
             render_bundle=render_bundle,
+            bundle_edits=bundle_edits,
+            query_upserts=query_upserts,
+            query_removals=query_removals,
+            filters=filters,
             request_options=request_options,
         )
         return _response.data
@@ -766,7 +828,7 @@ class AsyncCustomViewsExperimentalClient:
         self,
         display_id: str,
         *,
-        customer_id: str,
+        customer_id: typing.Optional[str] = None,
         period_kind: typing.Optional[GetCustomViewDataRequestPeriodKind] = None,
         period_unit: typing.Optional[GetCustomViewDataRequestPeriodUnit] = None,
         period_amount: typing.Optional[int] = None,
@@ -777,14 +839,14 @@ class AsyncCustomViewsExperimentalClient:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        Runs every stored query of the view on the read-only analytics database, scoped to the caller's organization AND the given customer (both enforced as ClickHouse row filters), and returns the result sets keyed by query id. The customer scope is enforced by the database — it cannot be widened by the stored SQL.
+        Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given `customerId` (both enforced as ClickHouse row filters) — `customerId` is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and `customerId` is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as `filter_<name>` query parameters (e.g. `filter_region=eu`); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it.
 
         Parameters
         ----------
         display_id : str
 
-        customer_id : str
-            Customer to scope the data to (dev/preview only; the embed derives this from the verified token).
+        customer_id : typing.Optional[str]
+            Customer to scope the data to (dev/preview only; the embed derives this from the verified token). Required for customer-scoped views; ignored for organization-scoped views (their data is org-wide).
 
         period_kind : typing.Optional[GetCustomViewDataRequestPeriodKind]
             Override the view's default date range for this request only. 'relative' = rolling window (set periodUnit + periodAmount); 'absolute' = fixed range (set periodStart + periodEnd).
@@ -823,7 +885,6 @@ class AsyncCustomViewsExperimentalClient:
         async def main() -> None:
             await client.custom_views_experimental.get_custom_view_data(
                 display_id="displayId",
-                customer_id="customerId",
             )
 
 
@@ -852,7 +913,7 @@ class AsyncCustomViewsExperimentalClient:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        Mints a short-lived, customer-scoped token for embedding a published custom view. Call this from your server with your API key, then pass the returned token to the embed SDK.
+        Mints a short-lived, customer-scoped token for embedding a published custom view. Call this from your server with your API key, then pass the returned token to the embed SDK. Organization-scoped views cannot be embedded per-customer — this returns a 400 (`ORG_SCOPED_VIEW_NOT_EMBEDDABLE`) for one.
 
         Parameters
         ----------

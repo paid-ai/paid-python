@@ -38,12 +38,12 @@ class ProductUsageBracketedPrepaidCreditsInput(UniversalBaseModel):
         typing.Optional[float], FieldMetadata(alias="unitValue"), pydantic.Field(alias="unitValue")
     ] = None
     overage_unit_price: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
+        typing.Optional[int], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
     ] = None
     credit_rollover_amount: typing_extensions.Annotated[
         typing.Optional[float],
         FieldMetadata(alias="creditRolloverAmount"),
-        pydantic.Field(alias="creditRolloverAmount"),
+        pydantic.Field(alias="creditRolloverAmount", description="Credit amount, exact to at most 6 decimal places."),
     ] = None
     pricing_input: typing_extensions.Annotated[
         ProductUsageBracketedPrepaidCreditsInputPricingInput,

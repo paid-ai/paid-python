@@ -10,9 +10,21 @@ from ..core.serialization import FieldMetadata
 
 
 class CreditGrant(UniversalBaseModel):
-    available: float
-    used: float
-    total: float
+    available: float = pydantic.Field()
+    """
+    JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+    """
+
+    used: float = pydantic.Field()
+    """
+    JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+    """
+
+    total: float = pydantic.Field()
+    """
+    JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+    """
+
     rollover_amount: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="rolloverAmount"), pydantic.Field(alias="rolloverAmount")
     ] = None

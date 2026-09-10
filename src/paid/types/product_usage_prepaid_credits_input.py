@@ -9,6 +9,7 @@ from ..core.serialization import FieldMetadata
 from .product_simple_price_point import ProductSimplePricePoint
 from .product_usage_prepaid_credits_input_billing_frequency import ProductUsagePrepaidCreditsInputBillingFrequency
 from .product_usage_prepaid_credits_input_billing_type import ProductUsagePrepaidCreditsInputBillingType
+from .product_usage_prepaid_credits_input_pricing_input import ProductUsagePrepaidCreditsInputPricingInput
 from .product_usage_prepaid_credits_input_signal_type import ProductUsagePrepaidCreditsInputSignalType
 
 
@@ -23,10 +24,17 @@ class ProductUsagePrepaidCreditsInput(UniversalBaseModel):
         str, FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ]
     credit_cost: typing_extensions.Annotated[
-        float, FieldMetadata(alias="creditCost"), pydantic.Field(alias="creditCost")
+        float,
+        FieldMetadata(alias="creditCost"),
+        pydantic.Field(alias="creditCost", description="Credit amount, exact to at most 6 decimal places."),
     ]
     unit_value: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="unitValue"), pydantic.Field(alias="unitValue")
+    ] = None
+    pricing_input: typing_extensions.Annotated[
+        typing.Optional[ProductUsagePrepaidCreditsInputPricingInput],
+        FieldMetadata(alias="pricingInput"),
+        pydantic.Field(alias="pricingInput"),
     ] = None
     billing_frequency: typing_extensions.Annotated[
         typing.Optional[ProductUsagePrepaidCreditsInputBillingFrequency],

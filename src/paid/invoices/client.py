@@ -8,6 +8,8 @@ from ..types.invoice import Invoice
 from ..types.invoice_lines_response import InvoiceLinesResponse
 from ..types.invoice_list_response import InvoiceListResponse
 from .raw_client import AsyncRawInvoicesClient, RawInvoicesClient
+from .types.list_invoices_request_payment_status import ListInvoicesRequestPaymentStatus
+from .types.list_invoices_request_status import ListInvoicesRequestStatus
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -33,6 +35,18 @@ class InvoicesClient:
         *,
         limit: typing.Optional[int] = None,
         offset: typing.Optional[int] = None,
+        customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        order_id: typing.Optional[str] = None,
+        status: typing.Optional[ListInvoicesRequestStatus] = None,
+        payment_status: typing.Optional[ListInvoicesRequestPaymentStatus] = None,
+        issue_date_from: typing.Optional[str] = None,
+        issue_date_to: typing.Optional[str] = None,
+        due_date_from: typing.Optional[str] = None,
+        due_date_to: typing.Optional[str] = None,
+        display_number: typing.Optional[str] = None,
+        purchase_order_reference: typing.Optional[str] = None,
+        currency: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> InvoiceListResponse:
         """
@@ -43,6 +57,42 @@ class InvoicesClient:
         limit : typing.Optional[int]
 
         offset : typing.Optional[int]
+
+        customer_id : typing.Optional[str]
+            Filter by customer ID.
+
+        external_customer_id : typing.Optional[str]
+            Filter by customer external ID.
+
+        order_id : typing.Optional[str]
+            Filter by the order this invoice was generated from.
+
+        status : typing.Optional[ListInvoicesRequestStatus]
+            Filter by invoice status.
+
+        payment_status : typing.Optional[ListInvoicesRequestPaymentStatus]
+            Filter by payment status.
+
+        issue_date_from : typing.Optional[str]
+            Only invoices whose issue date is on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        issue_date_to : typing.Optional[str]
+            Only invoices whose issue date is on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        due_date_from : typing.Optional[str]
+            Only invoices whose due date is on or after this date. Invoices without a due date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        due_date_to : typing.Optional[str]
+            Only invoices whose due date is on or before this date. Invoices without a due date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        display_number : typing.Optional[str]
+            Filter by the invoice number shown on the invoice, whether draft or posted (exact match).
+
+        purchase_order_reference : typing.Optional[str]
+            Filter by purchase order reference (exact match, whitespace-sensitive).
+
+        currency : typing.Optional[str]
+            Filter by invoice currency code (case-insensitive, e.g. USD).
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -61,7 +111,23 @@ class InvoicesClient:
         )
         client.invoices.list_invoices()
         """
-        _response = self._raw_client.list_invoices(limit=limit, offset=offset, request_options=request_options)
+        _response = self._raw_client.list_invoices(
+            limit=limit,
+            offset=offset,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            order_id=order_id,
+            status=status,
+            payment_status=payment_status,
+            issue_date_from=issue_date_from,
+            issue_date_to=issue_date_to,
+            due_date_from=due_date_from,
+            due_date_to=due_date_to,
+            display_number=display_number,
+            purchase_order_reference=purchase_order_reference,
+            currency=currency,
+            request_options=request_options,
+        )
         return _response.data
 
     def get_invoice_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Invoice:
@@ -194,6 +260,18 @@ class AsyncInvoicesClient:
         *,
         limit: typing.Optional[int] = None,
         offset: typing.Optional[int] = None,
+        customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        order_id: typing.Optional[str] = None,
+        status: typing.Optional[ListInvoicesRequestStatus] = None,
+        payment_status: typing.Optional[ListInvoicesRequestPaymentStatus] = None,
+        issue_date_from: typing.Optional[str] = None,
+        issue_date_to: typing.Optional[str] = None,
+        due_date_from: typing.Optional[str] = None,
+        due_date_to: typing.Optional[str] = None,
+        display_number: typing.Optional[str] = None,
+        purchase_order_reference: typing.Optional[str] = None,
+        currency: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> InvoiceListResponse:
         """
@@ -204,6 +282,42 @@ class AsyncInvoicesClient:
         limit : typing.Optional[int]
 
         offset : typing.Optional[int]
+
+        customer_id : typing.Optional[str]
+            Filter by customer ID.
+
+        external_customer_id : typing.Optional[str]
+            Filter by customer external ID.
+
+        order_id : typing.Optional[str]
+            Filter by the order this invoice was generated from.
+
+        status : typing.Optional[ListInvoicesRequestStatus]
+            Filter by invoice status.
+
+        payment_status : typing.Optional[ListInvoicesRequestPaymentStatus]
+            Filter by payment status.
+
+        issue_date_from : typing.Optional[str]
+            Only invoices whose issue date is on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        issue_date_to : typing.Optional[str]
+            Only invoices whose issue date is on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        due_date_from : typing.Optional[str]
+            Only invoices whose due date is on or after this date. Invoices without a due date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        due_date_to : typing.Optional[str]
+            Only invoices whose due date is on or before this date. Invoices without a due date are not matched. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        display_number : typing.Optional[str]
+            Filter by the invoice number shown on the invoice, whether draft or posted (exact match).
+
+        purchase_order_reference : typing.Optional[str]
+            Filter by purchase order reference (exact match, whitespace-sensitive).
+
+        currency : typing.Optional[str]
+            Filter by invoice currency code (case-insensitive, e.g. USD).
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -230,7 +344,23 @@ class AsyncInvoicesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_invoices(limit=limit, offset=offset, request_options=request_options)
+        _response = await self._raw_client.list_invoices(
+            limit=limit,
+            offset=offset,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            order_id=order_id,
+            status=status,
+            payment_status=payment_status,
+            issue_date_from=issue_date_from,
+            issue_date_to=issue_date_to,
+            due_date_from=due_date_from,
+            due_date_to=due_date_to,
+            display_number=display_number,
+            purchase_order_reference=purchase_order_reference,
+            currency=currency,
+            request_options=request_options,
+        )
         return _response.data
 
     async def get_invoice_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Invoice:

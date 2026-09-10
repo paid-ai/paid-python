@@ -6,6 +6,7 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
+from .custom_view_scope import CustomViewScope
 from .custom_view_status import CustomViewStatus
 
 
@@ -18,7 +19,7 @@ class CustomView(UniversalBaseModel):
     name: str
     status: CustomViewStatus = pydantic.Field()
     """
-    A view is DRAFT until explicitly published; only PUBLISHED views are served to end-customers.
+    A view is DRAFT until explicitly published. For customer-scoped views, only PUBLISHED views are embeddable and served to end-customers; a DRAFT is not. For organization-scoped views, publishing is only a 'ready to use' marker — both DRAFT and PUBLISHED are visible to your organization's members in Paid (publishing does not change who in the org can see it), and neither is ever embeddable to an end-customer.
     """
 
     preview_url: typing_extensions.Annotated[
@@ -29,6 +30,10 @@ class CustomView(UniversalBaseModel):
             description="Absolute URL to open this view in the Paid app for preview. Surface it to the user after creating or publishing a view. Null when the app URL is not configured.",
         ),
     ] = None
+    scope: CustomViewScope = pydantic.Field()
+    """
+    'customer': data is scoped to one viewing customer and the view is embeddable per-customer. 'organization': data is org-wide and the view is internal-only.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

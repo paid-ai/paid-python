@@ -6,6 +6,7 @@ UpdateWebhookRequestWebhookName = typing.Union[
     typing.Literal[
         "billing-invoice-created",
         "billing-invoice-paid",
+        "billing-invoice-posted",
         "billing-checkout-created",
         "billing-checkout-completed",
         "billing-checkout-expired",
@@ -13,6 +14,7 @@ UpdateWebhookRequestWebhookName = typing.Union[
         "billing-payment-failed",
         "billing-credits-depleted",
         "billing-overage-incurred",
+        "billing-credit-cap-reached",
     ],
     typing.Any,
 ]

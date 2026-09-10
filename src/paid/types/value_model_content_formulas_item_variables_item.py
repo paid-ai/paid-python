@@ -9,6 +9,10 @@ from ..core.serialization import FieldMetadata
 from .value_model_content_formulas_item_variables_item_derived_from import (
     ValueModelContentFormulasItemVariablesItemDerivedFrom,
 )
+from .value_model_content_formulas_item_variables_item_format import ValueModelContentFormulasItemVariablesItemFormat
+from .value_model_content_formulas_item_variables_item_format_unit import (
+    ValueModelContentFormulasItemVariablesItemFormatUnit,
+)
 from .value_model_content_formulas_item_variables_item_type import ValueModelContentFormulasItemVariablesItemType
 
 
@@ -17,6 +21,19 @@ class ValueModelContentFormulasItemVariablesItem(UniversalBaseModel):
     label: str
     type: typing.Optional[ValueModelContentFormulasItemVariablesItemType] = None
     description: typing.Optional[str] = None
+    format: typing.Optional[ValueModelContentFormulasItemVariablesItemFormat] = pydantic.Field(default=None)
+    """
+    Display-only formatting hint. "percent" renders the variable as a percentage (a stored 0.02 displays as 2%). "duration" renders it as a length of time, stepping down to the largest whole unit (0.75 with formatUnit "hours" displays as "45 minutes") and requires formatUnit. Calculations always use the stored raw value.
+    """
+
+    format_unit: typing_extensions.Annotated[
+        typing.Optional[ValueModelContentFormulasItemVariablesItemFormatUnit],
+        FieldMetadata(alias="formatUnit"),
+        pydantic.Field(
+            alias="formatUnit",
+            description='The time unit the stored value is expressed in. Required when format is "duration"; ignored otherwise.',
+        ),
+    ] = None
     derived_from: typing_extensions.Annotated[
         typing.Optional[ValueModelContentFormulasItemVariablesItemDerivedFrom],
         FieldMetadata(alias="derivedFrom"),

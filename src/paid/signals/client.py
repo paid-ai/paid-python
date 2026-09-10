@@ -6,6 +6,8 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.bulk_signals_response import BulkSignalsResponse
 from ..types.signal import Signal
+from ..types.signal_list_item import SignalListItem
+from ..types.signal_list_response import SignalListResponse
 from .raw_client import AsyncRawSignalsClient, RawSignalsClient
 
 # this is used as the default value for optional parameters
@@ -26,6 +28,112 @@ class SignalsClient:
         RawSignalsClient
         """
         return self._raw_client
+
+    def list_signals(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        signal_name: typing.Optional[str] = None,
+        customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        product_id: typing.Optional[str] = None,
+        external_product_id: typing.Optional[str] = None,
+        created_at_from: typing.Optional[str] = None,
+        created_at_to: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> SignalListResponse:
+        """
+        Returns ingested signals (usage events) for your organization, newest first. Filter by signal name, customer, product, and creation date range.
+
+        Parameters
+        ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        signal_name : typing.Optional[str]
+            Filter by signal event name (exact match).
+
+        customer_id : typing.Optional[str]
+            Filter by the Paid customer ID the signal is attributed to.
+
+        external_customer_id : typing.Optional[str]
+            Filter by your external customer ID. Aliases resolve to the attributed customer, and unresolved IDs match raw ingest data.
+
+        product_id : typing.Optional[str]
+            Filter by the Paid product ID the signal is attributed to.
+
+        external_product_id : typing.Optional[str]
+            Filter by your external product ID.
+
+        created_at_from : typing.Optional[str]
+            Only signals created on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        created_at_to : typing.Optional[str]
+            Only signals created on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalListResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.signals.list_signals()
+        """
+        _response = self._raw_client.list_signals(
+            limit=limit,
+            offset=offset,
+            signal_name=signal_name,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            product_id=product_id,
+            external_product_id=external_product_id,
+            created_at_from=created_at_from,
+            created_at_to=created_at_to,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def get_signal_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SignalListItem:
+        """
+        Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+
+        Parameters
+        ----------
+        id : str
+            Signal ID.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalListItem
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.signals.get_signal_by_id(
+            id="6890b0e2a6f2c30012f0a1b3",
+        )
+        """
+        _response = self._raw_client.get_signal_by_id(id, request_options=request_options)
+        return _response.data
 
     def create_signals(
         self, *, signals: typing.Sequence[Signal], request_options: typing.Optional[RequestOptions] = None
@@ -81,6 +189,130 @@ class AsyncSignalsClient:
         AsyncRawSignalsClient
         """
         return self._raw_client
+
+    async def list_signals(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        signal_name: typing.Optional[str] = None,
+        customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        product_id: typing.Optional[str] = None,
+        external_product_id: typing.Optional[str] = None,
+        created_at_from: typing.Optional[str] = None,
+        created_at_to: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> SignalListResponse:
+        """
+        Returns ingested signals (usage events) for your organization, newest first. Filter by signal name, customer, product, and creation date range.
+
+        Parameters
+        ----------
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        signal_name : typing.Optional[str]
+            Filter by signal event name (exact match).
+
+        customer_id : typing.Optional[str]
+            Filter by the Paid customer ID the signal is attributed to.
+
+        external_customer_id : typing.Optional[str]
+            Filter by your external customer ID. Aliases resolve to the attributed customer, and unresolved IDs match raw ingest data.
+
+        product_id : typing.Optional[str]
+            Filter by the Paid product ID the signal is attributed to.
+
+        external_product_id : typing.Optional[str]
+            Filter by your external product ID.
+
+        created_at_from : typing.Optional[str]
+            Only signals created on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        created_at_to : typing.Optional[str]
+            Only signals created on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalListResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.signals.list_signals()
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list_signals(
+            limit=limit,
+            offset=offset,
+            signal_name=signal_name,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            product_id=product_id,
+            external_product_id=external_product_id,
+            created_at_from=created_at_from,
+            created_at_to=created_at_to,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def get_signal_by_id(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> SignalListItem:
+        """
+        Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+
+        Parameters
+        ----------
+        id : str
+            Signal ID.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalListItem
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.signals.get_signal_by_id(
+                id="6890b0e2a6f2c30012f0a1b3",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_signal_by_id(id, request_options=request_options)
+        return _response.data
 
     async def create_signals(
         self, *, signals: typing.Sequence[Signal], request_options: typing.Optional[RequestOptions] = None

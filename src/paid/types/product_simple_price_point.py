@@ -11,16 +11,16 @@ from .product_simple_price_point_tiers_item import ProductSimplePricePointTiersI
 
 class ProductSimplePricePoint(UniversalBaseModel):
     currency: str
-    unit_price: typing_extensions.Annotated[float, FieldMetadata(alias="unitPrice"), pydantic.Field(alias="unitPrice")]
+    unit_price: typing_extensions.Annotated[int, FieldMetadata(alias="unitPrice"), pydantic.Field(alias="unitPrice")]
     tiers: typing.Optional[typing.List[ProductSimplePricePointTiersItem]] = None
     min_quantity: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="minQuantity"), pydantic.Field(alias="minQuantity")
+        typing.Optional[int], FieldMetadata(alias="minQuantity"), pydantic.Field(alias="minQuantity")
     ] = None
     max_quantity: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="maxQuantity"), pydantic.Field(alias="maxQuantity")
+        typing.Optional[int], FieldMetadata(alias="maxQuantity"), pydantic.Field(alias="maxQuantity")
     ] = None
     included_quantity: typing_extensions.Annotated[
-        typing.Optional[float], FieldMetadata(alias="includedQuantity"), pydantic.Field(alias="includedQuantity")
+        typing.Optional[int], FieldMetadata(alias="includedQuantity"), pydantic.Field(alias="includedQuantity")
     ] = None
 
     if IS_PYDANTIC_V2:

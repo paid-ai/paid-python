@@ -6,13 +6,13 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
-from .product_price_point_output_tiers_item import ProductPricePointOutputTiersItem
+from .product_pricing_tier_output import ProductPricingTierOutput
 
 
 class ProductPricePointOutput(UniversalBaseModel):
     currency: str
     unit_price: typing_extensions.Annotated[float, FieldMetadata(alias="unitPrice"), pydantic.Field(alias="unitPrice")]
-    tiers: typing.Optional[typing.List[ProductPricePointOutputTiersItem]] = None
+    tiers: typing.Optional[typing.List[ProductPricingTierOutput]] = None
     min_quantity: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="minQuantity"), pydantic.Field(alias="minQuantity")
     ] = None

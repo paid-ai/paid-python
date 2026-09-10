@@ -103,7 +103,7 @@ class PricingClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> PricingResponse:
         """
-        Updates pricing on an existing product attribute. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
+        Updates pricing on an existing product attribute. To create a new attribute, use the update product endpoint (updateProductById), which upserts productAttributes. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
 
         Parameters
         ----------
@@ -135,7 +135,7 @@ class PricingClient:
                 price_points=[
                     SimplePricePoint(
                         currency="currency",
-                        unit_price=1.1,
+                        unit_price=1,
                     )
                 ],
             ),
@@ -252,7 +252,7 @@ class AsyncPricingClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> PricingResponse:
         """
-        Updates pricing on an existing product attribute. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
+        Updates pricing on an existing product attribute. To create a new attribute, use the update product endpoint (updateProductById), which upserts productAttributes. If creditBenefits is provided, it fully replaces existing benefits. If omitted, existing benefits are preserved.
 
         Parameters
         ----------
@@ -289,7 +289,7 @@ class AsyncPricingClient:
                     price_points=[
                         SimplePricePoint(
                             currency="currency",
-                            unit_price=1.1,
+                            unit_price=1,
                         )
                     ],
                 ),
