@@ -7,12 +7,18 @@ from importlib import import_module
 
 if typing.TYPE_CHECKING:
     from .types import (
+        DeleteCustomerUnitAliasByExternalIdResponse,
+        DeleteCustomerUnitAliasByKeyResponse,
+        DeleteCustomerUnitAliasResponse,
         ListCustomerUnitsByExternalIdRequestStatus,
         ListCustomerUnitsRequestStatus,
         ListCustomersRequestCreationState,
         ListCustomersRequestStatus,
     )
 _dynamic_imports: typing.Dict[str, str] = {
+    "DeleteCustomerUnitAliasByExternalIdResponse": ".types",
+    "DeleteCustomerUnitAliasByKeyResponse": ".types",
+    "DeleteCustomerUnitAliasResponse": ".types",
     "ListCustomerUnitsByExternalIdRequestStatus": ".types",
     "ListCustomerUnitsRequestStatus": ".types",
     "ListCustomersRequestCreationState": ".types",
@@ -42,6 +48,9 @@ def __dir__():
 
 
 __all__ = [
+    "DeleteCustomerUnitAliasByExternalIdResponse",
+    "DeleteCustomerUnitAliasByKeyResponse",
+    "DeleteCustomerUnitAliasResponse",
     "ListCustomerUnitsByExternalIdRequestStatus",
     "ListCustomerUnitsRequestStatus",
     "ListCustomersRequestCreationState",

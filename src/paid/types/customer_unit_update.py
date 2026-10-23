@@ -35,6 +35,11 @@ class CustomerUnitUpdate(UniversalBaseModel):
     Freeform JSON for your own use.
     """
 
+    billable: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    Flips the unit's own setting either way. Under a non-billable ancestor the unit stays non-billable in effect (`effectiveBillable`) whatever its own value. Refused on the root unit, which is always billable (`409 ROOT_UNIT_ALWAYS_BILLABLE`). Sending `false` needs non-billable units enabled for your organization (`403 FEATURE_NOT_ENABLED` otherwise). Usage on a non-billable unit is still recorded but not billed: it burns no credits, adds nothing to invoices or overage, and counts toward no cap, on a price whose usage comes from a meter (read from your events when the invoice closes) too. A meter's derived signal, and a correlation-window meter's window, follow the source event they take their unit from (the window's closing event, else its opening event): they are not billed when that event was not. Usage is still billed when it is sent with a customer API key, and on cost-plus pricing, which bills from costs that carry no unit. Only signals sent to `/api/v2/signals` that resolve to an active unit, by its key or through an alias on it, can be non-billable, and a change applies to signals received afterwards.
+    """
+
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
     else:

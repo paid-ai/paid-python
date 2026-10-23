@@ -157,7 +157,7 @@ class RawPaymentsClient:
             Payment amount in cents (minor currency units).
 
         currency : str
-            Three-letter ISO currency code.
+            Three-letter ISO 4217 currency code. Lowercase is accepted and stored upper-cased.
 
         payment_type : PaymentType
 
@@ -475,7 +475,7 @@ class AsyncRawPaymentsClient:
             Payment amount in cents (minor currency units).
 
         currency : str
-            Three-letter ISO currency code.
+            Three-letter ISO 4217 currency code. Lowercase is accepted and stored upper-cased.
 
         payment_type : PaymentType
 

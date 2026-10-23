@@ -3,5 +3,5 @@
 import typing
 
 CreateOrderLineAttributeRequestPricingCreditBenefitsItemAllocationCadence = typing.Union[
-    typing.Literal["upfront", "monthly"], typing.Any
+    typing.Literal["upfront", "monthly", "quarterly", "semi_annually"], typing.Any
 ]

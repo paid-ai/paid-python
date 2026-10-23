@@ -57,7 +57,7 @@ class SignalListItem(UniversalBaseModel):
     ] = None
     data: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(default=None)
     """
-    The data payload submitted with the signal.
+    The data payload submitted with the signal. A signal whose active customer unit was not billable in effect when it arrived (`effectiveBillable: false` on the unit) also carries `_billing`: `{ "excluded": true, "externalCustomerUnitId": "<the unit's key>" }`, unless it was sent with a customer API key. A meter's derived signal (one carrying `_derived`) follows the source event it takes its unit from (the window's closing event, else its opening event): it carries `_billing` when that event did and it still resolves to that same active unit. Billing records that usage without billing it. A price whose usage comes from a meter (read from your events when the invoice closes) leaves those signals out as well; a correlation-window meter leaves out a whole window when the event it takes its unit from (the closing event, else the opening one) carries `_billing`.
     """
 
     created_at: typing_extensions.Annotated[

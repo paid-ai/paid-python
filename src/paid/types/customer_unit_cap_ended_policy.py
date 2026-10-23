@@ -8,6 +8,7 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .customer_unit_cap_ended_policy_frequency import CustomerUnitCapEndedPolicyFrequency
+from .customer_unit_cap_schedule import CustomerUnitCapSchedule
 
 
 class CustomerUnitCapEndedPolicy(UniversalBaseModel):
@@ -22,14 +23,16 @@ class CustomerUnitCapEndedPolicy(UniversalBaseModel):
 
     frequency: CustomerUnitCapEndedPolicyFrequency = pydantic.Field()
     """
-    Period length. Periods start on the day-of-month of `effectiveFrom` (UTC), clamped in shorter months.
+    Monthly UTC periods, with boundaries defined by `schedule`.
     """
 
+    schedule: CustomerUnitCapSchedule
     effective_from: typing_extensions.Annotated[
         dt.datetime,
         FieldMetadata(alias="effectiveFrom"),
         pydantic.Field(
-            alias="effectiveFrom", description="When this cap version started applying, and the anchor for its periods."
+            alias="effectiveFrom",
+            description="When this cap version started applying. The schedule independently defines its spend window.",
         ),
     ]
     effective_until: typing_extensions.Annotated[

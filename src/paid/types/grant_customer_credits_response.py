@@ -15,7 +15,7 @@ from .credit_grant_result import CreditGrantResult
 class GrantCustomerCreditsResponse(UniversalBaseModel):
     created: bool = pydantic.Field()
     """
-    True when this request created a new grant.
+    True when this request created a new grant. False when an earlier request with the same idempotencyKey already created it.
     """
 
     customer: CreditGrantCustomer

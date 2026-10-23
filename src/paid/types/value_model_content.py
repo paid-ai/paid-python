@@ -6,7 +6,10 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
+from .value_model_content_actions_item import ValueModelContentActionsItem
+from .value_model_content_flows_item import ValueModelContentFlowsItem
 from .value_model_content_formulas_item import ValueModelContentFormulasItem
+from .value_model_content_grouping_keys_item import ValueModelContentGroupingKeysItem
 from .value_model_content_overrides_item import ValueModelContentOverridesItem
 from .value_model_content_segment_tables_item import ValueModelContentSegmentTablesItem
 from .value_model_content_signals_item import ValueModelContentSignalsItem
@@ -15,7 +18,7 @@ from .value_model_content_value_types_item import ValueModelContentValueTypesIte
 
 class ValueModelContent(UniversalBaseModel):
     """
-    Full value model configuration: value types, formulas, signals, and overrides.
+    Full value model configuration: value types, formulas, events, overrides, and actions.
     """
 
     currency: str
@@ -32,6 +35,13 @@ class ValueModelContent(UniversalBaseModel):
         pydantic.Field(alias="segmentTables"),
     ] = None
     overrides: typing.Optional[typing.List[ValueModelContentOverridesItem]] = None
+    grouping_keys: typing_extensions.Annotated[
+        typing.Optional[typing.List[ValueModelContentGroupingKeysItem]],
+        FieldMetadata(alias="groupingKeys"),
+        pydantic.Field(alias="groupingKeys"),
+    ] = None
+    flows: typing.Optional[typing.List[ValueModelContentFlowsItem]] = None
+    actions: typing.Optional[typing.List[ValueModelContentActionsItem]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

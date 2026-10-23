@@ -108,6 +108,7 @@ class CheckoutsClient:
         cancel_url : typing.Optional[str]
 
         expires_at : typing.Optional[dt.datetime]
+            When the checkout link expires. Must be in the future. Defaults to 24 hours after creation.
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
@@ -196,7 +197,7 @@ class CheckoutsClient:
 
     def archive_checkout(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> EmptyResponse:
         """
-        Archive a checkout by ID
+        Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
 
         Parameters
         ----------
@@ -323,6 +324,7 @@ class AsyncCheckoutsClient:
         cancel_url : typing.Optional[str]
 
         expires_at : typing.Optional[dt.datetime]
+            When the checkout link expires. Must be in the future. Defaults to 24 hours after creation.
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
@@ -431,7 +433,7 @@ class AsyncCheckoutsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Archive a checkout by ID
+        Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
 
         Parameters
         ----------

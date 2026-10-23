@@ -39,6 +39,14 @@ class CreditGrantCreateRequest(UniversalBaseModel):
             description="When these credits expire, as an RFC3339 datetime with timezone. Omit or set null for credits that do not expire.",
         ),
     ] = None
+    idempotency_key: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="idempotencyKey"),
+        pydantic.Field(
+            alias="idempotencyKey",
+            description="Unique key for this grant within your organization. A retry with the same key and request body returns the original grant with `created: false` instead of granting again. Reusing a key for a different customer or request body returns 409.",
+        ),
+    ] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

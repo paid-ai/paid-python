@@ -7,14 +7,18 @@ from importlib import import_module
 
 if typing.TYPE_CHECKING:
     from .batch_seat_assignments_request_assignments_item import BatchSeatAssignmentsRequestAssignmentsItem
+    from .create_order_request_payment_terms import CreateOrderRequestPaymentTerms
     from .list_order_seats_request_status import ListOrderSeatsRequestStatus
     from .list_orders_request_creation_state import ListOrdersRequestCreationState
     from .order_status_filter import OrderStatusFilter
+    from .update_order_request_payment_terms import UpdateOrderRequestPaymentTerms
 _dynamic_imports: typing.Dict[str, str] = {
     "BatchSeatAssignmentsRequestAssignmentsItem": ".batch_seat_assignments_request_assignments_item",
+    "CreateOrderRequestPaymentTerms": ".create_order_request_payment_terms",
     "ListOrderSeatsRequestStatus": ".list_order_seats_request_status",
     "ListOrdersRequestCreationState": ".list_orders_request_creation_state",
     "OrderStatusFilter": ".order_status_filter",
+    "UpdateOrderRequestPaymentTerms": ".update_order_request_payment_terms",
 }
 
 
@@ -41,7 +45,9 @@ def __dir__():
 
 __all__ = [
     "BatchSeatAssignmentsRequestAssignmentsItem",
+    "CreateOrderRequestPaymentTerms",
     "ListOrderSeatsRequestStatus",
     "ListOrdersRequestCreationState",
     "OrderStatusFilter",
+    "UpdateOrderRequestPaymentTerms",
 ]

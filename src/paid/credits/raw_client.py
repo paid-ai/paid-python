@@ -16,6 +16,10 @@ from ..errors.not_found_error import NotFoundError
 from ..types.credit_currency import CreditCurrency
 from ..types.credit_currency_list_response import CreditCurrencyListResponse
 from ..types.credit_transaction_list_response import CreditTransactionListResponse
+from ..types.credit_transaction_summary_response import CreditTransactionSummaryResponse
+from .types.get_credit_transaction_summary_request_group_by import GetCreditTransactionSummaryRequestGroupBy
+from .types.get_credit_transaction_summary_request_interval import GetCreditTransactionSummaryRequestInterval
+from .types.get_credit_transaction_summary_request_type import GetCreditTransactionSummaryRequestType
 from .types.list_credit_currencies_request_status import ListCreditCurrenciesRequestStatus
 from .types.list_credit_transactions_request_type import ListCreditTransactionsRequestType
 from .types.update_credit_currency_request_status import UpdateCreditCurrencyRequestStatus
@@ -198,6 +202,7 @@ class RawCreditsClient:
         credit_currency_key: typing.Optional[str] = None,
         type: typing.Optional[ListCreditTransactionsRequestType] = None,
         order_id: typing.Optional[str] = None,
+        event_name: typing.Optional[str] = None,
         created_at_from: typing.Optional[str] = None,
         created_at_to: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -229,6 +234,9 @@ class RawCreditsClient:
         order_id : typing.Optional[str]
             Filter by the order this transaction is linked to.
 
+        event_name : typing.Optional[str]
+            Filter by the usage event that produced the transaction (exact match, untrimmed). Transactions with no event (grants, invoice-void clawbacks, manual adjustments) never match.
+
         created_at_from : typing.Optional[str]
             Only transactions recorded on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
 
@@ -255,6 +263,7 @@ class RawCreditsClient:
                 "creditCurrencyKey": credit_currency_key,
                 "type": type,
                 "orderId": order_id,
+                "eventName": event_name,
                 "createdAtFrom": created_at_from,
                 "createdAtTo": created_at_to,
             },
@@ -266,6 +275,134 @@ class RawCreditsClient:
                     CreditTransactionListResponse,
                     parse_obj_as(
                         type_=CreditTransactionListResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def get_credit_transaction_summary(
+        self,
+        *,
+        created_at_from: str,
+        group_by: GetCreditTransactionSummaryRequestGroupBy,
+        interval: GetCreditTransactionSummaryRequestInterval,
+        customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        credits_currency_id: typing.Optional[str] = None,
+        credit_currency_key: typing.Optional[str] = None,
+        type: typing.Optional[GetCreditTransactionSummaryRequestType] = None,
+        order_id: typing.Optional[str] = None,
+        event_name: typing.Optional[str] = None,
+        created_at_to: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[CreditTransactionSummaryResponse]:
+        """
+        Aggregate credit ledger transactions of one type into period buckets grouped by a dimension, for charting credit consumption over time. Accepts the same filters as the transaction list and reads the same ledger, so bucket totals always match summing that list over the same filters and the same `type` — pass this endpoint's effective `type` (it defaults to `spend`) to the list, which has no default and otherwise returns every type.
+
+        Parameters
+        ----------
+        created_at_from : str
+            Start of the window (inclusive). Required: the window may span at most 92 days. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        group_by : GetCreditTransactionSummaryRequestGroupBy
+            Dimension to group buckets by. `eventName` groups signal-driven spends by the usage event that produced them; transactions without one (grants, invoice-void clawbacks, manual adjustments) share a bucket whose `groupKey` is null.
+
+        interval : GetCreditTransactionSummaryRequestInterval
+            Period bucket size. Buckets align to UTC calendar days, ISO weeks (Monday start), or calendar months; the first and last bucket's published bounds are clipped to the requested window.
+
+        customer_id : typing.Optional[str]
+            Filter by customer ID.
+
+        external_customer_id : typing.Optional[str]
+            Filter by customer external ID.
+
+        credits_currency_id : typing.Optional[str]
+            Filter by credit currency ID.
+
+        credit_currency_key : typing.Optional[str]
+            Filter by the stable machine-readable key of the credit currency.
+
+        type : typing.Optional[GetCreditTransactionSummaryRequestType]
+            Ledger type to summarize. Each call summarizes exactly one type, so a spend chart never nets grants against spends. Defaults to `spend`.
+
+        order_id : typing.Optional[str]
+            Filter by the order this transaction is linked to.
+
+        event_name : typing.Optional[str]
+            Filter by the usage event that produced the transaction (exact match, untrimmed). Transactions with no event (grants, invoice-void clawbacks, manual adjustments) never match.
+
+        created_at_to : typing.Optional[str]
+            End of the window (inclusive). Defaults to now. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[CreditTransactionSummaryResponse]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "credits/transactions/summary",
+            method="GET",
+            params={
+                "customerId": customer_id,
+                "externalCustomerId": external_customer_id,
+                "creditsCurrencyId": credits_currency_id,
+                "creditCurrencyKey": credit_currency_key,
+                "type": type,
+                "orderId": order_id,
+                "eventName": event_name,
+                "createdAtFrom": created_at_from,
+                "createdAtTo": created_at_to,
+                "groupBy": group_by,
+                "interval": interval,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CreditTransactionSummaryResponse,
+                    parse_obj_as(
+                        type_=CreditTransactionSummaryResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -585,6 +722,7 @@ class AsyncRawCreditsClient:
         credit_currency_key: typing.Optional[str] = None,
         type: typing.Optional[ListCreditTransactionsRequestType] = None,
         order_id: typing.Optional[str] = None,
+        event_name: typing.Optional[str] = None,
         created_at_from: typing.Optional[str] = None,
         created_at_to: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -616,6 +754,9 @@ class AsyncRawCreditsClient:
         order_id : typing.Optional[str]
             Filter by the order this transaction is linked to.
 
+        event_name : typing.Optional[str]
+            Filter by the usage event that produced the transaction (exact match, untrimmed). Transactions with no event (grants, invoice-void clawbacks, manual adjustments) never match.
+
         created_at_from : typing.Optional[str]
             Only transactions recorded on or after this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
 
@@ -642,6 +783,7 @@ class AsyncRawCreditsClient:
                 "creditCurrencyKey": credit_currency_key,
                 "type": type,
                 "orderId": order_id,
+                "eventName": event_name,
                 "createdAtFrom": created_at_from,
                 "createdAtTo": created_at_to,
             },
@@ -653,6 +795,134 @@ class AsyncRawCreditsClient:
                     CreditTransactionListResponse,
                     parse_obj_as(
                         type_=CreditTransactionListResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def get_credit_transaction_summary(
+        self,
+        *,
+        created_at_from: str,
+        group_by: GetCreditTransactionSummaryRequestGroupBy,
+        interval: GetCreditTransactionSummaryRequestInterval,
+        customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        credits_currency_id: typing.Optional[str] = None,
+        credit_currency_key: typing.Optional[str] = None,
+        type: typing.Optional[GetCreditTransactionSummaryRequestType] = None,
+        order_id: typing.Optional[str] = None,
+        event_name: typing.Optional[str] = None,
+        created_at_to: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[CreditTransactionSummaryResponse]:
+        """
+        Aggregate credit ledger transactions of one type into period buckets grouped by a dimension, for charting credit consumption over time. Accepts the same filters as the transaction list and reads the same ledger, so bucket totals always match summing that list over the same filters and the same `type` — pass this endpoint's effective `type` (it defaults to `spend`) to the list, which has no default and otherwise returns every type.
+
+        Parameters
+        ----------
+        created_at_from : str
+            Start of the window (inclusive). Required: the window may span at most 92 days. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        group_by : GetCreditTransactionSummaryRequestGroupBy
+            Dimension to group buckets by. `eventName` groups signal-driven spends by the usage event that produced them; transactions without one (grants, invoice-void clawbacks, manual adjustments) share a bucket whose `groupKey` is null.
+
+        interval : GetCreditTransactionSummaryRequestInterval
+            Period bucket size. Buckets align to UTC calendar days, ISO weeks (Monday start), or calendar months; the first and last bucket's published bounds are clipped to the requested window.
+
+        customer_id : typing.Optional[str]
+            Filter by customer ID.
+
+        external_customer_id : typing.Optional[str]
+            Filter by customer external ID.
+
+        credits_currency_id : typing.Optional[str]
+            Filter by credit currency ID.
+
+        credit_currency_key : typing.Optional[str]
+            Filter by the stable machine-readable key of the credit currency.
+
+        type : typing.Optional[GetCreditTransactionSummaryRequestType]
+            Ledger type to summarize. Each call summarizes exactly one type, so a spend chart never nets grants against spends. Defaults to `spend`.
+
+        order_id : typing.Optional[str]
+            Filter by the order this transaction is linked to.
+
+        event_name : typing.Optional[str]
+            Filter by the usage event that produced the transaction (exact match, untrimmed). Transactions with no event (grants, invoice-void clawbacks, manual adjustments) never match.
+
+        created_at_to : typing.Optional[str]
+            End of the window (inclusive). Defaults to now. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[CreditTransactionSummaryResponse]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "credits/transactions/summary",
+            method="GET",
+            params={
+                "customerId": customer_id,
+                "externalCustomerId": external_customer_id,
+                "creditsCurrencyId": credits_currency_id,
+                "creditCurrencyKey": credit_currency_key,
+                "type": type,
+                "orderId": order_id,
+                "eventName": event_name,
+                "createdAtFrom": created_at_from,
+                "createdAtTo": created_at_to,
+                "groupBy": group_by,
+                "interval": interval,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CreditTransactionSummaryResponse,
+                    parse_obj_as(
+                        type_=CreditTransactionSummaryResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
