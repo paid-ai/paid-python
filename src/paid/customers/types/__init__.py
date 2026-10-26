@@ -6,11 +6,17 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
+    from .delete_customer_unit_alias_by_external_id_response import DeleteCustomerUnitAliasByExternalIdResponse
+    from .delete_customer_unit_alias_by_key_response import DeleteCustomerUnitAliasByKeyResponse
+    from .delete_customer_unit_alias_response import DeleteCustomerUnitAliasResponse
     from .list_customer_units_by_external_id_request_status import ListCustomerUnitsByExternalIdRequestStatus
     from .list_customer_units_request_status import ListCustomerUnitsRequestStatus
     from .list_customers_request_creation_state import ListCustomersRequestCreationState
     from .list_customers_request_status import ListCustomersRequestStatus
 _dynamic_imports: typing.Dict[str, str] = {
+    "DeleteCustomerUnitAliasByExternalIdResponse": ".delete_customer_unit_alias_by_external_id_response",
+    "DeleteCustomerUnitAliasByKeyResponse": ".delete_customer_unit_alias_by_key_response",
+    "DeleteCustomerUnitAliasResponse": ".delete_customer_unit_alias_response",
     "ListCustomerUnitsByExternalIdRequestStatus": ".list_customer_units_by_external_id_request_status",
     "ListCustomerUnitsRequestStatus": ".list_customer_units_request_status",
     "ListCustomersRequestCreationState": ".list_customers_request_creation_state",
@@ -40,6 +46,9 @@ def __dir__():
 
 
 __all__ = [
+    "DeleteCustomerUnitAliasByExternalIdResponse",
+    "DeleteCustomerUnitAliasByKeyResponse",
+    "DeleteCustomerUnitAliasResponse",
     "ListCustomerUnitsByExternalIdRequestStatus",
     "ListCustomerUnitsRequestStatus",
     "ListCustomersRequestCreationState",

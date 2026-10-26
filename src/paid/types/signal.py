@@ -13,8 +13,19 @@ from .customer_unit_attribution import CustomerUnitAttribution
 
 
 class Signal(UniversalBaseModel):
-    event_name: typing_extensions.Annotated[str, FieldMetadata(alias="eventName"), pydantic.Field(alias="eventName")]
-    customer: CustomerAttribution
+    """
+    One usage event. Name its customer with `customer`, its customer unit with `customerUnit`, or both: at least one is required, and a batch with a signal that names neither is refused with `400 VALIDATION_ERROR`.
+    """
+
+    event_name: typing_extensions.Annotated[
+        str,
+        FieldMetadata(alias="eventName"),
+        pydantic.Field(
+            alias="eventName",
+            description="The name of the usage event, such as `email_sent`. Meters and usage prices select signals by this name.",
+        ),
+    ]
+    customer: typing.Optional[CustomerAttribution] = None
     customer_unit: typing_extensions.Annotated[
         typing.Optional[CustomerUnitAttribution],
         FieldMetadata(alias="customerUnit"),
@@ -23,12 +34,21 @@ class Signal(UniversalBaseModel):
     attribution: typing.Optional[Attribution] = None
     timestamp: typing.Optional[dt.datetime] = pydantic.Field(default=None)
     """
-    True event timestamp in RFC3339 format with timezone (e.g. 2026-01-31T23:00:00Z)
+    True event timestamp in RFC3339 format with timezone (e.g. 2026-01-31T23:00:00Z). Omit it to use the time Paid receives the signal.
     """
 
-    data: typing.Optional[typing.Dict[str, typing.Any]] = None
+    data: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(default=None)
+    """
+    Your event data. The top-level keys `_derived`, `_dims` and `_billing`, and any top-level key starting with `_billing.`, are reserved for Paid: a batch in which any signal's `data` carries one is refused with `400 RESERVED_SIGNAL_DATA_FIELD`.
+    """
+
     idempotency_key: typing_extensions.Annotated[
-        typing.Optional[str], FieldMetadata(alias="idempotencyKey"), pydantic.Field(alias="idempotencyKey")
+        typing.Optional[str],
+        FieldMetadata(alias="idempotencyKey"),
+        pydantic.Field(
+            alias="idempotencyKey",
+            description="Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in `duplicates` instead of `ingested`.",
+        ),
     ] = None
 
     if IS_PYDANTIC_V2:

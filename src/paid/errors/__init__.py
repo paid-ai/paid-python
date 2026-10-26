@@ -13,6 +13,7 @@ if typing.TYPE_CHECKING:
     from .not_found_error import NotFoundError
     from .request_timeout_error import RequestTimeoutError
     from .too_many_requests_error import TooManyRequestsError
+    from .unprocessable_entity_error import UnprocessableEntityError
 _dynamic_imports: typing.Dict[str, str] = {
     "BadRequestError": ".bad_request_error",
     "ConflictError": ".conflict_error",
@@ -21,6 +22,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "NotFoundError": ".not_found_error",
     "RequestTimeoutError": ".request_timeout_error",
     "TooManyRequestsError": ".too_many_requests_error",
+    "UnprocessableEntityError": ".unprocessable_entity_error",
 }
 
 
@@ -53,4 +55,5 @@ __all__ = [
     "NotFoundError",
     "RequestTimeoutError",
     "TooManyRequestsError",
+    "UnprocessableEntityError",
 ]

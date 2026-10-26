@@ -54,7 +54,7 @@ class CreditTransaction(UniversalBaseModel):
         FieldMetadata(alias="signalId"),
         pydantic.Field(
             alias="signalId",
-            description="ID of the usage signal that produced this spend, resolvable via `GET /api/v2/signals/{id}` (including the signal's data payload). Null for grants and non-signal spends.",
+            description="ID of the usage signal that produced this spend, resolvable via `GET /api/v2/signals/{id}`, or in bulk for a whole page via `POST /api/v2/signals/lookup` (both include the signal's data payload). Null for grants and non-signal spends.",
         ),
     ] = None
     order_id: typing_extensions.Annotated[

@@ -37,7 +37,7 @@ class CustomerPortalsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CustomerPortal:
         """
-        Creates a portal session for the customer. Returns a short-lived URL to the customer portal.
+        Deprecated — the customer portal is being retired, and this endpoint will be removed in a future release. It keeps working for existing integrations meanwhile: it creates a portal session for the customer and returns a short-lived URL to the customer portal. Contact Paid before building anything new on it.
 
         Parameters
         ----------
@@ -103,7 +103,7 @@ class AsyncCustomerPortalsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CustomerPortal:
         """
-        Creates a portal session for the customer. Returns a short-lived URL to the customer portal.
+        Deprecated — the customer portal is being retired, and this endpoint will be removed in a future release. It keeps working for existing integrations meanwhile: it creates a portal session for the customer and returns a short-lived URL to the customer portal. Contact Paid before building anything new on it.
 
         Parameters
         ----------

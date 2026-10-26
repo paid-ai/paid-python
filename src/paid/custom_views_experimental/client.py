@@ -11,12 +11,15 @@ from ..types.custom_view_filter import CustomViewFilter
 from ..types.custom_view_list_response import CustomViewListResponse
 from ..types.custom_view_query import CustomViewQuery
 from ..types.render_bundle_edit import RenderBundleEdit
+from ..types.view_customer_units_response import ViewCustomerUnitsResponse
 from ..types.view_data_response import ViewDataResponse
 from .raw_client import AsyncRawCustomViewsExperimentalClient, RawCustomViewsExperimentalClient
 from .types.create_custom_view_request_period import CreateCustomViewRequestPeriod
 from .types.create_custom_view_request_scope import CreateCustomViewRequestScope
+from .types.get_custom_view_data_request_include_draft import GetCustomViewDataRequestIncludeDraft
 from .types.get_custom_view_data_request_period_kind import GetCustomViewDataRequestPeriodKind
 from .types.get_custom_view_data_request_period_unit import GetCustomViewDataRequestPeriodUnit
+from .types.get_custom_view_data_request_unit_mode import GetCustomViewDataRequestUnitMode
 from .types.update_custom_view_period_request_period import UpdateCustomViewPeriodRequestPeriod
 
 # this is used as the default value for optional parameters
@@ -72,6 +75,8 @@ class CustomViewsExperimentalClient:
         name: str,
         queries: typing.Sequence[CustomViewQuery],
         render_bundle: str,
+        hierarchy_enabled: typing.Optional[bool] = OMIT,
+        caps_enabled: typing.Optional[bool] = OMIT,
         description: typing.Optional[str] = OMIT,
         period: typing.Optional[CreateCustomViewRequestPeriod] = OMIT,
         filters: typing.Optional[typing.Sequence[CustomViewFilter]] = OMIT,
@@ -93,6 +98,12 @@ class CustomViewsExperimentalClient:
 
         render_bundle : str
             Self-contained HTML document that renders the result sets. Inline ALL CSS/JS/charting libraries — the render sandbox has no network access. It receives the keyed result sets via a `message` event (`data[<queryId>]`) and must not fetch anything itself.
+
+        hierarchy_enabled : typing.Optional[bool]
+            Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.
+
+        caps_enabled : typing.Optional[bool]
+            Send the customer's unit caps to the render bundle as `context.caps`. Needs `hierarchyEnabled` on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs `read:billing` to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.
 
         description : typing.Optional[str]
             Optional longer description of what the view shows.
@@ -136,6 +147,8 @@ class CustomViewsExperimentalClient:
             name=name,
             queries=queries,
             render_bundle=render_bundle,
+            hierarchy_enabled=hierarchy_enabled,
+            caps_enabled=caps_enabled,
             description=description,
             period=period,
             filters=filters,
@@ -231,7 +244,7 @@ class CustomViewsExperimentalClient:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        Returns the view's name, status, query ids, and the author render bundle for the owning organization (DRAFT or PUBLISHED). Used by the trusted preview/embed frame to render the sandbox; the per-customer data is fetched separately via /:displayId/data.
+        Returns the view's name, status, query ids, and the author render bundle for the owning organization. Only PUBLISHED views are returned; a DRAFT returns 404 (use getCustomViewAuthoring to read a DRAFT). Used by the trusted preview/embed frame to render the sandbox; the per-customer data is fetched separately via /:displayId/data.
 
         Parameters
         ----------
@@ -263,6 +276,8 @@ class CustomViewsExperimentalClient:
         self,
         display_id: str,
         *,
+        hierarchy_enabled: typing.Optional[bool] = OMIT,
+        caps_enabled: typing.Optional[bool] = OMIT,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         queries: typing.Optional[typing.Sequence[CustomViewQuery]] = OMIT,
@@ -276,11 +291,17 @@ class CustomViewsExperimentalClient:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — `bundleEdits` (exact search-and-replace on the stored render bundle) and `queryUpserts`/`queryRemovals` (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: `renderBundle`, and `queries` (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load.
+        Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — `bundleEdits` (exact search-and-replace on the stored render bundle) and `queryUpserts`/`queryRemovals` (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: `renderBundle`, and `queries` (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load. If the queries or hierarchy setting change during validation, returns 409 CUSTOM_VIEW_UPDATE_CONFLICT; fetch the current authoring definition and reapply your changes before retrying.
 
         Parameters
         ----------
         display_id : str
+
+        hierarchy_enabled : typing.Optional[bool]
+            Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.
+
+        caps_enabled : typing.Optional[bool]
+            Send the customer's unit caps to the render bundle as `context.caps`. Needs `hierarchyEnabled` on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs `read:billing` to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.
 
         name : typing.Optional[str]
             New human-readable view name.
@@ -327,6 +348,8 @@ class CustomViewsExperimentalClient:
         """
         _response = self._raw_client.update_custom_view(
             display_id,
+            hierarchy_enabled=hierarchy_enabled,
+            caps_enabled=caps_enabled,
             name=name,
             description=description,
             queries=queries,
@@ -336,6 +359,56 @@ class CustomViewsExperimentalClient:
             query_removals=query_removals,
             filters=filters,
             request_options=request_options,
+        )
+        return _response.data
+
+    def get_custom_view_customer_units(
+        self,
+        display_id: str,
+        *,
+        customer_id: str,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ViewCustomerUnitsResponse:
+        """
+        ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
+
+        Lists active customer units for a published customer-scoped view with hierarchyEnabled set to true. Hierarchy eligibility is independent of the requested page or usage; requires credit hierarchies to be enabled for the organization.
+
+        Parameters
+        ----------
+        display_id : str
+
+        customer_id : str
+            The customer's external ID, Paid customer ID, or internal ID.
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ViewCustomerUnitsResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.custom_views_experimental.get_custom_view_customer_units(
+            display_id="displayId",
+            customer_id="cus_acme",
+        )
+        """
+        _response = self._raw_client.get_custom_view_customer_units(
+            display_id, customer_id=customer_id, limit=limit, offset=offset, request_options=request_options
         )
         return _response.data
 
@@ -349,12 +422,15 @@ class CustomViewsExperimentalClient:
         period_amount: typing.Optional[int] = None,
         period_start: typing.Optional[str] = None,
         period_end: typing.Optional[str] = None,
+        include_draft: typing.Optional[GetCustomViewDataRequestIncludeDraft] = None,
+        unit_mode: typing.Optional[GetCustomViewDataRequestUnitMode] = None,
+        unit_external_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ViewDataResponse:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given `customerId` (both enforced as ClickHouse row filters) — `customerId` is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and `customerId` is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as `filter_<name>` query parameters (e.g. `filter_region=eu`); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it.
+        Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given `customerId` (both enforced as ClickHouse row filters) — `customerId` is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and `customerId` is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as `filter_<name>` query parameters (e.g. `filter_region=eu`); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it. Only PUBLISHED views are served by default; a DRAFT returns 404. To check a saved DRAFT's real data before publishing, pass `includeDraft=true`. Embeds and share links never serve a DRAFT.
 
         Parameters
         ----------
@@ -377,6 +453,15 @@ class CustomViewsExperimentalClient:
 
         period_end : typing.Optional[str]
             absolute override only: inclusive end date (YYYY-MM-DD).
+
+        include_draft : typing.Optional[GetCustomViewDataRequestIncludeDraft]
+            Pass 'true' to also serve a DRAFT view, so you can check its real data before publishing. Without it a DRAFT returns 404. End-customer embeds and share links never serve a DRAFT.
+
+        unit_mode : typing.Optional[GetCustomViewDataRequestUnitMode]
+            Unit selection for this request. Omit both unit parameters for all customer activity. Shared links instead use their saved starting selection when omitted; pass all to reset a shared link.
+
+        unit_external_id : typing.Optional[str]
+            The unit's external ID. Required with direct or subtree, and omitted with all.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -405,6 +490,9 @@ class CustomViewsExperimentalClient:
             period_amount=period_amount,
             period_start=period_start,
             period_end=period_end,
+            include_draft=include_draft,
+            unit_mode=unit_mode,
+            unit_external_id=unit_external_id,
             request_options=request_options,
         )
         return _response.data
@@ -517,6 +605,8 @@ class AsyncCustomViewsExperimentalClient:
         name: str,
         queries: typing.Sequence[CustomViewQuery],
         render_bundle: str,
+        hierarchy_enabled: typing.Optional[bool] = OMIT,
+        caps_enabled: typing.Optional[bool] = OMIT,
         description: typing.Optional[str] = OMIT,
         period: typing.Optional[CreateCustomViewRequestPeriod] = OMIT,
         filters: typing.Optional[typing.Sequence[CustomViewFilter]] = OMIT,
@@ -538,6 +628,12 @@ class AsyncCustomViewsExperimentalClient:
 
         render_bundle : str
             Self-contained HTML document that renders the result sets. Inline ALL CSS/JS/charting libraries — the render sandbox has no network access. It receives the keyed result sets via a `message` event (`data[<queryId>]`) and must not fetch anything itself.
+
+        hierarchy_enabled : typing.Optional[bool]
+            Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.
+
+        caps_enabled : typing.Optional[bool]
+            Send the customer's unit caps to the render bundle as `context.caps`. Needs `hierarchyEnabled` on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs `read:billing` to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.
 
         description : typing.Optional[str]
             Optional longer description of what the view shows.
@@ -589,6 +685,8 @@ class AsyncCustomViewsExperimentalClient:
             name=name,
             queries=queries,
             render_bundle=render_bundle,
+            hierarchy_enabled=hierarchy_enabled,
+            caps_enabled=caps_enabled,
             description=description,
             period=period,
             filters=filters,
@@ -700,7 +798,7 @@ class AsyncCustomViewsExperimentalClient:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        Returns the view's name, status, query ids, and the author render bundle for the owning organization (DRAFT or PUBLISHED). Used by the trusted preview/embed frame to render the sandbox; the per-customer data is fetched separately via /:displayId/data.
+        Returns the view's name, status, query ids, and the author render bundle for the owning organization. Only PUBLISHED views are returned; a DRAFT returns 404 (use getCustomViewAuthoring to read a DRAFT). Used by the trusted preview/embed frame to render the sandbox; the per-customer data is fetched separately via /:displayId/data.
 
         Parameters
         ----------
@@ -740,6 +838,8 @@ class AsyncCustomViewsExperimentalClient:
         self,
         display_id: str,
         *,
+        hierarchy_enabled: typing.Optional[bool] = OMIT,
+        caps_enabled: typing.Optional[bool] = OMIT,
         name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         queries: typing.Optional[typing.Sequence[CustomViewQuery]] = OMIT,
@@ -753,11 +853,17 @@ class AsyncCustomViewsExperimentalClient:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — `bundleEdits` (exact search-and-replace on the stored render bundle) and `queryUpserts`/`queryRemovals` (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: `renderBundle`, and `queries` (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load.
+        Partially updates a view. Omitted fields are left unchanged. For REVISIONS, prefer the incremental fields — `bundleEdits` (exact search-and-replace on the stored render bundle) and `queryUpserts`/`queryRemovals` (per-query changes) — so you transmit only what changed instead of re-sending the whole payload. The full-replacement fields remain for rewrites: `renderBundle`, and `queries` (a FULL replacement of the query list — never drop queries the user didn't ask to remove). Replacement and incremental forms of the same aspect cannot be combined. The resulting SQL and bundle pass the same validation as createCustomView (SELECT-only, size cap, self-contained, paid:data listener). Works on DRAFT or PUBLISHED views — published embeds pick the change up on their next load. If the queries or hierarchy setting change during validation, returns 409 CUSTOM_VIEW_UPDATE_CONFLICT; fetch the current authoring definition and reapply your changes before retrying.
 
         Parameters
         ----------
         display_id : str
+
+        hierarchy_enabled : typing.Optional[bool]
+            Enable customer unit navigation for a customer-scoped view. Setting true requires customer hierarchies to be enabled for your organization, and every query must support unit selection. Existing views default to false.
+
+        caps_enabled : typing.Optional[bool]
+            Send the customer's unit caps to the render bundle as `context.caps`. Needs `hierarchyEnabled` on a customer-scoped view. Turn it on only for views that draw cap usage: each load then reads cap usage from billing. Caps are spend policy, so an API key also needs `read:billing` to receive them in the data (they are left out otherwise) or to mint this view's embed token. Defaults to false.
 
         name : typing.Optional[str]
             New human-readable view name.
@@ -812,6 +918,8 @@ class AsyncCustomViewsExperimentalClient:
         """
         _response = await self._raw_client.update_custom_view(
             display_id,
+            hierarchy_enabled=hierarchy_enabled,
+            caps_enabled=caps_enabled,
             name=name,
             description=description,
             queries=queries,
@@ -821,6 +929,64 @@ class AsyncCustomViewsExperimentalClient:
             query_removals=query_removals,
             filters=filters,
             request_options=request_options,
+        )
+        return _response.data
+
+    async def get_custom_view_customer_units(
+        self,
+        display_id: str,
+        *,
+        customer_id: str,
+        limit: typing.Optional[int] = None,
+        offset: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ViewCustomerUnitsResponse:
+        """
+        ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
+
+        Lists active customer units for a published customer-scoped view with hierarchyEnabled set to true. Hierarchy eligibility is independent of the requested page or usage; requires credit hierarchies to be enabled for the organization.
+
+        Parameters
+        ----------
+        display_id : str
+
+        customer_id : str
+            The customer's external ID, Paid customer ID, or internal ID.
+
+        limit : typing.Optional[int]
+
+        offset : typing.Optional[int]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ViewCustomerUnitsResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.custom_views_experimental.get_custom_view_customer_units(
+                display_id="displayId",
+                customer_id="cus_acme",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_custom_view_customer_units(
+            display_id, customer_id=customer_id, limit=limit, offset=offset, request_options=request_options
         )
         return _response.data
 
@@ -834,12 +1000,15 @@ class AsyncCustomViewsExperimentalClient:
         period_amount: typing.Optional[int] = None,
         period_start: typing.Optional[str] = None,
         period_end: typing.Optional[str] = None,
+        include_draft: typing.Optional[GetCustomViewDataRequestIncludeDraft] = None,
+        unit_mode: typing.Optional[GetCustomViewDataRequestUnitMode] = None,
+        unit_external_id: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ViewDataResponse:
         """
         ⚠️ **Experimental** — this endpoint may change or be removed without notice and is not subject to v2 backwards-compatibility guarantees. Do not build production-critical integrations against it yet.
 
-        Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given `customerId` (both enforced as ClickHouse row filters) — `customerId` is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and `customerId` is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as `filter_<name>` query parameters (e.g. `filter_region=eu`); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it.
+        Runs every stored query of the view on the read-only analytics database and returns the result sets keyed by query id. For a customer-scoped view (the default), the query is scoped to the caller's organization AND the given `customerId` (both enforced as ClickHouse row filters) — `customerId` is required. For an organization-scoped view, the data is org-wide (scoped only to the caller's organization) and `customerId` is ignored. The scope is enforced by the database — it cannot be widened by the stored SQL. If the view declares filters, pass per-request values as `filter_<name>` query parameters (e.g. `filter_region=eu`); undeclared names or disallowed values are rejected with 400. Filters narrow data within the scope — never widen it. Only PUBLISHED views are served by default; a DRAFT returns 404. To check a saved DRAFT's real data before publishing, pass `includeDraft=true`. Embeds and share links never serve a DRAFT.
 
         Parameters
         ----------
@@ -862,6 +1031,15 @@ class AsyncCustomViewsExperimentalClient:
 
         period_end : typing.Optional[str]
             absolute override only: inclusive end date (YYYY-MM-DD).
+
+        include_draft : typing.Optional[GetCustomViewDataRequestIncludeDraft]
+            Pass 'true' to also serve a DRAFT view, so you can check its real data before publishing. Without it a DRAFT returns 404. End-customer embeds and share links never serve a DRAFT.
+
+        unit_mode : typing.Optional[GetCustomViewDataRequestUnitMode]
+            Unit selection for this request. Omit both unit parameters for all customer activity. Shared links instead use their saved starting selection when omitted; pass all to reset a shared link.
+
+        unit_external_id : typing.Optional[str]
+            The unit's external ID. Required with direct or subtree, and omitted with all.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -898,6 +1076,9 @@ class AsyncCustomViewsExperimentalClient:
             period_amount=period_amount,
             period_start=period_start,
             period_end=period_end,
+            include_draft=include_draft,
+            unit_mode=unit_mode,
+            unit_external_id=unit_external_id,
             request_options=request_options,
         )
         return _response.data

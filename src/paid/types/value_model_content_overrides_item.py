@@ -13,9 +13,6 @@ from .value_model_content_overrides_item_monetary_conversion_overrides_value imp
     ValueModelContentOverridesItemMonetaryConversionOverridesValue,
 )
 from .value_model_content_overrides_item_scope import ValueModelContentOverridesItemScope
-from .value_model_content_overrides_item_signal_overrides_value import (
-    ValueModelContentOverridesItemSignalOverridesValue,
-)
 from .value_model_content_overrides_item_value_type_overrides_value import (
     ValueModelContentOverridesItemValueTypeOverridesValue,
 )
@@ -26,17 +23,12 @@ class ValueModelContentOverridesItem(UniversalBaseModel):
     label: str
     scope: ValueModelContentOverridesItemScope
     currency: typing.Optional[str] = None
-    signal_overrides: typing_extensions.Annotated[
-        typing.Optional[typing.Dict[str, ValueModelContentOverridesItemSignalOverridesValue]],
-        FieldMetadata(alias="signalOverrides"),
-        pydantic.Field(alias="signalOverrides"),
-    ] = None
     value_type_overrides: typing_extensions.Annotated[
         typing.Optional[typing.Dict[str, ValueModelContentOverridesItemValueTypeOverridesValue]],
         FieldMetadata(alias="valueTypeOverrides"),
         pydantic.Field(
             alias="valueTypeOverrides",
-            description="Per-value-metric formula variable overrides, keyed by value type slug. Scoped to the named metric's formulas only — unlike signalOverrides (keyed by event name), a binding event shared with other metrics does not leak these values into them. When both shapes set the same variable, the value here wins.",
+            description="Per-value-metric formula variable overrides, keyed by value type slug. Scoped to the named metric's formulas only, so a binding event shared with other metrics does not leak these values into them.",
         ),
     ] = None
     additional_signals: typing_extensions.Annotated[

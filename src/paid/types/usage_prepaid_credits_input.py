@@ -31,6 +31,17 @@ class UsagePrepaidCreditsInput(UniversalBaseModel):
     unit_value: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="unitValue"), pydantic.Field(alias="unitValue")
     ] = None
+    overage_unit_price: typing_extensions.Annotated[
+        typing.Optional[int], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
+    ] = None
+    overage_unit_prices: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Optional[int]]],
+        FieldMetadata(alias="overageUnitPrices"),
+        pydantic.Field(
+            alias="overageUnitPrices",
+            description="Overage price per credit in the currency's minor units (40 is $0.40 for USD, ¥40 for JPY, 0.040 KWD for KWD), keyed by uppercase ISO 4217 currency code. On an invoice, an entry for the invoice currency on any of the order's pricing or credit benefits beats every overageUnitPrice; overageUnitPrice applies only when no holder has an entry for that currency. Writes keep the two consistent for the primary currency (the organization's default when the product is priced in it, else the product's only pricing currency; an order line's own currency): a map entry for it sets overageUnitPrice, winning when a write sends both, and an overageUnitPrice sent without the map updates an existing entry for it. A write that sends only overageUnitPrice never creates a map.",
+        ),
+    ] = None
     pricing_input: typing_extensions.Annotated[
         typing.Optional[UsagePrepaidCreditsInputPricingInput],
         FieldMetadata(alias="pricingInput"),
@@ -49,7 +60,10 @@ class UsagePrepaidCreditsInput(UniversalBaseModel):
     billing_type: typing_extensions.Annotated[
         typing.Optional[UsagePrepaidCreditsInputBillingType],
         FieldMetadata(alias="billingType"),
-        pydantic.Field(alias="billingType"),
+        pydantic.Field(
+            alias="billingType",
+            description="When usage is billed. Usage must use Arrears, prepaid credits included; to sell credits up front, add a credit benefit to a recurring, seat or one-time attribute.",
+        ),
     ] = None
     price_points: typing_extensions.Annotated[
         typing.Optional[typing.List[SimplePricePoint]],

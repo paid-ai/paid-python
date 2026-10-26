@@ -15,11 +15,18 @@ from ..types.order_lines_response import OrderLinesResponse
 from ..types.order_list_response import OrderListResponse
 from ..types.order_seat import OrderSeat
 from ..types.order_seat_list_response import OrderSeatListResponse
+from ..types.provision_contact import ProvisionContact
+from ..types.provision_customer import ProvisionCustomer
+from ..types.provision_external_reference import ProvisionExternalReference
+from ..types.provision_order import ProvisionOrder
+from ..types.provision_response import ProvisionResponse
 from .raw_client import AsyncRawOrdersClient, RawOrdersClient
 from .types.batch_seat_assignments_request_assignments_item import BatchSeatAssignmentsRequestAssignmentsItem
+from .types.create_order_request_payment_terms import CreateOrderRequestPaymentTerms
 from .types.list_order_seats_request_status import ListOrderSeatsRequestStatus
 from .types.list_orders_request_creation_state import ListOrdersRequestCreationState
 from .types.order_status_filter import OrderStatusFilter
+from .types.update_order_request_payment_terms import UpdateOrderRequestPaymentTerms
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -137,7 +144,7 @@ class OrdersClient:
         subscription_terms: typing.Optional[int] = OMIT,
         creation_state: typing.Optional[OrderCreationState] = OMIT,
         billing_anchor: typing.Optional[int] = OMIT,
-        payment_terms: typing.Optional[str] = OMIT,
+        payment_terms: typing.Optional[CreateOrderRequestPaymentTerms] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         currency: typing.Optional[str] = OMIT,
@@ -173,7 +180,7 @@ class OrdersClient:
         billing_anchor : typing.Optional[int]
             Day of month for billing anchor (1-31). Defaults to start date day if not provided.
 
-        payment_terms : typing.Optional[str]
+        payment_terms : typing.Optional[CreateOrderRequestPaymentTerms]
 
         external_id : typing.Optional[str]
 
@@ -277,7 +284,7 @@ class OrdersClient:
         subscription_terms: typing.Optional[int] = OMIT,
         creation_state: typing.Optional[OrderCreationState] = OMIT,
         billing_anchor: typing.Optional[int] = OMIT,
-        payment_terms: typing.Optional[str] = OMIT,
+        payment_terms: typing.Optional[UpdateOrderRequestPaymentTerms] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         billing_customer_id: typing.Optional[str] = OMIT,
@@ -289,7 +296,7 @@ class OrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
-        Update an order by ID
+        Update an order by ID. creationState must equal the order's current state; activate a draft order with POST /orders/{id}/activate.
 
         Parameters
         ----------
@@ -308,7 +315,7 @@ class OrdersClient:
         billing_anchor : typing.Optional[int]
             Day of month for billing anchor (1-31). Defaults to start date day if not provided.
 
-        payment_terms : typing.Optional[str]
+        payment_terms : typing.Optional[UpdateOrderRequestPaymentTerms]
 
         external_id : typing.Optional[str]
 
@@ -612,6 +619,153 @@ class OrdersClient:
         )
         return _response.data
 
+    def upsert_order_by_external_id(
+        self,
+        *,
+        idempotency_key: str,
+        external_reference: ProvisionExternalReference,
+        customer: ProvisionCustomer,
+        order: ProvisionOrder,
+        contact: typing.Optional[ProvisionContact] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ProvisionResponse:
+        """
+        Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+
+        Parameters
+        ----------
+        idempotency_key : str
+
+        external_reference : ProvisionExternalReference
+
+        customer : ProvisionCustomer
+
+        order : ProvisionOrder
+
+        contact : typing.Optional[ProvisionContact]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ProvisionResponse
+            200
+
+        Examples
+        --------
+        import datetime
+
+        from paid import (
+            CustomerBillingAddressInput,
+            Paid,
+            ProvisionCustomer,
+            ProvisionExternalReference,
+            ProvisionOrder,
+            ProvisionOrderLine,
+            ProvisionProduct,
+            ProvisionProductAttributesItem,
+            ProvisionProductAttributesItemPricing,
+            ProvisionProductAttributesItemPricingPricePoints,
+        )
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.orders.upsert_order_by_external_id(
+            idempotency_key="deal_88213-2026-09-30T14:05:00Z",
+            external_reference=ProvisionExternalReference(
+                source="standard",
+                metadata={"crmDealId": "deal_88213", "crmAccountId": "acct_4410"},
+            ),
+            customer=ProvisionCustomer(
+                external_id="acct_4410",
+                name="Northwind Logistics",
+                email="billing@northwind.example",
+                billing_address=CustomerBillingAddressInput(
+                    line1="200 Harbor Way",
+                    city="Seattle",
+                    state="WA",
+                    zip_code="98101",
+                    country="US",
+                ),
+            ),
+            order=ProvisionOrder(
+                external_id="deal_88213",
+                name="Northwind Logistics - Growth plan",
+                currency="USD",
+                start_date=datetime.datetime.fromisoformat(
+                    "2026-10-01 00:00:00+00:00",
+                ),
+                lines=[
+                    ProvisionOrderLine(
+                        external_id="deal_88213_platform",
+                        start_date=datetime.datetime.fromisoformat(
+                            "2026-10-01 00:00:00+00:00",
+                        ),
+                        product=ProvisionProduct(
+                            external_id="growth_plan",
+                            name="Growth plan",
+                            attributes=[
+                                ProvisionProductAttributesItem(
+                                    name="Platform fee",
+                                    pricing=ProvisionProductAttributesItemPricing(
+                                        charge_type="recurring",
+                                        pricing_model="perUnit",
+                                        billing_frequency="monthly",
+                                        billing_type="advance",
+                                        price_points=ProvisionProductAttributesItemPricingPricePoints(
+                                            currency="USD",
+                                            unit_price=49900,
+                                        ),
+                                    ),
+                                )
+                            ],
+                        ),
+                    ),
+                    ProvisionOrderLine(
+                        external_id="deal_88213_launch_discount",
+                        line_type="CREDIT",
+                        start_date=datetime.datetime.fromisoformat(
+                            "2026-10-01 00:00:00+00:00",
+                        ),
+                        end_date=datetime.datetime.fromisoformat(
+                            "2027-01-01 00:00:00+00:00",
+                        ),
+                        product=ProvisionProduct(
+                            external_id="launch_discount",
+                            name="Launch discount",
+                            attributes=[
+                                ProvisionProductAttributesItem(
+                                    name="Launch discount",
+                                    pricing=ProvisionProductAttributesItemPricing(
+                                        charge_type="recurring",
+                                        pricing_model="perUnit",
+                                        billing_frequency="monthly",
+                                        billing_type="advance",
+                                        price_points=ProvisionProductAttributesItemPricingPricePoints(
+                                            currency="USD",
+                                            unit_price=10000,
+                                        ),
+                                    ),
+                                )
+                            ],
+                        ),
+                    ),
+                ],
+            ),
+        )
+        """
+        _response = self._raw_client.upsert_order_by_external_id(
+            idempotency_key=idempotency_key,
+            external_reference=external_reference,
+            customer=customer,
+            order=order,
+            contact=contact,
+            request_options=request_options,
+        )
+        return _response.data
+
 
 class AsyncOrdersClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -733,7 +887,7 @@ class AsyncOrdersClient:
         subscription_terms: typing.Optional[int] = OMIT,
         creation_state: typing.Optional[OrderCreationState] = OMIT,
         billing_anchor: typing.Optional[int] = OMIT,
-        payment_terms: typing.Optional[str] = OMIT,
+        payment_terms: typing.Optional[CreateOrderRequestPaymentTerms] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         currency: typing.Optional[str] = OMIT,
@@ -769,7 +923,7 @@ class AsyncOrdersClient:
         billing_anchor : typing.Optional[int]
             Day of month for billing anchor (1-31). Defaults to start date day if not provided.
 
-        payment_terms : typing.Optional[str]
+        payment_terms : typing.Optional[CreateOrderRequestPaymentTerms]
 
         external_id : typing.Optional[str]
 
@@ -889,7 +1043,7 @@ class AsyncOrdersClient:
         subscription_terms: typing.Optional[int] = OMIT,
         creation_state: typing.Optional[OrderCreationState] = OMIT,
         billing_anchor: typing.Optional[int] = OMIT,
-        payment_terms: typing.Optional[str] = OMIT,
+        payment_terms: typing.Optional[UpdateOrderRequestPaymentTerms] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         billing_customer_id: typing.Optional[str] = OMIT,
@@ -901,7 +1055,7 @@ class AsyncOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
-        Update an order by ID
+        Update an order by ID. creationState must equal the order's current state; activate a draft order with POST /orders/{id}/activate.
 
         Parameters
         ----------
@@ -920,7 +1074,7 @@ class AsyncOrdersClient:
         billing_anchor : typing.Optional[int]
             Day of month for billing anchor (1-31). Defaults to start date day if not provided.
 
-        payment_terms : typing.Optional[str]
+        payment_terms : typing.Optional[UpdateOrderRequestPaymentTerms]
 
         external_id : typing.Optional[str]
 
@@ -1281,5 +1435,159 @@ class AsyncOrdersClient:
         """
         _response = await self._raw_client.batch_order_seat_assignments(
             id, assignments=assignments, request_options=request_options
+        )
+        return _response.data
+
+    async def upsert_order_by_external_id(
+        self,
+        *,
+        idempotency_key: str,
+        external_reference: ProvisionExternalReference,
+        customer: ProvisionCustomer,
+        order: ProvisionOrder,
+        contact: typing.Optional[ProvisionContact] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ProvisionResponse:
+        """
+        Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+
+        Parameters
+        ----------
+        idempotency_key : str
+
+        external_reference : ProvisionExternalReference
+
+        customer : ProvisionCustomer
+
+        order : ProvisionOrder
+
+        contact : typing.Optional[ProvisionContact]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ProvisionResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+        import datetime
+
+        from paid import (
+            AsyncPaid,
+            CustomerBillingAddressInput,
+            ProvisionCustomer,
+            ProvisionExternalReference,
+            ProvisionOrder,
+            ProvisionOrderLine,
+            ProvisionProduct,
+            ProvisionProductAttributesItem,
+            ProvisionProductAttributesItemPricing,
+            ProvisionProductAttributesItemPricingPricePoints,
+        )
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.orders.upsert_order_by_external_id(
+                idempotency_key="deal_88213-2026-09-30T14:05:00Z",
+                external_reference=ProvisionExternalReference(
+                    source="standard",
+                    metadata={"crmDealId": "deal_88213", "crmAccountId": "acct_4410"},
+                ),
+                customer=ProvisionCustomer(
+                    external_id="acct_4410",
+                    name="Northwind Logistics",
+                    email="billing@northwind.example",
+                    billing_address=CustomerBillingAddressInput(
+                        line1="200 Harbor Way",
+                        city="Seattle",
+                        state="WA",
+                        zip_code="98101",
+                        country="US",
+                    ),
+                ),
+                order=ProvisionOrder(
+                    external_id="deal_88213",
+                    name="Northwind Logistics - Growth plan",
+                    currency="USD",
+                    start_date=datetime.datetime.fromisoformat(
+                        "2026-10-01 00:00:00+00:00",
+                    ),
+                    lines=[
+                        ProvisionOrderLine(
+                            external_id="deal_88213_platform",
+                            start_date=datetime.datetime.fromisoformat(
+                                "2026-10-01 00:00:00+00:00",
+                            ),
+                            product=ProvisionProduct(
+                                external_id="growth_plan",
+                                name="Growth plan",
+                                attributes=[
+                                    ProvisionProductAttributesItem(
+                                        name="Platform fee",
+                                        pricing=ProvisionProductAttributesItemPricing(
+                                            charge_type="recurring",
+                                            pricing_model="perUnit",
+                                            billing_frequency="monthly",
+                                            billing_type="advance",
+                                            price_points=ProvisionProductAttributesItemPricingPricePoints(
+                                                currency="USD",
+                                                unit_price=49900,
+                                            ),
+                                        ),
+                                    )
+                                ],
+                            ),
+                        ),
+                        ProvisionOrderLine(
+                            external_id="deal_88213_launch_discount",
+                            line_type="CREDIT",
+                            start_date=datetime.datetime.fromisoformat(
+                                "2026-10-01 00:00:00+00:00",
+                            ),
+                            end_date=datetime.datetime.fromisoformat(
+                                "2027-01-01 00:00:00+00:00",
+                            ),
+                            product=ProvisionProduct(
+                                external_id="launch_discount",
+                                name="Launch discount",
+                                attributes=[
+                                    ProvisionProductAttributesItem(
+                                        name="Launch discount",
+                                        pricing=ProvisionProductAttributesItemPricing(
+                                            charge_type="recurring",
+                                            pricing_model="perUnit",
+                                            billing_frequency="monthly",
+                                            billing_type="advance",
+                                            price_points=ProvisionProductAttributesItemPricingPricePoints(
+                                                currency="USD",
+                                                unit_price=10000,
+                                            ),
+                                        ),
+                                    )
+                                ],
+                            ),
+                        ),
+                    ],
+                ),
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.upsert_order_by_external_id(
+            idempotency_key=idempotency_key,
+            external_reference=external_reference,
+            customer=customer,
+            order=order,
+            contact=contact,
+            request_options=request_options,
         )
         return _response.data

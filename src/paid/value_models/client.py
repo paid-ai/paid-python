@@ -62,10 +62,11 @@ class ValueModelsClient:
         content: ValueModelContent,
         effective_from: typing.Optional[dt.datetime] = OMIT,
         effective_to: typing.Optional[dt.datetime] = OMIT,
+        expected_active_version: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ValueModelDetail:
         """
-        Uploads a new value model version. Validates the content, creates a new version, archives the previous active version, syncs to ClickHouse, and triggers a backfill of all historical signals.
+        Uploads a new value model version. Validates the content, creates a new version, archives the previous active version, and syncs to ClickHouse. This updates how value is calculated going forward — new signals are valued under the new model. It does NOT re-rate historical signals; run POST /api/v2/value-models/backfill to re-rate history as a separate, explicit action. Any unpublished draft saved in the Paid app is discarded. Send expectedActiveVersion to get a 409 instead of overwriting a version published since you read it.
 
         Parameters
         ----------
@@ -74,6 +75,9 @@ class ValueModelsClient:
         effective_from : typing.Optional[dt.datetime]
 
         effective_to : typing.Optional[dt.datetime]
+
+        expected_active_version : typing.Optional[int]
+            Optimistic concurrency guard: the active version this upload is based on. When supplied and it does not match the live active version, the upload fails with 409 instead of overwriting a concurrent change.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -151,7 +155,11 @@ class ValueModelsClient:
         )
         """
         _response = self._raw_client.update_value_model(
-            content=content, effective_from=effective_from, effective_to=effective_to, request_options=request_options
+            content=content,
+            effective_from=effective_from,
+            effective_to=effective_to,
+            expected_active_version=expected_active_version,
+            request_options=request_options,
         )
         return _response.data
 
@@ -229,7 +237,7 @@ class ValueModelsClient:
         self, *, request_options: typing.Optional[RequestOptions] = None
     ) -> BackfillResponse:
         """
-        Manually triggers a recalculation of all ClickHouse rows against the current value model.
+        Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
 
         Parameters
         ----------
@@ -311,10 +319,11 @@ class AsyncValueModelsClient:
         content: ValueModelContent,
         effective_from: typing.Optional[dt.datetime] = OMIT,
         effective_to: typing.Optional[dt.datetime] = OMIT,
+        expected_active_version: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ValueModelDetail:
         """
-        Uploads a new value model version. Validates the content, creates a new version, archives the previous active version, syncs to ClickHouse, and triggers a backfill of all historical signals.
+        Uploads a new value model version. Validates the content, creates a new version, archives the previous active version, and syncs to ClickHouse. This updates how value is calculated going forward — new signals are valued under the new model. It does NOT re-rate historical signals; run POST /api/v2/value-models/backfill to re-rate history as a separate, explicit action. Any unpublished draft saved in the Paid app is discarded. Send expectedActiveVersion to get a 409 instead of overwriting a version published since you read it.
 
         Parameters
         ----------
@@ -323,6 +332,9 @@ class AsyncValueModelsClient:
         effective_from : typing.Optional[dt.datetime]
 
         effective_to : typing.Optional[dt.datetime]
+
+        expected_active_version : typing.Optional[int]
+            Optimistic concurrency guard: the active version this upload is based on. When supplied and it does not match the live active version, the upload fails with 409 instead of overwriting a concurrent change.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -407,7 +419,11 @@ class AsyncValueModelsClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.update_value_model(
-            content=content, effective_from=effective_from, effective_to=effective_to, request_options=request_options
+            content=content,
+            effective_from=effective_from,
+            effective_to=effective_to,
+            expected_active_version=expected_active_version,
+            request_options=request_options,
         )
         return _response.data
 
@@ -501,7 +517,7 @@ class AsyncValueModelsClient:
         self, *, request_options: typing.Optional[RequestOptions] = None
     ) -> BackfillResponse:
         """
-        Manually triggers a recalculation of all ClickHouse rows against the current value model.
+        Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
 
         Parameters
         ----------

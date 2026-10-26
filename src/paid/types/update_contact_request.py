@@ -12,7 +12,12 @@ from .update_contact_request_roles_item import UpdateContactRequestRolesItem
 
 class UpdateContactRequest(UniversalBaseModel):
     customer_id: typing_extensions.Annotated[
-        typing.Optional[str], FieldMetadata(alias="customerId"), pydantic.Field(alias="customerId")
+        typing.Optional[str],
+        FieldMetadata(alias="customerId"),
+        pydantic.Field(
+            alias="customerId",
+            description="Destination customer ID. A contact can move only if no orders or invoices reference it.",
+        ),
     ] = None
     first_name: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="firstName"), pydantic.Field(alias="firstName")

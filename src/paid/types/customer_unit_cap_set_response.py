@@ -7,7 +7,7 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .customer_unit_cap_current_period import CustomerUnitCapCurrentPeriod
-from .customer_unit_cap_open_policy import CustomerUnitCapOpenPolicy
+from .customer_unit_cap_saved_policy import CustomerUnitCapSavedPolicy
 
 
 class CustomerUnitCapSetResponse(UniversalBaseModel):
@@ -32,7 +32,12 @@ class CustomerUnitCapSetResponse(UniversalBaseModel):
             description="The credits currency the cap was set on: the requested `creditsCurrencyId`, or the organization's only credits currency when it was omitted.",
         ),
     ]
-    policy: CustomerUnitCapOpenPolicy
+    changed: bool = pydantic.Field()
+    """
+    Whether this save created a policy version. False when the effective timeline was already identical.
+    """
+
+    policy: CustomerUnitCapSavedPolicy
     current_period: typing_extensions.Annotated[
         typing.Optional[CustomerUnitCapCurrentPeriod],
         FieldMetadata(alias="currentPeriod"),
