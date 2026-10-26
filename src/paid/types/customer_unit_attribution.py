@@ -10,14 +10,15 @@ from ..core.serialization import FieldMetadata
 
 class CustomerUnitAttribution(UniversalBaseModel):
     """
-    The customer unit (a node in the customer's internal hierarchy) this usage belongs to. Optional; omit to attribute to the customer only.
+    The customer unit (a node in the customer's internal hierarchy) this usage belongs to, by your key for the unit or by an alias that points at it. Paid's unit ID is not accepted. Sent with `customer`, the unit must belong to that customer. Omit to attribute to the customer only.
     """
 
     external_customer_unit_id: typing_extensions.Annotated[
         str,
         FieldMetadata(alias="externalCustomerUnitId"),
         pydantic.Field(
-            alias="externalCustomerUnitId", description="Your external customer unit ID. Cannot be `.` or `..`."
+            alias="externalCustomerUnitId",
+            description="Your external customer unit ID (the unit's key), or an alias that points at a unit. Cannot be `.` or `..`.",
         ),
     ]
 

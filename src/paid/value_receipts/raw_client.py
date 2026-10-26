@@ -254,7 +254,7 @@ class RawValueReceiptsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ValueReceiptSyncResponse]:
         """
-        Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), refreshed with current data, and creates one only if there is none (201), so calling twice does not give the customer two receipts.
+        Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), and creates one only if there is none (201), so calling twice does not give the customer two receipts. A receipt does not change after it is created, so a repeated call reports the same figures. Create a new receipt to report the period again with newer data.
 
         Parameters
         ----------
@@ -446,7 +446,7 @@ class RawValueReceiptsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[ValueReceiptSyncResponse]:
         """
-        Re-populate an existing draft value receipt with current data inline. Returns the slim sync response. Sealed VRs cannot be refreshed.
+        Deprecated. A value receipt is immutable from creation, so it cannot be re-populated. A receipt you own answers 409, and one that does not exist or belongs to another organization answers 404. To get current data, create a new receipt for the period with `POST /value-receipts`.
 
         Parameters
         ----------
@@ -544,7 +544,7 @@ class RawValueReceiptsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[SuccessResponse]:
         """
-        Transition a draft value receipt to sealed (posted) status. Sealed VRs are immutable — they cannot be updated or re-populated.
+        Deprecated. A value receipt is immutable from creation, so it is already sealed and this call has nothing to do. It answers 200 for any receipt the organization owns.
 
         Parameters
         ----------
@@ -707,7 +707,7 @@ class RawValueReceiptsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[SuccessResponse]:
         """
-        Restore an archived value receipt.
+        Restore an archived value receipt. A receipt with no content, or one that failed to build, stays archived and answers 409. So does one whose period another value receipt now covers.
 
         Parameters
         ----------
@@ -798,13 +798,14 @@ class RawValueReceiptsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ValueReceiptDetail]:
         """
-        Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
+        Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first. So is one with no content, which has nothing to show.
 
         Parameters
         ----------
         id : str
 
         publish_expires_at : typing.Optional[dt.datetime]
+            When the public link stops working. Must be in the future, or the request fails with 409. Omit or set null for a link that does not expire.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1189,7 +1190,7 @@ class AsyncRawValueReceiptsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ValueReceiptSyncResponse]:
         """
-        Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), refreshed with current data, and creates one only if there is none (201), so calling twice does not give the customer two receipts.
+        Deprecated — use POST /value-receipts. Returns the receipt this customer already has for the date range (200), and creates one only if there is none (201), so calling twice does not give the customer two receipts. A receipt does not change after it is created, so a repeated call reports the same figures. Create a new receipt to report the period again with newer data.
 
         Parameters
         ----------
@@ -1381,7 +1382,7 @@ class AsyncRawValueReceiptsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[ValueReceiptSyncResponse]:
         """
-        Re-populate an existing draft value receipt with current data inline. Returns the slim sync response. Sealed VRs cannot be refreshed.
+        Deprecated. A value receipt is immutable from creation, so it cannot be re-populated. A receipt you own answers 409, and one that does not exist or belongs to another organization answers 404. To get current data, create a new receipt for the period with `POST /value-receipts`.
 
         Parameters
         ----------
@@ -1479,7 +1480,7 @@ class AsyncRawValueReceiptsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[SuccessResponse]:
         """
-        Transition a draft value receipt to sealed (posted) status. Sealed VRs are immutable — they cannot be updated or re-populated.
+        Deprecated. A value receipt is immutable from creation, so it is already sealed and this call has nothing to do. It answers 200 for any receipt the organization owns.
 
         Parameters
         ----------
@@ -1642,7 +1643,7 @@ class AsyncRawValueReceiptsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[SuccessResponse]:
         """
-        Restore an archived value receipt.
+        Restore an archived value receipt. A receipt with no content, or one that failed to build, stays archived and answers 409. So does one whose period another value receipt now covers.
 
         Parameters
         ----------
@@ -1733,13 +1734,14 @@ class AsyncRawValueReceiptsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ValueReceiptDetail]:
         """
-        Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first.
+        Make a value receipt publicly accessible via URL. An archived receipt is rejected with 409 — unarchive it first. So is one with no content, which has nothing to show.
 
         Parameters
         ----------
         id : str
 
         publish_expires_at : typing.Optional[dt.datetime]
+            When the public link stops working. Must be in the future, or the request fails with 409. Omit or set null for a link that does not expire.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

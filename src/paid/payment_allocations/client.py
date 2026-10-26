@@ -85,7 +85,7 @@ class PaymentAllocationsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> PaymentAllocationCreateResponse:
         """
-        Allocates a payment across one or more invoice lines. When an invoice becomes fully paid, its credit entitlements are processed.
+        Allocates a payment across one or more invoice lines of posted invoices, in the payment's currency. When an invoice becomes fully paid, its credit entitlements are processed. Returns 409 when a concurrent allocation has already spent the balance.
 
         Parameters
         ----------
@@ -206,7 +206,7 @@ class AsyncPaymentAllocationsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> PaymentAllocationCreateResponse:
         """
-        Allocates a payment across one or more invoice lines. When an invoice becomes fully paid, its credit entitlements are processed.
+        Allocates a payment across one or more invoice lines of posted invoices, in the payment's currency. When an invoice becomes fully paid, its credit entitlements are processed. Returns 409 when a concurrent allocation has already spent the balance.
 
         Parameters
         ----------

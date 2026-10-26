@@ -4,9 +4,11 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .custom_view_data_context import CustomViewDataContext
 
 
 class ViewDataResponse(UniversalBaseModel):
+    context: typing.Optional[CustomViewDataContext] = None
     data: typing.Dict[str, typing.List[typing.Dict[str, typing.Any]]] = pydantic.Field()
     """
     Result sets keyed by query id. Each value is an array of row objects (column name → value); 64-bit integers are returned as JSON strings to preserve precision.

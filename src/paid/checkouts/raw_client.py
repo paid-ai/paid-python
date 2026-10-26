@@ -12,6 +12,7 @@ from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
+from ..errors.conflict_error import ConflictError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
@@ -128,6 +129,8 @@ class RawCheckoutsClient:
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         collect_address: typing.Optional[bool] = OMIT,
         collect_phone: typing.Optional[bool] = OMIT,
+        success_title: typing.Optional[str] = OMIT,
+        success_message: typing.Optional[str] = OMIT,
         single_use: typing.Optional[bool] = OMIT,
         currency: typing.Optional[str] = OMIT,
         custom_cards: typing.Optional[typing.Sequence[CheckoutCustomCardInput]] = OMIT,
@@ -150,12 +153,19 @@ class RawCheckoutsClient:
         cancel_url : typing.Optional[str]
 
         expires_at : typing.Optional[dt.datetime]
+            When the checkout link expires. Must be in the future. Defaults to 24 hours after creation.
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         collect_address : typing.Optional[bool]
 
         collect_phone : typing.Optional[bool]
+
+        success_title : typing.Optional[str]
+            Heading on the confirmation screen the customer sees after completing checkout, shown instead of "Payment successful". Plain text, up to 80 characters. Omit it to keep the default.
+
+        success_message : typing.Optional[str]
+            Text under the heading on the confirmation screen, shown instead of "Thank you for your purchase!". Plain text, up to 500 characters. Omit it to keep the default. Right after checkout, the page still adds "You will be redirected shortly." before sending the customer to `successUrl`.
 
         single_use : typing.Optional[bool]
 
@@ -188,6 +198,8 @@ class RawCheckoutsClient:
                 "metadata": metadata,
                 "collectAddress": collect_address,
                 "collectPhone": collect_phone,
+                "successTitle": success_title,
+                "successMessage": success_message,
                 "singleUse": single_use,
                 "currency": currency,
                 "customCards": convert_and_respect_annotation_metadata(
@@ -334,7 +346,7 @@ class RawCheckoutsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[EmptyResponse]:
         """
-        Archive a checkout by ID
+        Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
 
         Parameters
         ----------
@@ -376,6 +388,17 @@ class RawCheckoutsClient:
                 )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -503,6 +526,8 @@ class AsyncRawCheckoutsClient:
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         collect_address: typing.Optional[bool] = OMIT,
         collect_phone: typing.Optional[bool] = OMIT,
+        success_title: typing.Optional[str] = OMIT,
+        success_message: typing.Optional[str] = OMIT,
         single_use: typing.Optional[bool] = OMIT,
         currency: typing.Optional[str] = OMIT,
         custom_cards: typing.Optional[typing.Sequence[CheckoutCustomCardInput]] = OMIT,
@@ -525,12 +550,19 @@ class AsyncRawCheckoutsClient:
         cancel_url : typing.Optional[str]
 
         expires_at : typing.Optional[dt.datetime]
+            When the checkout link expires. Must be in the future. Defaults to 24 hours after creation.
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         collect_address : typing.Optional[bool]
 
         collect_phone : typing.Optional[bool]
+
+        success_title : typing.Optional[str]
+            Heading on the confirmation screen the customer sees after completing checkout, shown instead of "Payment successful". Plain text, up to 80 characters. Omit it to keep the default.
+
+        success_message : typing.Optional[str]
+            Text under the heading on the confirmation screen, shown instead of "Thank you for your purchase!". Plain text, up to 500 characters. Omit it to keep the default. Right after checkout, the page still adds "You will be redirected shortly." before sending the customer to `successUrl`.
 
         single_use : typing.Optional[bool]
 
@@ -563,6 +595,8 @@ class AsyncRawCheckoutsClient:
                 "metadata": metadata,
                 "collectAddress": collect_address,
                 "collectPhone": collect_phone,
+                "successTitle": success_title,
+                "successMessage": success_message,
                 "singleUse": single_use,
                 "currency": currency,
                 "customCards": convert_and_respect_annotation_metadata(
@@ -709,7 +743,7 @@ class AsyncRawCheckoutsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[EmptyResponse]:
         """
-        Archive a checkout by ID
+        Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
 
         Parameters
         ----------
@@ -751,6 +785,17 @@ class AsyncRawCheckoutsClient:
                 )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,

@@ -7,6 +7,7 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
+from .customer_unit_cap_schedule_input import CustomerUnitCapScheduleInput
 from .customer_unit_cap_set_frequency import CustomerUnitCapSetFrequency
 
 
@@ -18,9 +19,10 @@ class CustomerUnitCapSet(UniversalBaseModel):
 
     frequency: typing.Optional[CustomerUnitCapSetFrequency] = pydantic.Field(default=None)
     """
-    Period length. Periods start on the day-of-month of `effectiveFrom` (UTC), clamped in shorter months.
+    Monthly UTC periods, with boundaries defined by `schedule`.
     """
 
+    schedule: typing.Optional[CustomerUnitCapScheduleInput] = None
     credits_currency_id: typing_extensions.Annotated[
         typing.Optional[str],
         FieldMetadata(alias="creditsCurrencyId"),
@@ -34,7 +36,7 @@ class CustomerUnitCapSet(UniversalBaseModel):
         FieldMetadata(alias="effectiveFrom"),
         pydantic.Field(
             alias="effectiveFrom",
-            description="ISO 8601 timestamp. When the cap starts applying and the anchor day for its periods (UTC). Defaults to now when omitted. Spend earlier in the period that contains it still counts toward the cap.",
+            description="ISO 8601 timestamp. When the cap starts applying, independently of its schedule. Defaults to now. Spend earlier in the schedule’s current period still counts.",
         ),
     ] = None
 

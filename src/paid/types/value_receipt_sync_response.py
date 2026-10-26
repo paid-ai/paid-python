@@ -11,7 +11,11 @@ from ..core.serialization import FieldMetadata
 
 class ValueReceiptSyncResponse(UniversalBaseModel):
     id: str
-    status: str
+    status: str = pydantic.Field()
+    """
+    Always "posted".
+    """
+
     public_url_token: typing_extensions.Annotated[
         str, FieldMetadata(alias="publicUrlToken"), pydantic.Field(alias="publicUrlToken")
     ]

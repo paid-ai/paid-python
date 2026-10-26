@@ -6,10 +6,12 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
-from .custom_view_preview_harness_request_synthetic_value_item import CustomViewPreviewHarnessRequestSyntheticValueItem
+from .custom_view_data_context import CustomViewDataContext
+from .custom_view_preview_harness_column import CustomViewPreviewHarnessColumn
 
 
 class CustomViewPreviewHarnessRequest(UniversalBaseModel):
+    context: typing.Optional[CustomViewDataContext] = None
     render_bundle: typing_extensions.Annotated[
         str,
         FieldMetadata(alias="renderBundle"),
@@ -20,11 +22,11 @@ class CustomViewPreviewHarnessRequest(UniversalBaseModel):
     ]
     data: typing.Optional[typing.Dict[str, typing.List[typing.Dict[str, typing.Any]]]] = pydantic.Field(default=None)
     """
-    Optional sample data keyed by query id (as getCustomViewData returns it), e.g. `{ "usage": [{ "day": "2026-01-01", "signals": "42" }] }`. Delivered to the bundle via the same `paid:data` message the real embed sends. Omit to preview the empty state. If these rows are fabricated (a data-restricted org), also set `sampleData: true` so the harness is marked with a sample-data banner.
+    Optional sample data keyed by query id (the `data` field of a getCustomViewData response), e.g. `{ "usage": [{ "day": "2026-01-01", "signals": "42" }] }`. Delivered to the bundle via the same `paid:data` message the real embed sends. Omit to preview the empty state. If these rows are fabricated (a data-restricted org), also set `sampleData: true` so the harness is marked with a sample-data banner.
     """
 
-    synthetic: typing.Optional[typing.Dict[str, typing.List[CustomViewPreviewHarnessRequestSyntheticValueItem]]] = (
-        pydantic.Field(default=None)
+    synthetic: typing.Optional[typing.Dict[str, typing.List[CustomViewPreviewHarnessColumn]]] = pydantic.Field(
+        default=None
     )
     """
     For data-restricted orgs (API key without read:analytics, so the real data endpoints are blocked): a per-query column contract, keyed by query id, describing the columns each SQL returns. The server fabricates deterministic sample rows from it — no query runs, so no customer data is used — and marks the preview as sample data. Mutually exclusive with `data`.
