@@ -20,6 +20,14 @@ class CustomerAlias(UniversalBaseModel):
         FieldMetadata(alias="customerId"),
         pydantic.Field(alias="customerId", description="Paid customer display ID this alias resolves to."),
     ]
+    customer_unit_external_id: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="customerUnitExternalId"),
+        pydantic.Field(
+            alias="customerUnitExternalId",
+            description="Your id of the customer unit signals carrying this alias land on: the unit the alias was created under, or the customer's root unit for a customer-level alias. `null` only while the customer has no root unit.",
+        ),
+    ] = None
     name: typing.Optional[str] = None
     description: typing.Optional[str] = None
     created_at: typing_extensions.Annotated[

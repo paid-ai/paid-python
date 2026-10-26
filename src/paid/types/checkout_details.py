@@ -38,6 +38,22 @@ class CheckoutDetails(UniversalBaseModel):
     collect_phone: typing_extensions.Annotated[
         bool, FieldMetadata(alias="collectPhone"), pydantic.Field(alias="collectPhone")
     ]
+    success_title: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="successTitle"),
+        pydantic.Field(
+            alias="successTitle",
+            description='Heading on the confirmation screen after checkout. Null when the checkout shows the default, "Payment successful".',
+        ),
+    ] = None
+    success_message: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="successMessage"),
+        pydantic.Field(
+            alias="successMessage",
+            description='Text under the heading on the confirmation screen. Null when the checkout shows the default, "Thank you for your purchase!".',
+        ),
+    ] = None
     single_use: typing_extensions.Annotated[bool, FieldMetadata(alias="singleUse"), pydantic.Field(alias="singleUse")]
     allowed_currencies: typing_extensions.Annotated[
         typing.List[str], FieldMetadata(alias="allowedCurrencies"), pydantic.Field(alias="allowedCurrencies")

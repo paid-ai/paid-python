@@ -2,4 +2,6 @@
 
 import typing
 
-ProductCreditBenefitInputAllocationCadence = typing.Union[typing.Literal["upfront", "monthly"], typing.Any]
+ProductCreditBenefitInputAllocationCadence = typing.Union[
+    typing.Literal["upfront", "monthly", "quarterly", "semi_annually"], typing.Any
+]

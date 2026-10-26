@@ -26,10 +26,17 @@ from ..types.order_lines_response import OrderLinesResponse
 from ..types.order_list_response import OrderListResponse
 from ..types.order_seat import OrderSeat
 from ..types.order_seat_list_response import OrderSeatListResponse
+from ..types.provision_contact import ProvisionContact
+from ..types.provision_customer import ProvisionCustomer
+from ..types.provision_external_reference import ProvisionExternalReference
+from ..types.provision_order import ProvisionOrder
+from ..types.provision_response import ProvisionResponse
 from .types.batch_seat_assignments_request_assignments_item import BatchSeatAssignmentsRequestAssignmentsItem
+from .types.create_order_request_payment_terms import CreateOrderRequestPaymentTerms
 from .types.list_order_seats_request_status import ListOrderSeatsRequestStatus
 from .types.list_orders_request_creation_state import ListOrdersRequestCreationState
 from .types.order_status_filter import OrderStatusFilter
+from .types.update_order_request_payment_terms import UpdateOrderRequestPaymentTerms
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -177,7 +184,7 @@ class RawOrdersClient:
         subscription_terms: typing.Optional[int] = OMIT,
         creation_state: typing.Optional[OrderCreationState] = OMIT,
         billing_anchor: typing.Optional[int] = OMIT,
-        payment_terms: typing.Optional[str] = OMIT,
+        payment_terms: typing.Optional[CreateOrderRequestPaymentTerms] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         currency: typing.Optional[str] = OMIT,
@@ -213,7 +220,7 @@ class RawOrdersClient:
         billing_anchor : typing.Optional[int]
             Day of month for billing anchor (1-31). Defaults to start date day if not provided.
 
-        payment_terms : typing.Optional[str]
+        payment_terms : typing.Optional[CreateOrderRequestPaymentTerms]
 
         external_id : typing.Optional[str]
 
@@ -405,7 +412,7 @@ class RawOrdersClient:
         subscription_terms: typing.Optional[int] = OMIT,
         creation_state: typing.Optional[OrderCreationState] = OMIT,
         billing_anchor: typing.Optional[int] = OMIT,
-        payment_terms: typing.Optional[str] = OMIT,
+        payment_terms: typing.Optional[UpdateOrderRequestPaymentTerms] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         billing_customer_id: typing.Optional[str] = OMIT,
@@ -417,7 +424,7 @@ class RawOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Order]:
         """
-        Update an order by ID
+        Update an order by ID. creationState must equal the order's current state; activate a draft order with POST /orders/{id}/activate.
 
         Parameters
         ----------
@@ -436,7 +443,7 @@ class RawOrdersClient:
         billing_anchor : typing.Optional[int]
             Day of month for billing anchor (1-31). Defaults to start date day if not provided.
 
-        payment_terms : typing.Optional[str]
+        payment_terms : typing.Optional[UpdateOrderRequestPaymentTerms]
 
         external_id : typing.Optional[str]
 
@@ -1107,6 +1114,122 @@ class RawOrdersClient:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def upsert_order_by_external_id(
+        self,
+        *,
+        idempotency_key: str,
+        external_reference: ProvisionExternalReference,
+        customer: ProvisionCustomer,
+        order: ProvisionOrder,
+        contact: typing.Optional[ProvisionContact] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[ProvisionResponse]:
+        """
+        Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+
+        Parameters
+        ----------
+        idempotency_key : str
+
+        external_reference : ProvisionExternalReference
+
+        customer : ProvisionCustomer
+
+        order : ProvisionOrder
+
+        contact : typing.Optional[ProvisionContact]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[ProvisionResponse]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "provision/",
+            method="POST",
+            json={
+                "externalReference": convert_and_respect_annotation_metadata(
+                    object_=external_reference, annotation=ProvisionExternalReference, direction="write"
+                ),
+                "customer": convert_and_respect_annotation_metadata(
+                    object_=customer, annotation=ProvisionCustomer, direction="write"
+                ),
+                "contact": convert_and_respect_annotation_metadata(
+                    object_=contact, annotation=ProvisionContact, direction="write"
+                ),
+                "order": convert_and_respect_annotation_metadata(
+                    object_=order, annotation=ProvisionOrder, direction="write"
+                ),
+            },
+            headers={
+                "content-type": "application/json",
+                "idempotency-key": str(idempotency_key) if idempotency_key is not None else None,
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ProvisionResponse,
+                    parse_obj_as(
+                        type_=ProvisionResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
 
 class AsyncRawOrdersClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -1250,7 +1373,7 @@ class AsyncRawOrdersClient:
         subscription_terms: typing.Optional[int] = OMIT,
         creation_state: typing.Optional[OrderCreationState] = OMIT,
         billing_anchor: typing.Optional[int] = OMIT,
-        payment_terms: typing.Optional[str] = OMIT,
+        payment_terms: typing.Optional[CreateOrderRequestPaymentTerms] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         currency: typing.Optional[str] = OMIT,
@@ -1286,7 +1409,7 @@ class AsyncRawOrdersClient:
         billing_anchor : typing.Optional[int]
             Day of month for billing anchor (1-31). Defaults to start date day if not provided.
 
-        payment_terms : typing.Optional[str]
+        payment_terms : typing.Optional[CreateOrderRequestPaymentTerms]
 
         external_id : typing.Optional[str]
 
@@ -1478,7 +1601,7 @@ class AsyncRawOrdersClient:
         subscription_terms: typing.Optional[int] = OMIT,
         creation_state: typing.Optional[OrderCreationState] = OMIT,
         billing_anchor: typing.Optional[int] = OMIT,
-        payment_terms: typing.Optional[str] = OMIT,
+        payment_terms: typing.Optional[UpdateOrderRequestPaymentTerms] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         billing_customer_id: typing.Optional[str] = OMIT,
@@ -1490,7 +1613,7 @@ class AsyncRawOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Order]:
         """
-        Update an order by ID
+        Update an order by ID. creationState must equal the order's current state; activate a draft order with POST /orders/{id}/activate.
 
         Parameters
         ----------
@@ -1509,7 +1632,7 @@ class AsyncRawOrdersClient:
         billing_anchor : typing.Optional[int]
             Day of month for billing anchor (1-31). Defaults to start date day if not provided.
 
-        payment_terms : typing.Optional[str]
+        payment_terms : typing.Optional[UpdateOrderRequestPaymentTerms]
 
         external_id : typing.Optional[str]
 
@@ -2144,6 +2267,122 @@ class AsyncRawOrdersClient:
                 )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def upsert_order_by_external_id(
+        self,
+        *,
+        idempotency_key: str,
+        external_reference: ProvisionExternalReference,
+        customer: ProvisionCustomer,
+        order: ProvisionOrder,
+        contact: typing.Optional[ProvisionContact] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[ProvisionResponse]:
+        """
+        Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+
+        Parameters
+        ----------
+        idempotency_key : str
+
+        external_reference : ProvisionExternalReference
+
+        customer : ProvisionCustomer
+
+        order : ProvisionOrder
+
+        contact : typing.Optional[ProvisionContact]
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[ProvisionResponse]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "provision/",
+            method="POST",
+            json={
+                "externalReference": convert_and_respect_annotation_metadata(
+                    object_=external_reference, annotation=ProvisionExternalReference, direction="write"
+                ),
+                "customer": convert_and_respect_annotation_metadata(
+                    object_=customer, annotation=ProvisionCustomer, direction="write"
+                ),
+                "contact": convert_and_respect_annotation_metadata(
+                    object_=contact, annotation=ProvisionContact, direction="write"
+                ),
+                "order": convert_and_respect_annotation_metadata(
+                    object_=order, annotation=ProvisionOrder, direction="write"
+                ),
+            },
+            headers={
+                "content-type": "application/json",
+                "idempotency-key": str(idempotency_key) if idempotency_key is not None else None,
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ProvisionResponse,
+                    parse_obj_as(
+                        type_=ProvisionResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,

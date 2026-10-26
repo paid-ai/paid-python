@@ -8,15 +8,19 @@ from importlib import import_module
 if typing.TYPE_CHECKING:
     from .types import (
         BatchSeatAssignmentsRequestAssignmentsItem,
+        CreateOrderRequestPaymentTerms,
         ListOrderSeatsRequestStatus,
         ListOrdersRequestCreationState,
         OrderStatusFilter,
+        UpdateOrderRequestPaymentTerms,
     )
 _dynamic_imports: typing.Dict[str, str] = {
     "BatchSeatAssignmentsRequestAssignmentsItem": ".types",
+    "CreateOrderRequestPaymentTerms": ".types",
     "ListOrderSeatsRequestStatus": ".types",
     "ListOrdersRequestCreationState": ".types",
     "OrderStatusFilter": ".types",
+    "UpdateOrderRequestPaymentTerms": ".types",
 }
 
 
@@ -43,7 +47,9 @@ def __dir__():
 
 __all__ = [
     "BatchSeatAssignmentsRequestAssignmentsItem",
+    "CreateOrderRequestPaymentTerms",
     "ListOrderSeatsRequestStatus",
     "ListOrdersRequestCreationState",
     "OrderStatusFilter",
+    "UpdateOrderRequestPaymentTerms",
 ]

@@ -328,6 +328,14 @@ class PricingInput_UsagePrepaidCredits(UniversalBaseModel):
     unit_value: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="unitValue"), pydantic.Field(alias="unitValue")
     ] = None
+    overage_unit_price: typing_extensions.Annotated[
+        typing.Optional[int], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
+    ] = None
+    overage_unit_prices: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Optional[int]]],
+        FieldMetadata(alias="overageUnitPrices"),
+        pydantic.Field(alias="overageUnitPrices"),
+    ] = None
     pricing_input: typing_extensions.Annotated[
         typing.Optional[UsagePrepaidCreditsInputPricingInput],
         FieldMetadata(alias="pricingInput"),
@@ -384,6 +392,11 @@ class PricingInput_UsageBracketedPrepaidCredits(UniversalBaseModel):
     ] = None
     overage_unit_price: typing_extensions.Annotated[
         typing.Optional[int], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
+    ] = None
+    overage_unit_prices: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Optional[int]]],
+        FieldMetadata(alias="overageUnitPrices"),
+        pydantic.Field(alias="overageUnitPrices"),
     ] = None
     credit_rollover_amount: typing_extensions.Annotated[
         typing.Optional[float],
@@ -613,6 +626,14 @@ class PricingInput_SeatBasedPrepaidCredits(UniversalBaseModel):
     ]
     unit_value: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="unitValue"), pydantic.Field(alias="unitValue")
+    ] = None
+    overage_unit_price: typing_extensions.Annotated[
+        typing.Optional[int], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
+    ] = None
+    overage_unit_prices: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Optional[int]]],
+        FieldMetadata(alias="overageUnitPrices"),
+        pydantic.Field(alias="overageUnitPrices"),
     ] = None
     billing_frequency: typing_extensions.Annotated[
         SeatBasedPrepaidCreditsInputBillingFrequency,

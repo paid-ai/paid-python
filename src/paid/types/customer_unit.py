@@ -11,6 +11,11 @@ from .customer_unit_status import CustomerUnitStatus
 
 
 class CustomerUnit(UniversalBaseModel):
+    id: str = pydantic.Field()
+    """
+    Paid's id for the unit (`cu_…`), unique within the organization and stable across renames of the customer. For reference only: no unit route accepts it, and routes and signals name a unit by its `externalId`.
+    """
+
     external_id: typing_extensions.Annotated[
         str,
         FieldMetadata(alias="externalId"),
@@ -19,6 +24,19 @@ class CustomerUnit(UniversalBaseModel):
             description="Your own id for the unit, unique within the customer; the identifier every unit route takes.",
         ),
     ]
+    customer_id: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="customerId"),
+        pydantic.Field(
+            alias="customerId",
+            description="Paid's id of the customer the unit belongs to (`cus_…`). `null` only for a legacy customer that has no Paid id; `customerExternalId` still names it.",
+        ),
+    ] = None
+    customer_external_id: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="customerExternalId"),
+        pydantic.Field(alias="customerExternalId", description="Your external id of that customer, when it has one."),
+    ] = None
     name: str = pydantic.Field()
     """
     Display name. Never used to address the unit.
@@ -31,7 +49,7 @@ class CustomerUnit(UniversalBaseModel):
     ] = None
     status: CustomerUnitStatus = pydantic.Field()
     """
-    ACTIVE, or DELETED after a soft delete (one-way).
+    ACTIVE; DELETED after a soft delete (one-way); or DRAFT, a placeholder that holds the key for this customer until you create the unit with that key (which promotes it) or delete it (soft, the key stays reserved, as for any unit). A draft is never a parent and never carries a cap.
     """
 
     parent_external_id: typing_extensions.Annotated[
@@ -48,6 +66,19 @@ class CustomerUnit(UniversalBaseModel):
         pydantic.Field(
             alias="isRoot",
             description="Whether this unit is the customer's root: the one unit without a parent. Derived from the missing parent, not stored. At most one active root per customer; the root cannot be moved, and once deleted a new root can be created.",
+        ),
+    ]
+    billable: bool = pydantic.Field()
+    """
+    The unit's own setting, as last created or updated: `false` marks it, and every unit under it, non-billable. Always `true` on the root. `effectiveBillable` says whether the unit is billable once its ancestors are counted. Usage on a non-billable unit is still recorded but not billed: it burns no credits, adds nothing to invoices or overage, and counts toward no cap, on a price whose usage comes from a meter (read from your events when the invoice closes) too. A meter's derived signal, and a correlation-window meter's window, follow the source event they take their unit from (the window's closing event, else its opening event): they are not billed when that event was not. Usage is still billed when it is sent with a customer API key, and on cost-plus pricing, which bills from costs that carry no unit. Only signals sent to `/api/v2/signals` that resolve to an active unit, by its key or through an alias on it, can be non-billable, and a change applies to signals received afterwards.
+    """
+
+    effective_billable: typing_extensions.Annotated[
+        bool,
+        FieldMetadata(alias="effectiveBillable"),
+        pydantic.Field(
+            alias="effectiveBillable",
+            description="Read-only. Whether the unit is billable in effect: `false` when the unit or any unit above it has `billable: false`. A unit cannot make itself billable under a non-billable ancestor, and moving a unit under one makes it non-billable.",
         ),
     ]
     metadata: typing.Optional[typing.Dict[str, typing.Any]] = None

@@ -86,6 +86,8 @@ class CheckoutsClient:
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         collect_address: typing.Optional[bool] = OMIT,
         collect_phone: typing.Optional[bool] = OMIT,
+        success_title: typing.Optional[str] = OMIT,
+        success_message: typing.Optional[str] = OMIT,
         single_use: typing.Optional[bool] = OMIT,
         currency: typing.Optional[str] = OMIT,
         custom_cards: typing.Optional[typing.Sequence[CheckoutCustomCardInput]] = OMIT,
@@ -108,12 +110,19 @@ class CheckoutsClient:
         cancel_url : typing.Optional[str]
 
         expires_at : typing.Optional[dt.datetime]
+            When the checkout link expires. Must be in the future. Defaults to 24 hours after creation.
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         collect_address : typing.Optional[bool]
 
         collect_phone : typing.Optional[bool]
+
+        success_title : typing.Optional[str]
+            Heading on the confirmation screen the customer sees after completing checkout, shown instead of "Payment successful". Plain text, up to 80 characters. Omit it to keep the default.
+
+        success_message : typing.Optional[str]
+            Text under the heading on the confirmation screen, shown instead of "Thank you for your purchase!". Plain text, up to 500 characters. Omit it to keep the default. Right after checkout, the page still adds "You will be redirected shortly." before sending the customer to `successUrl`.
 
         single_use : typing.Optional[bool]
 
@@ -157,6 +166,8 @@ class CheckoutsClient:
             metadata=metadata,
             collect_address=collect_address,
             collect_phone=collect_phone,
+            success_title=success_title,
+            success_message=success_message,
             single_use=single_use,
             currency=currency,
             custom_cards=custom_cards,
@@ -196,7 +207,7 @@ class CheckoutsClient:
 
     def archive_checkout(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> EmptyResponse:
         """
-        Archive a checkout by ID
+        Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
 
         Parameters
         ----------
@@ -301,6 +312,8 @@ class AsyncCheckoutsClient:
         metadata: typing.Optional[typing.Dict[str, typing.Any]] = OMIT,
         collect_address: typing.Optional[bool] = OMIT,
         collect_phone: typing.Optional[bool] = OMIT,
+        success_title: typing.Optional[str] = OMIT,
+        success_message: typing.Optional[str] = OMIT,
         single_use: typing.Optional[bool] = OMIT,
         currency: typing.Optional[str] = OMIT,
         custom_cards: typing.Optional[typing.Sequence[CheckoutCustomCardInput]] = OMIT,
@@ -323,12 +336,19 @@ class AsyncCheckoutsClient:
         cancel_url : typing.Optional[str]
 
         expires_at : typing.Optional[dt.datetime]
+            When the checkout link expires. Must be in the future. Defaults to 24 hours after creation.
 
         metadata : typing.Optional[typing.Dict[str, typing.Any]]
 
         collect_address : typing.Optional[bool]
 
         collect_phone : typing.Optional[bool]
+
+        success_title : typing.Optional[str]
+            Heading on the confirmation screen the customer sees after completing checkout, shown instead of "Payment successful". Plain text, up to 80 characters. Omit it to keep the default.
+
+        success_message : typing.Optional[str]
+            Text under the heading on the confirmation screen, shown instead of "Thank you for your purchase!". Plain text, up to 500 characters. Omit it to keep the default. Right after checkout, the page still adds "You will be redirected shortly." before sending the customer to `successUrl`.
 
         single_use : typing.Optional[bool]
 
@@ -380,6 +400,8 @@ class AsyncCheckoutsClient:
             metadata=metadata,
             collect_address=collect_address,
             collect_phone=collect_phone,
+            success_title=success_title,
+            success_message=success_message,
             single_use=single_use,
             currency=currency,
             custom_cards=custom_cards,
@@ -431,7 +453,7 @@ class AsyncCheckoutsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Archive a checkout by ID
+        Archive a checkout by ID so it can no longer be paid. A completed (paid) checkout can't be archived and returns 409.
 
         Parameters
         ----------

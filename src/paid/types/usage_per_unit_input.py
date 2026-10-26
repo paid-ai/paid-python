@@ -32,7 +32,10 @@ class UsagePerUnitInput(UniversalBaseModel):
     billing_type: typing_extensions.Annotated[
         typing.Optional[UsagePerUnitInputBillingType],
         FieldMetadata(alias="billingType"),
-        pydantic.Field(alias="billingType"),
+        pydantic.Field(
+            alias="billingType",
+            description="When usage is billed. Usage must use Arrears, prepaid credits included; to sell credits up front, add a credit benefit to a recurring, seat or one-time attribute.",
+        ),
     ] = None
     price_points: typing_extensions.Annotated[
         typing.List[SimplePricePoint], FieldMetadata(alias="pricePoints"), pydantic.Field(alias="pricePoints")

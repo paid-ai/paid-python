@@ -8,7 +8,14 @@ from ..types.bulk_signals_response import BulkSignalsResponse
 from ..types.signal import Signal
 from ..types.signal_list_item import SignalListItem
 from ..types.signal_list_response import SignalListResponse
+from ..types.signal_lookup_response import SignalLookupResponse
+from ..types.signal_summary_export import SignalSummaryExport
+from ..types.signal_summary_response import SignalSummaryResponse
+from ..types.signal_summary_spec_input import SignalSummarySpecInput
 from .raw_client import AsyncRawSignalsClient, RawSignalsClient
+from .types.create_signal_summary_export_request_format import CreateSignalSummaryExportRequestFormat
+from .types.get_signal_summary_request_group_by import GetSignalSummaryRequestGroupBy
+from .types.get_signal_summary_request_interval import GetSignalSummaryRequestInterval
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
@@ -135,11 +142,44 @@ class SignalsClient:
         _response = self._raw_client.get_signal_by_id(id, request_options=request_options)
         return _response.data
 
+    def get_signals_by_ids(
+        self, *, ids: typing.Sequence[str], request_options: typing.Optional[RequestOptions] = None
+    ) -> SignalLookupResponse:
+        """
+        Fetch up to 500 ingested signals (usage events) by ID in one request, each with the data payload submitted at ingest. Use it to resolve the `signalId` values on a page of credit transactions, or the signals behind one run or ticket, instead of calling `GET /api/v2/signals/{id}` once per signal. Signals are returned in request order; IDs that match nothing in your organization are listed under `notFound` rather than failing the request. This is a read-only operation: it requires the `read:usage` scope and is not available to customer API keys.
+
+        Parameters
+        ----------
+        ids : typing.Sequence[str]
+            Signal IDs to fetch, up to 500 per request. Duplicates are collapsed. For example the `signalId` values from a page of `GET /api/v2/credits/transactions`.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalLookupResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.signals.get_signals_by_ids(
+            ids=["6890b0e2a6f2c30012f0a1b3", "6890b0e2a6f2c30012f0a1b4"],
+        )
+        """
+        _response = self._raw_client.get_signals_by_ids(ids=ids, request_options=request_options)
+        return _response.data
+
     def create_signals(
         self, *, signals: typing.Sequence[Signal], request_options: typing.Optional[RequestOptions] = None
     ) -> BulkSignalsResponse:
         """
-        Create multiple signals (usage events) in a single request. Each signal must include a customer attribution (either customerId or externalCustomerId) and a product attribution (either productId or externalProductId).
+        Create multiple signals (usage events) in a single request. Each signal names its customer (`customerId` or `externalCustomerId`; an alias of the customer resolves too), its customer unit (`externalCustomerUnitId`: the unit's key, or an alias that points at a unit), or both, plus an optional product attribution (`productId` or `externalProductId`). A unit alone derives the customer from the unit. A unit sent with a customer must belong to it, else the batch is refused with `400 CUSTOMER_UNIT_MISMATCH`. A unit is never named by Paid's unit id. A key or alias that matches nothing is stored without a customer, keeping the id, so it can be pointed at a unit later. An identifier is matched as a unit key first, then a customer external id, then an alias. Unit attribution is enabled per organization: where it is not, a `customerUnit` sent next to a `customer` is accepted and ignored rather than checked, as before, while a unit named alone still derives its customer. Authenticate with your organization API key, or with a customer API key (prefixed `paid_ck_live_` or `paid_ck_test_`, created with `POST /api/v2/customers/{id}/api-keys`) so a customer's own runtime can report its usage without holding your organization key. A customer API key can call this endpoint only, and only for its own customer: if any signal names another customer, or one Paid does not know, the whole batch is refused with `403` `CUSTOMER_MISMATCH` and nothing is stored. Its idempotency keys are scoped to that customer. See [Send signals with a customer API key](/documentation/signals/send-signals-with-a-customer-api-key).
 
         Parameters
         ----------
@@ -155,7 +195,15 @@ class SignalsClient:
 
         Examples
         --------
-        from paid import CustomerById, Paid, Signal
+        import datetime
+
+        from paid import (
+            CustomerByExternalId,
+            CustomerUnitAttribution,
+            Paid,
+            ProductByExternalId,
+            Signal,
+        )
 
         client = Paid(
             token="YOUR_TOKEN",
@@ -163,15 +211,275 @@ class SignalsClient:
         client.signals.create_signals(
             signals=[
                 Signal(
-                    event_name="eventName",
-                    customer=CustomerById(
-                        customer_id="customerId",
+                    event_name="email_sent",
+                    customer=CustomerByExternalId(
+                        external_customer_id="acme-corp",
                     ),
-                )
+                    attribution=ProductByExternalId(
+                        external_product_id="email-agent",
+                    ),
+                    timestamp=datetime.datetime.fromisoformat(
+                        "2026-01-31 23:00:00+00:00",
+                    ),
+                    data={"recipients": 3},
+                    idempotency_key="email_sent_msg_8f3a2c",
+                ),
+                Signal(
+                    event_name="email_sent",
+                    customer_unit=CustomerUnitAttribution(
+                        external_customer_unit_id="acme-marketing",
+                    ),
+                    idempotency_key="email_sent_msg_9b41d7",
+                ),
             ],
         )
         """
         _response = self._raw_client.create_signals(signals=signals, request_options=request_options)
+        return _response.data
+
+    def create_signal_summary_export(
+        self,
+        *,
+        from_: str,
+        to: str,
+        spec: typing.Optional[SignalSummarySpecInput] = OMIT,
+        copy_from: typing.Optional[str] = OMIT,
+        customer_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        format: typing.Optional[CreateSignalSummaryExportRequestFormat] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> SignalSummaryExport:
+        """
+        Produces a usage summary file: one row per customer per month, with columns broken down by the signal payload fields you name. Choose `format` to get JSON or a wide CSV; JSON is the default. The export runs in the background, so this returns immediately with a pending export and the file appears on it once it succeeds. Give `spec` to describe the columns, or `copyFrom` with an earlier export's id to reuse that export's columns over a new window. The spec is stored on the export, so an old file can always be explained by the export that produced it. Signals are bucketed by month in UTC on their effective timestamp, the same basis billing uses, so the totals reconcile with invoices. One export runs per organization at a time.
+
+        Parameters
+        ----------
+        from_ : str
+            Start of the window, inclusive, snapped down to a period start. Cannot be earlier than 2025-09-01.
+
+        to : str
+            End of the window, exclusive, snapped down to a period start.
+
+        spec : typing.Optional[SignalSummarySpecInput]
+
+        copy_from : typing.Optional[str]
+            Reuse the shape of an earlier export, so a monthly run produces the same columns without restating them. Give this or spec, not both.
+
+        customer_ids : typing.Optional[typing.Sequence[str]]
+            Restrict the file to these customers. Accepts Paid IDs, UUIDs, or your external IDs. Omit for every customer.
+
+        format : typing.Optional[CreateSignalSummaryExportRequestFormat]
+            Format of the produced file. `json` gives the columns and one object per customer per month; `csv` gives the wide spreadsheet with three header rows.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalSummaryExport
+            202
+
+        Examples
+        --------
+        from paid import (
+            Paid,
+            SignalSummaryBandsDimensionBracketsItem,
+            SignalSummaryMeasure,
+            SignalSummarySignalSelection,
+            SignalSummarySpecInput,
+            SignalSummarySpecInputDimensionsItem_Bands,
+        )
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.signals.create_signal_summary_export(
+            spec=SignalSummarySpecInput(
+                name="Monthly workflow usage",
+                signal_names=[
+                    SignalSummarySignalSelection(
+                        name="workflow_run",
+                        group="Workflow runs",
+                        slug="runs",
+                    )
+                ],
+                dimensions=[
+                    SignalSummarySpecInputDimensionsItem_Bands(
+                        path="steps",
+                        applies_to=["workflow_run"],
+                        brackets=[
+                            SignalSummaryBandsDimensionBracketsItem(
+                                from_=1,
+                                up_to=10,
+                                slug="1_10_steps",
+                                group="1-10 steps",
+                            ),
+                            SignalSummaryBandsDimensionBracketsItem(
+                                slug="11_plus_steps",
+                                group="11+ steps",
+                            ),
+                        ],
+                    )
+                ],
+                measures=[
+                    SignalSummaryMeasure(
+                        fn="count",
+                    )
+                ],
+            ),
+            from_="2026-01-01",
+            to="2026-04-01",
+            format="csv",
+        )
+        """
+        _response = self._raw_client.create_signal_summary_export(
+            from_=from_,
+            to=to,
+            spec=spec,
+            copy_from=copy_from,
+            customer_ids=customer_ids,
+            format=format,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def get_signal_summary_export(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> SignalSummaryExport:
+        """
+        Returns one export with its status and the shape it ran. While it is succeeded and unexpired, each read issues a fresh short-lived download link.
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalSummaryExport
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.signals.get_signal_summary_export(
+            id="sse_5pZa1Kd8Nqx",
+        )
+        """
+        _response = self._raw_client.get_signal_summary_export(id, request_options=request_options)
+        return _response.data
+
+    def get_signal_summary(
+        self,
+        *,
+        start_date: str,
+        end_date: str,
+        interval: GetSignalSummaryRequestInterval,
+        customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        signal_names: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None,
+        group_by: typing.Optional[GetSignalSummaryRequestGroupBy] = None,
+        dimension_key: typing.Optional[str] = None,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> SignalSummaryResponse:
+        """
+        Counts signals into period buckets. Use it to chart signal volume over time, split by signal name or by a signal-payload key such as team_id.
+
+        Signals count against their effective timestamp in UTC. This is the same basis billing uses, so these figures reconcile with an invoice.
+
+        The endpoint reads a pre-aggregated hourly rollup, not the raw signals. An hour is therefore the finest interval. One request may span at most 250 periods.
+
+        A grouped request keeps the 100 groups with the most signals. It sums the rest under the key "other". Each period total stays complete, but a group inside "other" loses its own figure. Read groups.truncated to learn how many groups lost it. Zero means every group kept its own figure.
+
+        Results are paged with limit and cursor. A page is never truncated in silence.
+
+        To download the series as a file, call this endpoint over HTTP with format=csv. It returns the same points as a text/csv table with a single header row. A CSV cannot carry a cursor, so a result that does not fit one page returns 400 rather than a file that is missing rows.
+
+        For a wide per-customer spreadsheet over arbitrary payload fields, use the batch export at /signals/summary/batch instead.
+
+        Parameters
+        ----------
+        start_date : str
+            Window start, inclusive. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        end_date : str
+            Window end, inclusive — a date-only value means through the end of that UTC day. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        interval : GetSignalSummaryRequestInterval
+            Period size. Buckets align to UTC hours, calendar days, ISO weeks that start on Monday, or calendar months. An hour is the finest period available.
+
+            The first and last bucket report bounds clipped to your window.
+
+            A request may span at most 250 periods. That is about 10 days at hour, 8 months at day, and 20 years at month. A longer window returns 400 WINDOW_TOO_LARGE.
+
+        customer_id : typing.Optional[str]
+            Narrow the summary to one customer. Accepts a Paid customer ID or, as a fallback, your external customer ID. Mutually exclusive with externalCustomerId. Omit both to summarize every customer.
+
+        external_customer_id : typing.Optional[str]
+            Your external customer ID. Mutually exclusive with customerId.
+
+        signal_names : typing.Optional[typing.Union[str, typing.Sequence[str]]]
+            Narrow the summary to these signal names. Repeat the parameter for more than one. Omit to count every signal.
+
+        group_by : typing.Optional[GetSignalSummaryRequestGroupBy]
+            Split each period into one series per group. signalName groups by the signal's name. dimension groups by a signal-payload key named in dimensionKey — signals per team, for example. Omit for one total per period.
+
+            A grouped request keeps the 100 groups with the most signals. It sums the rest under the key "other".
+
+            Each period total stays complete, but a group inside "other" loses its own figure. Read groups.truncated to learn how many groups lost it. To name every group, narrow the request with signalNames, customerId, or a shorter window.
+
+        dimension_key : typing.Optional[str]
+            The signal-payload key to group by. Required when groupBy is dimension; rejected otherwise. The key must be one your organization has declared for grouping — an undeclared key is refused rather than answered by a full scan. A signal whose payload lacks the key, or holds it empty, groups under an empty groupKey.
+
+        limit : typing.Optional[int]
+            Maximum points to return in this page. The response is never silently truncated: when more points exist, hasMore is true and nextCursor is set.
+
+        cursor : typing.Optional[str]
+            Continue from a previous response's nextCursor. Every other parameter must be unchanged.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalSummaryResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.signals.get_signal_summary(
+            start_date="2026-08-01",
+            end_date="2026-08-31",
+            interval="day",
+            group_by="signalName",
+            limit=1000,
+        )
+        """
+        _response = self._raw_client.get_signal_summary(
+            start_date=start_date,
+            end_date=end_date,
+            interval=interval,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            signal_names=signal_names,
+            group_by=group_by,
+            dimension_key=dimension_key,
+            limit=limit,
+            cursor=cursor,
+            request_options=request_options,
+        )
         return _response.data
 
 
@@ -314,11 +622,52 @@ class AsyncSignalsClient:
         _response = await self._raw_client.get_signal_by_id(id, request_options=request_options)
         return _response.data
 
+    async def get_signals_by_ids(
+        self, *, ids: typing.Sequence[str], request_options: typing.Optional[RequestOptions] = None
+    ) -> SignalLookupResponse:
+        """
+        Fetch up to 500 ingested signals (usage events) by ID in one request, each with the data payload submitted at ingest. Use it to resolve the `signalId` values on a page of credit transactions, or the signals behind one run or ticket, instead of calling `GET /api/v2/signals/{id}` once per signal. Signals are returned in request order; IDs that match nothing in your organization are listed under `notFound` rather than failing the request. This is a read-only operation: it requires the `read:usage` scope and is not available to customer API keys.
+
+        Parameters
+        ----------
+        ids : typing.Sequence[str]
+            Signal IDs to fetch, up to 500 per request. Duplicates are collapsed. For example the `signalId` values from a page of `GET /api/v2/credits/transactions`.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalLookupResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.signals.get_signals_by_ids(
+                ids=["6890b0e2a6f2c30012f0a1b3", "6890b0e2a6f2c30012f0a1b4"],
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_signals_by_ids(ids=ids, request_options=request_options)
+        return _response.data
+
     async def create_signals(
         self, *, signals: typing.Sequence[Signal], request_options: typing.Optional[RequestOptions] = None
     ) -> BulkSignalsResponse:
         """
-        Create multiple signals (usage events) in a single request. Each signal must include a customer attribution (either customerId or externalCustomerId) and a product attribution (either productId or externalProductId).
+        Create multiple signals (usage events) in a single request. Each signal names its customer (`customerId` or `externalCustomerId`; an alias of the customer resolves too), its customer unit (`externalCustomerUnitId`: the unit's key, or an alias that points at a unit), or both, plus an optional product attribution (`productId` or `externalProductId`). A unit alone derives the customer from the unit. A unit sent with a customer must belong to it, else the batch is refused with `400 CUSTOMER_UNIT_MISMATCH`. A unit is never named by Paid's unit id. A key or alias that matches nothing is stored without a customer, keeping the id, so it can be pointed at a unit later. An identifier is matched as a unit key first, then a customer external id, then an alias. Unit attribution is enabled per organization: where it is not, a `customerUnit` sent next to a `customer` is accepted and ignored rather than checked, as before, while a unit named alone still derives its customer. Authenticate with your organization API key, or with a customer API key (prefixed `paid_ck_live_` or `paid_ck_test_`, created with `POST /api/v2/customers/{id}/api-keys`) so a customer's own runtime can report its usage without holding your organization key. A customer API key can call this endpoint only, and only for its own customer: if any signal names another customer, or one Paid does not know, the whole batch is refused with `403` `CUSTOMER_MISMATCH` and nothing is stored. Its idempotency keys are scoped to that customer. See [Send signals with a customer API key](/documentation/signals/send-signals-with-a-customer-api-key).
 
         Parameters
         ----------
@@ -335,8 +684,15 @@ class AsyncSignalsClient:
         Examples
         --------
         import asyncio
+        import datetime
 
-        from paid import AsyncPaid, CustomerById, Signal
+        from paid import (
+            AsyncPaid,
+            CustomerByExternalId,
+            CustomerUnitAttribution,
+            ProductByExternalId,
+            Signal,
+        )
 
         client = AsyncPaid(
             token="YOUR_TOKEN",
@@ -347,11 +703,26 @@ class AsyncSignalsClient:
             await client.signals.create_signals(
                 signals=[
                     Signal(
-                        event_name="eventName",
-                        customer=CustomerById(
-                            customer_id="customerId",
+                        event_name="email_sent",
+                        customer=CustomerByExternalId(
+                            external_customer_id="acme-corp",
                         ),
-                    )
+                        attribution=ProductByExternalId(
+                            external_product_id="email-agent",
+                        ),
+                        timestamp=datetime.datetime.fromisoformat(
+                            "2026-01-31 23:00:00+00:00",
+                        ),
+                        data={"recipients": 3},
+                        idempotency_key="email_sent_msg_8f3a2c",
+                    ),
+                    Signal(
+                        event_name="email_sent",
+                        customer_unit=CustomerUnitAttribution(
+                            external_customer_unit_id="acme-marketing",
+                        ),
+                        idempotency_key="email_sent_msg_9b41d7",
+                    ),
                 ],
             )
 
@@ -359,4 +730,273 @@ class AsyncSignalsClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.create_signals(signals=signals, request_options=request_options)
+        return _response.data
+
+    async def create_signal_summary_export(
+        self,
+        *,
+        from_: str,
+        to: str,
+        spec: typing.Optional[SignalSummarySpecInput] = OMIT,
+        copy_from: typing.Optional[str] = OMIT,
+        customer_ids: typing.Optional[typing.Sequence[str]] = OMIT,
+        format: typing.Optional[CreateSignalSummaryExportRequestFormat] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> SignalSummaryExport:
+        """
+        Produces a usage summary file: one row per customer per month, with columns broken down by the signal payload fields you name. Choose `format` to get JSON or a wide CSV; JSON is the default. The export runs in the background, so this returns immediately with a pending export and the file appears on it once it succeeds. Give `spec` to describe the columns, or `copyFrom` with an earlier export's id to reuse that export's columns over a new window. The spec is stored on the export, so an old file can always be explained by the export that produced it. Signals are bucketed by month in UTC on their effective timestamp, the same basis billing uses, so the totals reconcile with invoices. One export runs per organization at a time.
+
+        Parameters
+        ----------
+        from_ : str
+            Start of the window, inclusive, snapped down to a period start. Cannot be earlier than 2025-09-01.
+
+        to : str
+            End of the window, exclusive, snapped down to a period start.
+
+        spec : typing.Optional[SignalSummarySpecInput]
+
+        copy_from : typing.Optional[str]
+            Reuse the shape of an earlier export, so a monthly run produces the same columns without restating them. Give this or spec, not both.
+
+        customer_ids : typing.Optional[typing.Sequence[str]]
+            Restrict the file to these customers. Accepts Paid IDs, UUIDs, or your external IDs. Omit for every customer.
+
+        format : typing.Optional[CreateSignalSummaryExportRequestFormat]
+            Format of the produced file. `json` gives the columns and one object per customer per month; `csv` gives the wide spreadsheet with three header rows.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalSummaryExport
+            202
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import (
+            AsyncPaid,
+            SignalSummaryBandsDimensionBracketsItem,
+            SignalSummaryMeasure,
+            SignalSummarySignalSelection,
+            SignalSummarySpecInput,
+            SignalSummarySpecInputDimensionsItem_Bands,
+        )
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.signals.create_signal_summary_export(
+                spec=SignalSummarySpecInput(
+                    name="Monthly workflow usage",
+                    signal_names=[
+                        SignalSummarySignalSelection(
+                            name="workflow_run",
+                            group="Workflow runs",
+                            slug="runs",
+                        )
+                    ],
+                    dimensions=[
+                        SignalSummarySpecInputDimensionsItem_Bands(
+                            path="steps",
+                            applies_to=["workflow_run"],
+                            brackets=[
+                                SignalSummaryBandsDimensionBracketsItem(
+                                    from_=1,
+                                    up_to=10,
+                                    slug="1_10_steps",
+                                    group="1-10 steps",
+                                ),
+                                SignalSummaryBandsDimensionBracketsItem(
+                                    slug="11_plus_steps",
+                                    group="11+ steps",
+                                ),
+                            ],
+                        )
+                    ],
+                    measures=[
+                        SignalSummaryMeasure(
+                            fn="count",
+                        )
+                    ],
+                ),
+                from_="2026-01-01",
+                to="2026-04-01",
+                format="csv",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.create_signal_summary_export(
+            from_=from_,
+            to=to,
+            spec=spec,
+            copy_from=copy_from,
+            customer_ids=customer_ids,
+            format=format,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def get_signal_summary_export(
+        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> SignalSummaryExport:
+        """
+        Returns one export with its status and the shape it ran. While it is succeeded and unexpired, each read issues a fresh short-lived download link.
+
+        Parameters
+        ----------
+        id : str
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalSummaryExport
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.signals.get_signal_summary_export(
+                id="sse_5pZa1Kd8Nqx",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_signal_summary_export(id, request_options=request_options)
+        return _response.data
+
+    async def get_signal_summary(
+        self,
+        *,
+        start_date: str,
+        end_date: str,
+        interval: GetSignalSummaryRequestInterval,
+        customer_id: typing.Optional[str] = None,
+        external_customer_id: typing.Optional[str] = None,
+        signal_names: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None,
+        group_by: typing.Optional[GetSignalSummaryRequestGroupBy] = None,
+        dimension_key: typing.Optional[str] = None,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> SignalSummaryResponse:
+        """
+        Counts signals into period buckets. Use it to chart signal volume over time, split by signal name or by a signal-payload key such as team_id.
+
+        Signals count against their effective timestamp in UTC. This is the same basis billing uses, so these figures reconcile with an invoice.
+
+        The endpoint reads a pre-aggregated hourly rollup, not the raw signals. An hour is therefore the finest interval. One request may span at most 250 periods.
+
+        A grouped request keeps the 100 groups with the most signals. It sums the rest under the key "other". Each period total stays complete, but a group inside "other" loses its own figure. Read groups.truncated to learn how many groups lost it. Zero means every group kept its own figure.
+
+        Results are paged with limit and cursor. A page is never truncated in silence.
+
+        To download the series as a file, call this endpoint over HTTP with format=csv. It returns the same points as a text/csv table with a single header row. A CSV cannot carry a cursor, so a result that does not fit one page returns 400 rather than a file that is missing rows.
+
+        For a wide per-customer spreadsheet over arbitrary payload fields, use the batch export at /signals/summary/batch instead.
+
+        Parameters
+        ----------
+        start_date : str
+            Window start, inclusive. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        end_date : str
+            Window end, inclusive — a date-only value means through the end of that UTC day. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        interval : GetSignalSummaryRequestInterval
+            Period size. Buckets align to UTC hours, calendar days, ISO weeks that start on Monday, or calendar months. An hour is the finest period available.
+
+            The first and last bucket report bounds clipped to your window.
+
+            A request may span at most 250 periods. That is about 10 days at hour, 8 months at day, and 20 years at month. A longer window returns 400 WINDOW_TOO_LARGE.
+
+        customer_id : typing.Optional[str]
+            Narrow the summary to one customer. Accepts a Paid customer ID or, as a fallback, your external customer ID. Mutually exclusive with externalCustomerId. Omit both to summarize every customer.
+
+        external_customer_id : typing.Optional[str]
+            Your external customer ID. Mutually exclusive with customerId.
+
+        signal_names : typing.Optional[typing.Union[str, typing.Sequence[str]]]
+            Narrow the summary to these signal names. Repeat the parameter for more than one. Omit to count every signal.
+
+        group_by : typing.Optional[GetSignalSummaryRequestGroupBy]
+            Split each period into one series per group. signalName groups by the signal's name. dimension groups by a signal-payload key named in dimensionKey — signals per team, for example. Omit for one total per period.
+
+            A grouped request keeps the 100 groups with the most signals. It sums the rest under the key "other".
+
+            Each period total stays complete, but a group inside "other" loses its own figure. Read groups.truncated to learn how many groups lost it. To name every group, narrow the request with signalNames, customerId, or a shorter window.
+
+        dimension_key : typing.Optional[str]
+            The signal-payload key to group by. Required when groupBy is dimension; rejected otherwise. The key must be one your organization has declared for grouping — an undeclared key is refused rather than answered by a full scan. A signal whose payload lacks the key, or holds it empty, groups under an empty groupKey.
+
+        limit : typing.Optional[int]
+            Maximum points to return in this page. The response is never silently truncated: when more points exist, hasMore is true and nextCursor is set.
+
+        cursor : typing.Optional[str]
+            Continue from a previous response's nextCursor. Every other parameter must be unchanged.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalSummaryResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.signals.get_signal_summary(
+                start_date="2026-08-01",
+                end_date="2026-08-31",
+                interval="day",
+                group_by="signalName",
+                limit=1000,
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_signal_summary(
+            start_date=start_date,
+            end_date=end_date,
+            interval=interval,
+            customer_id=customer_id,
+            external_customer_id=external_customer_id,
+            signal_names=signal_names,
+            group_by=group_by,
+            dimension_key=dimension_key,
+            limit=limit,
+            cursor=cursor,
+            request_options=request_options,
+        )
         return _response.data

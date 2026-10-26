@@ -15,7 +15,7 @@ from .value_model_content_value_types_item import ValueModelContentValueTypesIte
 
 class ValueModelContent(UniversalBaseModel):
     """
-    Full value model configuration: value types, formulas, signals, and overrides.
+    Full value model configuration: value types, formulas, events, and overrides.
     """
 
     currency: str

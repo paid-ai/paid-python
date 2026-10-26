@@ -6,6 +6,9 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
+from .value_model_content_formulas_item_variables_item_derived_from_source_unit import (
+    ValueModelContentFormulasItemVariablesItemDerivedFromSourceUnit,
+)
 from .value_model_content_formulas_item_variables_item_derived_from_target_unit import (
     ValueModelContentFormulasItemVariablesItemDerivedFromTargetUnit,
 )
@@ -20,6 +23,22 @@ class ValueModelContentFormulasItemVariablesItemDerivedFrom(UniversalBaseModel):
         FieldMetadata(alias="targetUnit"),
         pydantic.Field(alias="targetUnit"),
     ]
+    source_unit: typing_extensions.Annotated[
+        typing.Optional[ValueModelContentFormulasItemVariablesItemDerivedFromSourceUnit],
+        FieldMetadata(alias="sourceUnit"),
+        pydantic.Field(
+            alias="sourceUnit",
+            description="Fixed source unit the signal field reports its value in; the engine converts it into the metric's duration unit (targetUnit). Used as the fallback when sourceUnitFromSignal is set but the companion field is missing/invalid. Requires a duration value type.",
+        ),
+    ] = None
+    source_unit_from_signal: typing_extensions.Annotated[
+        typing.Optional[bool],
+        FieldMetadata(alias="sourceUnitFromSignal"),
+        pydantic.Field(
+            alias="sourceUnitFromSignal",
+            description='When true, each event names its own source unit in a "<sourceField>_unit" companion field (e.g. sourceField "time_spent" reads "time_spent_unit"), which must be one of seconds|minutes|hours|days. Takes precedence over sourceUnit; if the companion is absent or invalid it falls back to sourceUnit. If neither resolves, the payload value is discarded and the variable\'s default is used (the default is stored in the metric\'s unit and is never converted); the value is never silently treated as seconds. Requires a duration value type.',
+        ),
+    ] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
