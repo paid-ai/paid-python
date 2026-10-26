@@ -32,7 +32,10 @@ class ProductUsageGraduatedInput(UniversalBaseModel):
     billing_type: typing_extensions.Annotated[
         typing.Optional[ProductUsageGraduatedInputBillingType],
         FieldMetadata(alias="billingType"),
-        pydantic.Field(alias="billingType"),
+        pydantic.Field(
+            alias="billingType",
+            description="When usage is billed. Advance is supported only for the UsagePrepaidCredits and UsageBracketedPrepaidCredits pricing types; every other usage pricing type must use Arrears.",
+        ),
     ] = None
     price_points: typing_extensions.Annotated[
         typing.List[ProductTieredPricePoint], FieldMetadata(alias="pricePoints"), pydantic.Field(alias="pricePoints")

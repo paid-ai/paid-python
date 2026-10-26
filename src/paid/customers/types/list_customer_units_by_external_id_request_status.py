@@ -2,4 +2,4 @@
 
 import typing
 
-ListCustomerUnitsByExternalIdRequestStatus = typing.Union[typing.Literal["ACTIVE", "DELETED"], typing.Any]
+ListCustomerUnitsByExternalIdRequestStatus = typing.Union[typing.Literal["ACTIVE", "DELETED", "DRAFT"], typing.Any]

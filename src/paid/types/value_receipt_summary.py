@@ -11,7 +11,11 @@ from ..core.serialization import FieldMetadata
 
 class ValueReceiptSummary(UniversalBaseModel):
     id: str
-    status: str
+    status: str = pydantic.Field()
+    """
+    Always "posted": a value receipt is immutable from creation.
+    """
+
     public_url_token: typing_extensions.Annotated[
         str, FieldMetadata(alias="publicUrlToken"), pydantic.Field(alias="publicUrlToken")
     ]

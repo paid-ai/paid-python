@@ -27,6 +27,11 @@ class ValueModelContentValueTypesItem(UniversalBaseModel):
         typing.Optional[str], FieldMetadata(alias="longDescription"), pydantic.Field(alias="longDescription")
     ] = None
     sources: typing.Optional[typing.List[ValueModelContentValueTypesItemSourcesItem]] = None
+    maturation: typing.Optional[typing.Any] = pydantic.Field(default=None)
+    """
+    Gates when this value type's number is published to a customer on a value receipt. Evaluated per customer, cumulative since their first signal for this value type, as of the receipt's end date. Until the threshold is met the receipt withholds the figure and shows a 'gathering data' state instead. At least one of minDataPoints or minMonths is required.
+    """
+
     display_order: typing_extensions.Annotated[
         typing.Optional[int], FieldMetadata(alias="displayOrder"), pydantic.Field(alias="displayOrder")
     ] = None

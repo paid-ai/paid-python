@@ -10,13 +10,8 @@ from ..core.serialization import FieldMetadata
 
 class ValueModelContentOverridesItemScope(UniversalBaseModel):
     customer_ids: typing_extensions.Annotated[
-        typing.Optional[typing.List[str]], FieldMetadata(alias="customerIds"), pydantic.Field(alias="customerIds")
-    ] = None
-    customer_group_ids: typing_extensions.Annotated[
-        typing.Optional[typing.List[str]],
-        FieldMetadata(alias="customerGroupIds"),
-        pydantic.Field(alias="customerGroupIds"),
-    ] = None
+        typing.List[str], FieldMetadata(alias="customerIds"), pydantic.Field(alias="customerIds")
+    ]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

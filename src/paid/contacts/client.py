@@ -179,13 +179,14 @@ class ContactsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
-        Update a contact by its ID
+        Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`.
 
         Parameters
         ----------
         id : str
 
         customer_id : typing.Optional[str]
+            Destination customer ID. A contact can move only if no orders or invoices reference it.
 
         first_name : typing.Optional[str]
 
@@ -238,7 +239,7 @@ class ContactsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a contact by its ID
+        Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
 
         Parameters
         ----------
@@ -313,13 +314,14 @@ class ContactsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
-        Update a contact by its external ID
+        Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`.
 
         Parameters
         ----------
         external_id_ : str
 
         customer_id : typing.Optional[str]
+            Destination customer ID. A contact can move only if no orders or invoices reference it.
 
         first_name : typing.Optional[str]
 
@@ -372,7 +374,7 @@ class ContactsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a contact by its external ID
+        Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
 
         Parameters
         ----------
@@ -588,13 +590,14 @@ class AsyncContactsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
-        Update a contact by its ID
+        Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`.
 
         Parameters
         ----------
         id : str
 
         customer_id : typing.Optional[str]
+            Destination customer ID. A contact can move only if no orders or invoices reference it.
 
         first_name : typing.Optional[str]
 
@@ -655,7 +658,7 @@ class AsyncContactsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a contact by its ID
+        Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
 
         Parameters
         ----------
@@ -746,13 +749,14 @@ class AsyncContactsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
-        Update a contact by its external ID
+        Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`.
 
         Parameters
         ----------
         external_id_ : str
 
         customer_id : typing.Optional[str]
+            Destination customer ID. A contact can move only if no orders or invoices reference it.
 
         first_name : typing.Optional[str]
 
@@ -813,7 +817,7 @@ class AsyncContactsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a contact by its external ID
+        Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
 
         Parameters
         ----------
