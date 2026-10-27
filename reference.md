@@ -12619,7 +12619,7 @@ client = Paid(
     token="YOUR_TOKEN",
 )
 client.webhooks.update_webhook(
-    webhook_name="billing-invoice-created",
+    webhook_name="billing-invoice-paid",
 )
 
 ```
@@ -12705,7 +12705,7 @@ client = Paid(
     token="YOUR_TOKEN",
 )
 client.webhooks.test_webhook(
-    webhook_name="billing-invoice-created",
+    webhook_name="billing-invoice-paid",
 )
 
 ```

@@ -4,7 +4,6 @@ import typing
 
 TestWebhookRequestWebhookName = typing.Union[
     typing.Literal[
-        "billing-invoice-created",
         "billing-invoice-paid",
         "billing-invoice-posted",
         "billing-checkout-created",
