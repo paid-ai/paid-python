@@ -1,5 +1,5 @@
 # Reference
-## Products
+## products
 <details><summary><code>client.products.<a href="src/paid/products/client.py">list_products</a>(...) -&gt; AsyncHttpResponse[ProductListResponse]</code></summary>
 <dl>
 <dd>
@@ -602,7 +602,7 @@ client.products.update_product_by_external_id(
 </dl>
 </details>
 
-## Plans
+## plans
 <details><summary><code>client.plans.<a href="src/paid/plans/client.py">list_plans</a>(...) -&gt; AsyncHttpResponse[PlanListResponse]</code></summary>
 <dl>
 <dd>
@@ -1291,7 +1291,7 @@ client.plans.update_plan_by_external_id(
 </dl>
 </details>
 
-## Customers
+## customers
 <details><summary><code>client.customers.<a href="src/paid/customers/client.py">list_customers</a>(...) -&gt; AsyncHttpResponse[CustomerListResponse]</code></summary>
 <dl>
 <dd>
@@ -7166,7 +7166,7 @@ client.customers.get_customer_unit_spend(
 </dl>
 </details>
 
-## Contacts
+## contacts
 <details><summary><code>client.contacts.<a href="src/paid/contacts/client.py">list_contacts</a>(...) -&gt; AsyncHttpResponse[ContactListResponse]</code></summary>
 <dl>
 <dd>
@@ -7918,7 +7918,7 @@ client.contacts.delete_contact_by_external_id(
 </dl>
 </details>
 
-## Orders
+## orders
 <details><summary><code>client.orders.<a href="src/paid/orders/client.py">list_orders</a>(...) -&gt; AsyncHttpResponse[OrderListResponse]</code></summary>
 <dl>
 <dd>
@@ -9235,7 +9235,7 @@ client.orders.upsert_order_by_external_id(
 </dl>
 </details>
 
-## Invoices
+## invoices
 <details><summary><code>client.invoices.<a href="src/paid/invoices/client.py">list_invoices</a>(...) -&gt; AsyncHttpResponse[InvoiceListResponse]</code></summary>
 <dl>
 <dd>
@@ -9642,7 +9642,7 @@ client.invoices.get_invoice_lines(
 </dl>
 </details>
 
-## Signals
+## signals
 <details><summary><code>client.signals.<a href="src/paid/signals/client.py">list_signals</a>(...) -&gt; AsyncHttpResponse[SignalListResponse]</code></summary>
 <dl>
 <dd>
@@ -10407,7 +10407,7 @@ Each period total stays complete, but a group inside "other" loses its own figur
 </dl>
 </details>
 
-## Credits
+## credits
 <details><summary><code>client.credits.<a href="src/paid/credits/client.py">list_credit_currencies</a>(...) -&gt; AsyncHttpResponse[CreditCurrencyListResponse]</code></summary>
 <dl>
 <dd>
@@ -10952,7 +10952,7 @@ client.credits.update_credit_currency_by_id(
 </dl>
 </details>
 
-## Checkouts
+## checkouts
 <details><summary><code>client.checkouts.<a href="src/paid/checkouts/client.py">list_checkouts</a>(...) -&gt; AsyncHttpResponse[CheckoutListResponse]</code></summary>
 <dl>
 <dd>
@@ -11356,7 +11356,7 @@ client.checkouts.archive_checkout(
 </dl>
 </details>
 
-## CustomerPortals
+## customer-portals
 <details><summary><code>client.customer_portals.<a href="src/paid/customer_portals/client.py">create_customer_portal</a>(...) -&gt; AsyncHttpResponse[CustomerPortal]</code></summary>
 <dl>
 <dd>
@@ -11449,7 +11449,7 @@ client.customer_portals.create_customer_portal()
 </dl>
 </details>
 
-## ValueReceipts
+## value-receipts
 <details><summary><code>client.value_receipts.<a href="src/paid/value_receipts/client.py">list_value_receipts</a>(...) -&gt; AsyncHttpResponse[ValueReceiptListResponse]</code></summary>
 <dl>
 <dd>
@@ -12298,7 +12298,7 @@ client.value_receipts.unpublish_value_receipt(
 </dl>
 </details>
 
-## DeliveredValue
+## delivered-value
 <details><summary><code>client.delivered_value.<a href="src/paid/delivered_value/client.py">get_delivered_value</a>(...) -&gt; AsyncHttpResponse[DeliveredValueResponse]</code></summary>
 <dl>
 <dd>
@@ -12525,7 +12525,7 @@ client.delivered_value.get_delivered_value_summary(
 </dl>
 </details>
 
-## Webhooks
+## webhooks
 <details><summary><code>client.webhooks.<a href="src/paid/webhooks/client.py">list_webhooks</a>() -&gt; AsyncHttpResponse[WebhookListResponse]</code></summary>
 <dl>
 <dd>
@@ -12619,7 +12619,7 @@ client = Paid(
     token="YOUR_TOKEN",
 )
 client.webhooks.update_webhook(
-    webhook_name="billing-invoice-created",
+    webhook_name="billing-invoice-paid",
 )
 
 ```
@@ -12705,7 +12705,7 @@ client = Paid(
     token="YOUR_TOKEN",
 )
 client.webhooks.test_webhook(
-    webhook_name="billing-invoice-created",
+    webhook_name="billing-invoice-paid",
 )
 
 ```
@@ -12802,7 +12802,7 @@ client.webhooks.rotate_webhook_secret()
 </dl>
 </details>
 
-## Pricing
+## pricing
 <details><summary><code>client.pricing.<a href="src/paid/pricing/client.py">list_pricing</a>(...) -&gt; AsyncHttpResponse[PricingListResponse]</code></summary>
 <dl>
 <dd>
@@ -13038,7 +13038,7 @@ client.pricing.update_pricing(
 </dl>
 </details>
 
-## Costs
+## costs
 <details><summary><code>client.costs.<a href="src/paid/costs/client.py">create_costs</a>(...) -&gt; AsyncHttpResponse[CostIngestResponse]</code></summary>
 <dl>
 <dd>
@@ -13117,7 +13117,7 @@ client.costs.create_costs(
 </dl>
 </details>
 
-## Analytics
+## analytics
 <details><summary><code>client.analytics.<a href="src/paid/analytics/client.py">execute_analytics_query</a>(...) -&gt; AsyncHttpResponse[AnalyticsQueryResponse]</code></summary>
 <dl>
 <dd>
@@ -13336,7 +13336,7 @@ client.analytics.get_signals_metadata()
 </dl>
 </details>
 
-## CustomViewsExperimental
+## custom-views-experimental
 <details><summary><code>client.custom_views_experimental.<a href="src/paid/custom_views_experimental/client.py">list_custom_views</a>() -&gt; AsyncHttpResponse[CustomViewListResponse]</code></summary>
 <dl>
 <dd>
@@ -14252,7 +14252,7 @@ client.custom_views_experimental.get_custom_view_embed_token(
 </dl>
 </details>
 
-## ValueModels
+## value-models
 <details><summary><code>client.value_models.<a href="src/paid/value_models/client.py">get_current_value_model</a>() -&gt; AsyncHttpResponse[ValueModelDetail]</code></summary>
 <dl>
 <dd>
@@ -14669,7 +14669,7 @@ client.value_models.refresh_value_model_backfill()
 </dl>
 </details>
 
-## ValueMetrics
+## value-metrics
 <details><summary><code>client.value_metrics.<a href="src/paid/value_metrics/client.py">list_value_metrics</a>(...) -&gt; AsyncHttpResponse[ValueMetricListResponse]</code></summary>
 <dl>
 <dd>
@@ -15223,7 +15223,7 @@ client.value_metrics.update_value_metric(
 </dl>
 </details>
 
-## PaymentMethods
+## payment-methods
 <details><summary><code>client.payment_methods.<a href="src/paid/payment_methods/client.py">list_payment_methods</a>(...) -&gt; AsyncHttpResponse[PaymentMethodListResponse]</code></summary>
 <dl>
 <dd>
@@ -15630,7 +15630,7 @@ client.payment_methods.update_default_payment_method(
 </dl>
 </details>
 
-## Payments
+## payments
 <details><summary><code>client.payments.<a href="src/paid/payments/client.py">list_payments</a>(...) -&gt; AsyncHttpResponse[PaymentListResponse]</code></summary>
 <dl>
 <dd>
@@ -15929,7 +15929,7 @@ client.payments.get_payment(
 </dl>
 </details>
 
-## PaymentAllocations
+## payment-allocations
 <details><summary><code>client.payment_allocations.<a href="src/paid/payment_allocations/client.py">list_payment_allocations</a>(...) -&gt; AsyncHttpResponse[PaymentAllocationListResponse]</code></summary>
 <dl>
 <dd>
@@ -16109,7 +16109,7 @@ client.payment_allocations.create_payment_allocation(
 </dl>
 </details>
 
-## Amendments
+## amendments
 <details><summary><code>client.amendments.<a href="src/paid/amendments/client.py">get_order_amendment_options</a>(...) -&gt; AsyncHttpResponse[AmendmentOptions]</code></summary>
 <dl>
 <dd>
@@ -16390,7 +16390,7 @@ client.amendments.execute_order_amendment(
 </dl>
 </details>
 
-## AnalyticsExperimental
+## analytics-experimental
 <details><summary><code>client.analytics_experimental.<a href="src/paid/analytics_experimental/client.py">execute_experimental_analytics_query</a>(...) -&gt; AsyncHttpResponse[AnalyticsQueryResponse]</code></summary>
 <dl>
 <dd>
