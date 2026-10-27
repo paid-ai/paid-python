@@ -94,7 +94,7 @@ class WebhooksClient:
             token="YOUR_TOKEN",
         )
         client.webhooks.update_webhook(
-            webhook_name="billing-invoice-created",
+            webhook_name="billing-invoice-paid",
         )
         """
         _response = self._raw_client.update_webhook(
@@ -128,7 +128,7 @@ class WebhooksClient:
             token="YOUR_TOKEN",
         )
         client.webhooks.test_webhook(
-            webhook_name="billing-invoice-created",
+            webhook_name="billing-invoice-paid",
         )
         """
         _response = self._raw_client.test_webhook(webhook_name, request_options=request_options)
@@ -254,7 +254,7 @@ class AsyncWebhooksClient:
 
         async def main() -> None:
             await client.webhooks.update_webhook(
-                webhook_name="billing-invoice-created",
+                webhook_name="billing-invoice-paid",
             )
 
 
@@ -296,7 +296,7 @@ class AsyncWebhooksClient:
 
         async def main() -> None:
             await client.webhooks.test_webhook(
-                webhook_name="billing-invoice-created",
+                webhook_name="billing-invoice-paid",
             )
 
 
