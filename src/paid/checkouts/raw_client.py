@@ -144,6 +144,7 @@ class RawCheckoutsClient:
         products : typing.Sequence[CheckoutProductInput]
 
         success_url : str
+            Where the customer goes after paying. `{CHECKOUT_ID}` is replaced with this checkout's ID when it's created, and `{CHECKOUT_SESSION_ID}` with the customer's own checkout session ID (`cs_…`) when they start paying, so on a reusable checkout each customer returns with their own.
 
         customer_id : typing.Optional[str]
 
@@ -151,6 +152,7 @@ class RawCheckoutsClient:
             External customer identifier. Creates the customer on first use, resolves to the existing customer on subsequent uses.
 
         cancel_url : typing.Optional[str]
+            Where the customer goes if they leave without paying. Takes the same `{CHECKOUT_ID}` and `{CHECKOUT_SESSION_ID}` placeholders as `successUrl`.
 
         expires_at : typing.Optional[dt.datetime]
             When the checkout link expires. Must be in the future. Defaults to 24 hours after creation.
@@ -541,6 +543,7 @@ class AsyncRawCheckoutsClient:
         products : typing.Sequence[CheckoutProductInput]
 
         success_url : str
+            Where the customer goes after paying. `{CHECKOUT_ID}` is replaced with this checkout's ID when it's created, and `{CHECKOUT_SESSION_ID}` with the customer's own checkout session ID (`cs_…`) when they start paying, so on a reusable checkout each customer returns with their own.
 
         customer_id : typing.Optional[str]
 
@@ -548,6 +551,7 @@ class AsyncRawCheckoutsClient:
             External customer identifier. Creates the customer on first use, resolves to the existing customer on subsequent uses.
 
         cancel_url : typing.Optional[str]
+            Where the customer goes if they leave without paying. Takes the same `{CHECKOUT_ID}` and `{CHECKOUT_SESSION_ID}` placeholders as `successUrl`.
 
         expires_at : typing.Optional[dt.datetime]
             When the checkout link expires. Must be in the future. Defaults to 24 hours after creation.
