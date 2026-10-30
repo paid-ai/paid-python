@@ -76,7 +76,7 @@ class CheckoutDetails(UniversalBaseModel):
         FieldMetadata(alias="orderId"),
         pydantic.Field(
             alias="orderId",
-            description="The resulting order ID once checkout has completed. Null until an order is created.",
+            description="The resulting order ID once a single-use checkout has completed. Null until an order is created, and always null on a reusable checkout (`singleUse: false`), where each payment creates its own order: use the `billing-checkout-completed` webhook to see each one.",
         ),
     ] = None
     selected_product: typing_extensions.Annotated[
