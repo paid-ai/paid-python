@@ -8,10 +8,6 @@ from .plan_ref import PlanRef
 
 
 class CheckoutSelectedProduct(UniversalBaseModel):
-    """
-    The product and plan the customer selected, once a single-use checkout completes. Null before completion, and always null on a reusable checkout (`singleUse: false`).
-    """
-
     id: str
     plan: typing.Optional[PlanRef] = None
 
