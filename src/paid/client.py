@@ -12,6 +12,7 @@ if typing.TYPE_CHECKING:
     from .amendments.client import AmendmentsClient, AsyncAmendmentsClient
     from .analytics.client import AnalyticsClient, AsyncAnalyticsClient
     from .analytics_experimental.client import AnalyticsExperimentalClient, AsyncAnalyticsExperimentalClient
+    from .checkout_sessions.client import AsyncCheckoutSessionsClient, CheckoutSessionsClient
     from .checkouts.client import AsyncCheckoutsClient, CheckoutsClient
     from .contacts.client import AsyncContactsClient, ContactsClient
     from .costs.client import AsyncCostsClient, CostsClient
@@ -109,6 +110,7 @@ class Paid:
         self._signals: typing.Optional[SignalsClient] = None
         self._credits: typing.Optional[CreditsClient] = None
         self._checkouts: typing.Optional[CheckoutsClient] = None
+        self._checkout_sessions: typing.Optional[CheckoutSessionsClient] = None
         self._customer_portals: typing.Optional[CustomerPortalsClient] = None
         self._value_receipts: typing.Optional[ValueReceiptsClient] = None
         self._delivered_value: typing.Optional[DeliveredValueClient] = None
@@ -196,6 +198,14 @@ class Paid:
 
             self._checkouts = CheckoutsClient(client_wrapper=self._client_wrapper)
         return self._checkouts
+
+    @property
+    def checkout_sessions(self):
+        if self._checkout_sessions is None:
+            from .checkout_sessions.client import CheckoutSessionsClient  # noqa: E402
+
+            self._checkout_sessions = CheckoutSessionsClient(client_wrapper=self._client_wrapper)
+        return self._checkout_sessions
 
     @property
     def customer_portals(self):
@@ -392,6 +402,7 @@ class AsyncPaid:
         self._signals: typing.Optional[AsyncSignalsClient] = None
         self._credits: typing.Optional[AsyncCreditsClient] = None
         self._checkouts: typing.Optional[AsyncCheckoutsClient] = None
+        self._checkout_sessions: typing.Optional[AsyncCheckoutSessionsClient] = None
         self._customer_portals: typing.Optional[AsyncCustomerPortalsClient] = None
         self._value_receipts: typing.Optional[AsyncValueReceiptsClient] = None
         self._delivered_value: typing.Optional[AsyncDeliveredValueClient] = None
@@ -479,6 +490,14 @@ class AsyncPaid:
 
             self._checkouts = AsyncCheckoutsClient(client_wrapper=self._client_wrapper)
         return self._checkouts
+
+    @property
+    def checkout_sessions(self):
+        if self._checkout_sessions is None:
+            from .checkout_sessions.client import AsyncCheckoutSessionsClient  # noqa: E402
+
+            self._checkout_sessions = AsyncCheckoutSessionsClient(client_wrapper=self._client_wrapper)
+        return self._checkout_sessions
 
     @property
     def customer_portals(self):

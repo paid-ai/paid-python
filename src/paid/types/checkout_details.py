@@ -82,7 +82,10 @@ class CheckoutDetails(UniversalBaseModel):
     selected_product: typing_extensions.Annotated[
         typing.Optional[CheckoutSelectedProduct],
         FieldMetadata(alias="selectedProduct"),
-        pydantic.Field(alias="selectedProduct"),
+        pydantic.Field(
+            alias="selectedProduct",
+            description="The product and plan the customer selected, once a single-use checkout completes. Null before completion, and always null on a reusable checkout (`singleUse: false`).",
+        ),
     ] = None
 
     if IS_PYDANTIC_V2:

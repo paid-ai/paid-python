@@ -79,6 +79,9 @@ if typing.TYPE_CHECKING:
     from .checkout_product import CheckoutProduct
     from .checkout_product_input import CheckoutProductInput
     from .checkout_selected_product import CheckoutSelectedProduct
+    from .checkout_session import CheckoutSession
+    from .checkout_session_list_response import CheckoutSessionListResponse
+    from .checkout_session_status import CheckoutSessionStatus
     from .checkout_status import CheckoutStatus
     from .contact import Contact
     from .contact_billing_address import ContactBillingAddress
@@ -969,6 +972,9 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CheckoutProduct": ".checkout_product",
     "CheckoutProductInput": ".checkout_product_input",
     "CheckoutSelectedProduct": ".checkout_selected_product",
+    "CheckoutSession": ".checkout_session",
+    "CheckoutSessionListResponse": ".checkout_session_list_response",
+    "CheckoutSessionStatus": ".checkout_session_status",
     "CheckoutStatus": ".checkout_status",
     "Contact": ".contact",
     "ContactBillingAddress": ".contact_billing_address",
@@ -1739,6 +1745,9 @@ __all__ = [
     "CheckoutProduct",
     "CheckoutProductInput",
     "CheckoutSelectedProduct",
+    "CheckoutSession",
+    "CheckoutSessionListResponse",
+    "CheckoutSessionStatus",
     "CheckoutStatus",
     "Contact",
     "ContactBillingAddress",

@@ -11356,6 +11356,177 @@ client.checkouts.archive_checkout(
 </dl>
 </details>
 
+## checkout-sessions
+<details><summary><code>client.checkout_sessions.<a href="src/paid/checkout_sessions/client.py">list_checkout_sessions</a>(...) -&gt; AsyncHttpResponse[CheckoutSessionListResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists checkout sessions, newest first: one for each time a customer started paying on a checkout. Filter by checkout to see everyone who opened a reusable checkout.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.checkout_sessions.list_checkout_sessions()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**offset:** `typing.Optional[int]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**checkout_id:** `typing.Optional[str]` — Only sessions of this checkout
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**status:** `typing.Optional[ListCheckoutSessionsRequestStatus]` — `open` until the customer pays, `processing` while the payment goes through (including 3D Secure), `completed` once paid, `expired` if it ran out of time first, `canceled` if it was canceled.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**client_reference_id:** `typing.Optional[str]` — Only sessions started with this `client_reference_id`
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.checkout_sessions.<a href="src/paid/checkout_sessions/client.py">get_checkout_session</a>(...) -&gt; AsyncHttpResponse[CheckoutSession]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Get one customer's checkout session by ID, for example the `{CHECKOUT_SESSION_ID}` they returned with
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.checkout_sessions.get_checkout_session(
+    id="id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## customer-portals
 <details><summary><code>client.customer_portals.<a href="src/paid/customer_portals/client.py">create_customer_portal</a>(...) -&gt; AsyncHttpResponse[CustomerPortal]</code></summary>
 <dl>
