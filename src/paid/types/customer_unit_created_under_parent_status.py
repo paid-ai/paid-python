@@ -2,4 +2,4 @@
 
 import typing
 
-CustomerUnitCreatedUnderParentStatus = typing.Union[typing.Literal["ACTIVE", "DELETED", "DRAFT"], typing.Any]
+CustomerUnitCreatedUnderParentStatus = typing.Union[typing.Literal["ACTIVE", "DELETED"], typing.Any]
