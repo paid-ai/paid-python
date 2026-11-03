@@ -49,7 +49,7 @@ class CustomerUnit(UniversalBaseModel):
     ] = None
     status: CustomerUnitStatus = pydantic.Field()
     """
-    ACTIVE; DELETED after a soft delete (one-way); or DRAFT, a placeholder that holds the key for this customer until you create the unit with that key (which promotes it) or delete it (soft, the key stays reserved, as for any unit). A draft is never a parent and never carries a cap.
+    ACTIVE, or DELETED after a soft delete (one-way).
     """
 
     parent_external_id: typing_extensions.Annotated[

@@ -2,4 +2,4 @@
 
 import typing
 
-CustomerUnitByKeyStatus = typing.Union[typing.Literal["ACTIVE", "DELETED", "DRAFT"], typing.Any]
+CustomerUnitByKeyStatus = typing.Union[typing.Literal["ACTIVE", "DELETED"], typing.Any]
