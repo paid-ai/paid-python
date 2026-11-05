@@ -39,7 +39,7 @@ class Signal(UniversalBaseModel):
 
     data: typing.Optional[typing.Dict[str, typing.Any]] = pydantic.Field(default=None)
     """
-    Your event data. The top-level keys `_derived`, `_dims` and `_billing`, and any top-level key starting with `_billing.`, are reserved for Paid: a batch in which any signal's `data` carries one is refused with `400 RESERVED_SIGNAL_DATA_FIELD`.
+    Your event data. The top-level keys `_derived`, `_dims` and `_billing`, and any top-level key starting with `_derived.`, `_dims.` or `_billing.`, are reserved for Paid: a batch in which any signal's `data` carries one is refused with `400 RESERVED_SIGNAL_DATA_FIELD`.
     """
 
     idempotency_key: typing_extensions.Annotated[
