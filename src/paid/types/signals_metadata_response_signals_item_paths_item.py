@@ -20,12 +20,12 @@ class SignalsMetadataResponseSignalsItemPathsItem(UniversalBaseModel):
 
     declared: bool = pydantic.Field()
     """
-    True when this key is declared as a grouping dimension for your organization. Declared keys are listed first.
+    True when a signal summary can be grouped by this key for your organization. Declared keys are listed first.
     """
 
     slot: typing.Optional[SignalsMetadataResponseSignalsItemPathsItemSlot] = pydantic.Field(default=None)
     """
-    The dimension slot a declared key fills. Present only when `declared` is true.
+    Deprecated: no longer returned. Use `declared` to tell whether a summary can be grouped by this key.
     """
 
     signals: typing.Optional[int] = pydantic.Field(default=None)
