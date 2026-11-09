@@ -15,9 +15,7 @@ from ..errors.bad_request_error import BadRequestError
 from ..errors.conflict_error import ConflictError
 from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
-from ..errors.unprocessable_entity_error import UnprocessableEntityError
 from ..types.backfill_response import BackfillResponse
-from ..types.error_response import ErrorResponse
 from ..types.value_model_content import ValueModelContent
 from ..types.value_model_detail import ValueModelDetail
 from ..types.value_model_version_list_response import ValueModelVersionListResponse
@@ -307,7 +305,7 @@ class RawValueModelsClient:
         self, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[BackfillResponse]:
         """
-        Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
+        Manually triggers a recalculation of all ClickHouse rows against the current value model.
 
         Parameters
         ----------
@@ -346,17 +344,6 @@ class RawValueModelsClient:
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -659,7 +646,7 @@ class AsyncRawValueModelsClient:
         self, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[BackfillResponse]:
         """
-        Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
+        Manually triggers a recalculation of all ClickHouse rows against the current value model.
 
         Parameters
         ----------
@@ -698,17 +685,6 @@ class AsyncRawValueModelsClient:
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 422:
-                raise UnprocessableEntityError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
