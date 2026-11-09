@@ -127,6 +127,7 @@ class RawProductsClient:
         self,
         *,
         name: str,
+        display_name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
@@ -140,6 +141,9 @@ class RawProductsClient:
         Parameters
         ----------
         name : str
+
+        display_name : typing.Optional[str]
+            What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
 
         description : typing.Optional[str]
 
@@ -164,6 +168,7 @@ class RawProductsClient:
             method="POST",
             json={
                 "name": name,
+                "displayName": display_name,
                 "description": description,
                 "active": active,
                 "productCode": product_code,
@@ -300,6 +305,7 @@ class RawProductsClient:
         id: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
@@ -316,6 +322,9 @@ class RawProductsClient:
         id : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
 
         description : typing.Optional[str]
 
@@ -342,6 +351,7 @@ class RawProductsClient:
             method="PUT",
             json={
                 "name": name,
+                "displayName": display_name,
                 "description": description,
                 "active": active,
                 "productCode": product_code,
@@ -492,6 +502,7 @@ class RawProductsClient:
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
@@ -508,6 +519,9 @@ class RawProductsClient:
         external_id_ : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
 
         description : typing.Optional[str]
 
@@ -534,6 +548,7 @@ class RawProductsClient:
             method="PUT",
             json={
                 "name": name,
+                "displayName": display_name,
                 "description": description,
                 "active": active,
                 "productCode": product_code,
@@ -713,6 +728,7 @@ class AsyncRawProductsClient:
         self,
         *,
         name: str,
+        display_name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
@@ -726,6 +742,9 @@ class AsyncRawProductsClient:
         Parameters
         ----------
         name : str
+
+        display_name : typing.Optional[str]
+            What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
 
         description : typing.Optional[str]
 
@@ -750,6 +769,7 @@ class AsyncRawProductsClient:
             method="POST",
             json={
                 "name": name,
+                "displayName": display_name,
                 "description": description,
                 "active": active,
                 "productCode": product_code,
@@ -886,6 +906,7 @@ class AsyncRawProductsClient:
         id: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
@@ -902,6 +923,9 @@ class AsyncRawProductsClient:
         id : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
 
         description : typing.Optional[str]
 
@@ -928,6 +952,7 @@ class AsyncRawProductsClient:
             method="PUT",
             json={
                 "name": name,
+                "displayName": display_name,
                 "description": description,
                 "active": active,
                 "productCode": product_code,
@@ -1078,6 +1103,7 @@ class AsyncRawProductsClient:
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
@@ -1094,6 +1120,9 @@ class AsyncRawProductsClient:
         external_id_ : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
 
         description : typing.Optional[str]
 
@@ -1120,6 +1149,7 @@ class AsyncRawProductsClient:
             method="PUT",
             json={
                 "name": name,
+                "displayName": display_name,
                 "description": description,
                 "active": active,
                 "productCode": product_code,

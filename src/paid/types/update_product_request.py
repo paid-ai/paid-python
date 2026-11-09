@@ -11,6 +11,14 @@ from .product_attribute_upsert import ProductAttributeUpsert
 
 class UpdateProductRequest(UniversalBaseModel):
     name: typing.Optional[str] = None
+    display_name: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="displayName"),
+        pydantic.Field(
+            alias="displayName",
+            description="What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.",
+        ),
+    ] = None
     description: typing.Optional[str] = None
     active: typing.Optional[bool] = None
     product_code: typing_extensions.Annotated[

@@ -83,6 +83,7 @@ class ProductsClient:
         self,
         *,
         name: str,
+        display_name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
@@ -96,6 +97,9 @@ class ProductsClient:
         Parameters
         ----------
         name : str
+
+        display_name : typing.Optional[str]
+            What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
 
         description : typing.Optional[str]
 
@@ -128,6 +132,7 @@ class ProductsClient:
         """
         _response = self._raw_client.create_product(
             name=name,
+            display_name=display_name,
             description=description,
             active=active,
             product_code=product_code,
@@ -172,6 +177,7 @@ class ProductsClient:
         id: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
@@ -188,6 +194,9 @@ class ProductsClient:
         id : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
 
         description : typing.Optional[str]
 
@@ -223,6 +232,7 @@ class ProductsClient:
         _response = self._raw_client.update_product_by_id(
             id,
             name=name,
+            display_name=display_name,
             description=description,
             active=active,
             product_code=product_code,
@@ -270,6 +280,7 @@ class ProductsClient:
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
@@ -286,6 +297,9 @@ class ProductsClient:
         external_id_ : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
 
         description : typing.Optional[str]
 
@@ -321,6 +335,7 @@ class ProductsClient:
         _response = self._raw_client.update_product_by_external_id(
             external_id_,
             name=name,
+            display_name=display_name,
             description=description,
             active=active,
             product_code=product_code,
@@ -409,6 +424,7 @@ class AsyncProductsClient:
         self,
         *,
         name: str,
+        display_name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
@@ -422,6 +438,9 @@ class AsyncProductsClient:
         Parameters
         ----------
         name : str
+
+        display_name : typing.Optional[str]
+            What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
 
         description : typing.Optional[str]
 
@@ -462,6 +481,7 @@ class AsyncProductsClient:
         """
         _response = await self._raw_client.create_product(
             name=name,
+            display_name=display_name,
             description=description,
             active=active,
             product_code=product_code,
@@ -516,6 +536,7 @@ class AsyncProductsClient:
         id: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
@@ -532,6 +553,9 @@ class AsyncProductsClient:
         id : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
 
         description : typing.Optional[str]
 
@@ -575,6 +599,7 @@ class AsyncProductsClient:
         _response = await self._raw_client.update_product_by_id(
             id,
             name=name,
+            display_name=display_name,
             description=description,
             active=active,
             product_code=product_code,
@@ -630,6 +655,7 @@ class AsyncProductsClient:
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         description: typing.Optional[str] = OMIT,
         active: typing.Optional[bool] = OMIT,
         product_code: typing.Optional[str] = OMIT,
@@ -646,6 +672,9 @@ class AsyncProductsClient:
         external_id_ : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
 
         description : typing.Optional[str]
 
@@ -689,6 +718,7 @@ class AsyncProductsClient:
         _response = await self._raw_client.update_product_by_external_id(
             external_id_,
             name=name,
+            display_name=display_name,
             description=description,
             active=active,
             product_code=product_code,
