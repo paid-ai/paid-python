@@ -158,6 +158,14 @@ client.products.create_product(
 <dl>
 <dd>
 
+**display_name:** `typing.Optional[str]` — What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **description:** `typing.Optional[str]` 
     
 </dd>
@@ -339,6 +347,14 @@ client.products.update_product_by_id(
 <dd>
 
 **name:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**display_name:** `typing.Optional[str]` — What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
     
 </dd>
 </dl>
@@ -535,6 +551,14 @@ client.products.update_product_by_external_id(
 <dd>
 
 **name:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**display_name:** `typing.Optional[str]` — What your customers see on invoices, up to 250 characters. Omit it or send null to use the product name.
     
 </dd>
 </dl>

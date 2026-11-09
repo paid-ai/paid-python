@@ -13,6 +13,14 @@ from .product_attribute_output import ProductAttributeOutput
 class ProductDetail(UniversalBaseModel):
     id: str
     name: str
+    display_name: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="displayName"),
+        pydantic.Field(
+            alias="displayName",
+            description="What your customers see on invoices. Null means invoices show the product name.",
+        ),
+    ] = None
     description: typing.Optional[str] = None
     created_at: typing_extensions.Annotated[
         dt.datetime, FieldMetadata(alias="createdAt"), pydantic.Field(alias="createdAt")
