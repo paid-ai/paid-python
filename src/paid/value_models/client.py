@@ -237,7 +237,7 @@ class ValueModelsClient:
         self, *, request_options: typing.Optional[RequestOptions] = None
     ) -> BackfillResponse:
         """
-        Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
+        Manually triggers a recalculation of all ClickHouse rows against the current value model.
 
         Parameters
         ----------
@@ -517,7 +517,7 @@ class AsyncValueModelsClient:
         self, *, request_options: typing.Optional[RequestOptions] = None
     ) -> BackfillResponse:
         """
-        Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
+        Manually triggers a recalculation of all ClickHouse rows against the current value model.
 
         Parameters
         ----------

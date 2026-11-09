@@ -14816,7 +14816,7 @@ client.value_models.get_value_model_version(
 <dl>
 <dd>
 
-Manually triggers a recalculation of all ClickHouse rows against the current value model. Returns 422 when the backfill would scan more signals than the ceiling allows — that is deterministic, so retrying without narrowing the scope will not help.
+Manually triggers a recalculation of all ClickHouse rows against the current value model.
 </dd>
 </dl>
 </dd>
