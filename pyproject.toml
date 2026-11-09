@@ -4,7 +4,7 @@ dynamic = ["version"]
 
 [tool.poetry]
 name = "paid-python"
-version = "2.8.0"
+version = "2.9.0"
 description = ""
 readme = "README.md"
 authors = []
