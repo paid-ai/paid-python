@@ -7,9 +7,29 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
 class BulkSignalsResponse(UniversalBaseModel):
-    ingested: int
-    duplicates: int
-    failed: int
+    """
+    The four counts add up to the number of signals in the request.
+    """
+
+    ingested: int = pydantic.Field()
+    """
+    Signals accepted and stored.
+    """
+
+    duplicates: int = pydantic.Field()
+    """
+    Signals skipped because their idempotency key was already sent, earlier or in the same batch. A resend of a key whose signal you voided is counted in `voided`, not here.
+    """
+
+    failed: int = pydantic.Field()
+    """
+    Signals that could not be ingested.
+    """
+
+    voided: int = pydantic.Field()
+    """
+    Signals skipped because their idempotency key belongs to a signal you voided. A voided signal keeps its key, so a resend under it is not stored. Counted here and not in `duplicates`. 0 when none apply.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
