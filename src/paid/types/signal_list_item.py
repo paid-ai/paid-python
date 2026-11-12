@@ -65,6 +65,10 @@ class SignalListItem(UniversalBaseModel):
         FieldMetadata(alias="createdAt"),
         pydantic.Field(alias="createdAt", description="When the signal was ingested (ISO 8601, UTC)."),
     ]
+    voided: typing.Optional[bool] = pydantic.Field(default=None)
+    """
+    True when the signal was voided. A voided signal no longer counts as usage; it is kept. Present on every signal only when the read passes `includeVoided=true`, and only for an organization with signal voiding.
+    """
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

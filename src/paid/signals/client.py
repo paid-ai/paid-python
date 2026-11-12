@@ -12,6 +12,7 @@ from ..types.signal_lookup_response import SignalLookupResponse
 from ..types.signal_summary_export import SignalSummaryExport
 from ..types.signal_summary_response import SignalSummaryResponse
 from ..types.signal_summary_spec_input import SignalSummarySpecInput
+from ..types.signal_void_response import SignalVoidResponse
 from .raw_client import AsyncRawSignalsClient, RawSignalsClient
 from .types.create_signal_summary_export_request_format import CreateSignalSummaryExportRequestFormat
 from .types.get_signal_summary_request_group_by import GetSignalSummaryRequestGroupBy
@@ -48,6 +49,7 @@ class SignalsClient:
         external_product_id: typing.Optional[str] = None,
         created_at_from: typing.Optional[str] = None,
         created_at_to: typing.Optional[str] = None,
+        include_voided: typing.Optional[bool] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SignalListResponse:
         """
@@ -80,6 +82,9 @@ class SignalsClient:
         created_at_to : typing.Optional[str]
             Only signals created on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
 
+        include_voided : typing.Optional[bool]
+            Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -107,18 +112,28 @@ class SignalsClient:
             external_product_id=external_product_id,
             created_at_from=created_at_from,
             created_at_to=created_at_to,
+            include_voided=include_voided,
             request_options=request_options,
         )
         return _response.data
 
-    def get_signal_by_id(self, id: str, *, request_options: typing.Optional[RequestOptions] = None) -> SignalListItem:
+    def get_signal_by_id(
+        self,
+        id: str,
+        *,
+        include_voided: typing.Optional[bool] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> SignalListItem:
         """
-        Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+        Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest. A voided signal answers 404 unless the request passes `includeVoided=true`.
 
         Parameters
         ----------
         id : str
             Signal ID.
+
+        include_voided : typing.Optional[bool]
+            Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -139,11 +154,17 @@ class SignalsClient:
             id="6890b0e2a6f2c30012f0a1b3",
         )
         """
-        _response = self._raw_client.get_signal_by_id(id, request_options=request_options)
+        _response = self._raw_client.get_signal_by_id(
+            id, include_voided=include_voided, request_options=request_options
+        )
         return _response.data
 
     def get_signals_by_ids(
-        self, *, ids: typing.Sequence[str], request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        ids: typing.Sequence[str],
+        include_voided: typing.Optional[bool] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> SignalLookupResponse:
         """
         Fetch up to 500 ingested signals (usage events) by ID in one request, each with the data payload submitted at ingest. Use it to resolve the `signalId` values on a page of credit transactions, or the signals behind one run or ticket, instead of calling `GET /api/v2/signals/{id}` once per signal. Signals are returned in request order; IDs that match nothing in your organization are listed under `notFound` rather than failing the request. This is a read-only operation: it requires the `read:usage` scope and is not available to customer API keys.
@@ -152,6 +173,9 @@ class SignalsClient:
         ----------
         ids : typing.Sequence[str]
             Signal IDs to fetch, up to 500 per request. Duplicates are collapsed. For example the `signalId` values from a page of `GET /api/v2/credits/transactions`.
+
+        include_voided : typing.Optional[bool]
+            Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -172,7 +196,9 @@ class SignalsClient:
             ids=["6890b0e2a6f2c30012f0a1b3", "6890b0e2a6f2c30012f0a1b4"],
         )
         """
-        _response = self._raw_client.get_signals_by_ids(ids=ids, request_options=request_options)
+        _response = self._raw_client.get_signals_by_ids(
+            ids=ids, include_voided=include_voided, request_options=request_options
+        )
         return _response.data
 
     def create_signals(
@@ -235,6 +261,83 @@ class SignalsClient:
         )
         """
         _response = self._raw_client.create_signals(signals=signals, request_options=request_options)
+        return _response.data
+
+    def void_signal(
+        self, id: str, *, reason: typing.Optional[str] = OMIT, request_options: typing.Optional[RequestOptions] = None
+    ) -> SignalVoidResponse:
+        """
+        Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization without signal voiding gets 404.
+
+        Parameters
+        ----------
+        id : str
+            The signal's ID: 24 hexadecimal characters, in any case.
+
+        reason : typing.Optional[str]
+            Why you are voiding the signal, kept with the void. At most 500 characters.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalVoidResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.signals.void_signal(
+            id="6890b0e2a6f2c30012f0a1b3",
+        )
+        """
+        _response = self._raw_client.void_signal(id, reason=reason, request_options=request_options)
+        return _response.data
+
+    def void_signal_by_idempotency_key(
+        self,
+        idempotency_key: str,
+        *,
+        reason: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> SignalVoidResponse:
+        """
+        Early access. Voids one ingested signal by the idempotency key it was sent with, as voidSignal does by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is `.` or `..` cannot be addressed by key: void it by ID. An organization without signal voiding gets 404.
+
+        Parameters
+        ----------
+        idempotency_key : str
+
+        reason : typing.Optional[str]
+            Why you are voiding the signal, kept with the void. At most 500 characters.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalVoidResponse
+            200
+
+        Examples
+        --------
+        from paid import Paid
+
+        client = Paid(
+            token="YOUR_TOKEN",
+        )
+        client.signals.void_signal_by_idempotency_key(
+            idempotency_key="idempotencyKey",
+        )
+        """
+        _response = self._raw_client.void_signal_by_idempotency_key(
+            idempotency_key, reason=reason, request_options=request_options
+        )
         return _response.data
 
     def create_signal_summary_export(
@@ -510,6 +613,7 @@ class AsyncSignalsClient:
         external_product_id: typing.Optional[str] = None,
         created_at_from: typing.Optional[str] = None,
         created_at_to: typing.Optional[str] = None,
+        include_voided: typing.Optional[bool] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> SignalListResponse:
         """
@@ -541,6 +645,9 @@ class AsyncSignalsClient:
 
         created_at_to : typing.Optional[str]
             Only signals created on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
+
+        include_voided : typing.Optional[bool]
+            Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -577,20 +684,28 @@ class AsyncSignalsClient:
             external_product_id=external_product_id,
             created_at_from=created_at_from,
             created_at_to=created_at_to,
+            include_voided=include_voided,
             request_options=request_options,
         )
         return _response.data
 
     async def get_signal_by_id(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        id: str,
+        *,
+        include_voided: typing.Optional[bool] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> SignalListItem:
         """
-        Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+        Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest. A voided signal answers 404 unless the request passes `includeVoided=true`.
 
         Parameters
         ----------
         id : str
             Signal ID.
+
+        include_voided : typing.Optional[bool]
+            Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -619,11 +734,17 @@ class AsyncSignalsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_signal_by_id(id, request_options=request_options)
+        _response = await self._raw_client.get_signal_by_id(
+            id, include_voided=include_voided, request_options=request_options
+        )
         return _response.data
 
     async def get_signals_by_ids(
-        self, *, ids: typing.Sequence[str], request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        ids: typing.Sequence[str],
+        include_voided: typing.Optional[bool] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> SignalLookupResponse:
         """
         Fetch up to 500 ingested signals (usage events) by ID in one request, each with the data payload submitted at ingest. Use it to resolve the `signalId` values on a page of credit transactions, or the signals behind one run or ticket, instead of calling `GET /api/v2/signals/{id}` once per signal. Signals are returned in request order; IDs that match nothing in your organization are listed under `notFound` rather than failing the request. This is a read-only operation: it requires the `read:usage` scope and is not available to customer API keys.
@@ -632,6 +753,9 @@ class AsyncSignalsClient:
         ----------
         ids : typing.Sequence[str]
             Signal IDs to fetch, up to 500 per request. Duplicates are collapsed. For example the `signalId` values from a page of `GET /api/v2/credits/transactions`.
+
+        include_voided : typing.Optional[bool]
+            Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -660,7 +784,9 @@ class AsyncSignalsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_signals_by_ids(ids=ids, request_options=request_options)
+        _response = await self._raw_client.get_signals_by_ids(
+            ids=ids, include_voided=include_voided, request_options=request_options
+        )
         return _response.data
 
     async def create_signals(
@@ -730,6 +856,99 @@ class AsyncSignalsClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.create_signals(signals=signals, request_options=request_options)
+        return _response.data
+
+    async def void_signal(
+        self, id: str, *, reason: typing.Optional[str] = OMIT, request_options: typing.Optional[RequestOptions] = None
+    ) -> SignalVoidResponse:
+        """
+        Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization without signal voiding gets 404.
+
+        Parameters
+        ----------
+        id : str
+            The signal's ID: 24 hexadecimal characters, in any case.
+
+        reason : typing.Optional[str]
+            Why you are voiding the signal, kept with the void. At most 500 characters.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalVoidResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.signals.void_signal(
+                id="6890b0e2a6f2c30012f0a1b3",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.void_signal(id, reason=reason, request_options=request_options)
+        return _response.data
+
+    async def void_signal_by_idempotency_key(
+        self,
+        idempotency_key: str,
+        *,
+        reason: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> SignalVoidResponse:
+        """
+        Early access. Voids one ingested signal by the idempotency key it was sent with, as voidSignal does by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is `.` or `..` cannot be addressed by key: void it by ID. An organization without signal voiding gets 404.
+
+        Parameters
+        ----------
+        idempotency_key : str
+
+        reason : typing.Optional[str]
+            Why you are voiding the signal, kept with the void. At most 500 characters.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SignalVoidResponse
+            200
+
+        Examples
+        --------
+        import asyncio
+
+        from paid import AsyncPaid
+
+        client = AsyncPaid(
+            token="YOUR_TOKEN",
+        )
+
+
+        async def main() -> None:
+            await client.signals.void_signal_by_idempotency_key(
+                idempotency_key="idempotencyKey",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.void_signal_by_idempotency_key(
+            idempotency_key, reason=reason, request_options=request_options
+        )
         return _response.data
 
     async def create_signal_summary_export(

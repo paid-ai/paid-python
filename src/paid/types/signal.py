@@ -47,7 +47,7 @@ class Signal(UniversalBaseModel):
         FieldMetadata(alias="idempotencyKey"),
         pydantic.Field(
             alias="idempotencyKey",
-            description="Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in `duplicates` instead of `ingested`.",
+            description="Your unique key for this event. A signal whose key was already sent, earlier or in the same batch, is skipped and counted in `duplicates` instead of `ingested`. A resend of a key whose signal you voided is counted in `voided`, not in `duplicates`.",
         ),
     ] = None
 

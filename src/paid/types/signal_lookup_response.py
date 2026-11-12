@@ -20,7 +20,7 @@ class SignalLookupResponse(UniversalBaseModel):
         FieldMetadata(alias="notFound"),
         pydantic.Field(
             alias="notFound",
-            description="Requested IDs that match no signal in your organization, in request order. Malformed IDs are reported here rather than rejected.",
+            description="Requested IDs that match no signal in your organization, in request order. Malformed IDs are reported here rather than rejected. A voided signal is reported here too unless the request passes `includeVoided=true`.",
         ),
     ]
 

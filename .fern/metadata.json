@@ -36,6 +36,6 @@
       "vcrpy": ">=6.0.0"
     }
   },
-  "originGitCommit": "678961f32c973ebdd1218691c640b15c358f6cde",
-  "sdkVersion": "2.14.0"
+  "originGitCommit": "8f20912e2b5c30c76c80b0f4179140fc3d441cd9",
+  "sdkVersion": "2.15.0"
 }

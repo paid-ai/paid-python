@@ -655,6 +655,10 @@ if typing.TYPE_CHECKING:
         SignalSummarySpecInputDimensionsItem_Presence,
     )
     from .signal_summary_spec_input_interval import SignalSummarySpecInputInterval
+    from .signal_void_cell_effect import SignalVoidCellEffect
+    from .signal_void_credit_effect import SignalVoidCreditEffect
+    from .signal_void_request import SignalVoidRequest
+    from .signal_void_response import SignalVoidResponse
     from .signals_metadata_response import SignalsMetadataResponse
     from .signals_metadata_response_meta import SignalsMetadataResponseMeta
     from .signals_metadata_response_signals_item import SignalsMetadataResponseSignalsItem
@@ -1478,6 +1482,10 @@ _dynamic_imports: typing.Dict[str, str] = {
     "SignalSummarySpecInputDimensionsItem_Bands": ".signal_summary_spec_input_dimensions_item",
     "SignalSummarySpecInputDimensionsItem_Presence": ".signal_summary_spec_input_dimensions_item",
     "SignalSummarySpecInputInterval": ".signal_summary_spec_input_interval",
+    "SignalVoidCellEffect": ".signal_void_cell_effect",
+    "SignalVoidCreditEffect": ".signal_void_credit_effect",
+    "SignalVoidRequest": ".signal_void_request",
+    "SignalVoidResponse": ".signal_void_response",
     "SignalsMetadataResponse": ".signals_metadata_response",
     "SignalsMetadataResponseMeta": ".signals_metadata_response_meta",
     "SignalsMetadataResponseSignalsItem": ".signals_metadata_response_signals_item",
@@ -2251,6 +2259,10 @@ __all__ = [
     "SignalSummarySpecInputDimensionsItem_Bands",
     "SignalSummarySpecInputDimensionsItem_Presence",
     "SignalSummarySpecInputInterval",
+    "SignalVoidCellEffect",
+    "SignalVoidCreditEffect",
+    "SignalVoidRequest",
+    "SignalVoidResponse",
     "SignalsMetadataResponse",
     "SignalsMetadataResponseMeta",
     "SignalsMetadataResponseSignalsItem",

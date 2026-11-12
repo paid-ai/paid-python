@@ -10,13 +10,16 @@ from ..core.jsonable_encoder import jsonable_encoder
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
+from ..errors.bad_gateway_error import BadGatewayError
 from ..errors.bad_request_error import BadRequestError
 from ..errors.conflict_error import ConflictError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
 from ..errors.request_timeout_error import RequestTimeoutError
+from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.too_many_requests_error import TooManyRequestsError
+from ..errors.unprocessable_entity_error import UnprocessableEntityError
 from ..types.bulk_signals_response import BulkSignalsResponse
 from ..types.error_response import ErrorResponse
 from ..types.signal import Signal
@@ -26,6 +29,7 @@ from ..types.signal_lookup_response import SignalLookupResponse
 from ..types.signal_summary_export import SignalSummaryExport
 from ..types.signal_summary_response import SignalSummaryResponse
 from ..types.signal_summary_spec_input import SignalSummarySpecInput
+from ..types.signal_void_response import SignalVoidResponse
 from .types.create_signal_summary_export_request_format import CreateSignalSummaryExportRequestFormat
 from .types.get_signal_summary_request_group_by import GetSignalSummaryRequestGroupBy
 from .types.get_signal_summary_request_interval import GetSignalSummaryRequestInterval
@@ -50,6 +54,7 @@ class RawSignalsClient:
         external_product_id: typing.Optional[str] = None,
         created_at_from: typing.Optional[str] = None,
         created_at_to: typing.Optional[str] = None,
+        include_voided: typing.Optional[bool] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[SignalListResponse]:
         """
@@ -82,6 +87,9 @@ class RawSignalsClient:
         created_at_to : typing.Optional[str]
             Only signals created on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
 
+        include_voided : typing.Optional[bool]
+            Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -103,6 +111,7 @@ class RawSignalsClient:
                 "externalProductId": external_product_id,
                 "createdAtFrom": created_at_from,
                 "createdAtTo": created_at_to,
+                "includeVoided": include_voided,
             },
             request_options=request_options,
         )
@@ -149,6 +158,17 @@ class RawSignalsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     headers=dict(_response.headers),
@@ -171,21 +191,39 @@ class RawSignalsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def get_signal_by_id(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        id: str,
+        *,
+        include_voided: typing.Optional[bool] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[SignalListItem]:
         """
-        Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+        Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest. A voided signal answers 404 unless the request passes `includeVoided=true`.
 
         Parameters
         ----------
         id : str
             Signal ID.
+
+        include_voided : typing.Optional[bool]
+            Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -198,6 +236,9 @@ class RawSignalsClient:
         _response = self._client_wrapper.httpx_client.request(
             f"signals/{jsonable_encoder(id)}",
             method="GET",
+            params={
+                "includeVoided": include_voided,
+            },
             request_options=request_options,
         )
         try:
@@ -282,7 +323,11 @@ class RawSignalsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def get_signals_by_ids(
-        self, *, ids: typing.Sequence[str], request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        ids: typing.Sequence[str],
+        include_voided: typing.Optional[bool] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[SignalLookupResponse]:
         """
         Fetch up to 500 ingested signals (usage events) by ID in one request, each with the data payload submitted at ingest. Use it to resolve the `signalId` values on a page of credit transactions, or the signals behind one run or ticket, instead of calling `GET /api/v2/signals/{id}` once per signal. Signals are returned in request order; IDs that match nothing in your organization are listed under `notFound` rather than failing the request. This is a read-only operation: it requires the `read:usage` scope and is not available to customer API keys.
@@ -291,6 +336,9 @@ class RawSignalsClient:
         ----------
         ids : typing.Sequence[str]
             Signal IDs to fetch, up to 500 per request. Duplicates are collapsed. For example the `signalId` values from a page of `GET /api/v2/credits/transactions`.
+
+        include_voided : typing.Optional[bool]
+            Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -303,6 +351,9 @@ class RawSignalsClient:
         _response = self._client_wrapper.httpx_client.request(
             "signals/lookup",
             method="POST",
+            params={
+                "includeVoided": include_voided,
+            },
             json={
                 "ids": ids,
             },
@@ -453,6 +504,283 @@ class RawSignalsClient:
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def void_signal(
+        self, id: str, *, reason: typing.Optional[str] = OMIT, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[SignalVoidResponse]:
+        """
+        Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization without signal voiding gets 404.
+
+        Parameters
+        ----------
+        id : str
+            The signal's ID: 24 hexadecimal characters, in any case.
+
+        reason : typing.Optional[str]
+            Why you are voiding the signal, kept with the void. At most 500 characters.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[SignalVoidResponse]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"signals/{jsonable_encoder(id)}/void",
+            method="PUT",
+            json={
+                "reason": reason,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    SignalVoidResponse,
+                    parse_obj_as(
+                        type_=SignalVoidResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 502:
+                raise BadGatewayError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def void_signal_by_idempotency_key(
+        self,
+        idempotency_key: str,
+        *,
+        reason: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[SignalVoidResponse]:
+        """
+        Early access. Voids one ingested signal by the idempotency key it was sent with, as voidSignal does by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is `.` or `..` cannot be addressed by key: void it by ID. An organization without signal voiding gets 404.
+
+        Parameters
+        ----------
+        idempotency_key : str
+
+        reason : typing.Optional[str]
+            Why you are voiding the signal, kept with the void. At most 500 characters.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[SignalVoidResponse]
+            200
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"signals/idempotency-key/{jsonable_encoder(idempotency_key)}/void",
+            method="PUT",
+            json={
+                "reason": reason,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    SignalVoidResponse,
+                    parse_obj_as(
+                        type_=SignalVoidResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 502:
+                raise BadGatewayError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -867,6 +1195,7 @@ class AsyncRawSignalsClient:
         external_product_id: typing.Optional[str] = None,
         created_at_from: typing.Optional[str] = None,
         created_at_to: typing.Optional[str] = None,
+        include_voided: typing.Optional[bool] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[SignalListResponse]:
         """
@@ -899,6 +1228,9 @@ class AsyncRawSignalsClient:
         created_at_to : typing.Optional[str]
             Only signals created on or before this date. Accepts an ISO 8601 date or date-time. Date-only values (e.g. 2026-06-30) are treated as UTC; date-times without an explicit timezone offset are ambiguous, so include one (e.g. 2026-06-30T00:00:00-05:00) when precision matters.
 
+        include_voided : typing.Optional[bool]
+            Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -920,6 +1252,7 @@ class AsyncRawSignalsClient:
                 "externalProductId": external_product_id,
                 "createdAtFrom": created_at_from,
                 "createdAtTo": created_at_to,
+                "includeVoided": include_voided,
             },
             request_options=request_options,
         )
@@ -966,6 +1299,17 @@ class AsyncRawSignalsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 422:
+                raise UnprocessableEntityError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 429:
                 raise TooManyRequestsError(
                     headers=dict(_response.headers),
@@ -988,21 +1332,39 @@ class AsyncRawSignalsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def get_signal_by_id(
-        self, id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        id: str,
+        *,
+        include_voided: typing.Optional[bool] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[SignalListItem]:
         """
-        Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+        Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest. A voided signal answers 404 unless the request passes `includeVoided=true`.
 
         Parameters
         ----------
         id : str
             Signal ID.
+
+        include_voided : typing.Optional[bool]
+            Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1015,6 +1377,9 @@ class AsyncRawSignalsClient:
         _response = await self._client_wrapper.httpx_client.request(
             f"signals/{jsonable_encoder(id)}",
             method="GET",
+            params={
+                "includeVoided": include_voided,
+            },
             request_options=request_options,
         )
         try:
@@ -1099,7 +1464,11 @@ class AsyncRawSignalsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def get_signals_by_ids(
-        self, *, ids: typing.Sequence[str], request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        ids: typing.Sequence[str],
+        include_voided: typing.Optional[bool] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[SignalLookupResponse]:
         """
         Fetch up to 500 ingested signals (usage events) by ID in one request, each with the data payload submitted at ingest. Use it to resolve the `signalId` values on a page of credit transactions, or the signals behind one run or ticket, instead of calling `GET /api/v2/signals/{id}` once per signal. Signals are returned in request order; IDs that match nothing in your organization are listed under `notFound` rather than failing the request. This is a read-only operation: it requires the `read:usage` scope and is not available to customer API keys.
@@ -1108,6 +1477,9 @@ class AsyncRawSignalsClient:
         ----------
         ids : typing.Sequence[str]
             Signal IDs to fetch, up to 500 per request. Duplicates are collapsed. For example the `signalId` values from a page of `GET /api/v2/credits/transactions`.
+
+        include_voided : typing.Optional[bool]
+            Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1120,6 +1492,9 @@ class AsyncRawSignalsClient:
         _response = await self._client_wrapper.httpx_client.request(
             "signals/lookup",
             method="POST",
+            params={
+                "includeVoided": include_voided,
+            },
             json={
                 "ids": ids,
             },
@@ -1270,6 +1645,283 @@ class AsyncRawSignalsClient:
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def void_signal(
+        self, id: str, *, reason: typing.Optional[str] = OMIT, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[SignalVoidResponse]:
+        """
+        Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization without signal voiding gets 404.
+
+        Parameters
+        ----------
+        id : str
+            The signal's ID: 24 hexadecimal characters, in any case.
+
+        reason : typing.Optional[str]
+            Why you are voiding the signal, kept with the void. At most 500 characters.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[SignalVoidResponse]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"signals/{jsonable_encoder(id)}/void",
+            method="PUT",
+            json={
+                "reason": reason,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    SignalVoidResponse,
+                    parse_obj_as(
+                        type_=SignalVoidResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 502:
+                raise BadGatewayError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def void_signal_by_idempotency_key(
+        self,
+        idempotency_key: str,
+        *,
+        reason: typing.Optional[str] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[SignalVoidResponse]:
+        """
+        Early access. Voids one ingested signal by the idempotency key it was sent with, as voidSignal does by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is `.` or `..` cannot be addressed by key: void it by ID. An organization without signal voiding gets 404.
+
+        Parameters
+        ----------
+        idempotency_key : str
+
+        reason : typing.Optional[str]
+            Why you are voiding the signal, kept with the void. At most 500 characters.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[SignalVoidResponse]
+            200
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"signals/idempotency-key/{jsonable_encoder(idempotency_key)}/void",
+            method="PUT",
+            json={
+                "reason": reason,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    SignalVoidResponse,
+                    parse_obj_as(
+                        type_=SignalVoidResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 429:
+                raise TooManyRequestsError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 502:
+                raise BadGatewayError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),

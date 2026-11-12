@@ -9787,6 +9787,14 @@ client.signals.list_signals()
 <dl>
 <dd>
 
+**include_voided:** `typing.Optional[bool]` — Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -9811,7 +9819,7 @@ client.signals.list_signals()
 <dl>
 <dd>
 
-Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest.
+Get a single ingested signal (usage event) by its ID, including the data payload submitted at ingest. A voided signal answers 404 unless the request passes `includeVoided=true`.
 </dd>
 </dl>
 </dd>
@@ -9850,6 +9858,14 @@ client.signals.get_signal_by_id(
 <dd>
 
 **id:** `str` — Signal ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**include_voided:** `typing.Optional[bool]` — Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
     
 </dd>
 </dl>
@@ -9920,6 +9936,14 @@ client.signals.get_signals_by_ids(
 <dd>
 
 **ids:** `typing.Sequence[str]` — Signal IDs to fetch, up to 500 per request. Duplicates are collapsed. For example the `signalId` values from a page of `GET /api/v2/credits/transactions`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**include_voided:** `typing.Optional[bool]` — Include voided signals in the response. Defaults to false, and an absent value and false behave the same: a voided signal is one you withdrew, so the read leaves it out (a list leaves it out of its rows and of `pagination.total`; the read by ID answers a voided signal as not found; the bulk lookup reports it under `notFound`) and no signal carries a `voided` field. With true, voided signals are included and every signal returned carries `voided`, true or false. For an organization without signal voiding the option is ignored and no signal carries `voided`.
     
 </dd>
 </dl>
@@ -10020,6 +10044,162 @@ client.signals.create_signals(
 <dd>
 
 **signals:** `typing.Sequence[Signal]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.signals.<a href="src/paid/signals/client.py">void_signal</a>(...) -&gt; AsyncHttpResponse[SignalVoidResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization without signal voiding gets 404.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.signals.void_signal(
+    id="6890b0e2a6f2c30012f0a1b3",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**id:** `str` — The signal's ID: 24 hexadecimal characters, in any case.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**reason:** `typing.Optional[str]` — Why you are voiding the signal, kept with the void. At most 500 characters.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.signals.<a href="src/paid/signals/client.py">void_signal_by_idempotency_key</a>(...) -&gt; AsyncHttpResponse[SignalVoidResponse]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Early access. Voids one ingested signal by the idempotency key it was sent with, as voidSignal does by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is `.` or `..` cannot be addressed by key: void it by ID. An organization without signal voiding gets 404.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from paid import Paid
+
+client = Paid(
+    token="YOUR_TOKEN",
+)
+client.signals.void_signal_by_idempotency_key(
+    idempotency_key="idempotencyKey",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**idempotency_key:** `str` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**reason:** `typing.Optional[str]` — Why you are voiding the signal, kept with the void. At most 500 characters.
     
 </dd>
 </dl>
