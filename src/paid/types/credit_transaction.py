@@ -30,7 +30,7 @@ class CreditTransaction(UniversalBaseModel):
 
     amount: str = pydantic.Field()
     """
-    Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends, except a reversal, which is a `spend` with a positive amount. Exact at any magnitude, and at the full 6 decimal places.
+    Exact signed transaction amount in credits, as a decimal string: positive for grants, negative for spends, except a reversal, which is a `spend` with a positive amount. Exact at any magnitude and at every decimal place the value carries.
     """
 
     origin_code: typing_extensions.Annotated[

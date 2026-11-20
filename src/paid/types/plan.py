@@ -15,6 +15,14 @@ class Plan(UniversalBaseModel):
     id: str
     product_id: typing_extensions.Annotated[str, FieldMetadata(alias="productId"), pydantic.Field(alias="productId")]
     name: typing.Optional[str] = None
+    display_name: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="displayName"),
+        pydantic.Field(
+            alias="displayName",
+            description="What your customers see for this plan on invoices, checkout and the customer portal. Null means they see the plan name.",
+        ),
+    ] = None
     external_id: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="externalId"), pydantic.Field(alias="externalId")
     ] = None

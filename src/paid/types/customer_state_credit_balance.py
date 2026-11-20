@@ -18,7 +18,19 @@ class CustomerStateCreditBalance(UniversalBaseModel):
     currency_key: typing_extensions.Annotated[
         str, FieldMetadata(alias="currencyKey"), pydantic.Field(alias="currencyKey")
     ]
-    balance: float
+    balance: float = pydantic.Field()
+    """
+    JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use `balanceDecimal` for the exact value.
+    """
+
+    balance_decimal: typing_extensions.Annotated[
+        str,
+        FieldMetadata(alias="balanceDecimal"),
+        pydantic.Field(
+            alias="balanceDecimal",
+            description="Exact value of `balance` as a decimal string, at any magnitude and every decimal place it carries.",
+        ),
+    ]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

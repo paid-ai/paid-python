@@ -13,16 +13,35 @@ class UsageBracketedPrepaidCreditsInputCreditUnitBracketsItem(UniversalBaseModel
         typing.Optional[int], FieldMetadata(alias="upTo"), pydantic.Field(alias="upTo")
     ] = None
     credit_units: typing_extensions.Annotated[
-        float,
+        typing.Optional[float],
         FieldMetadata(alias="creditUnits"),
-        pydantic.Field(alias="creditUnits", description="Credit amount, exact to at most 6 decimal places."),
-    ]
+        pydantic.Field(
+            alias="creditUnits",
+            description="Up to 15 decimal places. Send this or `creditUnitsDecimal`; when both are sent they must be equal.",
+        ),
+    ] = None
+    credit_units_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="creditUnitsDecimal"),
+        pydantic.Field(
+            alias="creditUnitsDecimal",
+            description="The same amount as `creditUnits`, as an exact decimal string with up to 15 decimal places. Send this or `creditUnits`; when both are sent they must be equal.",
+        ),
+    ] = None
     credit_units_per_unit: typing_extensions.Annotated[
         typing.Optional[float],
         FieldMetadata(alias="creditUnitsPerUnit"),
         pydantic.Field(
             alias="creditUnitsPerUnit",
-            description="Credits burned per unit in this band (graduated), instead of the flat creditUnits per signal. Brackets must be all flat or all graduated. Requires the graduated-credit-brackets flag.",
+            description="Credits burned per unit in this band (graduated), instead of the flat creditUnits per signal. Brackets must be all flat or all graduated. Requires the graduated-credit-brackets flag. Up to 15 decimal places. Send this or `creditUnitsPerUnitDecimal`; when both are sent they must be equal.",
+        ),
+    ] = None
+    credit_units_per_unit_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="creditUnitsPerUnitDecimal"),
+        pydantic.Field(
+            alias="creditUnitsPerUnitDecimal",
+            description="The same amount as `creditUnitsPerUnit`, as an exact decimal string with up to 15 decimal places. Send this or `creditUnitsPerUnit`; when both are sent they must be equal.",
         ),
     ] = None
 

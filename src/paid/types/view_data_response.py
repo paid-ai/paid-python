@@ -3,11 +3,21 @@
 import typing
 
 import pydantic
+import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.serialization import FieldMetadata
 from .custom_view_data_context import CustomViewDataContext
 
 
 class ViewDataResponse(UniversalBaseModel):
+    stored_currency_decimals: typing_extensions.Annotated[
+        typing.Dict[str, int],
+        FieldMetadata(alias="storedCurrencyDecimals"),
+        pydantic.Field(
+            alias="storedCurrencyDecimals",
+            description='The decimals Paid stores each listed currency\'s amounts at, where they differ from the currency\'s own minor unit. Divide a listed currency\'s amounts by 10 to this power: `{ "JPY": 2 }` means yen are stored in hundredths (150000 is ¥1,500), `{ "JPY": 0 }` whole yen. A currency not listed uses its own minor unit. `fact_cost.cost_amount` and `fact_delivered_value.delivered_value_cents` are exceptions: always hundredths of `cost_currency` and `delivered_value_currency`, respectively (the major unit × 100), whatever this says.',
+        ),
+    ]
     context: typing.Optional[CustomViewDataContext] = None
     data: typing.Dict[str, typing.List[typing.Dict[str, typing.Any]]] = pydantic.Field()
     """

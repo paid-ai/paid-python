@@ -8,6 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .add_attribute_intent_charge_stub import AddAttributeIntentChargeStub
 from .add_attribute_intent_credit_grant import AddAttributeIntentCreditGrant
+from .add_attribute_intent_price_source import AddAttributeIntentPriceSource
 from .add_attribute_intent_treatment import AddAttributeIntentTreatment
 
 
@@ -32,6 +33,14 @@ class AddAttributeIntent(UniversalBaseModel):
     line_name: typing_extensions.Annotated[
         str, FieldMetadata(alias="lineName"), pydantic.Field(alias="lineName", description="Name of the new line.")
     ]
+    price_source: typing_extensions.Annotated[
+        typing.Optional[AddAttributeIntentPriceSource],
+        FieldMetadata(alias="priceSource"),
+        pydantic.Field(
+            alias="priceSource",
+            description="Source of the supplied price. Linked attributes default to `catalog`. Set `custom` for an intentional override, including a free `0` price.",
+        ),
+    ] = None
     pricing: typing.Dict[str, typing.Any] = pydantic.Field()
     """
     Full pricing JSON. Prefer `addFromCatalog` or `newUnitPriceMinor` unless you are replacing the pricing shape.

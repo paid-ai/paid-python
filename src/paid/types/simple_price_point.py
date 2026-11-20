@@ -7,11 +7,28 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .simple_price_point_tiers_item import SimplePricePointTiersItem
+from .simple_price_point_unit_price_origin import SimplePricePointUnitPriceOrigin
 
 
 class SimplePricePoint(UniversalBaseModel):
     currency: str
+    unit_price_origin: typing_extensions.Annotated[
+        typing.Optional[SimplePricePointUnitPriceOrigin],
+        FieldMetadata(alias="unitPriceOrigin"),
+        pydantic.Field(
+            alias="unitPriceOrigin",
+            description="Explicitly replace a stored decimal price with the submitted price. Requires the organization's sub-cent prices flag; omission preserves an unchanged stored decimal or refuses a rate change.",
+        ),
+    ] = None
     unit_price: typing_extensions.Annotated[int, FieldMetadata(alias="unitPrice"), pydantic.Field(alias="unitPrice")]
+    unit_price_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="unitPriceDecimal"),
+        pydantic.Field(
+            alias="unitPriceDecimal",
+            description='An exact per-unit price as decimal text in minor units, with at most 15 decimal places: `"0.025"` is 0.025¢ per unit. Set `unitPrice` to its whole-number fallback. Fractional prices require sub-cent prices enabled and are only for per-unit usage prices (including per-N), usage tier rates and flat amounts, overage price per credit, and credit units per unit. Flat recurring, one-time and seat prices have at most the currency’s decimals and must be whole minor units, including custom plan prices. Text exactly equal to the whole price is ordinary and is stored without decimal text. To replace a plan\'s stored fraction with a whole price, explicitly send its decimal text (such as `"500"`) with the flag enabled; omitting it preserves the rate or refuses an unsafe change.',
+        ),
+    ] = None
     tiers: typing.Optional[typing.List[SimplePricePointTiersItem]] = None
     min_quantity: typing_extensions.Annotated[
         typing.Optional[int], FieldMetadata(alias="minQuantity"), pydantic.Field(alias="minQuantity")

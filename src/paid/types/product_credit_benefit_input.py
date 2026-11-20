@@ -16,11 +16,19 @@ class ProductCreditBenefitInput(UniversalBaseModel):
     credits_currency_id: typing_extensions.Annotated[
         str, FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ]
-    amount: float = pydantic.Field()
+    amount: typing.Optional[float] = pydantic.Field(default=None)
     """
-    Credit amount, exact to at most 6 decimal places.
+    Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
     """
 
+    amount_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="amountDecimal"),
+        pydantic.Field(
+            alias="amountDecimal",
+            description="The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal.",
+        ),
+    ] = None
     recipient: typing.Optional[ProductCreditBenefitInputRecipient] = None
     is_infinite_total: typing_extensions.Annotated[
         typing.Optional[bool], FieldMetadata(alias="isInfiniteTotal"), pydantic.Field(alias="isInfiniteTotal")
@@ -38,6 +46,14 @@ class ProductCreditBenefitInput(UniversalBaseModel):
     overage_unit_price: typing_extensions.Annotated[
         typing.Optional[int], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
     ] = None
+    overage_unit_prices_decimal: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Optional[str]]],
+        FieldMetadata(alias="overageUnitPricesDecimal"),
+        pydantic.Field(
+            alias="overageUnitPricesDecimal",
+            description="Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.",
+        ),
+    ] = None
     overage_unit_prices: typing_extensions.Annotated[
         typing.Optional[typing.Dict[str, typing.Optional[int]]],
         FieldMetadata(alias="overageUnitPrices"),
@@ -49,7 +65,18 @@ class ProductCreditBenefitInput(UniversalBaseModel):
     rollover_amount: typing_extensions.Annotated[
         typing.Optional[float],
         FieldMetadata(alias="rolloverAmount"),
-        pydantic.Field(alias="rolloverAmount", description="Credit amount, exact to at most 6 decimal places."),
+        pydantic.Field(
+            alias="rolloverAmount",
+            description="Up to 15 decimal places. Send this or `rolloverAmountDecimal`; when both are sent they must be equal.",
+        ),
+    ] = None
+    rollover_amount_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="rolloverAmountDecimal"),
+        pydantic.Field(
+            alias="rolloverAmountDecimal",
+            description="The same amount as `rolloverAmount`, as an exact decimal string with up to 15 decimal places. Send this or `rolloverAmount`; when both are sent they must be equal.",
+        ),
     ] = None
     rollover_duration: typing_extensions.Annotated[
         typing.Optional[int], FieldMetadata(alias="rolloverDuration"), pydantic.Field(alias="rolloverDuration")

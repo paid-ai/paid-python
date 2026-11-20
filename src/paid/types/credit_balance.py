@@ -23,19 +23,43 @@ class CreditBalance(UniversalBaseModel):
     ]
     available: float = pydantic.Field()
     """
-    Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].available). JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+    Effective spendable balance across all grants in this pool, rollover-capped during rollover windows. Equals sum(grants[].availableDecimal). JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use `availableDecimal` for the exact value.
     """
 
+    available_decimal: typing_extensions.Annotated[
+        str,
+        FieldMetadata(alias="availableDecimal"),
+        pydantic.Field(
+            alias="availableDecimal",
+            description="Exact value of `available` as a decimal string, at any magnitude and every decimal place it carries.",
+        ),
+    ]
     used: float = pydantic.Field()
     """
-    JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+    JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use `usedDecimal` for the exact value.
     """
 
+    used_decimal: typing_extensions.Annotated[
+        str,
+        FieldMetadata(alias="usedDecimal"),
+        pydantic.Field(
+            alias="usedDecimal",
+            description="Exact value of `used` as a decimal string, at any magnitude and every decimal place it carries.",
+        ),
+    ]
     total: float = pydantic.Field()
     """
-    JSON number; exact within ±2^53 — balances are sums and can legitimately exceed it.
+    JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use `totalDecimal` for the exact value.
     """
 
+    total_decimal: typing_extensions.Annotated[
+        str,
+        FieldMetadata(alias="totalDecimal"),
+        pydantic.Field(
+            alias="totalDecimal",
+            description="Exact value of `total` as a decimal string, at any magnitude and every decimal place it carries.",
+        ),
+    ]
     period_start: typing_extensions.Annotated[
         typing.Optional[dt.datetime],
         FieldMetadata(alias="periodStart"),

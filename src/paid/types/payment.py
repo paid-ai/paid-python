@@ -40,19 +40,20 @@ class Payment(UniversalBaseModel):
     ] = None
     amount: int = pydantic.Field()
     """
-    Payment amount in cents (minor currency units).
+    Payment amount in stored minor units: cents for USD; for JPY, hundredths when currencyDecimals is 2 and whole yen when it is 0.
     """
 
     allocated_amount: typing_extensions.Annotated[
         int,
         FieldMetadata(alias="allocatedAmount"),
         pydantic.Field(
-            alias="allocatedAmount", description="Portion of the amount already allocated to invoice lines, in cents."
+            alias="allocatedAmount",
+            description="Portion allocated to invoice lines, in stored minor units described by currencyDecimals.",
         ),
     ]
     balance: int = pydantic.Field()
     """
-    Unallocated remainder of the payment, in cents.
+    Unallocated remainder, in stored minor units described by currencyDecimals.
     """
 
     currency: str = pydantic.Field()
@@ -60,6 +61,14 @@ class Payment(UniversalBaseModel):
     Three-letter ISO currency code.
     """
 
+    currency_decimals: typing_extensions.Annotated[
+        int,
+        FieldMetadata(alias="currencyDecimals"),
+        pydantic.Field(
+            alias="currencyDecimals",
+            description="Decimals of this payment's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99); for JPY 2 while Paid stores yen in hundredths, then 0. Divide amounts by 10^currencyDecimals; never assume 100.",
+        ),
+    ]
     payment_date: typing_extensions.Annotated[
         dt.datetime,
         FieldMetadata(alias="paymentDate"),

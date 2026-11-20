@@ -26,6 +26,14 @@ class PlanPricing(UniversalBaseModel):
         FieldMetadata(alias="pricePoints"),
         pydantic.Field(alias="pricePoints"),
     ]
+    overage_unit_prices_decimal: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Optional[str]]],
+        FieldMetadata(alias="overageUnitPricesDecimal"),
+        pydantic.Field(
+            alias="overageUnitPricesDecimal",
+            description="Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.",
+        ),
+    ] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

@@ -16,6 +16,14 @@ class CreateOrderLineAttributeRequestPricingPricePoints(UniversalBaseModel):
     Single flat price point for this order attribute override. Do not send a currency-keyed map here.
     """
 
+    unit_price_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="unitPriceDecimal"),
+        pydantic.Field(
+            alias="unitPriceDecimal",
+            description="Exact per-unit order price in minor currency units, as decimal text with at most 15 decimal places. Requires sub-cent prices for this organization. The whole-number unitPrice remains the fallback.",
+        ),
+    ] = None
     currency: typing.Optional[str] = None
     unit_price: typing_extensions.Annotated[int, FieldMetadata(alias="unitPrice"), pydantic.Field(alias="unitPrice")]
     min_quantity: typing_extensions.Annotated[

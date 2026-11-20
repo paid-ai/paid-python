@@ -21,7 +21,7 @@ class CreditGrantResult(UniversalBaseModel):
         FieldMetadata(alias="amountDecimal"),
         pydantic.Field(
             alias="amountDecimal",
-            description="Exact number of credits granted, as a decimal string. Exact at any magnitude, and at the full 6 decimal places.",
+            description="Exact number of credits granted, as a decimal string. Exact at any magnitude and at every decimal place the value carries.",
         ),
     ]
     starts_at: typing_extensions.Annotated[

@@ -157,7 +157,7 @@ class OrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
-        Creates a new order for the organization
+        Creates a new order for the organization. If draft pricing cannot be confirmed, returns 503 BILLING_UNAVAILABLE only after deleting the new draft. A retained draft returns 409 ORDER_RETAINED with its order id and externalId in details. Retrieve that order and check its state instead of repeating creation.
 
         Parameters
         ----------
@@ -630,11 +630,12 @@ class OrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ProvisionResponse:
         """
-        Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+        Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. A 503 `BILLING_UNAVAILABLE` means draft pricing could not be confirmed and any newly created draft was deleted; send the same request again with the same idempotency key. If a new draft is retained, returns 409 `ORDER_RETAINED` with its order id and externalId in `details`. Retrieve that order and check its state instead of repeating creation. Amounts are whole numbers in minor currency units (cents).
 
         Parameters
         ----------
         idempotency_key : str
+            A unique key for this provision, such as the source record ID plus its last-modified time. Retrying with the same key and body returns the stored response with the `Idempotent-Replayed: true` header. The same key with a different body returns 409 `IDEMPOTENCY_KEY_CONFLICT`.
 
         external_reference : ProvisionExternalReference
 
@@ -900,7 +901,7 @@ class AsyncOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Order:
         """
-        Creates a new order for the organization
+        Creates a new order for the organization. If draft pricing cannot be confirmed, returns 503 BILLING_UNAVAILABLE only after deleting the new draft. A retained draft returns 409 ORDER_RETAINED with its order id and externalId in details. Retrieve that order and check its state instead of repeating creation.
 
         Parameters
         ----------
@@ -1449,11 +1450,12 @@ class AsyncOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ProvisionResponse:
         """
-        Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+        Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. A 503 `BILLING_UNAVAILABLE` means draft pricing could not be confirmed and any newly created draft was deleted; send the same request again with the same idempotency key. If a new draft is retained, returns 409 `ORDER_RETAINED` with its order id and externalId in `details`. Retrieve that order and check its state instead of repeating creation. Amounts are whole numbers in minor currency units (cents).
 
         Parameters
         ----------
         idempotency_key : str
+            A unique key for this provision, such as the source record ID plus its last-modified time. Retrying with the same key and body returns the stored response with the `Idempotent-Replayed: true` header. The same key with a different body returns 409 `IDEMPOTENCY_KEY_CONFLICT`.
 
         external_reference : ProvisionExternalReference
 

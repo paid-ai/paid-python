@@ -12,6 +12,14 @@ from .update_plan_request_status import UpdatePlanRequestStatus
 
 class UpdatePlanRequest(UniversalBaseModel):
     name: typing.Optional[str] = None
+    display_name: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="displayName"),
+        pydantic.Field(
+            alias="displayName",
+            description="What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.",
+        ),
+    ] = None
     external_id: typing_extensions.Annotated[
         typing.Optional[str], FieldMetadata(alias="externalId"), pydantic.Field(alias="externalId")
     ] = None

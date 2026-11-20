@@ -220,6 +220,12 @@ class PricingInput_UsagePerUnit(UniversalBaseModel):
     price_points: typing_extensions.Annotated[
         typing.List[SimplePricePoint], FieldMetadata(alias="pricePoints"), pydantic.Field(alias="pricePoints")
     ]
+    unit_size: typing_extensions.Annotated[
+        typing.Optional[int], FieldMetadata(alias="unitSize"), pydantic.Field(alias="unitSize")
+    ] = None
+    unit_name: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="unitName"), pydantic.Field(alias="unitName")
+    ] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -323,13 +329,27 @@ class PricingInput_UsagePrepaidCredits(UniversalBaseModel):
         str, FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ]
     credit_cost: typing_extensions.Annotated[
-        float, FieldMetadata(alias="creditCost"), pydantic.Field(alias="creditCost")
-    ]
+        typing.Optional[float], FieldMetadata(alias="creditCost"), pydantic.Field(alias="creditCost")
+    ] = None
+    credit_cost_decimal: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="creditCostDecimal"), pydantic.Field(alias="creditCostDecimal")
+    ] = None
+    unit_size: typing_extensions.Annotated[
+        typing.Optional[int], FieldMetadata(alias="unitSize"), pydantic.Field(alias="unitSize")
+    ] = None
+    unit_name: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="unitName"), pydantic.Field(alias="unitName")
+    ] = None
     unit_value: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="unitValue"), pydantic.Field(alias="unitValue")
     ] = None
     overage_unit_price: typing_extensions.Annotated[
         typing.Optional[int], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
+    ] = None
+    overage_unit_prices_decimal: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Optional[str]]],
+        FieldMetadata(alias="overageUnitPricesDecimal"),
+        pydantic.Field(alias="overageUnitPricesDecimal"),
     ] = None
     overage_unit_prices: typing_extensions.Annotated[
         typing.Optional[typing.Dict[str, typing.Optional[int]]],
@@ -393,6 +413,11 @@ class PricingInput_UsageBracketedPrepaidCredits(UniversalBaseModel):
     overage_unit_price: typing_extensions.Annotated[
         typing.Optional[int], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
     ] = None
+    overage_unit_prices_decimal: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Optional[str]]],
+        FieldMetadata(alias="overageUnitPricesDecimal"),
+        pydantic.Field(alias="overageUnitPricesDecimal"),
+    ] = None
     overage_unit_prices: typing_extensions.Annotated[
         typing.Optional[typing.Dict[str, typing.Optional[int]]],
         FieldMetadata(alias="overageUnitPrices"),
@@ -402,6 +427,11 @@ class PricingInput_UsageBracketedPrepaidCredits(UniversalBaseModel):
         typing.Optional[float],
         FieldMetadata(alias="creditRolloverAmount"),
         pydantic.Field(alias="creditRolloverAmount"),
+    ] = None
+    credit_rollover_amount_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="creditRolloverAmountDecimal"),
+        pydantic.Field(alias="creditRolloverAmountDecimal"),
     ] = None
     pricing_input: typing_extensions.Annotated[
         UsageBracketedPrepaidCreditsInputPricingInput,
@@ -622,13 +652,21 @@ class PricingInput_SeatBasedPrepaidCredits(UniversalBaseModel):
         str, FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ]
     credit_cost: typing_extensions.Annotated[
-        float, FieldMetadata(alias="creditCost"), pydantic.Field(alias="creditCost")
-    ]
+        typing.Optional[float], FieldMetadata(alias="creditCost"), pydantic.Field(alias="creditCost")
+    ] = None
+    credit_cost_decimal: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="creditCostDecimal"), pydantic.Field(alias="creditCostDecimal")
+    ] = None
     unit_value: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="unitValue"), pydantic.Field(alias="unitValue")
     ] = None
     overage_unit_price: typing_extensions.Annotated[
         typing.Optional[int], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
+    ] = None
+    overage_unit_prices_decimal: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Optional[str]]],
+        FieldMetadata(alias="overageUnitPricesDecimal"),
+        pydantic.Field(alias="overageUnitPricesDecimal"),
     ] = None
     overage_unit_prices: typing_extensions.Annotated[
         typing.Optional[typing.Dict[str, typing.Optional[int]]],

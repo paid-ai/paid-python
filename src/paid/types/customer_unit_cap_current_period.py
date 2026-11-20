@@ -3,7 +3,9 @@
 import typing
 
 import pydantic
+import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.serialization import FieldMetadata
 from .customer_unit_cap_period import CustomerUnitCapPeriod
 
 
@@ -15,13 +17,30 @@ class CustomerUnitCapCurrentPeriod(UniversalBaseModel):
     window: CustomerUnitCapPeriod
     used: float = pydantic.Field()
     """
-    Credits of this currency spent by this unit and its descendants during the window. JSON number; exact within ±2^53.
+    Credits of this currency spent by this unit and its descendants during the window. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use `usedDecimal` for the exact value.
     """
 
+    used_decimal: typing_extensions.Annotated[
+        str,
+        FieldMetadata(alias="usedDecimal"),
+        pydantic.Field(
+            alias="usedDecimal",
+            description="Exact value of `used` as a decimal string, at any magnitude and every decimal place it carries.",
+        ),
+    ]
     remaining: float = pydantic.Field()
     """
-    `amount - used`; negative once the cap is exceeded. Advisory: spend may land between this read and the next burn.
+    `amount - used`; negative once the cap is exceeded. Advisory: spend may land between this read and the next burn. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use `remainingDecimal` for the exact value.
     """
+
+    remaining_decimal: typing_extensions.Annotated[
+        str,
+        FieldMetadata(alias="remainingDecimal"),
+        pydantic.Field(
+            alias="remainingDecimal",
+            description="Exact value of `remaining` as a decimal string, at any magnitude and every decimal place it carries.",
+        ),
+    ]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

@@ -36,6 +36,19 @@ class Order(UniversalBaseModel):
     subscription_terms: typing_extensions.Annotated[
         typing.Optional[int], FieldMetadata(alias="subscriptionTerms"), pydantic.Field(alias="subscriptionTerms")
     ] = None
+    currency: str = pydantic.Field()
+    """
+    Three-letter ISO currency code of the order's amounts.
+    """
+
+    currency_decimals: typing_extensions.Annotated[
+        int,
+        FieldMetadata(alias="currencyDecimals"),
+        pydantic.Field(
+            alias="currencyDecimals",
+            description="Decimals of this order's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99); for JPY 2 while Paid stores yen in hundredths, then 0. Divide amounts by 10^currencyDecimals; never assume 100.",
+        ),
+    ]
     billed_amount_no_tax: typing_extensions.Annotated[
         float, FieldMetadata(alias="billedAmountNoTax"), pydantic.Field(alias="billedAmountNoTax")
     ]

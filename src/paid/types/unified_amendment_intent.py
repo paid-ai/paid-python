@@ -11,6 +11,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .add_attribute_intent_charge_stub import AddAttributeIntentChargeStub
 from .add_attribute_intent_credit_grant import AddAttributeIntentCreditGrant
+from .add_attribute_intent_price_source import AddAttributeIntentPriceSource
 from .add_attribute_intent_treatment import AddAttributeIntentTreatment
 from .add_from_catalog_intent_charge_stub import AddFromCatalogIntentChargeStub
 from .end_attribute_intent_treatment import EndAttributeIntentTreatment
@@ -94,6 +95,9 @@ class UnifiedAmendmentIntent_AddFromCatalog(UniversalBaseModel):
     unit_price_minor: typing_extensions.Annotated[
         typing.Optional[int], FieldMetadata(alias="unitPriceMinor"), pydantic.Field(alias="unitPriceMinor")
     ] = None
+    unit_price_decimal: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="unitPriceDecimal"), pydantic.Field(alias="unitPriceDecimal")
+    ] = None
     charge_stub: typing_extensions.Annotated[
         typing.Optional[AddFromCatalogIntentChargeStub],
         FieldMetadata(alias="chargeStub"),
@@ -120,6 +124,11 @@ class UnifiedAmendmentIntent_AddAttribute(UniversalBaseModel):
         typing.Optional[str], FieldMetadata(alias="productAttributeId"), pydantic.Field(alias="productAttributeId")
     ] = None
     line_name: typing_extensions.Annotated[str, FieldMetadata(alias="lineName"), pydantic.Field(alias="lineName")]
+    price_source: typing_extensions.Annotated[
+        typing.Optional[AddAttributeIntentPriceSource],
+        FieldMetadata(alias="priceSource"),
+        pydantic.Field(alias="priceSource"),
+    ] = None
     pricing: typing.Dict[str, typing.Any]
     quantity: int
     currency: typing.Optional[str] = None

@@ -9,6 +9,7 @@ if typing.TYPE_CHECKING:
     from .add_attribute_intent import AddAttributeIntent
     from .add_attribute_intent_charge_stub import AddAttributeIntentChargeStub
     from .add_attribute_intent_credit_grant import AddAttributeIntentCreditGrant
+    from .add_attribute_intent_price_source import AddAttributeIntentPriceSource
     from .add_attribute_intent_treatment import AddAttributeIntentTreatment
     from .add_from_catalog_intent import AddFromCatalogIntent
     from .add_from_catalog_intent_charge_stub import AddFromCatalogIntentChargeStub
@@ -484,9 +485,11 @@ if typing.TYPE_CHECKING:
     from .product_simple_price_point import ProductSimplePricePoint
     from .product_simple_price_point_tiers_item import ProductSimplePricePointTiersItem
     from .product_simple_price_point_tiers_item_tier_billing_type import ProductSimplePricePointTiersItemTierBillingType
+    from .product_simple_price_point_unit_price_origin import ProductSimplePricePointUnitPriceOrigin
     from .product_tiered_price_point import ProductTieredPricePoint
     from .product_tiered_price_point_tiers_item import ProductTieredPricePointTiersItem
     from .product_tiered_price_point_tiers_item_tier_billing_type import ProductTieredPricePointTiersItemTierBillingType
+    from .product_tiered_price_point_unit_price_origin import ProductTieredPricePointUnitPriceOrigin
     from .product_usage_bracketed_prepaid_credits_input import ProductUsageBracketedPrepaidCreditsInput
     from .product_usage_bracketed_prepaid_credits_input_billing_frequency import (
         ProductUsageBracketedPrepaidCreditsInputBillingFrequency,
@@ -553,6 +556,7 @@ if typing.TYPE_CHECKING:
     from .provision_order_line import ProvisionOrderLine
     from .provision_order_line_attribute import ProvisionOrderLineAttribute
     from .provision_order_line_attribute_discount_type import ProvisionOrderLineAttributeDiscountType
+    from .provision_order_line_attribute_price_source import ProvisionOrderLineAttributePriceSource
     from .provision_order_line_attribute_pricing import ProvisionOrderLineAttributePricing
     from .provision_order_line_attribute_pricing_billing_frequency import (
         ProvisionOrderLineAttributePricingBillingFrequency,
@@ -667,6 +671,7 @@ if typing.TYPE_CHECKING:
     from .simple_price_point import SimplePricePoint
     from .simple_price_point_tiers_item import SimplePricePointTiersItem
     from .simple_price_point_tiers_item_tier_billing_type import SimplePricePointTiersItemTierBillingType
+    from .simple_price_point_unit_price_origin import SimplePricePointUnitPriceOrigin
     from .stripe_connection import StripeConnection
     from .success_response import SuccessResponse
     from .sync_value_receipt_request import SyncValueReceiptRequest
@@ -674,6 +679,7 @@ if typing.TYPE_CHECKING:
     from .tiered_price_point import TieredPricePoint
     from .tiered_price_point_tiers_item import TieredPricePointTiersItem
     from .tiered_price_point_tiers_item_tier_billing_type import TieredPricePointTiersItemTierBillingType
+    from .tiered_price_point_unit_price_origin import TieredPricePointUnitPriceOrigin
     from .token_usage import TokenUsage
     from .unified_amendment_intent import (
         UnifiedAmendmentIntent,
@@ -886,6 +892,7 @@ if typing.TYPE_CHECKING:
         ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZeroType,
     )
     from .value_model_content_value_types_item_category import ValueModelContentValueTypesItemCategory
+    from .value_model_content_value_types_item_maturation import ValueModelContentValueTypesItemMaturation
     from .value_model_content_value_types_item_sources_item import ValueModelContentValueTypesItemSourcesItem
     from .value_model_detail import ValueModelDetail
     from .value_model_summary import ValueModelSummary
@@ -910,6 +917,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "AddAttributeIntent": ".add_attribute_intent",
     "AddAttributeIntentChargeStub": ".add_attribute_intent_charge_stub",
     "AddAttributeIntentCreditGrant": ".add_attribute_intent_credit_grant",
+    "AddAttributeIntentPriceSource": ".add_attribute_intent_price_source",
     "AddAttributeIntentTreatment": ".add_attribute_intent_treatment",
     "AddFromCatalogIntent": ".add_from_catalog_intent",
     "AddFromCatalogIntentChargeStub": ".add_from_catalog_intent_charge_stub",
@@ -1341,9 +1349,11 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ProductSimplePricePoint": ".product_simple_price_point",
     "ProductSimplePricePointTiersItem": ".product_simple_price_point_tiers_item",
     "ProductSimplePricePointTiersItemTierBillingType": ".product_simple_price_point_tiers_item_tier_billing_type",
+    "ProductSimplePricePointUnitPriceOrigin": ".product_simple_price_point_unit_price_origin",
     "ProductTieredPricePoint": ".product_tiered_price_point",
     "ProductTieredPricePointTiersItem": ".product_tiered_price_point_tiers_item",
     "ProductTieredPricePointTiersItemTierBillingType": ".product_tiered_price_point_tiers_item_tier_billing_type",
+    "ProductTieredPricePointUnitPriceOrigin": ".product_tiered_price_point_unit_price_origin",
     "ProductUsageBracketedPrepaidCreditsInput": ".product_usage_bracketed_prepaid_credits_input",
     "ProductUsageBracketedPrepaidCreditsInputBillingFrequency": ".product_usage_bracketed_prepaid_credits_input_billing_frequency",
     "ProductUsageBracketedPrepaidCreditsInputBillingType": ".product_usage_bracketed_prepaid_credits_input_billing_type",
@@ -1398,6 +1408,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ProvisionOrderLine": ".provision_order_line",
     "ProvisionOrderLineAttribute": ".provision_order_line_attribute",
     "ProvisionOrderLineAttributeDiscountType": ".provision_order_line_attribute_discount_type",
+    "ProvisionOrderLineAttributePriceSource": ".provision_order_line_attribute_price_source",
     "ProvisionOrderLineAttributePricing": ".provision_order_line_attribute_pricing",
     "ProvisionOrderLineAttributePricingBillingFrequency": ".provision_order_line_attribute_pricing_billing_frequency",
     "ProvisionOrderLineAttributePricingBillingType": ".provision_order_line_attribute_pricing_billing_type",
@@ -1494,6 +1505,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "SimplePricePoint": ".simple_price_point",
     "SimplePricePointTiersItem": ".simple_price_point_tiers_item",
     "SimplePricePointTiersItemTierBillingType": ".simple_price_point_tiers_item_tier_billing_type",
+    "SimplePricePointUnitPriceOrigin": ".simple_price_point_unit_price_origin",
     "StripeConnection": ".stripe_connection",
     "SuccessResponse": ".success_response",
     "SyncValueReceiptRequest": ".sync_value_receipt_request",
@@ -1501,6 +1513,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "TieredPricePoint": ".tiered_price_point",
     "TieredPricePointTiersItem": ".tiered_price_point_tiers_item",
     "TieredPricePointTiersItemTierBillingType": ".tiered_price_point_tiers_item_tier_billing_type",
+    "TieredPricePointUnitPriceOrigin": ".tiered_price_point_unit_price_origin",
     "TokenUsage": ".token_usage",
     "UnifiedAmendmentIntent": ".unified_amendment_intent",
     "UnifiedAmendmentIntent_AddAttribute": ".unified_amendment_intent",
@@ -1639,6 +1652,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZero": ".value_model_content_value_types_item_calculation_timeline_item_calculation_unit_zero",
     "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZeroType": ".value_model_content_value_types_item_calculation_timeline_item_calculation_unit_zero_type",
     "ValueModelContentValueTypesItemCategory": ".value_model_content_value_types_item_category",
+    "ValueModelContentValueTypesItemMaturation": ".value_model_content_value_types_item_maturation",
     "ValueModelContentValueTypesItemSourcesItem": ".value_model_content_value_types_item_sources_item",
     "ValueModelDetail": ".value_model_detail",
     "ValueModelSummary": ".value_model_summary",
@@ -1687,6 +1701,7 @@ __all__ = [
     "AddAttributeIntent",
     "AddAttributeIntentChargeStub",
     "AddAttributeIntentCreditGrant",
+    "AddAttributeIntentPriceSource",
     "AddAttributeIntentTreatment",
     "AddFromCatalogIntent",
     "AddFromCatalogIntentChargeStub",
@@ -2118,9 +2133,11 @@ __all__ = [
     "ProductSimplePricePoint",
     "ProductSimplePricePointTiersItem",
     "ProductSimplePricePointTiersItemTierBillingType",
+    "ProductSimplePricePointUnitPriceOrigin",
     "ProductTieredPricePoint",
     "ProductTieredPricePointTiersItem",
     "ProductTieredPricePointTiersItemTierBillingType",
+    "ProductTieredPricePointUnitPriceOrigin",
     "ProductUsageBracketedPrepaidCreditsInput",
     "ProductUsageBracketedPrepaidCreditsInputBillingFrequency",
     "ProductUsageBracketedPrepaidCreditsInputBillingType",
@@ -2175,6 +2192,7 @@ __all__ = [
     "ProvisionOrderLine",
     "ProvisionOrderLineAttribute",
     "ProvisionOrderLineAttributeDiscountType",
+    "ProvisionOrderLineAttributePriceSource",
     "ProvisionOrderLineAttributePricing",
     "ProvisionOrderLineAttributePricingBillingFrequency",
     "ProvisionOrderLineAttributePricingBillingType",
@@ -2271,6 +2289,7 @@ __all__ = [
     "SimplePricePoint",
     "SimplePricePointTiersItem",
     "SimplePricePointTiersItemTierBillingType",
+    "SimplePricePointUnitPriceOrigin",
     "StripeConnection",
     "SuccessResponse",
     "SyncValueReceiptRequest",
@@ -2278,6 +2297,7 @@ __all__ = [
     "TieredPricePoint",
     "TieredPricePointTiersItem",
     "TieredPricePointTiersItemTierBillingType",
+    "TieredPricePointUnitPriceOrigin",
     "TokenUsage",
     "UnifiedAmendmentIntent",
     "UnifiedAmendmentIntent_AddAttribute",
@@ -2416,6 +2436,7 @@ __all__ = [
     "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZero",
     "ValueModelContentValueTypesItemCalculationTimelineItemCalculationUnitZeroType",
     "ValueModelContentValueTypesItemCategory",
+    "ValueModelContentValueTypesItemMaturation",
     "ValueModelContentValueTypesItemSourcesItem",
     "ValueModelDetail",
     "ValueModelSummary",

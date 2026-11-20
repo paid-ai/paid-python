@@ -44,7 +44,7 @@ class SignalSummaryPoint(UniversalBaseModel):
         FieldMetadata(alias="quantityTotal"),
         pydantic.Field(
             alias="quantityTotal",
-            description="Quantity reported by those signals — one signal reporting a batch of 100 adds 100. Equals signalCount when every signal reported a single occurrence.",
+            description="Quantity reported by those signals — one signal reporting a batch of 100 adds 100. A decimal quantity counts as sent, so it can have a fractional part: two signals of 2.5 add 5. A signal with no quantity adds 1, and one whose quantity is not a number or is below zero adds 0. Equals signalCount when every signal reported a single occurrence.",
         ),
     ]
 
