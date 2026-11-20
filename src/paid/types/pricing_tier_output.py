@@ -10,6 +10,22 @@ from .pricing_tier_output_tier_billing_type import PricingTierOutputTierBillingT
 
 
 class PricingTierOutput(UniversalBaseModel):
+    flat_amount_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="flatAmountDecimal"),
+        pydantic.Field(
+            alias="flatAmountDecimal",
+            description="The tier's exact flat amount in minor units, when present, replacing its whole-number field.",
+        ),
+    ] = None
+    unit_amount_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="unitAmountDecimal"),
+        pydantic.Field(
+            alias="unitAmountDecimal",
+            description="The tier's exact per-unit rate in minor units, when present, replacing its whole-number field.",
+        ),
+    ] = None
     flat_amount: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="flatAmount"), pydantic.Field(alias="flatAmount")
     ] = None

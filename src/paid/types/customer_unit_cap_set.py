@@ -12,11 +12,19 @@ from .customer_unit_cap_set_frequency import CustomerUnitCapSetFrequency
 
 
 class CustomerUnitCapSet(UniversalBaseModel):
-    amount: float = pydantic.Field()
+    amount: typing.Optional[float] = pydantic.Field(default=None)
     """
-    The cap, in credits of the currency, per period. Must be positive.
+    The cap, in credits of the currency, per period. Must be positive. Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
     """
 
+    amount_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="amountDecimal"),
+        pydantic.Field(
+            alias="amountDecimal",
+            description="The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal. Must be positive.",
+        ),
+    ] = None
     frequency: typing.Optional[CustomerUnitCapSetFrequency] = pydantic.Field(default=None)
     """
     Monthly UTC periods, with boundaries defined by `schedule`.

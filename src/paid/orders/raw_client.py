@@ -16,9 +16,11 @@ from ..errors.conflict_error import ConflictError
 from ..errors.forbidden_error import ForbiddenError
 from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
+from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..types.batch_seat_assignments_response import BatchSeatAssignmentsResponse
 from ..types.create_order_line_request import CreateOrderLineRequest
 from ..types.empty_response import EmptyResponse
+from ..types.error_response import ErrorResponse
 from ..types.order import Order
 from ..types.order_billing_frequency_override import OrderBillingFrequencyOverride
 from ..types.order_creation_state import OrderCreationState
@@ -197,7 +199,7 @@ class RawOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Order]:
         """
-        Creates a new order for the organization
+        Creates a new order for the organization. If draft pricing cannot be confirmed, returns 503 BILLING_UNAVAILABLE only after deleting the new draft. A retained draft returns 409 ORDER_RETAINED with its order id and externalId in details. Retrieve that order and check its state instead of repeating creation.
 
         Parameters
         ----------
@@ -315,6 +317,17 @@ class RawOrdersClient:
                         ),
                     ),
                 )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 500:
                 raise InternalServerError(
                     headers=dict(_response.headers),
@@ -322,6 +335,17 @@ class RawOrdersClient:
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -539,6 +563,17 @@ class RawOrdersClient:
                         ),
                     ),
                 )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 500:
                 raise InternalServerError(
                     headers=dict(_response.headers),
@@ -601,6 +636,17 @@ class RawOrdersClient:
                 )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -683,6 +729,17 @@ class RawOrdersClient:
                 )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -1125,11 +1182,12 @@ class RawOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ProvisionResponse]:
         """
-        Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+        Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. A 503 `BILLING_UNAVAILABLE` means draft pricing could not be confirmed and any newly created draft was deleted; send the same request again with the same idempotency key. If a new draft is retained, returns 409 `ORDER_RETAINED` with its order id and externalId in `details`. Retrieve that order and check its state instead of repeating creation. Amounts are whole numbers in minor currency units (cents).
 
         Parameters
         ----------
         idempotency_key : str
+            A unique key for this provision, such as the source record ID plus its last-modified time. Retrying with the same key and body returns the stored response with the `Idempotent-Replayed: true` header. The same key with a different body returns 409 `IDEMPOTENCY_KEY_CONFLICT`.
 
         external_reference : ProvisionExternalReference
 
@@ -1221,6 +1279,17 @@ class RawOrdersClient:
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1386,7 +1455,7 @@ class AsyncRawOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Order]:
         """
-        Creates a new order for the organization
+        Creates a new order for the organization. If draft pricing cannot be confirmed, returns 503 BILLING_UNAVAILABLE only after deleting the new draft. A retained draft returns 409 ORDER_RETAINED with its order id and externalId in details. Retrieve that order and check its state instead of repeating creation.
 
         Parameters
         ----------
@@ -1504,6 +1573,17 @@ class AsyncRawOrdersClient:
                         ),
                     ),
                 )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 500:
                 raise InternalServerError(
                     headers=dict(_response.headers),
@@ -1511,6 +1591,17 @@ class AsyncRawOrdersClient:
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1728,6 +1819,17 @@ class AsyncRawOrdersClient:
                         ),
                     ),
                 )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 500:
                 raise InternalServerError(
                     headers=dict(_response.headers),
@@ -1790,6 +1892,17 @@ class AsyncRawOrdersClient:
                 )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -1872,6 +1985,17 @@ class AsyncRawOrdersClient:
                 )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -2314,11 +2438,12 @@ class AsyncRawOrdersClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ProvisionResponse]:
         """
-        Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+        Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. A 503 `BILLING_UNAVAILABLE` means draft pricing could not be confirmed and any newly created draft was deleted; send the same request again with the same idempotency key. If a new draft is retained, returns 409 `ORDER_RETAINED` with its order id and externalId in `details`. Retrieve that order and check its state instead of repeating creation. Amounts are whole numbers in minor currency units (cents).
 
         Parameters
         ----------
         idempotency_key : str
+            A unique key for this provision, such as the source record ID plus its last-modified time. Retrying with the same key and body returns the stored response with the `Idempotent-Replayed: true` header. The same key with a different body returns 409 `IDEMPOTENCY_KEY_CONFLICT`.
 
         external_reference : ProvisionExternalReference
 
@@ -2410,6 +2535,17 @@ class AsyncRawOrdersClient:
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),

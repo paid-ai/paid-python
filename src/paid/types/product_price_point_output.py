@@ -12,6 +12,14 @@ from .product_pricing_tier_output import ProductPricingTierOutput
 class ProductPricePointOutput(UniversalBaseModel):
     currency: str
     unit_price: typing_extensions.Annotated[float, FieldMetadata(alias="unitPrice"), pydantic.Field(alias="unitPrice")]
+    unit_price_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="unitPriceDecimal"),
+        pydantic.Field(
+            alias="unitPriceDecimal",
+            description='The unit price below one minor unit, as decimal text in minor units, when the price has one: `"0.025"` is 0.025¢ per unit. When present it is the price, and `unitPrice` is its whole-number fallback.',
+        ),
+    ] = None
     tiers: typing.Optional[typing.List[ProductPricingTierOutput]] = None
     min_quantity: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="minQuantity"), pydantic.Field(alias="minQuantity")

@@ -7,11 +7,28 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .provision_order_line_attribute_discount_type import ProvisionOrderLineAttributeDiscountType
+from .provision_order_line_attribute_price_source import ProvisionOrderLineAttributePriceSource
 from .provision_order_line_attribute_pricing import ProvisionOrderLineAttributePricing
 
 
 class ProvisionOrderLineAttribute(UniversalBaseModel):
+    attribute_id: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="attributeId"),
+        pydantic.Field(
+            alias="attributeId",
+            description="The existing product attribute's ID. Disambiguates catalogue fees with the same name; must belong to this line's product.",
+        ),
+    ] = None
     name: str
+    price_source: typing_extensions.Annotated[
+        typing.Optional[ProvisionOrderLineAttributePriceSource],
+        FieldMetadata(alias="priceSource"),
+        pydantic.Field(
+            alias="priceSource",
+            description="Whether the line uses the catalog price or an intentional custom override. Omitted pricing uses the catalog; explicit pricing defaults to custom.",
+        ),
+    ] = None
     quantity: typing.Optional[int] = None
     pricing: typing.Optional[ProvisionOrderLineAttributePricing] = pydantic.Field(default=None)
     """
@@ -23,7 +40,15 @@ class ProvisionOrderLineAttribute(UniversalBaseModel):
         FieldMetadata(alias="creditAmount"),
         pydantic.Field(
             alias="creditAmount",
-            description="Overrides the credit amount on every credit benefit this attribute carries onto the order line. Paid grants creditAmount × quantity per allocation. When omitted, the product attribute's configured benefit amount applies.",
+            description="Overrides the credit amount on every credit benefit this attribute carries onto the order line. Paid grants creditAmount × quantity per allocation. When omitted, the product attribute's configured benefit amount applies. Send this or `creditAmountDecimal`; when both are sent they must be equal.",
+        ),
+    ] = None
+    credit_amount_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="creditAmountDecimal"),
+        pydantic.Field(
+            alias="creditAmountDecimal",
+            description="The same amount as `creditAmount`, as an exact decimal string with up to 15 decimal places. Send this or `creditAmount`; when both are sent they must be equal.",
         ),
     ] = None
     overage_unit_price: typing_extensions.Annotated[
@@ -32,6 +57,14 @@ class ProvisionOrderLineAttribute(UniversalBaseModel):
         pydantic.Field(
             alias="overageUnitPrice",
             description="Overrides the overage unit price, in the currency's minor units, for credits consumed beyond the granted balance, on this attribute only: applied to every credit benefit this attribute carries onto the order line, or to the attribute's pricing when it carries no benefits, and it replaces this attribute's per-currency price for the order currency, so it is what this attribute bills in every currency. Other attributes on the order that price the same credits currency keep their own overage prices, and the invoice bills the highest entry for its currency across all of them. When omitted, the product attribute's configured overage applies; null clears it, so the attribute takes its order-currency per-currency price, or none if it has no map.",
+        ),
+    ] = None
+    overage_unit_prices_decimal: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Optional[str]]],
+        FieldMetadata(alias="overageUnitPricesDecimal"),
+        pydantic.Field(
+            alias="overageUnitPricesDecimal",
+            description="Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.",
         ),
     ] = None
     overage_unit_prices: typing_extensions.Annotated[

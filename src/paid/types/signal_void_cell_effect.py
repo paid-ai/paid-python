@@ -31,6 +31,14 @@ class SignalVoidCellEffect(UniversalBaseModel):
     How much usage was taken back from this billing period, in the attribute's own usage units: the signal's net quantity there.
     """
 
+    quantity_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="quantityDecimal"),
+        pydantic.Field(
+            alias="quantityDecimal",
+            description="The exact net usage taken back, as a decimal string. Use this field when every fractional digit matters; quantity is the numeric approximation for clients using floating-point numbers.",
+        ),
+    ] = None
     non_billable: typing_extensions.Annotated[
         bool,
         FieldMetadata(alias="nonBillable"),

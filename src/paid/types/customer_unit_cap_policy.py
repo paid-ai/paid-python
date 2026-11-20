@@ -18,9 +18,17 @@ class CustomerUnitCapPolicy(UniversalBaseModel):
 
     amount: float = pydantic.Field()
     """
-    The cap, in credits of the currency. JSON number; exact within ±2^53.
+    The cap, in credits of the currency. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use `amountDecimal` for the exact value.
     """
 
+    amount_decimal: typing_extensions.Annotated[
+        str,
+        FieldMetadata(alias="amountDecimal"),
+        pydantic.Field(
+            alias="amountDecimal",
+            description="Exact value of `amount` as a decimal string, at any magnitude and every decimal place it carries.",
+        ),
+    ]
     frequency: CustomerUnitCapPolicyFrequency = pydantic.Field()
     """
     Monthly UTC periods, with boundaries defined by `schedule`.

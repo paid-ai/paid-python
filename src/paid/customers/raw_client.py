@@ -1736,7 +1736,8 @@ class RawCustomersClient:
         id: str,
         *,
         credit_currency_key: str,
-        amount: float,
+        amount: typing.Optional[float] = OMIT,
+        amount_decimal: typing.Optional[str] = OMIT,
         starts_at: typing.Optional[dt.datetime] = OMIT,
         expires_at: typing.Optional[dt.datetime] = OMIT,
         idempotency_key: typing.Optional[str] = OMIT,
@@ -1753,8 +1754,11 @@ class RawCustomersClient:
         credit_currency_key : str
             Stable machine-readable key for the active credit currency to grant.
 
-        amount : float
-            Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
+        amount : typing.Optional[float]
+            Number of credits to grant. This is not a monetary amount. Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
+
+        amount_decimal : typing.Optional[str]
+            The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal. Exact at any magnitude the balance can hold.
 
         starts_at : typing.Optional[dt.datetime]
             When these credits become spendable, as an RFC3339 datetime with timezone. Must be at or before the current server time. Defaults to the current server time when omitted.
@@ -1779,6 +1783,7 @@ class RawCustomersClient:
             json={
                 "creditCurrencyKey": credit_currency_key,
                 "amount": amount,
+                "amountDecimal": amount_decimal,
                 "startsAt": starts_at,
                 "expiresAt": expires_at,
                 "idempotencyKey": idempotency_key,
@@ -2128,7 +2133,8 @@ class RawCustomersClient:
         external_id: str,
         *,
         credit_currency_key: str,
-        amount: float,
+        amount: typing.Optional[float] = OMIT,
+        amount_decimal: typing.Optional[str] = OMIT,
         starts_at: typing.Optional[dt.datetime] = OMIT,
         expires_at: typing.Optional[dt.datetime] = OMIT,
         idempotency_key: typing.Optional[str] = OMIT,
@@ -2145,8 +2151,11 @@ class RawCustomersClient:
         credit_currency_key : str
             Stable machine-readable key for the active credit currency to grant.
 
-        amount : float
-            Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
+        amount : typing.Optional[float]
+            Number of credits to grant. This is not a monetary amount. Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
+
+        amount_decimal : typing.Optional[str]
+            The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal. Exact at any magnitude the balance can hold.
 
         starts_at : typing.Optional[dt.datetime]
             When these credits become spendable, as an RFC3339 datetime with timezone. Must be at or before the current server time. Defaults to the current server time when omitted.
@@ -2171,6 +2180,7 @@ class RawCustomersClient:
             json={
                 "creditCurrencyKey": credit_currency_key,
                 "amount": amount,
+                "amountDecimal": amount_decimal,
                 "startsAt": starts_at,
                 "expiresAt": expires_at,
                 "idempotencyKey": idempotency_key,
@@ -5723,7 +5733,8 @@ class RawCustomersClient:
         external_id: str,
         external_customer_unit_id: str,
         *,
-        amount: float,
+        amount: typing.Optional[float] = OMIT,
+        amount_decimal: typing.Optional[str] = OMIT,
         frequency: typing.Optional[CustomerUnitCapSetFrequency] = OMIT,
         schedule: typing.Optional[CustomerUnitCapScheduleInput] = OMIT,
         credits_currency_id: typing.Optional[str] = OMIT,
@@ -5741,8 +5752,11 @@ class RawCustomersClient:
         external_customer_unit_id : str
             Your own id for the unit (its `externalId`), unique within this customer.
 
-        amount : float
-            The cap, in credits of the currency, per period. Must be positive.
+        amount : typing.Optional[float]
+            The cap, in credits of the currency, per period. Must be positive. Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
+
+        amount_decimal : typing.Optional[str]
+            The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal. Must be positive.
 
         frequency : typing.Optional[CustomerUnitCapSetFrequency]
             Monthly UTC periods, with boundaries defined by `schedule`.
@@ -5768,6 +5782,7 @@ class RawCustomersClient:
             method="PUT",
             json={
                 "amount": amount,
+                "amountDecimal": amount_decimal,
                 "frequency": frequency,
                 "schedule": convert_and_respect_annotation_metadata(
                     object_=schedule, annotation=CustomerUnitCapScheduleInput, direction="write"
@@ -6168,7 +6183,8 @@ class RawCustomersClient:
         id: str,
         external_customer_unit_id: str,
         *,
-        amount: float,
+        amount: typing.Optional[float] = OMIT,
+        amount_decimal: typing.Optional[str] = OMIT,
         frequency: typing.Optional[CustomerUnitCapSetFrequency] = OMIT,
         schedule: typing.Optional[CustomerUnitCapScheduleInput] = OMIT,
         credits_currency_id: typing.Optional[str] = OMIT,
@@ -6186,8 +6202,11 @@ class RawCustomersClient:
         external_customer_unit_id : str
             Your own id for the unit (its `externalId`), unique within this customer.
 
-        amount : float
-            The cap, in credits of the currency, per period. Must be positive.
+        amount : typing.Optional[float]
+            The cap, in credits of the currency, per period. Must be positive. Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
+
+        amount_decimal : typing.Optional[str]
+            The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal. Must be positive.
 
         frequency : typing.Optional[CustomerUnitCapSetFrequency]
             Monthly UTC periods, with boundaries defined by `schedule`.
@@ -6213,6 +6232,7 @@ class RawCustomersClient:
             method="PUT",
             json={
                 "amount": amount,
+                "amountDecimal": amount_decimal,
                 "frequency": frequency,
                 "schedule": convert_and_respect_annotation_metadata(
                     object_=schedule, annotation=CustomerUnitCapScheduleInput, direction="write"
@@ -8190,7 +8210,8 @@ class AsyncRawCustomersClient:
         id: str,
         *,
         credit_currency_key: str,
-        amount: float,
+        amount: typing.Optional[float] = OMIT,
+        amount_decimal: typing.Optional[str] = OMIT,
         starts_at: typing.Optional[dt.datetime] = OMIT,
         expires_at: typing.Optional[dt.datetime] = OMIT,
         idempotency_key: typing.Optional[str] = OMIT,
@@ -8207,8 +8228,11 @@ class AsyncRawCustomersClient:
         credit_currency_key : str
             Stable machine-readable key for the active credit currency to grant.
 
-        amount : float
-            Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
+        amount : typing.Optional[float]
+            Number of credits to grant. This is not a monetary amount. Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
+
+        amount_decimal : typing.Optional[str]
+            The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal. Exact at any magnitude the balance can hold.
 
         starts_at : typing.Optional[dt.datetime]
             When these credits become spendable, as an RFC3339 datetime with timezone. Must be at or before the current server time. Defaults to the current server time when omitted.
@@ -8233,6 +8257,7 @@ class AsyncRawCustomersClient:
             json={
                 "creditCurrencyKey": credit_currency_key,
                 "amount": amount,
+                "amountDecimal": amount_decimal,
                 "startsAt": starts_at,
                 "expiresAt": expires_at,
                 "idempotencyKey": idempotency_key,
@@ -8582,7 +8607,8 @@ class AsyncRawCustomersClient:
         external_id: str,
         *,
         credit_currency_key: str,
-        amount: float,
+        amount: typing.Optional[float] = OMIT,
+        amount_decimal: typing.Optional[str] = OMIT,
         starts_at: typing.Optional[dt.datetime] = OMIT,
         expires_at: typing.Optional[dt.datetime] = OMIT,
         idempotency_key: typing.Optional[str] = OMIT,
@@ -8599,8 +8625,11 @@ class AsyncRawCustomersClient:
         credit_currency_key : str
             Stable machine-readable key for the active credit currency to grant.
 
-        amount : float
-            Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
+        amount : typing.Optional[float]
+            Number of credits to grant. This is not a monetary amount. Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
+
+        amount_decimal : typing.Optional[str]
+            The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal. Exact at any magnitude the balance can hold.
 
         starts_at : typing.Optional[dt.datetime]
             When these credits become spendable, as an RFC3339 datetime with timezone. Must be at or before the current server time. Defaults to the current server time when omitted.
@@ -8625,6 +8654,7 @@ class AsyncRawCustomersClient:
             json={
                 "creditCurrencyKey": credit_currency_key,
                 "amount": amount,
+                "amountDecimal": amount_decimal,
                 "startsAt": starts_at,
                 "expiresAt": expires_at,
                 "idempotencyKey": idempotency_key,
@@ -12177,7 +12207,8 @@ class AsyncRawCustomersClient:
         external_id: str,
         external_customer_unit_id: str,
         *,
-        amount: float,
+        amount: typing.Optional[float] = OMIT,
+        amount_decimal: typing.Optional[str] = OMIT,
         frequency: typing.Optional[CustomerUnitCapSetFrequency] = OMIT,
         schedule: typing.Optional[CustomerUnitCapScheduleInput] = OMIT,
         credits_currency_id: typing.Optional[str] = OMIT,
@@ -12195,8 +12226,11 @@ class AsyncRawCustomersClient:
         external_customer_unit_id : str
             Your own id for the unit (its `externalId`), unique within this customer.
 
-        amount : float
-            The cap, in credits of the currency, per period. Must be positive.
+        amount : typing.Optional[float]
+            The cap, in credits of the currency, per period. Must be positive. Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
+
+        amount_decimal : typing.Optional[str]
+            The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal. Must be positive.
 
         frequency : typing.Optional[CustomerUnitCapSetFrequency]
             Monthly UTC periods, with boundaries defined by `schedule`.
@@ -12222,6 +12256,7 @@ class AsyncRawCustomersClient:
             method="PUT",
             json={
                 "amount": amount,
+                "amountDecimal": amount_decimal,
                 "frequency": frequency,
                 "schedule": convert_and_respect_annotation_metadata(
                     object_=schedule, annotation=CustomerUnitCapScheduleInput, direction="write"
@@ -12622,7 +12657,8 @@ class AsyncRawCustomersClient:
         id: str,
         external_customer_unit_id: str,
         *,
-        amount: float,
+        amount: typing.Optional[float] = OMIT,
+        amount_decimal: typing.Optional[str] = OMIT,
         frequency: typing.Optional[CustomerUnitCapSetFrequency] = OMIT,
         schedule: typing.Optional[CustomerUnitCapScheduleInput] = OMIT,
         credits_currency_id: typing.Optional[str] = OMIT,
@@ -12640,8 +12676,11 @@ class AsyncRawCustomersClient:
         external_customer_unit_id : str
             Your own id for the unit (its `externalId`), unique within this customer.
 
-        amount : float
-            The cap, in credits of the currency, per period. Must be positive.
+        amount : typing.Optional[float]
+            The cap, in credits of the currency, per period. Must be positive. Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
+
+        amount_decimal : typing.Optional[str]
+            The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal. Must be positive.
 
         frequency : typing.Optional[CustomerUnitCapSetFrequency]
             Monthly UTC periods, with boundaries defined by `schedule`.
@@ -12667,6 +12706,7 @@ class AsyncRawCustomersClient:
             method="PUT",
             json={
                 "amount": amount,
+                "amountDecimal": amount_decimal,
                 "frequency": frequency,
                 "schedule": convert_and_respect_annotation_metadata(
                     object_=schedule, annotation=CustomerUnitCapScheduleInput, direction="write"

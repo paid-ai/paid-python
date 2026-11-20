@@ -13,6 +13,22 @@ class SimplePricePointTiersItem(UniversalBaseModel):
     flat_amount: typing_extensions.Annotated[
         typing.Optional[int], FieldMetadata(alias="flatAmount"), pydantic.Field(alias="flatAmount")
     ] = None
+    flat_amount_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="flatAmountDecimal"),
+        pydantic.Field(
+            alias="flatAmountDecimal",
+            description="The tier's flat amount as exact decimal text in the currency's minor unit, with at most 15 decimal places. When present it replaces the corresponding whole-number field. Only for volume or graduated pricing in organizations with sub-cent prices enabled.",
+        ),
+    ] = None
+    unit_amount_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="unitAmountDecimal"),
+        pydantic.Field(
+            alias="unitAmountDecimal",
+            description="The tier's per-unit rate as exact decimal text in the currency's minor unit, with at most 15 decimal places. When present it replaces the corresponding whole-number field. Only for volume or graduated pricing in organizations with sub-cent prices enabled.",
+        ),
+    ] = None
     index: typing.Optional[float] = None
     lower_bound: typing_extensions.Annotated[int, FieldMetadata(alias="lowerBound"), pydantic.Field(alias="lowerBound")]
     number: typing.Optional[int] = None

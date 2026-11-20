@@ -18,11 +18,19 @@ class CreditGrantCreateRequest(UniversalBaseModel):
             description="Stable machine-readable key for the active credit currency to grant.",
         ),
     ]
-    amount: float = pydantic.Field()
+    amount: typing.Optional[float] = pydantic.Field(default=None)
     """
-    Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
+    Number of credits to grant. This is not a monetary amount. Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
     """
 
+    amount_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="amountDecimal"),
+        pydantic.Field(
+            alias="amountDecimal",
+            description="The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal. Exact at any magnitude the balance can hold.",
+        ),
+    ] = None
     starts_at: typing_extensions.Annotated[
         typing.Optional[dt.datetime],
         FieldMetadata(alias="startsAt"),

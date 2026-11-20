@@ -31,7 +31,7 @@ class UpdatePricingIntent(UniversalBaseModel):
         FieldMetadata(alias="newPricing"),
         pydantic.Field(
             alias="newPricing",
-            description="Full pricing JSON. Prefer `addFromCatalog` or `newUnitPriceMinor` unless you are replacing the pricing shape.",
+            description="Full replacement pricing. Carry stored unitPriceDecimal values on copied rates. For flagged organizations an explicitly submitted unitPriceDecimal, including whole text or zero, selects a custom replacement. unitPrice alone never clears a saved decimal; an omitted decimal is kept only while rate-setting fields are unchanged.",
         ),
     ] = None
     new_quantity: typing_extensions.Annotated[

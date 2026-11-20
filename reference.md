@@ -820,6 +820,14 @@ client.plans.create_plan(
 <dl>
 <dd>
 
+**display_name:** `typing.Optional[str]` — What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **external_id:** `typing.Optional[str]` — Your stable identifier for this plan
     
 </dd>
@@ -1075,6 +1083,14 @@ client.plans.update_plan_by_id(
 <dl>
 <dd>
 
+**display_name:** `typing.Optional[str]` — What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **external_id:** `typing.Optional[str]` 
     
 </dd>
@@ -1256,6 +1272,14 @@ client.plans.update_plan_by_external_id(
 <dd>
 
 **name:** `typing.Optional[str]` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**display_name:** `typing.Optional[str]` — What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
     
 </dd>
 </dl>
@@ -2993,7 +3017,15 @@ client.customers.grant_customer_credits(
 <dl>
 <dd>
 
-**amount:** `float` — Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
+**amount:** `typing.Optional[float]` — Number of credits to grant. This is not a monetary amount. Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**amount_decimal:** `typing.Optional[str]` — The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal. Exact at any magnitude the balance can hold.
     
 </dd>
 </dl>
@@ -3356,7 +3388,15 @@ client.customers.grant_customer_credits_by_external_id(
 <dl>
 <dd>
 
-**amount:** `float` — Number of credits to grant, exact to at most 6 decimal places. This is not a monetary amount.
+**amount:** `typing.Optional[float]` — Number of credits to grant. This is not a monetary amount. Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**amount_decimal:** `typing.Optional[str]` — The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal. Exact at any magnitude the balance can hold.
     
 </dd>
 </dl>
@@ -6497,7 +6537,6 @@ client = Paid(
 client.customers.set_customer_unit_cap_by_external_id(
     external_id="customer_123",
     external_customer_unit_id="tenant-a",
-    amount=10000.0,
 )
 
 ```
@@ -6530,7 +6569,15 @@ client.customers.set_customer_unit_cap_by_external_id(
 <dl>
 <dd>
 
-**amount:** `float` — The cap, in credits of the currency, per period. Must be positive.
+**amount:** `typing.Optional[float]` — The cap, in credits of the currency, per period. Must be positive. Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**amount_decimal:** `typing.Optional[str]` — The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal. Must be positive.
     
 </dd>
 </dl>
@@ -6905,7 +6952,6 @@ client = Paid(
 client.customers.set_customer_unit_cap(
     id="cus_abc123",
     external_customer_unit_id="tenant-a",
-    amount=10000.0,
 )
 
 ```
@@ -6938,7 +6984,15 @@ client.customers.set_customer_unit_cap(
 <dl>
 <dd>
 
-**amount:** `float` — The cap, in credits of the currency, per period. Must be positive.
+**amount:** `typing.Optional[float]` — The cap, in credits of the currency, per period. Must be positive. Up to 15 decimal places. Send this or `amountDecimal`; when both are sent they must be equal.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**amount_decimal:** `typing.Optional[str]` — The same amount as `amount`, as an exact decimal string with up to 15 decimal places. Send this or `amount`; when both are sent they must be equal. Must be positive.
     
 </dd>
 </dl>
@@ -8103,7 +8157,7 @@ client.orders.list_orders()
 <dl>
 <dd>
 
-Creates a new order for the organization
+Creates a new order for the organization. If draft pricing cannot be confirmed, returns 503 BILLING_UNAVAILABLE only after deleting the new draft. A retained draft returns 409 ORDER_RETAINED with its order id and externalId in details. Retrieve that order and check its state instead of repeating creation.
 </dd>
 </dl>
 </dd>
@@ -9076,7 +9130,7 @@ client.orders.batch_order_seat_assignments(
 <dl>
 <dd>
 
-Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. Amounts are whole numbers in minor currency units (cents).
+Creates or updates a customer, an optional contact, the products on the order, and the order with its lines, in one call. Each record is matched by its `externalId`, so you can send the same deal again after it changes in your CRM. Returns 201 Created when the order is new, and 200 OK when an existing draft order with the same `externalId` was updated. Treat both as success. Re-provisioning an order that is already active returns 409 `ORDER_ALREADY_ACTIVE`; change an active order through the amendments API instead. A 503 `BILLING_UNAVAILABLE` means draft pricing could not be confirmed and any newly created draft was deleted; send the same request again with the same idempotency key. If a new draft is retained, returns 409 `ORDER_RETAINED` with its order id and externalId in `details`. Retrieve that order and check its state instead of repeating creation. Amounts are whole numbers in minor currency units (cents).
 </dd>
 </dl>
 </dd>
@@ -9207,7 +9261,7 @@ client.orders.upsert_order_by_external_id(
 <dl>
 <dd>
 
-**idempotency_key:** `str` 
+**idempotency_key:** `str` — A unique key for this provision, such as the source record ID plus its last-modified time. Retrying with the same key and body returns the stored response with the `Idempotent-Replayed: true` header. The same key with a different body returns 409 `IDEMPOTENCY_KEY_CONFLICT`.
     
 </dd>
 </dl>
@@ -10075,7 +10129,7 @@ client.signals.create_signals(
 <dl>
 <dd>
 
-Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization without signal voiding gets 404.
+Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization that has signal voiding turned off gets 404.
 </dd>
 </dl>
 </dd>
@@ -10153,7 +10207,7 @@ client.signals.void_signal(
 <dl>
 <dd>
 
-Early access. Voids one ingested signal by the idempotency key it was sent with, with the same result as voiding it by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is `.` or `..` cannot be addressed by key: void it by ID. An organization without signal voiding gets 404.
+Early access. Voids one ingested signal by the idempotency key it was sent with, with the same result as voiding it by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is `.` or `..` cannot be addressed by key: void it by ID. An organization that has signal voiding turned off gets 404.
 </dd>
 </dl>
 </dd>
@@ -13507,7 +13561,7 @@ client.costs.create_costs(
 
 Runs a single ClickHouse SELECT (or WITH … SELECT) against your organization's analytics views. Before writing a query, call `getAnalyticsSchema` (GET /schema) for the available views and columns, and `getSignalsMetadata` (GET /signals/metadata) for the JSON paths inside `fact_signal.data`. Results are automatically scoped to your organization — no org filter is needed or possible. Only SELECT/WITH statements are accepted.
 
-Conventions: monetary amounts are minor units (cents — divide by 100 for the major unit); most are integers, but `fact_cost.cost_amount` is fractional cents (Decimal) since a single AI call usually costs less than a cent; 64-bit integers (counts, ids, amounts) are returned as JSON strings to preserve precision, so parse them client-side; Decimal columns (fractional cents, and credit amounts, which are counts of credits rather than cents and are never divided by 100) come back as JSON numbers instead, so a value beyond 2^53 is already rounded — select toString(col) when you need its exact digits. Query signal payloads via JSON paths, e.g. `SELECT data.country::String AS country, count() FROM fact_signal GROUP BY country`.
+Conventions: monetary amounts are in the currency's stored minor units (cents for USD — divide by 100 for the major unit). A currency listed in `meta.storedCurrencyDecimals` is stored at those decimals instead of its own: JPY at 2 means hundredths of a yen (divide by 100), at 0 whole yen; most are integers. The exceptions are `fact_cost.cost_amount` and `fact_delivered_value.delivered_value_cents`: always hundredths of `cost_currency` and `delivered_value_currency`, respectively (Decimal, possibly fractional), whatever `meta.storedCurrencyDecimals` says; 64-bit integers (counts, ids, amounts) are returned as JSON strings to preserve precision, so parse them client-side; Decimal columns (fractional cents, and credit amounts, which are counts of credits rather than cents and are never divided by 100) come back as JSON numbers instead, so a value beyond 2^53 is already rounded — select toString(col) when you need its exact digits. Query signal payloads via JSON paths, e.g. `SELECT data.country::String AS country, count() FROM fact_signal GROUP BY country`.
 
 Limits: 30 seconds of execution time and 10,000 result rows (truncation is flagged via `meta.truncated`). Queries exceeding the 4 GB memory allowance return HTTP 422 with code `QUERY_MEMORY_LIMIT_EXCEEDED`. Prefer aggregates and a `created_at` date filter on large tables — this endpoint is for interactive analytics, not bulk export.
 </dd>
@@ -16158,7 +16212,7 @@ client.payments.create_payment(
 <dl>
 <dd>
 
-**amount:** `int` — Payment amount in cents (minor currency units).
+**amount:** `int` — Payment amount in stored minor units: cents for USD; for JPY, hundredths when currencyDecimals is 2 and whole yen when it is 0.
     
 </dd>
 </dl>
@@ -16782,7 +16836,7 @@ This experimental path is deprecated and is not supported for new integrations. 
 
 Runs a single ClickHouse SELECT (or WITH … SELECT) against your organization's analytics views. Before writing a query, call `getAnalyticsSchema` (GET /schema) for the available views and columns, and `getSignalsMetadata` (GET /signals/metadata) for the JSON paths inside `fact_signal.data`. Results are automatically scoped to your organization — no org filter is needed or possible. Only SELECT/WITH statements are accepted.
 
-Conventions: monetary amounts are minor units (cents — divide by 100 for the major unit); most are integers, but `fact_cost.cost_amount` is fractional cents (Decimal) since a single AI call usually costs less than a cent; 64-bit integers (counts, ids, amounts) are returned as JSON strings to preserve precision, so parse them client-side; Decimal columns (fractional cents, and credit amounts, which are counts of credits rather than cents and are never divided by 100) come back as JSON numbers instead, so a value beyond 2^53 is already rounded — select toString(col) when you need its exact digits. Query signal payloads via JSON paths, e.g. `SELECT data.country::String AS country, count() FROM fact_signal GROUP BY country`.
+Conventions: monetary amounts are in the currency's stored minor units (cents for USD — divide by 100 for the major unit). A currency listed in `meta.storedCurrencyDecimals` is stored at those decimals instead of its own: JPY at 2 means hundredths of a yen (divide by 100), at 0 whole yen; most are integers. The exceptions are `fact_cost.cost_amount` and `fact_delivered_value.delivered_value_cents`: always hundredths of `cost_currency` and `delivered_value_currency`, respectively (Decimal, possibly fractional), whatever `meta.storedCurrencyDecimals` says; 64-bit integers (counts, ids, amounts) are returned as JSON strings to preserve precision, so parse them client-side; Decimal columns (fractional cents, and credit amounts, which are counts of credits rather than cents and are never divided by 100) come back as JSON numbers instead, so a value beyond 2^53 is already rounded — select toString(col) when you need its exact digits. Query signal payloads via JSON paths, e.g. `SELECT data.country::String AS country, count() FROM fact_signal GROUP BY country`.
 
 Limits: 30 seconds of execution time and 10,000 result rows (truncation is flagged via `meta.truncated`). Queries exceeding the 4 GB memory allowance return HTTP 422 with code `QUERY_MEMORY_LIMIT_EXCEEDED`. Prefer aggregates and a `created_at` date filter on large tables — this endpoint is for interactive analytics, not bulk export.
 </dd>

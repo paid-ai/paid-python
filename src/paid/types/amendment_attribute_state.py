@@ -23,6 +23,22 @@ class AmendmentAttributeState(UniversalBaseModel):
             description="Unit price in cents. Absent when no single per-unit rate exists (tiered models).",
         ),
     ] = None
+    unit_size: typing_extensions.Annotated[
+        typing.Optional[float],
+        FieldMetadata(alias="unitSize"),
+        pydantic.Field(
+            alias="unitSize",
+            description="How many raw units unitPriceMinor or creditCost is quoted per, for a price per N raw units. Absent for a per-raw-unit price.",
+        ),
+    ] = None
+    unit_name: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="unitName"),
+        pydantic.Field(
+            alias="unitName",
+            description='The priced unit\'s name ("GB"), when the price is per N raw units and names it.',
+        ),
+    ] = None
     total_amount_minor: typing_extensions.Annotated[
         typing.Optional[float],
         FieldMetadata(alias="totalAmountMinor"),
