@@ -39,11 +39,25 @@ class ProductPricingOutput(UniversalBaseModel):
     credit_cost: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="creditCost"), pydantic.Field(alias="creditCost")
     ] = None
+    unit_size: typing_extensions.Annotated[
+        typing.Optional[float], FieldMetadata(alias="unitSize"), pydantic.Field(alias="unitSize")
+    ] = None
+    unit_name: typing_extensions.Annotated[
+        typing.Optional[str], FieldMetadata(alias="unitName"), pydantic.Field(alias="unitName")
+    ] = None
     unit_value: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="unitValue"), pydantic.Field(alias="unitValue")
     ] = None
     overage_unit_price: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
+    ] = None
+    overage_unit_prices_decimal: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Optional[str]]],
+        FieldMetadata(alias="overageUnitPricesDecimal"),
+        pydantic.Field(
+            alias="overageUnitPricesDecimal",
+            description="Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.",
+        ),
     ] = None
     overage_unit_prices: typing_extensions.Annotated[
         typing.Optional[typing.Dict[str, typing.Optional[float]]],

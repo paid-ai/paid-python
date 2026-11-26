@@ -11,6 +11,7 @@ from .value_model_content_value_types_item_calculation_timeline_item import (
     ValueModelContentValueTypesItemCalculationTimelineItem,
 )
 from .value_model_content_value_types_item_category import ValueModelContentValueTypesItemCategory
+from .value_model_content_value_types_item_maturation import ValueModelContentValueTypesItemMaturation
 from .value_model_content_value_types_item_sources_item import ValueModelContentValueTypesItemSourcesItem
 
 
@@ -27,7 +28,7 @@ class ValueModelContentValueTypesItem(UniversalBaseModel):
         typing.Optional[str], FieldMetadata(alias="longDescription"), pydantic.Field(alias="longDescription")
     ] = None
     sources: typing.Optional[typing.List[ValueModelContentValueTypesItemSourcesItem]] = None
-    maturation: typing.Optional[typing.Any] = pydantic.Field(default=None)
+    maturation: typing.Optional[ValueModelContentValueTypesItemMaturation] = pydantic.Field(default=None)
     """
     Gates when this value type's number is published to a customer on a value receipt. Evaluated per customer, cumulative since their first signal for this value type, as of the receipt's end date. Until the threshold is met the receipt withholds the figure and shows a 'gathering data' state instead. At least one of minDataPoints or minMonths is required.
     """

@@ -140,6 +140,7 @@ class RawPlansClient:
         product_id: str,
         attributes: typing.Sequence[PlanAttributeInput],
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         supported_currencies: typing.Optional[typing.Sequence[str]] = OMIT,
         is_default: typing.Optional[bool] = OMIT,
@@ -156,6 +157,9 @@ class RawPlansClient:
         attributes : typing.Sequence[PlanAttributeInput]
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
 
         external_id : typing.Optional[str]
             Your stable identifier for this plan
@@ -178,6 +182,7 @@ class RawPlansClient:
             json={
                 "productId": product_id,
                 "name": name,
+                "displayName": display_name,
                 "externalId": external_id,
                 "supportedCurrencies": supported_currencies,
                 "isDefault": is_default,
@@ -423,6 +428,7 @@ class RawPlansClient:
         id: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         supported_currencies: typing.Optional[typing.Sequence[str]] = OMIT,
         is_default: typing.Optional[bool] = OMIT,
@@ -438,6 +444,9 @@ class RawPlansClient:
         id : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
 
         external_id : typing.Optional[str]
 
@@ -463,6 +472,7 @@ class RawPlansClient:
             method="PUT",
             json={
                 "name": name,
+                "displayName": display_name,
                 "externalId": external_id,
                 "supportedCurrencies": supported_currencies,
                 "isDefault": is_default,
@@ -612,6 +622,7 @@ class RawPlansClient:
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         supported_currencies: typing.Optional[typing.Sequence[str]] = OMIT,
         is_default: typing.Optional[bool] = OMIT,
@@ -627,6 +638,9 @@ class RawPlansClient:
         external_id_ : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
 
         external_id : typing.Optional[str]
 
@@ -652,6 +666,7 @@ class RawPlansClient:
             method="PUT",
             json={
                 "name": name,
+                "displayName": display_name,
                 "externalId": external_id,
                 "supportedCurrencies": supported_currencies,
                 "isDefault": is_default,
@@ -841,6 +856,7 @@ class AsyncRawPlansClient:
         product_id: str,
         attributes: typing.Sequence[PlanAttributeInput],
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         supported_currencies: typing.Optional[typing.Sequence[str]] = OMIT,
         is_default: typing.Optional[bool] = OMIT,
@@ -857,6 +873,9 @@ class AsyncRawPlansClient:
         attributes : typing.Sequence[PlanAttributeInput]
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
 
         external_id : typing.Optional[str]
             Your stable identifier for this plan
@@ -879,6 +898,7 @@ class AsyncRawPlansClient:
             json={
                 "productId": product_id,
                 "name": name,
+                "displayName": display_name,
                 "externalId": external_id,
                 "supportedCurrencies": supported_currencies,
                 "isDefault": is_default,
@@ -1126,6 +1146,7 @@ class AsyncRawPlansClient:
         id: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         supported_currencies: typing.Optional[typing.Sequence[str]] = OMIT,
         is_default: typing.Optional[bool] = OMIT,
@@ -1141,6 +1162,9 @@ class AsyncRawPlansClient:
         id : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
 
         external_id : typing.Optional[str]
 
@@ -1166,6 +1190,7 @@ class AsyncRawPlansClient:
             method="PUT",
             json={
                 "name": name,
+                "displayName": display_name,
                 "externalId": external_id,
                 "supportedCurrencies": supported_currencies,
                 "isDefault": is_default,
@@ -1315,6 +1340,7 @@ class AsyncRawPlansClient:
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         supported_currencies: typing.Optional[typing.Sequence[str]] = OMIT,
         is_default: typing.Optional[bool] = OMIT,
@@ -1330,6 +1356,9 @@ class AsyncRawPlansClient:
         external_id_ : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
 
         external_id : typing.Optional[str]
 
@@ -1355,6 +1384,7 @@ class AsyncRawPlansClient:
             method="PUT",
             json={
                 "name": name,
+                "displayName": display_name,
                 "externalId": external_id,
                 "supportedCurrencies": supported_currencies,
                 "isDefault": is_default,

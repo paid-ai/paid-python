@@ -8,6 +8,7 @@ from ..types.invoice import Invoice
 from ..types.invoice_lines_response import InvoiceLinesResponse
 from ..types.invoice_list_response import InvoiceListResponse
 from .raw_client import AsyncRawInvoicesClient, RawInvoicesClient
+from .types.list_invoices_request_delivery_status import ListInvoicesRequestDeliveryStatus
 from .types.list_invoices_request_payment_status import ListInvoicesRequestPaymentStatus
 from .types.list_invoices_request_status import ListInvoicesRequestStatus
 
@@ -47,6 +48,7 @@ class InvoicesClient:
         display_number: typing.Optional[str] = None,
         purchase_order_reference: typing.Optional[str] = None,
         currency: typing.Optional[str] = None,
+        delivery_status: typing.Optional[ListInvoicesRequestDeliveryStatus] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> InvoiceListResponse:
         """
@@ -94,6 +96,9 @@ class InvoicesClient:
         currency : typing.Optional[str]
             Filter by invoice currency code (case-insensitive, e.g. USD).
 
+        delivery_status : typing.Optional[ListInvoicesRequestDeliveryStatus]
+            Only finalized invoices whose email delivery is this. For "issued but never sent", pass notSent: it matches notSent and failed, and each row's delivery.reason says why. noRecord means Paid has no evidence either way: say so, never call those "not sent". Only for accounts with invoice delivery status enabled. Otherwise 400 FEATURE_NOT_ENABLED.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -126,6 +131,7 @@ class InvoicesClient:
             display_number=display_number,
             purchase_order_reference=purchase_order_reference,
             currency=currency,
+            delivery_status=delivery_status,
             request_options=request_options,
         )
         return _response.data
@@ -272,6 +278,7 @@ class AsyncInvoicesClient:
         display_number: typing.Optional[str] = None,
         purchase_order_reference: typing.Optional[str] = None,
         currency: typing.Optional[str] = None,
+        delivery_status: typing.Optional[ListInvoicesRequestDeliveryStatus] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> InvoiceListResponse:
         """
@@ -319,6 +326,9 @@ class AsyncInvoicesClient:
         currency : typing.Optional[str]
             Filter by invoice currency code (case-insensitive, e.g. USD).
 
+        delivery_status : typing.Optional[ListInvoicesRequestDeliveryStatus]
+            Only finalized invoices whose email delivery is this. For "issued but never sent", pass notSent: it matches notSent and failed, and each row's delivery.reason says why. noRecord means Paid has no evidence either way: say so, never call those "not sent". Only for accounts with invoice delivery status enabled. Otherwise 400 FEATURE_NOT_ENABLED.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -359,6 +369,7 @@ class AsyncInvoicesClient:
             display_number=display_number,
             purchase_order_reference=purchase_order_reference,
             currency=currency,
+            delivery_status=delivery_status,
             request_options=request_options,
         )
         return _response.data

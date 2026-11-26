@@ -16,6 +16,15 @@ class AnalyticsQueryResponseMeta(UniversalBaseModel):
     True when the result hit the row cap and was truncated. Narrow the query (shorter date range, LIMIT, coarser grouping) to see the rest.
     """
 
+    stored_currency_decimals: typing_extensions.Annotated[
+        typing.Dict[str, int],
+        FieldMetadata(alias="storedCurrencyDecimals"),
+        pydantic.Field(
+            alias="storedCurrencyDecimals",
+            description="The decimals Paid stores each listed currency's amounts at, where they differ from the currency's own minor unit. Divide a listed currency's amounts by 10 to this power: `{ \"JPY\": 2 }` means yen are stored in hundredths (150000 is ¥1,500). A currency not listed uses its own minor unit. `fact_cost.cost_amount` and `fact_delivered_value.delivered_value_cents` are exceptions: always hundredths of `cost_currency` and `delivered_value_currency`, respectively (the major unit × 100), whatever this says.",
+        ),
+    ]
+
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
     else:

@@ -35,6 +35,14 @@ class AddFromCatalogIntent(UniversalBaseModel):
             description="Override unit price. Only for per-unit pricing. Amount in cents (minor currency units).",
         ),
     ] = None
+    unit_price_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="unitPriceDecimal"),
+        pydantic.Field(
+            alias="unitPriceDecimal",
+            description="Exact custom order price in minor units, for flagged organizations and per-unit pricing. Takes precedence over unitPriceMinor.",
+        ),
+    ] = None
     charge_stub: typing_extensions.Annotated[
         typing.Optional[AddFromCatalogIntentChargeStub],
         FieldMetadata(alias="chargeStub"),

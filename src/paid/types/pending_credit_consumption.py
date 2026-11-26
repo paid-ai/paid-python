@@ -21,7 +21,7 @@ class PendingCreditConsumption(UniversalBaseModel):
         FieldMetadata(alias="creditsDecimal"),
         pydantic.Field(
             alias="creditsDecimal",
-            description="Exact number of credits consumed, as a decimal string. Exact at any magnitude, and at the full 6 decimal places.",
+            description="Exact number of credits consumed, as a decimal string. Exact at any magnitude and at every decimal place the value carries.",
         ),
     ]
     credit_currency: typing_extensions.Annotated[

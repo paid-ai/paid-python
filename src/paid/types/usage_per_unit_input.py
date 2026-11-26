@@ -40,6 +40,19 @@ class UsagePerUnitInput(UniversalBaseModel):
     price_points: typing_extensions.Annotated[
         typing.List[SimplePricePoint], FieldMetadata(alias="pricePoints"), pydantic.Field(alias="pricePoints")
     ]
+    unit_size: typing_extensions.Annotated[
+        typing.Optional[int],
+        FieldMetadata(alias="unitSize"),
+        pydantic.Field(
+            alias="unitSize",
+            description="How many raw signal units one priced unit is made of. A price per CPU-hour over signals in microseconds carries 3600000000: the signal keeps its raw count, and the amount is rate × quantity ÷ unitSize, rounded once. Omit when the signal is already in the priced unit.",
+        ),
+    ] = None
+    unit_name: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="unitName"),
+        pydantic.Field(alias="unitName", description="The priced unit's name, shown with converted quantities."),
+    ] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

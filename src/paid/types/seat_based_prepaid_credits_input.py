@@ -16,15 +16,34 @@ class SeatBasedPrepaidCreditsInput(UniversalBaseModel):
         str, FieldMetadata(alias="creditsCurrencyId"), pydantic.Field(alias="creditsCurrencyId")
     ]
     credit_cost: typing_extensions.Annotated[
-        float,
+        typing.Optional[float],
         FieldMetadata(alias="creditCost"),
-        pydantic.Field(alias="creditCost", description="Credit amount, exact to at most 6 decimal places."),
-    ]
+        pydantic.Field(
+            alias="creditCost",
+            description="Up to 15 decimal places. Send this or `creditCostDecimal`; when both are sent they must be equal.",
+        ),
+    ] = None
+    credit_cost_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="creditCostDecimal"),
+        pydantic.Field(
+            alias="creditCostDecimal",
+            description="The same amount as `creditCost`, as an exact decimal string with up to 15 decimal places. Send this or `creditCost`; when both are sent they must be equal.",
+        ),
+    ] = None
     unit_value: typing_extensions.Annotated[
         typing.Optional[float], FieldMetadata(alias="unitValue"), pydantic.Field(alias="unitValue")
     ] = None
     overage_unit_price: typing_extensions.Annotated[
         typing.Optional[int], FieldMetadata(alias="overageUnitPrice"), pydantic.Field(alias="overageUnitPrice")
+    ] = None
+    overage_unit_prices_decimal: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, typing.Optional[str]]],
+        FieldMetadata(alias="overageUnitPricesDecimal"),
+        pydantic.Field(
+            alias="overageUnitPricesDecimal",
+            description="Exact overage price per credit, keyed by currency, as decimal text in the currency’s smallest stored unit. Used instead of overageUnitPrices when present. Requires decimal pricing to be enabled.",
+        ),
     ] = None
     overage_unit_prices: typing_extensions.Annotated[
         typing.Optional[typing.Dict[str, typing.Optional[int]]],

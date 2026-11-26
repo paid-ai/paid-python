@@ -16,6 +16,14 @@ class CustomerApiKeyCreated(UniversalBaseModel):
     The key's id.
     """
 
+    display_id: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="displayId"),
+        pydantic.Field(
+            alias="displayId",
+            description="The key's display id (`key_…`), for telling keys apart in lists and logs. It is not the secret and cannot authenticate.",
+        ),
+    ] = None
     name: str
     description: typing.Optional[str] = None
     customer_id: typing_extensions.Annotated[

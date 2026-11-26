@@ -44,7 +44,7 @@ class CreditTransactionSummaryBucket(UniversalBaseModel):
     ]
     credits: str = pydantic.Field()
     """
-    Net credits in this bucket as an exact decimal string, in the type's natural direction: for `spend`, the credits consumed (positive; negative only when the bucket holds solely reversals); for `grant` and `pendingGrant`, the credits granted. Exact at any magnitude and at the full 6 decimal places. Summing the transaction list's `amount` over the same filters and period gives the same value (negated for `spend`).
+    Net credits in this bucket as an exact decimal string, in the type's natural direction: for `spend`, the credits consumed (positive; negative only when the bucket holds solely reversals); for `grant` and `pendingGrant`, the credits granted. Exact at any magnitude and at every decimal place the value carries. Summing the transaction list's `amount` over the same filters and period gives the same value (negated for `spend`).
     """
 
     transaction_count: typing_extensions.Annotated[
