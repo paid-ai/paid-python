@@ -38,6 +38,14 @@ class InvoiceLine(UniversalBaseModel):
         float, FieldMetadata(alias="totalPriceAfterTax"), pydantic.Field(alias="totalPriceAfterTax")
     ]
     currency: str
+    currency_decimals: typing_extensions.Annotated[
+        int,
+        FieldMetadata(alias="currencyDecimals"),
+        pydantic.Field(
+            alias="currencyDecimals",
+            description="Decimals of this record's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99), and 2 for JPY, which Paid stores in hundredths of a yen (150000 is ¥1,500). Divide amounts by 10^currencyDecimals; never assume 100.",
+        ),
+    ]
     description: str
     balance_amount: typing_extensions.Annotated[
         float, FieldMetadata(alias="balanceAmount"), pydantic.Field(alias="balanceAmount")

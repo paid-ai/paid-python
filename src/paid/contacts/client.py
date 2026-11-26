@@ -179,7 +179,7 @@ class ContactsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
-        Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`.
+        Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`. A contact archived through the Date Versioned API can't be updated (409 `CONTACT_ARCHIVED`).
 
         Parameters
         ----------
@@ -239,7 +239,7 @@ class ContactsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
+        Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion. A contact archived through the Date Versioned API cannot be deleted either (409 `CONTACT_ARCHIVED`).
 
         Parameters
         ----------
@@ -314,7 +314,7 @@ class ContactsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
-        Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`.
+        Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`. A contact archived through the Date Versioned API can't be updated (409 `CONTACT_ARCHIVED`).
 
         Parameters
         ----------
@@ -374,7 +374,7 @@ class ContactsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
+        Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion. A contact archived through the Date Versioned API cannot be deleted either (409 `CONTACT_ARCHIVED`).
 
         Parameters
         ----------
@@ -590,7 +590,7 @@ class AsyncContactsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
-        Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`.
+        Update a contact by its ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`. A contact archived through the Date Versioned API can't be updated (409 `CONTACT_ARCHIVED`).
 
         Parameters
         ----------
@@ -658,7 +658,7 @@ class AsyncContactsClient:
         self, id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
+        Delete a contact by its ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion. A contact archived through the Date Versioned API cannot be deleted either (409 `CONTACT_ARCHIVED`).
 
         Parameters
         ----------
@@ -749,7 +749,7 @@ class AsyncContactsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Contact:
         """
-        Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`.
+        Update a contact by its external ID. A contact can move to another customer only if no orders or invoices reference it; otherwise a different `customerId` returns 400 `CONTACT_CUSTOMER_IMMUTABLE`. A contact archived through the Date Versioned API can't be updated (409 `CONTACT_ARCHIVED`).
 
         Parameters
         ----------
@@ -817,7 +817,7 @@ class AsyncContactsClient:
         self, external_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> EmptyResponse:
         """
-        Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion.
+        Delete a contact by its external ID. A contact referenced by an order or an unsettled invoice cannot be deleted (409 `CONTACT_HAS_ASSOCIATIONS`). Posted paid invoices, voided invoices and canceled invoices do not block deletion. A contact archived through the Date Versioned API cannot be deleted either (409 `CONTACT_ARCHIVED`).
 
         Parameters
         ----------

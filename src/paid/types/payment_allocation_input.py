@@ -18,7 +18,7 @@ class PaymentAllocationInput(UniversalBaseModel):
     ]
     amount: int = pydantic.Field()
     """
-    Amount to allocate in cents (minor currency units).
+    Amount to allocate in the payment's stored minor units, as described by currencyDecimals in the payment response.
     """
 
     currency: typing.Optional[str] = pydantic.Field(default=None)

@@ -27,7 +27,18 @@ class AmendmentPlanCreditEffect(UniversalBaseModel):
     credit_amount: typing_extensions.Annotated[
         typing.Optional[float],
         FieldMetadata(alias="creditAmount"),
-        pydantic.Field(alias="creditAmount", description="Credits ended or granted. Absent for infinite benefits."),
+        pydantic.Field(
+            alias="creditAmount",
+            description="Credits ended or granted. Absent for infinite benefits. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use `creditAmountDecimal` for the exact value.",
+        ),
+    ] = None
+    credit_amount_decimal: typing_extensions.Annotated[
+        typing.Optional[str],
+        FieldMetadata(alias="creditAmountDecimal"),
+        pydantic.Field(
+            alias="creditAmountDecimal",
+            description="Exact value of `creditAmount` as a decimal string, at any magnitude and every decimal place it carries.",
+        ),
     ] = None
     has_infinite_credits: typing_extensions.Annotated[
         typing.Optional[bool],

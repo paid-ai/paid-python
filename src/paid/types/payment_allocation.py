@@ -35,7 +35,7 @@ class PaymentAllocation(UniversalBaseModel):
     ]
     amount: int = pydantic.Field()
     """
-    Allocated amount in cents (minor currency units).
+    Allocated amount in the payment's stored minor units. Divide by 10^currencyDecimals from the payment response.
     """
 
     currency: str = pydantic.Field()

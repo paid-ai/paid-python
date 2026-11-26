@@ -426,7 +426,7 @@ class RawSignalsClient:
         self, *, signals: typing.Sequence[Signal], request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[BulkSignalsResponse]:
         """
-        Create multiple signals (usage events) in a single request. Each signal names its customer (`customerId` or `externalCustomerId`; an alias of the customer resolves too), its customer unit (`externalCustomerUnitId`: the unit's key, or an alias that points at a unit), or both, plus an optional product attribution (`productId` or `externalProductId`). A unit alone derives the customer from the unit. A unit sent with a customer must belong to it, else the batch is refused with `400 CUSTOMER_UNIT_MISMATCH`. A unit is never named by Paid's unit id. A key or alias that matches nothing is stored without a customer, keeping the id, so it can be pointed at a unit later. An identifier is matched as a unit key first, then a customer external id, then an alias. Where held usage is enabled for your organization, a signal that names its customer and a unit key the customer has no unit for is accepted and held, kept out of your signals and analytics and not billed, until that customer creates a unit with that key or makes the key an alias of one of its units; the usage then lands on the unit. Usage held for 90 days without a unit is marked outdated and never billed. A signal that names a key another customer's held usage is waiting for is refused like one naming another customer's unit, with `400 CUSTOMER_UNIT_MISMATCH`. Unit attribution is enabled per organization: where it is not, a `customerUnit` sent next to a `customer` is accepted and ignored rather than checked, as before, while a unit named alone still derives its customer. Authenticate with your organization API key, or with a customer API key (prefixed `paid_ck_live_` or `paid_ck_test_`, created with `POST /api/v2/customers/{id}/api-keys`) so a customer's own runtime can report its usage without holding your organization key. A customer API key can call this endpoint only, and only for its own customer: if any signal names another customer, or one Paid does not know, the whole batch is refused with `403` `CUSTOMER_MISMATCH` and nothing is stored. Its idempotency keys are scoped to that customer. See [Send signals with a customer API key](/documentation/signals/send-signals-with-a-customer-api-key).
+        Create multiple signals (usage events) in a single request. Each signal names its customer (`customerId` or `externalCustomerId`; an alias of the customer resolves too), its customer unit (`externalCustomerUnitId`: the unit's key, or an alias that points at a unit), or both, plus an optional product attribution (`productId` or `externalProductId`). A unit alone derives the customer from the unit. A unit sent with a customer must belong to it, else the batch is refused with `400 CUSTOMER_UNIT_MISMATCH`. A unit is never named by Paid's unit id. A key or alias that matches nothing is stored without a customer, keeping the id, so it can be pointed at a unit later. An identifier is matched as a unit key first, then a customer external id, then an alias. Where held usage is enabled for your organization, a signal that names its customer and a unit key the customer has no unit for is accepted and held, kept out of your signals and analytics and not billed, until that customer creates a unit with that key or makes the key an alias of one of its units; the usage then lands on the unit. Usage held for 90 days without a unit is marked outdated and never billed. A signal that names a key another customer's held usage is waiting for is refused like one naming another customer's unit, with `400 CUSTOMER_UNIT_MISMATCH`. Unit attribution is enabled per organization: where it is not, a `customerUnit` sent next to a `customer` is accepted and ignored rather than checked, as before, while a unit named alone still derives its customer. Authenticate with your organization API key, or with a customer API key (prefixed `paid_ck_live_` or `paid_ck_test_`, created with `POST /api/v2/customers/{id}/api-keys`) so a customer's own runtime can report its usage without holding your organization key. A customer API key can call this endpoint only, and only for its own customer: if any signal names another customer, or one Paid does not know, the whole batch is refused with `403` `CUSTOMER_MISMATCH` and nothing is stored. Its idempotency keys are scoped to that customer. A `503` with `IDEMPOTENCY_UNAVAILABLE` means nothing from the batch was stored, either because idempotency keys could not be checked or because an earlier request with the same keys is still in progress: resend the whole batch with the same idempotency keys after a backoff. A `503` with `SIGNALS_NOT_ACCEPTED` means the batch was not fully accepted for delivery: resend the whole batch with the same idempotency keys after a backoff. A signal sent with an idempotency key is counted once however often it is resent; a signal without one may be counted again. See [Send signals with a customer API key](/documentation/signals/send-signals-with-a-customer-api-key).
 
         Parameters
         ----------
@@ -508,6 +508,17 @@ class RawSignalsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
@@ -517,7 +528,7 @@ class RawSignalsClient:
         self, id: str, *, reason: typing.Optional[str] = OMIT, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[SignalVoidResponse]:
         """
-        Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization without signal voiding gets 404.
+        Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization that has signal voiding turned off gets 404.
 
         Parameters
         ----------
@@ -658,7 +669,7 @@ class RawSignalsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[SignalVoidResponse]:
         """
-        Early access. Voids one ingested signal by the idempotency key it was sent with, with the same result as voiding it by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is `.` or `..` cannot be addressed by key: void it by ID. An organization without signal voiding gets 404.
+        Early access. Voids one ingested signal by the idempotency key it was sent with, with the same result as voiding it by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is `.` or `..` cannot be addressed by key: void it by ID. An organization that has signal voiding turned off gets 404.
 
         Parameters
         ----------
@@ -1567,7 +1578,7 @@ class AsyncRawSignalsClient:
         self, *, signals: typing.Sequence[Signal], request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[BulkSignalsResponse]:
         """
-        Create multiple signals (usage events) in a single request. Each signal names its customer (`customerId` or `externalCustomerId`; an alias of the customer resolves too), its customer unit (`externalCustomerUnitId`: the unit's key, or an alias that points at a unit), or both, plus an optional product attribution (`productId` or `externalProductId`). A unit alone derives the customer from the unit. A unit sent with a customer must belong to it, else the batch is refused with `400 CUSTOMER_UNIT_MISMATCH`. A unit is never named by Paid's unit id. A key or alias that matches nothing is stored without a customer, keeping the id, so it can be pointed at a unit later. An identifier is matched as a unit key first, then a customer external id, then an alias. Where held usage is enabled for your organization, a signal that names its customer and a unit key the customer has no unit for is accepted and held, kept out of your signals and analytics and not billed, until that customer creates a unit with that key or makes the key an alias of one of its units; the usage then lands on the unit. Usage held for 90 days without a unit is marked outdated and never billed. A signal that names a key another customer's held usage is waiting for is refused like one naming another customer's unit, with `400 CUSTOMER_UNIT_MISMATCH`. Unit attribution is enabled per organization: where it is not, a `customerUnit` sent next to a `customer` is accepted and ignored rather than checked, as before, while a unit named alone still derives its customer. Authenticate with your organization API key, or with a customer API key (prefixed `paid_ck_live_` or `paid_ck_test_`, created with `POST /api/v2/customers/{id}/api-keys`) so a customer's own runtime can report its usage without holding your organization key. A customer API key can call this endpoint only, and only for its own customer: if any signal names another customer, or one Paid does not know, the whole batch is refused with `403` `CUSTOMER_MISMATCH` and nothing is stored. Its idempotency keys are scoped to that customer. See [Send signals with a customer API key](/documentation/signals/send-signals-with-a-customer-api-key).
+        Create multiple signals (usage events) in a single request. Each signal names its customer (`customerId` or `externalCustomerId`; an alias of the customer resolves too), its customer unit (`externalCustomerUnitId`: the unit's key, or an alias that points at a unit), or both, plus an optional product attribution (`productId` or `externalProductId`). A unit alone derives the customer from the unit. A unit sent with a customer must belong to it, else the batch is refused with `400 CUSTOMER_UNIT_MISMATCH`. A unit is never named by Paid's unit id. A key or alias that matches nothing is stored without a customer, keeping the id, so it can be pointed at a unit later. An identifier is matched as a unit key first, then a customer external id, then an alias. Where held usage is enabled for your organization, a signal that names its customer and a unit key the customer has no unit for is accepted and held, kept out of your signals and analytics and not billed, until that customer creates a unit with that key or makes the key an alias of one of its units; the usage then lands on the unit. Usage held for 90 days without a unit is marked outdated and never billed. A signal that names a key another customer's held usage is waiting for is refused like one naming another customer's unit, with `400 CUSTOMER_UNIT_MISMATCH`. Unit attribution is enabled per organization: where it is not, a `customerUnit` sent next to a `customer` is accepted and ignored rather than checked, as before, while a unit named alone still derives its customer. Authenticate with your organization API key, or with a customer API key (prefixed `paid_ck_live_` or `paid_ck_test_`, created with `POST /api/v2/customers/{id}/api-keys`) so a customer's own runtime can report its usage without holding your organization key. A customer API key can call this endpoint only, and only for its own customer: if any signal names another customer, or one Paid does not know, the whole batch is refused with `403` `CUSTOMER_MISMATCH` and nothing is stored. Its idempotency keys are scoped to that customer. A `503` with `IDEMPOTENCY_UNAVAILABLE` means nothing from the batch was stored, either because idempotency keys could not be checked or because an earlier request with the same keys is still in progress: resend the whole batch with the same idempotency keys after a backoff. A `503` with `SIGNALS_NOT_ACCEPTED` means the batch was not fully accepted for delivery: resend the whole batch with the same idempotency keys after a backoff. A signal sent with an idempotency key is counted once however often it is resent; a signal without one may be counted again. See [Send signals with a customer API key](/documentation/signals/send-signals-with-a-customer-api-key).
 
         Parameters
         ----------
@@ -1649,6 +1660,17 @@ class AsyncRawSignalsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
@@ -1658,7 +1680,7 @@ class AsyncRawSignalsClient:
         self, id: str, *, reason: typing.Optional[str] = OMIT, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[SignalVoidResponse]:
         """
-        Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization without signal voiding gets 404.
+        Early access. Voids one ingested signal by its ID, so it no longer counts as usage. Voiding a signal that is already voided answers 200 with the same void. An organization that has signal voiding turned off gets 404.
 
         Parameters
         ----------
@@ -1799,7 +1821,7 @@ class AsyncRawSignalsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[SignalVoidResponse]:
         """
-        Early access. Voids one ingested signal by the idempotency key it was sent with, with the same result as voiding it by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is `.` or `..` cannot be addressed by key: void it by ID. An organization without signal voiding gets 404.
+        Early access. Voids one ingested signal by the idempotency key it was sent with, with the same result as voiding it by ID. The key is matched exactly as stored: a signal sent with a customer-scoped API key is stored under a namespaced key and is voided by its ID. A key that names no signal answers 404; a key that names more than one answers 409 and voids nothing. A signal whose key is `.` or `..` cannot be addressed by key: void it by ID. An organization that has signal voiding turned off gets 404.
 
         Parameters
         ----------

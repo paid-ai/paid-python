@@ -7,10 +7,19 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .product_tiered_price_point_tiers_item import ProductTieredPricePointTiersItem
+from .product_tiered_price_point_unit_price_origin import ProductTieredPricePointUnitPriceOrigin
 
 
 class ProductTieredPricePoint(UniversalBaseModel):
     currency: str
+    unit_price_origin: typing_extensions.Annotated[
+        typing.Optional[ProductTieredPricePointUnitPriceOrigin],
+        FieldMetadata(alias="unitPriceOrigin"),
+        pydantic.Field(
+            alias="unitPriceOrigin",
+            description="Explicitly replace a stored decimal price with the submitted price. Requires the organization's sub-cent prices flag; omission preserves an unchanged stored decimal or refuses a rate change.",
+        ),
+    ] = None
     unit_price: typing_extensions.Annotated[int, FieldMetadata(alias="unitPrice"), pydantic.Field(alias="unitPrice")]
     tiers: typing.List[ProductTieredPricePointTiersItem]
     min_quantity: typing_extensions.Annotated[

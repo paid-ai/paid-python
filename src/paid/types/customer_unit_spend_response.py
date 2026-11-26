@@ -34,8 +34,17 @@ class CustomerUnitSpendResponse(UniversalBaseModel):
     window: CustomerUnitSpendWindow
     spent: float = pydantic.Field()
     """
-    Credits of this currency spent by this unit and every unit beneath it during the window, net of reversals. Counted whether or not the unit has a cap. JSON number; exact within ±2^53.
+    Credits of this currency spent by this unit and every unit beneath it during the window, net of reversals. Counted whether or not the unit has a cap. JSON number, up to 6 decimal places, truncated toward zero; exact only within ±2^53. Use `spentDecimal` for the exact value.
     """
+
+    spent_decimal: typing_extensions.Annotated[
+        str,
+        FieldMetadata(alias="spentDecimal"),
+        pydantic.Field(
+            alias="spentDecimal",
+            description="Exact value of `spent` as a decimal string, at any magnitude and every decimal place it carries.",
+        ),
+    ]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

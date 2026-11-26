@@ -90,6 +90,7 @@ class PlansClient:
         product_id: str,
         attributes: typing.Sequence[PlanAttributeInput],
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         supported_currencies: typing.Optional[typing.Sequence[str]] = OMIT,
         is_default: typing.Optional[bool] = OMIT,
@@ -106,6 +107,9 @@ class PlansClient:
         attributes : typing.Sequence[PlanAttributeInput]
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
 
         external_id : typing.Optional[str]
             Your stable identifier for this plan
@@ -156,6 +160,7 @@ class PlansClient:
             product_id=product_id,
             attributes=attributes,
             name=name,
+            display_name=display_name,
             external_id=external_id,
             supported_currencies=supported_currencies,
             is_default=is_default,
@@ -244,6 +249,7 @@ class PlansClient:
         id: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         supported_currencies: typing.Optional[typing.Sequence[str]] = OMIT,
         is_default: typing.Optional[bool] = OMIT,
@@ -259,6 +265,9 @@ class PlansClient:
         id : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
 
         external_id : typing.Optional[str]
 
@@ -293,6 +302,7 @@ class PlansClient:
         _response = self._raw_client.update_plan_by_id(
             id,
             name=name,
+            display_name=display_name,
             external_id=external_id,
             supported_currencies=supported_currencies,
             is_default=is_default,
@@ -339,6 +349,7 @@ class PlansClient:
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         supported_currencies: typing.Optional[typing.Sequence[str]] = OMIT,
         is_default: typing.Optional[bool] = OMIT,
@@ -354,6 +365,9 @@ class PlansClient:
         external_id_ : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
 
         external_id : typing.Optional[str]
 
@@ -388,6 +402,7 @@ class PlansClient:
         _response = self._raw_client.update_plan_by_external_id(
             external_id_,
             name=name,
+            display_name=display_name,
             external_id=external_id,
             supported_currencies=supported_currencies,
             is_default=is_default,
@@ -480,6 +495,7 @@ class AsyncPlansClient:
         product_id: str,
         attributes: typing.Sequence[PlanAttributeInput],
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         supported_currencies: typing.Optional[typing.Sequence[str]] = OMIT,
         is_default: typing.Optional[bool] = OMIT,
@@ -496,6 +512,9 @@ class AsyncPlansClient:
         attributes : typing.Sequence[PlanAttributeInput]
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
 
         external_id : typing.Optional[str]
             Your stable identifier for this plan
@@ -554,6 +573,7 @@ class AsyncPlansClient:
             product_id=product_id,
             attributes=attributes,
             name=name,
+            display_name=display_name,
             external_id=external_id,
             supported_currencies=supported_currencies,
             is_default=is_default,
@@ -658,6 +678,7 @@ class AsyncPlansClient:
         id: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         supported_currencies: typing.Optional[typing.Sequence[str]] = OMIT,
         is_default: typing.Optional[bool] = OMIT,
@@ -673,6 +694,9 @@ class AsyncPlansClient:
         id : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
 
         external_id : typing.Optional[str]
 
@@ -715,6 +739,7 @@ class AsyncPlansClient:
         _response = await self._raw_client.update_plan_by_id(
             id,
             name=name,
+            display_name=display_name,
             external_id=external_id,
             supported_currencies=supported_currencies,
             is_default=is_default,
@@ -769,6 +794,7 @@ class AsyncPlansClient:
         external_id_: str,
         *,
         name: typing.Optional[str] = OMIT,
+        display_name: typing.Optional[str] = OMIT,
         external_id: typing.Optional[str] = OMIT,
         supported_currencies: typing.Optional[typing.Sequence[str]] = OMIT,
         is_default: typing.Optional[bool] = OMIT,
@@ -784,6 +810,9 @@ class AsyncPlansClient:
         external_id_ : str
 
         name : typing.Optional[str]
+
+        display_name : typing.Optional[str]
+            What your customers see for this plan on invoices, checkout and the customer portal, up to 250 characters. Omit it or send null to use the plan name.
 
         external_id : typing.Optional[str]
 
@@ -826,6 +855,7 @@ class AsyncPlansClient:
         _response = await self._raw_client.update_plan_by_external_id(
             external_id_,
             name=name,
+            display_name=display_name,
             external_id=external_id,
             supported_currencies=supported_currencies,
             is_default=is_default,

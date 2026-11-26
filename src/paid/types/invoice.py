@@ -7,6 +7,7 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
+from .invoice_delivery import InvoiceDelivery
 from .invoice_payment_status import InvoicePaymentStatus
 from .invoice_source import InvoiceSource
 from .invoice_status import InvoiceStatus
@@ -43,6 +44,14 @@ class Invoice(UniversalBaseModel):
         typing.Optional[dt.datetime], FieldMetadata(alias="dueDate"), pydantic.Field(alias="dueDate")
     ] = None
     currency: str
+    currency_decimals: typing_extensions.Annotated[
+        int,
+        FieldMetadata(alias="currencyDecimals"),
+        pydantic.Field(
+            alias="currencyDecimals",
+            description="Decimals of this record's amounts, from the currency and how Paid stores it: 2 for USD (4999 is $49.99), and 2 for JPY, which Paid stores in hundredths of a yen (150000 is ¥1,500). Divide amounts by 10^currencyDecimals; never assume 100.",
+        ),
+    ]
     tax_amount: typing_extensions.Annotated[float, FieldMetadata(alias="taxAmount"), pydantic.Field(alias="taxAmount")]
     tax_rate: typing_extensions.Annotated[float, FieldMetadata(alias="taxRate"), pydantic.Field(alias="taxRate")]
     tax_status: typing_extensions.Annotated[
@@ -94,6 +103,15 @@ class Invoice(UniversalBaseModel):
         FieldMetadata(alias="purchaseOrderReference"),
         pydantic.Field(alias="purchaseOrderReference", description="Purchase order reference stamped on this invoice."),
     ] = None
+    sent_at: typing_extensions.Annotated[
+        typing.Optional[dt.datetime],
+        FieldMetadata(alias="sentAt"),
+        pydantic.Field(
+            alias="sentAt",
+            description="When the email provider last accepted this invoice's email, or null. Only for accounts with invoice delivery status enabled.",
+        ),
+    ] = None
+    delivery: typing.Optional[InvoiceDelivery] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
